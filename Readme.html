@@ -1,0 +1,98 @@
+<h1>BATTLETECH Attack Improvement Mod</h1>
+
+<p>
+   This mod fixes a few serious hit bugs in the BATTLETECH game, especially head shot chances and lack of vehicle called shot, so that they work <i>as intended</i>.
+   If you think you get too much headshots and you called shots miss too much, this is your mod.
+</p>
+<p>
+   By editing this mod's "mod.json" as a text file, you can also adjust strength of roll correction, see real and detailed hit chances, and/or log hit rolls and location rolls.
+</p>
+
+<details>
+   <summary><h2>Install Instructions</h2></summary>
+   <p>
+      Most BATTLETECH mods requires BTML and ModTek. This mod is no exception.
+      The <a href="https://github.com/Mpstark/ModTek/wiki">ModTek wiki</a> may have more up-to-date <a href="https://github.com/Mpstark/ModTek/wiki/The-Drop-Dead-Simple-Guide-to-Installing-BTML-&-ModTek-&-ModTek-mods">install instructions</a>.
+   </p>
+   <details>
+      <summary><h3>Step 1: Find Game Folder </h3></summary>
+      <ol>
+         <li> Open File Explorer. Click "This PC" on the left. In the top right corner it should says "Search This PC".
+         <li> Click on it and type "BATTLETECH", without the quote. Your PC may take a while to do the search.
+         <li> If you get one result, that is the game folder.
+         <li> If you get multiple results, right click each one and "Open in new window". This will keep the search result untouched.
+         <li> The one that has a "BattleTech_Data" folder is your game folder. You should also see the BattleTech icon and BattleTechLauncher icon.
+      </ol>
+   </details>
+   <details>
+      <summary><h3>Step 2: Install BTML</h3></summary>
+      <ol>
+         <li> Download and Extract <a href="https://github.com/Mpstark/BattleTechModLoader/releases
+         ">BTML</a>. You should see three files - two dll and one exe.
+         <li> Find the BATTLETECH\BattleTech_Data\Managed folder (where BATTLETECH is your game folder.)</li>
+         <li> The correct folder should have lots of file. One of them should be "Assembly-CSharp.dll". If you don't see this file you're in the wrong folder.
+         <li> Copy all three files to it. Then run "BattleTechModLoaderInjector". Say yes if it ask whether to overwrite.
+         <li> It should says "Injection complete!" or "Assembly-CSharp.dll already injected".
+      </ol>
+   </details>
+   <details>
+      <summary><h3>Step 3: Install ModTek</h3></summary>
+      <ol>
+         <li> Download <a href="https://github.com/Mpstark/ModTek/releases">ModTek.dll</a>
+         <li> Create a "Mods" folder in the game folder (Right click in the folder, New > Folder) and put the dll in it
+         <li> Launch the Game. At the bottom of main menu there is a version string. Part of it should be "W/ MODTEK".
+      </ol>
+   </details>
+   <details open>
+      <summary><h3>Step 4: Install this mod</h3></summary>
+      <ol>
+         <li> Download and extact this mod to the Mods folder of the game.
+         <li> i.e. BATTLETECH\Mods\AttackImprovementMod\ should contains "mod.json", "AttackImprovementMod.dll", and other files and folders
+         <li> Exit and Re-launch the game and the mod should be loaded.  If it doesn't, BTModLoader.log will log why.
+         <li> This mod also keeps its own log of what it can or cannot try to modify in the log folder.
+      </ol>
+   </details>
+</details>
+
+<details open>
+   <summary><h2>Features</h2></summary>
+   <ul>
+      <li>
+   </ul>
+</details>
+
+
+<details>
+   <summary><h2>Development</h2></summary>
+   <p>
+      The source code of this mod is open and free, and should be bundled. <br>
+      You can take it and modify it, provided that you include your code when you distribute your work, and don't claim my work as yours.
+      License: AGPL v3 - local / <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">online</a>.
+   </p>
+   <p>
+      If you know programming, you can follow these steps to see game code and where to learn how BATTLETECH mod works:
+   </p>
+   <ol>
+      <li> Install <a href="https://www.visualstudio.com/downloads/
+      ">Visual Studio</a>, or VS. This mod is developed with VS 2017 Community Edition. You'll need the ".NET desktop development" workload.
+      <li> Down and Run <a href="https://github.com/0xd4d/dnSpy/releases">DnSpy</a>
+      <li> Download DnSpy's Unity x64 debugging zip, extract the 5.6.5 mono.dll, and replace the game's one.
+      <li> Create an Environment Variable "DNSPY_UNITY_DBG" with the value "--debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555,defer=y" (both without the quotes). This will instruct the modified game to connect to DnSpy.
+      <li> Run the game. If you want you can <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/tcpview">check that</a> its port 55555 is opened.
+      <li> Launch the modified BATTLETECH game.
+      <li> In DnSpy, click the Start button on toolbar, or the "Start Debugging" menu item. This will popup a dialogue. Select "Unity (Connect)" and leave other settings at default.
+      <li> DnSpy should now be connected to the game and the stats says "Running...".
+      <li> Go to Debug > Windows > Modules, double click "Assembly-CSharp.dll".  This will load the assembly.  It contains most BATTLETECH code.
+      <li> You may now search and browse the assembly!  For example in the search tab you can type "GetCorrectedRoll" to find the method. Clicking on it will show you the roll correction code.
+      <li> Right click on method name (or any identifier) and click "Analyze".  It'll help you find where and how the method is called, or its override hierarchy.
+      <li> Left click the assembly, then File > Export to Project. This will decompile all code which you can browse with other editor or IDE. <li>
+      <li> Head to the <a href="https://github.com/Mpstark/ModTek/wiki">ModTek wiki</a> to learn how to make a mod.  For a code mode like this one, you need <a href="https://github.com/Mpstark/ModTek/wiki/The-mod.json-Format">"mod.json"</a> and <a href="https://github.com/Mpstark/ModTek/wiki/Writing-ModTek-DLL-mods">dll</a>.
+      <li> You may notice that this patch manually calls Harmony to patch things, instead of using Annotation. This gives me much better control such as sharing of patch methods. You may read <a href="https://github.com/pardeike/Harmony/wiki">Harmony wiki</a> to learn how it works.
+   </ol>
+</details>
+
+
+<style>
+   p, li { font-size: 120%; }
+   h1, h2, h3 { display: inline-block; }
+</style>
