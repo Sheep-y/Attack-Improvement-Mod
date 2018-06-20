@@ -21,22 +21,19 @@ namespace Sheepy.AttackImprovementMod {
       internal static HarmonyInstance harmony = HarmonyInstance.Create( "io.github.Sheep-y.AttackImprovementMod" );
 
       static void Main () { // Sometimes I run quick tests as a console app here
-         /**/
+         /**
+         Type cls = typeof( CombatHUDVehicleArmorHover );
+         PropertyInfo m1 = cls.GetProperty( "Readout", BindingFlags.NonPublic | BindingFlags.Instance );
+         Console.WriteLine( m1 );
+         /**//**
          for ( int i = 0 ; i < 20 ; i++ ) {
-            float strength = 1f, roll = i * 0.05f;
-            float rev = RollCorrection.ReverseRollCorrection( roll, strength ), rrev = RollCorrection.CorrectRoll( rev, strength );
-            Console.WriteLine( roll + " => Reversed " + rev + ", Re-reversed " + rrev );
-            strength = 0.5f;
-            rev = RollCorrection.ReverseRollCorrection( roll, strength );
-            rrev = RollCorrection.CorrectRoll( rev, strength );
-            Console.WriteLine( roll + " => Reversed " + rev + ", Re-reversed " + rrev );
-            int x = (int)( roll / 0.05f );
-            if ( x >= 0 && x < 20 && x * 0.05f == roll ) {
-
-            } else
-               Console.WriteLine( "Problem" );
-         }
-         Console.ReadKey(); /**/
+            float roll = i * 0.05f;
+            float rev1 = RollCorrection.ReverseRollCorrection( roll, 0.5f  ), rrev1 = RollCorrection.CorrectRoll( rev1, 0.5f ),
+                  rev2 = RollCorrection.ReverseRollCorrection( roll, 1f    ), rrev2 = RollCorrection.CorrectRoll( rev2, 1f ),
+                  rev3 = RollCorrection.ReverseRollCorrection( roll, 1.9999f), rrev3 = RollCorrection.CorrectRoll( rev3, 1.9999f );
+            Console.WriteLine( string.Format( "{0:0.00} => [Half correction] {1:0.0000}, Re-rev {2:0.0000}   [Full] {3:0.0000}, Re-rev {4:0.0000}   [Double] {5:0.0000}, Re-rev {6:0.0000}",
+               new object[]{ roll, rev1, rrev1, rev2, rrev2, rev3, rrev3 } ) );
+         } /**/
       }
 
       public static void Init ( string directory, string settingsJSON ) {
@@ -46,7 +43,7 @@ namespace Sheepy.AttackImprovementMod {
 
          try {
             Settings = JsonConvert.DeserializeObject<ModSettings>(settingsJSON);
-            Log( "Mod Settings: " + JsonConvert.SerializeObject( Settings ) );
+            Log( "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
          } catch ( Exception ex ) {
             Log( string.Format( "Error: Cannot read mod settings, using default: {0}", ex ) );
          }
@@ -112,7 +109,7 @@ namespace Sheepy.AttackImprovementMod {
             return;
          }
          harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
-         Log( string.Format( "Patched: {0}.{1}(...)", new object[]{ patchedClass.Name, patchedMethod } ) );
+         Log( string.Format( "Patched: {0} {1} [ {2} / {3} ]", new object[]{ patchedClass, patched, prefix, postfix } ) );
       }
 
       // ============ UTILS ============
@@ -124,7 +121,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       private static string LOG_NAME = LOG_DIR + "log.txt";
-      internal static bool Log( Exception message ) { Log( message.ToString() ); return true; }
+      internal static bool Log( object message ) { Log( message.ToString() ); return true; }
       internal static void Log( string message ) {
          try {
             if ( ! File.Exists( LOG_NAME ) ) message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;

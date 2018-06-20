@@ -8,6 +8,7 @@ namespace Sheepy.AttackImprovementMod {
    using Harmony;
    using System.Reflection;
    using UnityEngine;
+   using UnityEngine.EventSystems;
    using static Mod;
 
    public class FixHitLocation {
@@ -45,7 +46,12 @@ namespace Sheepy.AttackImprovementMod {
          }
 
          if ( Settings.FixVehicleCalledShot ) {
-            Patch( typeof( SelectionStateFire ), "SetCalledShot", typeof( VehicleChassisLocations ), null, "PostfixSetCalledShot" );
+            Patch( typeof( SelectionStateFire ), "SetCalledShot", typeof( VehicleChassisLocations ), "PostfixSetCalledShot", "PostfixSetCalledShot" );
+            ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", BindingFlags.NonPublic | BindingFlags.Instance );
+            if ( ReadoutProp != null )
+               Patch( typeof( CombatHUDVehicleArmorHover ), "OnPointerClick", typeof( PointerEventData ), null, "PostPointerClick" );
+            else
+               Log( "Can't find CombatHUDVehicleArmorHover.Readout. OnPointerClick not patched. Vehicle called shot may not work." );
             if ( Mod.Pre_1_1 )
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "PrefixVehicleGetHitLocation_1_0", null );
             else
@@ -188,53 +194,44 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Vehicle Called Shot ============
 
-
-      // Map Vehicle location to Mech location so that fire event can pass called shot location down
-      public static void PostfixSetCalledShot ( SelectionStateFire __instance, VehicleChassisLocations location ) {
-         __instance.calledShotLocation = translate( location );
+      private static PropertyInfo ReadoutProp = null;
+      
+      // Somehow PostfixSetCalledShot is NOT called since 1.1 beta. So need to override PostPointerClick to make sure called shot location is translated
+      public static void PostPointerClick ( CombatHUDVehicleArmorHover __instance ) {
+         try {
+            HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
+				SelectionStateFire selectionState = Readout.HUD.SelectionHandler.ActiveState as SelectionStateFire;
+            if ( selectionState != null )
+               selectionState.calledShotLocation = translateLocation( selectionState.calledShotVLocation );
+         } catch ( Exception ex ) {
+            Log( ex );
+         }
       }
 
-      public static bool PrefixVehicleGetHitLocation ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation ) {
+      // Store vehicle called shot location in mech location, so that it will be passed down event chain
+      public static void PostfixSetCalledShot ( SelectionStateFire __instance, VehicleChassisLocations location ) {
+         __instance.calledShotLocation = translateLocation( location );
+      }
+
+      public static bool PrefixVehicleGetHitLocation_1_0 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation ) {
          try {
-            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translate( calledShotLocation ), attacker.CalledShotBonusMultiplier );
+            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translateLocation( calledShotLocation ), attacker.CalledShotBonusMultiplier );
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
          }
-		}
+      }
 
       public static bool PrefixVehicleGetHitLocation_1_1 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) {
-         Log( "Get: " + calledShotLocation );
-         Log( "Translated: " + translateLocation( calledShotLocation ) );
          try {
-            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translate( calledShotLocation ), bonusMultiplier );
+            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translateLocation( calledShotLocation ), bonusMultiplier );
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
          }
 		}
 
-      public static ArmorLocation translate ( VehicleChassisLocations location ) {
-         //return (ArmorLocation)(int)location;
-         switch ( location ) {
-            case VehicleChassisLocations.Turret : return ArmorLocation.Head;
-            case VehicleChassisLocations.Front  : return ArmorLocation.CenterTorso;
-            case VehicleChassisLocations.Left   : return ArmorLocation.LeftTorso;
-            case VehicleChassisLocations.Right  : return ArmorLocation.RightTorso;
-            case VehicleChassisLocations.Rear   : return ArmorLocation.CenterTorsoRear;
-         }
-         return ArmorLocation.None;
-      }
-
-      public static VehicleChassisLocations translate( ArmorLocation location ) {
-         switch ( location ) {
-            case ArmorLocation.Head            : return VehicleChassisLocations.Turret;
-            case ArmorLocation.CenterTorso     : return VehicleChassisLocations.Front;
-            case ArmorLocation.LeftTorso       : return VehicleChassisLocations.Left;
-            case ArmorLocation.RightTorso      : return VehicleChassisLocations.Right;
-            case ArmorLocation.CenterTorsoRear : return VehicleChassisLocations.Rear;
-         }
-         return VehicleChassisLocations.None;
-      }
+      public static ArmorLocation translateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(int)location; }
+      public static VehicleChassisLocations translateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(int)location; }
    }
 }
