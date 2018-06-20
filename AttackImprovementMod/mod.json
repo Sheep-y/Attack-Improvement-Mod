@@ -12,75 +12,44 @@
    "DLLEntryPoint": "Sheepy.AttackImprovementMod.Mod.Init",
 
    "Settings": {
-      /* Called shot have absolutely no effect on vehicles, probaly because there isn't enough time to implement it.
-       * In the code, Mech Locations and Vehicle Locations are two separate enum, meaning there are two set of states and methods to handle hit location .
-       * And vechicle's called shot method state/chain is only partially complete.  You can't reach the terminal station if any part of the rail is broken.
-       * 
-       * This mod can re-enable called shot on vehicles. HBS do you need a proven remote freelancer? */
+      /* Enable Vehicle Called Shot, which the game did not implement fully. Default true. */
       "FixVehicleCalledShot" : true,
 
-      /* The game's hit distribution is verified (on ver 1.0.4) to be very imprecise because of improper float to int conversion.
-       * For example it would rounded all head shot% to a bigger chances, causing almost double non-called headshot then intended.
-       * 
-       * This mod can replace the "static HitLocation.GetHitLocation" with an improved version that has 1000x better precision, without using slow floats.
-       * Enabling this fix would lower global headshot chances, but called shots chances can be fixed by enabling FixHeadCalledShot. */
-      "FixHitDistribution" : true,  
+      /* Fix hit distribution bug which increase head shot % of all attacks. Default true. */
+      "FixHitDistribution" : true,
 
-      /* Mech head called shot has lower weight multiplier than others locations because called shot borrows LRM clustering weights.
-       * This mod can fix it to have same multiplier as other locations.
-       * 
-       * Only apply if ClusterChanceNeverMultiplyHead is true, and only applies to head called shots.
-       * Torso shot does not regard head as adjacent and this won't increase head hit chance.
-       * Enabling this fix would greatly boost called shot head shot chance, by default tempered by CalledShotWeightMultiplier. */
-      "FixHeadCalledShot" : true,
+      /* Enable clustering effect for called shots against mechs. Default true. */
+      "CalledShotUseClustering" : true,
 
-      /* Called shot against mechs are amplified by clustering rule which make them much more powerful than the game seem to believe.
-       * Head hit chance is up to 40% when head multiplier is fixed.
-       *
-       * This setting let you tune called shot's weight multipliers.  Default is 0.34 to counter the effect of FixHeadCalledShot.
-       * Set to 1.0 to disable adjustment (and a 40% chance to headshot with called shot mastery, if FixHeadCalledShot is true).
-       * A modifier < 1 lowers the power of called shot, and vice versa. */
-      "MechCalledShotMultiplier" : 0.34,
+      /* Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.
+       * Default is 0.33 to counter the effect of CalledShotClusterStrength. */
+      "MechCalledShotMultiplier" : 0.33,
 
-      /* Called shot didn't work on vehicles without modding.
-       * Once that is fixed, unmodified called shot is pretty powerful on vechicles, which does not use clustering rule.
-       * This setting tries to fix that. Default 0.75 to tune down vehicle called shot. */
+      /* Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.
+       * Default is 0.75 to balance vehicle's lower number of locations. */
       "VehicleCalledShotMultiplier" : 0.75,
 
-      /* Override called shot percentage display of mech locations to show true shot distribution.
-       * Work with any combination of fixes, disable all.of them to get the true % of the base game.
-       *
-       * It is possible that the game will update called shot algorithm and cause this override to become inaccurate,
-       * then you may disable this override until the mod updates. */
+      /* Override called shot percentage display of mech locations to show true shot distribution, with bug fix or not. Default true. */
       "ShowRealMechCalledShotChance" : true,
 
-      /* Override called shot percentage display of vehicle locations to show true shot distribution.
-       * When the mod was authored, vehicles do not respect called shot. This override reflects the bug.
-       *
-       * It is possible that the game will update called shot algorithm and cause this override to become inaccurate,
-       * then you may disable this override until the mod updates. */
+      /* Override called shot percentage display of vehicle locations to show true shot distribution, with bug fix or not. Default true. */
       "ShowRealVehicleCalledShotChance" : true,
 
-      /* If called shot percentage display is overridden, location hit chance can be displayed to one decimal point. */
+      /* Display chance to one decimal IF AND ONLY IF called shot chance is overridden (above). Default false. */
       "ShowDecimalCalledChance" : false,
 
-      /* BattleTech is known to adjust Hit Rolls, so that 75% hit is actually 84% and 25% is actuall 16%.
-       * This roll "correction" can be disabled.
-       * 
-       * 0.0 disables roll correction. 0.5 means half strength correction, 2.0 means double strength, etc.
-       * Default is 1.0 which means leave roll correction alone. */
+      /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, 2 for double.
+       * Default is 0.5 for less correction. */
       "RollCorrectionStrength" : 0.5,
 
-      /* Override weapon hit chance display so that the real (corrected) roll chances can be displayed instead of original chances. */
+      /* Show adjusted hit chance in weapon panel, instead of original (fake) hit chance. Default false. */
       "ShowRealWeaponHitChance" : false,
 
-      /* If weapon hit chance display is overridden, hit chance can be displayed to one decimal point. */
+      /* Show hit chance to one decimal in weapon panel. Default false. */
       "ShowDecimalHitChance" : false,
 
-      /* Enable this to log hit roll, hit correction, location roll, location weight and other info to "BATTLETECH\Mods\FixHitLocation\log_roll.txt" in tab separated value (tsv).
-       * Weight of front armours and rear armours are combined to keep the log simple.
-       * 
-       * Expect high disk activity when enabled. Can log even when all other fixes are disabled.  Default disabled. */
+      /* Log attacker, weapon, hit roll, correction, location roll, location weights etc. to "BATTLETECH\Mods\FixHitLocation\log_roll.txt", for copy and paste to Excel.
+       * Default disabled. */
       "LogHitRolls" : false
    }
 }
