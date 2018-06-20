@@ -60,8 +60,6 @@ namespace Sheepy.AttackImprovementMod {
          return result;
       }
 
-      // Can't get private fields. Not sure why. Method does not get called.
-		// public static bool PrefixMechHUDPercent ( ref Dictionary<ArmorLocation, int> ___currentHitTable, ref CombatHUD ___HUD, ref AttackDirection ___shownAttackDirection, ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) {
 		public static bool PrefixMechHUDPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) {
          try {
             Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! FixHitLocation.CallShotClustered )

@@ -31,7 +31,16 @@
        * Default is 0.5 for less correction. */
       public float RollCorrectionStrength = 0.5f;
 
-      /* Show adjusted hit chance in weapon panel, instead of original (fake) hit chance. Default false. */
+      /* Set miss streak breaker threshold. Only attacks with hit rate above the threshold will add to streak breaker.
+       * Default is 0.5, same as game default. Set to 1 to disable miss streak breaker. */
+      public float MissStreakBreakerThreshold = 0.5f;
+
+      /* Set miss streak breaker divider. Set to negative or zero to make it a (positive) constant.
+       * Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.
+       * Default is 5, same as game default. */
+      public float MissStreakBreakerDivider = 5f;
+
+      /* Show adjusted hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker. Default false. */
       public bool ShowRealWeaponHitChance = false;
 
       /* Show hit chance to one decimal in weapon panel. Default false. */

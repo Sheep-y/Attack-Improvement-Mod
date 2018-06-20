@@ -58,6 +58,13 @@ namespace Sheepy.AttackImprovementMod {
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "PrefixWeaponHitChance", null );
             }
          }
+         if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f )
+            StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
+            if ( StreakBreakingValueProp != null )
+               Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "PrefixProcessRandomRoll", null );
+            else
+               Log( "Error: Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched." );            
+
          if ( Settings.ShowDecimalHitChance )
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "PrefixWeaponDecimalChance", null );
       }
@@ -94,6 +101,26 @@ namespace Sheepy.AttackImprovementMod {
 				if ( team != null )
 					roll -= team.StreakBreakingValue;
 				__result = roll;
+            return false;
+         } catch ( Exception ex ) {
+            return Log( ex );
+         }
+      }
+
+      private static FieldInfo StreakBreakingValueProp = null;
+      public static bool PrefixProcessRandomRoll ( Team __instance, float targetValue, bool succeeded ) {
+         try {
+			   if ( succeeded ) {
+               StreakBreakingValueProp.SetValue( __instance, 0f );
+
+			   } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
+               float mod;
+               if ( Settings.MissStreakBreakerDivider > 0 )
+                  mod = ( targetValue - Settings.MissStreakBreakerThreshold ) / Settings.MissStreakBreakerDivider;
+               else
+                  mod = - Settings.MissStreakBreakerDivider;
+               StreakBreakingValueProp.SetValue( __instance, __instance.StreakBreakingValue + mod );
+			   }
             return false;
          } catch ( Exception ex ) {
             return Log( ex );

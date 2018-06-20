@@ -22,10 +22,11 @@ namespace Sheepy.AttackImprovementMod {
 
       static void Main () { // Sometimes I run quick tests as a console app here
          /**
-         Type cls = typeof( CombatHUDVehicleArmorHover );
-         PropertyInfo m1 = cls.GetProperty( "Readout", BindingFlags.NonPublic | BindingFlags.Instance );
+         foreach ( MemberInfo e in typeof( Team ).GetMembers( BindingFlags.NonPublic | BindingFlags.Instance ) )
+            Console.WriteLine( e );
+         FieldInfo m1 = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
          Console.WriteLine( m1 );
-         /**//**
+         /**/ /**
          for ( int i = 0 ; i < 20 ; i++ ) {
             float roll = i * 0.05f;
             float rev1 = RollCorrection.ReverseRollCorrection( roll, 0.5f  ), rrev1 = RollCorrection.CorrectRoll( rev1, 0.5f ),
@@ -49,11 +50,11 @@ namespace Sheepy.AttackImprovementMod {
          }
 
          try {
-            Log( "=== Patching Roll Corrections ===" );
+            Log( "=== Patching Roll Corrections and Logger ===" );
             patchClass = typeof( RollCorrection );
             RollCorrection.InitPatch();
 
-            Log( "=== Patching Hit Location Bugfixs ===" );
+            Log( "=== Patching Hit Location Bugfixs and Logger ===" );
             patchClass = typeof( FixHitLocation );
             FixHitLocation.InitPatch( harmony );
 
