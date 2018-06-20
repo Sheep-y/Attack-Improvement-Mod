@@ -125,13 +125,12 @@ namespace Sheepy.AttackImprovementMod {
       // Get attacker, weapon and hitchance before logging
       internal static string thisAttacker = "(unknown)";
       internal static string thisWeapon = "(unknown)";
-      internal static float thisHitChance = 0f;
+      internal static float thisHitChance;
       public static void PrefixGetHits ( AttackDirector.AttackSequence __instance, Weapon weapon, float toHitChance ) {
          thisAttacker = __instance.attacker.GetPilot()?.Callsign ?? __instance.attacker.Nickname;
-         thisWeapon = weapon.defId;
+         thisWeapon = weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId;
          thisHitChance = toHitChance;
       }
-      // TODO: We can reset the fields in postfix to be safe, may be in next mod update
 
       internal static float thisRoll;
       internal static float thisStreak;
@@ -143,8 +142,12 @@ namespace Sheepy.AttackImprovementMod {
       internal static float thisCorrectedRoll;
       public static void PostfixLogRoll ( float __result, float roll, Team team ) {
          thisCorrectedRoll = __result;
-         if ( __result >= thisHitChance ) // Miss, log now because hit location won't be rolled
-            RollLog( GetHitLog() );
+         if ( __result > thisHitChance ) // Miss, log now because hit location won't be rolled
+            RollLog( GetHitLog() +
+               "\t-" + // Roll; Empty cells are added so that copy and paste will override any old data in Excel, instead of leaving them in place and make it confusing
+               "\t-\t-\t-\t-" +  // Head & Torsos
+               "\t-\t-\t-\t-" +  // Limbs
+               "\t-\t-\t-\t-" ); // called shot and result
       }
 
       internal static string GetHitLog () {

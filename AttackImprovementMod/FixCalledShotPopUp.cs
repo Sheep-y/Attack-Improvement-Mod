@@ -12,6 +12,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void InitPatch () {
          if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance ) {
+
             Type CalledShot = typeof( CombatHUDCalledShotPopUp );
 
             // Eavesdrops HUD assignment
@@ -48,22 +49,29 @@ namespace Sheepy.AttackImprovementMod {
 
       private static Object LastHitTable;
       private static int HitTableTotalWeight;
-      private static VehicleChassisLocations lastCalledShotLocation; // Vehicle does not have cluster so need to update cache with call shot location
+      private static int lastCalledShotLocation;
+
+      private static bool CacheNeedRefresh( Object hitTable, int targetedLocation ) {
+         bool result = ! Object.ReferenceEquals( hitTable, LastHitTable ) || lastCalledShotLocation != (int) targetedLocation;
+         if ( result ) {
+            LastHitTable = hitTable;
+            lastCalledShotLocation = (int) targetedLocation;
+         }
+         return result;
+      }
 
       // Can't get private fields. Not sure why. Method does not get called.
 		// public static bool PrefixMechHUDPercent ( ref Dictionary<ArmorLocation, int> ___currentHitTable, ref CombatHUD ___HUD, ref AttackDirection ___shownAttackDirection, ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) {
 		public static bool PrefixMechHUDPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) {
          try {
-            Dictionary<ArmorLocation, int> hitTable = targetedLocation == ArmorLocation.None
+            Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! FixHitLocation.CallShotClustered )
                                                     ? Combat.HitLocation.GetMechHitTable( AttackDirection )
                                                     : Combat.Constants.GetMechClusterTable( targetedLocation, AttackDirection );
-            if ( ! Object.ReferenceEquals( hitTable, LastHitTable ) ) {
-               // Cached table changes with type (Mech/Vehicle), targetedLocation, and AttackDiection.
-               LastHitTable = hitTable;
+            if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
                HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
-            }
+
 			   int local = TryGet( hitTable, location ) * scale;
-            if ( local != 0 && location == targetedLocation )
+            if ( location == targetedLocation )
                local = (int)( (float) local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
 
             __result = FineTuneAndFormat( hitTable, location, local );
@@ -78,14 +86,12 @@ namespace Sheepy.AttackImprovementMod {
             targetedLocation = VehicleChassisLocations.None; // Disable called location if vehicle called shot is not fixed
 
          try {
-            Dictionary<VehicleChassisLocations, int> hitTable = Combat.HitLocation.GetVehicleHitTable( AttackDirection ); // Vehicle has no cluster table
-            if ( ! Object.ReferenceEquals( hitTable, LastHitTable ) || lastCalledShotLocation != targetedLocation ) {
-               LastHitTable = hitTable;
-               lastCalledShotLocation = targetedLocation;
+            Dictionary<VehicleChassisLocations, int> hitTable = Combat.HitLocation.GetVehicleHitTable( AttackDirection );
+            if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
                HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
-            }
+
 			   int local = TryGet( hitTable, location ) * scale;
-            if ( local != 0 && location == targetedLocation )
+            if ( location == targetedLocation )
                local = (int)( (float) local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
 
             __result = FineTuneAndFormat( hitTable, location, local );

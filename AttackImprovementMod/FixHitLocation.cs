@@ -15,26 +15,30 @@ namespace Sheepy.AttackImprovementMod {
       private const int SCALE = 1024; // Increase precisions of float to int conversions. Set it too high may cause overflow.
       internal static int scale = SCALE; // Actual scale. Determined by FixHitDistribution.
 
+      internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
+
       internal static void InitPatch ( HarmonyInstance harmony ) {
          scale = Settings.FixHitDistribution ? SCALE : 1;
+         CallShotClustered = Settings.CalledShotUseClustering || Mod.Pre_1_1;
 
          MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Public | BindingFlags.Static ); // Only one public static GetHitLocation method.
          if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
             Log( "Error: Cannot find HitLocation.GetHitLocation( ?, float, ?, float ) to patch" );
 
          } else {
-            bool patchPrefix  = Settings.FixHeadCalledShot || Settings.FixHitDistribution || ( Settings.MechCalledShotMultiplier != 1.0f ),
+            bool patchMech    = Settings.CalledShotUseClustering || Settings.FixHitDistribution || Settings.MechCalledShotMultiplier != 1.0f,
+                 patchVehicle = Settings.FixHitDistribution || Settings.VehicleCalledShotMultiplier != 1.0f,
                  patchPostfix = Settings.LogHitRolls;
-            if ( patchPrefix || patchPostfix ) {
-               MethodInfo GetHitLocationArmour  = GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) );
-               MethodInfo GetHitLocationVehicle = GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) );
-               HarmonyMethod FixArmour  = patchPrefix  ? MakePatch( "PrefixArmourLocation"   ) : null;
-               HarmonyMethod FixVehicle = patchPrefix  ? MakePatch( "PrefixVehicleLocation"  ) : null;
+            if ( patchMech || patchVehicle || patchPostfix ) {
+               HarmonyMethod FixArmour  = patchMech    ? MakePatch( "PrefixArmourLocation"   ) : null;
+               HarmonyMethod FixVehicle = patchVehicle ? MakePatch( "PrefixVehicleLocation"  ) : null;
                HarmonyMethod LogArmour  = patchPostfix ? MakePatch( "PostfixArmourLocation"  ) : null;
                HarmonyMethod LogVehicle = patchPostfix ? MakePatch( "PostfixVehicleLocation" ) : null;
-               harmony.Patch( GetHitLocationArmour , FixArmour , LogArmour  );
-               harmony.Patch( GetHitLocationVehicle, FixVehicle, LogVehicle );
-               Log( string.Format( "GetHitLocation patched: {0}, {1}, {2}, {3}.", new object[]{ FixArmour?.method.Name, LogArmour?.method.Name, FixVehicle?.method.Name, LogVehicle?.method.Name } ) );
+               if ( patchMech    || patchPostfix )
+                  harmony.Patch( GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ), FixArmour, LogArmour );
+               if ( patchVehicle || patchPostfix )
+                  harmony.Patch( GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) ), FixVehicle, LogVehicle );
+               Log( string.Format( "GetHitLocation patched: M:[ {0} / {1} ]   V:[ {2} / {3} ].", new object[]{ FixArmour?.method.Name, LogArmour?.method.Name, FixVehicle?.method.Name, LogVehicle?.method.Name } ) );
             } else {
                Log( "GetHitLocation not patched." );
             }
@@ -42,7 +46,10 @@ namespace Sheepy.AttackImprovementMod {
 
          if ( Settings.FixVehicleCalledShot ) {
             Patch( typeof( SelectionStateFire ), "SetCalledShot", typeof( VehicleChassisLocations ), null, "PostfixSetCalledShot" );
-            Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "PrefixVehicleGetHitLocation", null );
+            if ( Mod.Pre_1_1 )
+               Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "PrefixVehicleGetHitLocation_1_0", null );
+            else
+               Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, "PrefixVehicleGetHitLocation_1_1", null );
          }
       }
 
@@ -51,7 +58,7 @@ namespace Sheepy.AttackImprovementMod {
       internal static float FixMultiplier ( ArmorLocation location, float multiplier ) {
          if ( Settings.MechCalledShotMultiplier != 1.0f )
             multiplier *= Settings.MechCalledShotMultiplier;
-         if ( Settings.FixHeadCalledShot && location == ArmorLocation.Head && Combat.Constants.ToHit.ClusterChanceNeverMultiplyHead )
+         if ( location == ArmorLocation.Head && CallShotClustered && Combat.Constants.ToHit.ClusterChanceNeverMultiplyHead )
             return multiplier * Combat.Constants.ToHit.ClusterChanceOriginalLocationMultiplier;
          return multiplier;
       }
@@ -65,10 +72,23 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Prefix (fix things) ============
 
-      public static bool PrefixArmourLocation ( ref ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) {
+
+      public static bool PrefixArmourLocation ( ref ArmorLocation __result, ref Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) {
          try {
             bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-            if ( ! Settings.FixHitDistribution ) return true;
+            if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None ) {
+               HitTableConstantsDef hitTables = Combat.Constants.HitTables;
+               AttackDirection dir = AttackDirection.None;
+               if      ( hitTable == hitTables.HitMechLocationFromFront ) dir = AttackDirection.FromFront;
+               else if ( hitTable == hitTables.HitMechLocationFromLeft  ) dir = AttackDirection.FromLeft;
+               else if ( hitTable == hitTables.HitMechLocationFromRight ) dir = AttackDirection.FromRight;
+               else if ( hitTable == hitTables.HitMechLocationFromBack  ) dir = AttackDirection.FromBack;
+               else if ( hitTable == hitTables.HitMechLocationProne     ) dir = AttackDirection.ToProne;
+               else if ( hitTable == hitTables.HitMechLocationFromTop   ) dir = AttackDirection.FromTop;
+               if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
+                  hitTable = Combat.Constants.GetMechClusterTable( bonusLocation, dir );
+            }
+            if ( Settings.FixHitDistribution ) return true;
             __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
             return false;
          } catch ( Exception ex ) {
@@ -183,7 +203,19 @@ namespace Sheepy.AttackImprovementMod {
          }
 		}
 
-      public static ArmorLocation translate( VehicleChassisLocations location ) {
+      public static bool PrefixVehicleGetHitLocation_1_1 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) {
+         Log( "Get: " + calledShotLocation );
+         Log( "Translated: " + translateLocation( calledShotLocation ) );
+         try {
+            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translate( calledShotLocation ), bonusMultiplier );
+            return false;
+         } catch ( Exception ex ) {
+            return Log( ex );
+         }
+		}
+
+      public static ArmorLocation translate ( VehicleChassisLocations location ) {
+         //return (ArmorLocation)(int)location;
          switch ( location ) {
             case VehicleChassisLocations.Turret : return ArmorLocation.Head;
             case VehicleChassisLocations.Front  : return ArmorLocation.CenterTorso;

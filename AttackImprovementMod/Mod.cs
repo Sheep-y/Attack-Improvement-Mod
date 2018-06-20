@@ -16,6 +16,7 @@ namespace Sheepy.AttackImprovementMod {
 
       public static ModSettings Settings = new ModSettings();
 
+      internal static bool Pre_1_1 = false; // True if game version is less than 1.1
       internal const string LOG_DIR = "Mods/AttackImprovementMod/";
       internal static HarmonyInstance harmony = HarmonyInstance.Create( "io.github.Sheep-y.AttackImprovementMod" );
 
@@ -40,9 +41,12 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void Init ( string directory, string settingsJSON ) {
          DeleteLog( LOG_NAME );
+         Pre_1_1 = ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0.";
+         Log( Pre_1_1 ? "Game is Pre-1.1 (Clustered Called Shot)" : "Game is Post-1.1 (Non-Clustered Called Shot)" );
 
          try {
             Settings = JsonConvert.DeserializeObject<ModSettings>(settingsJSON);
+            Log( "Mod Settings: " + JsonConvert.SerializeObject( Settings ) );
          } catch ( Exception ex ) {
             Log( string.Format( "Error: Cannot read mod settings, using default: {0}", ex ) );
          }
@@ -136,12 +140,7 @@ namespace Sheepy.AttackImprovementMod {
          return result;
       }
 
-      private static CombatGameState CombatCache;
-      internal static CombatGameState Combat {
-         get {
-            if ( CombatCache == null ) CombatCache = UnityGameInstance.BattleTechGame.Combat;
-            return CombatCache;
-         }
-      }
+      // A shortcut to get CombatGameConstants
+      internal static CombatGameState Combat { get { return UnityGameInstance.BattleTechGame.Combat; } }
    }
 }
