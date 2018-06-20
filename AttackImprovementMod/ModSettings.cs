@@ -49,6 +49,9 @@
       /* Log attacker, weapon, hit roll, correction, location roll, location weights etc. to "BATTLETECH\Mods\FixHitLocation\log_roll.txt", for copy and paste to Excel.
        * Default disabled. */
       public bool LogHitRolls = false;
+
+      /* If true, don't clear log on mod load (game launch). */
+      public bool PersistentLog = false;
    }
 
 }

@@ -22,6 +22,9 @@ namespace Sheepy.AttackImprovementMod {
 
             if ( Settings.ShowRealVehicleCalledShotChance )
                Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
+
+         } else if ( Settings.ShowDecimalCalledChance ) {
+            Log( "Warning: Decimal Called Shot Chance requires ShowRealMechCalledShotChance and/or ShowRealVehicleCalledShotChance" );
          }
       }
 

@@ -13,7 +13,7 @@ namespace Sheepy.AttackImprovementMod {
       private static float[] correctionCache = new float[20];
 
       internal static void InitPatch () {
-         DeleteLog( ROLL_LOG );
+         if ( ! Settings.PersistentLog ) DeleteLog( ROLL_LOG );
          DisableRollCorrection = Settings.RollCorrectionStrength == 0.0f;
          Type AttackType = typeof( AttackDirector.AttackSequence );
 
@@ -28,7 +28,8 @@ namespace Sheepy.AttackImprovementMod {
             Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
             Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
             Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
-            RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location" } ) );
+            if ( ! File.Exists( ROLL_LOG ) )
+               RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location" } ) );
          }
 
          if ( DisableRollCorrection ) {
@@ -46,7 +47,7 @@ namespace Sheepy.AttackImprovementMod {
             }
             if ( Settings.RollCorrectionStrength >= 2 ) {
                if ( Settings.RollCorrectionStrength > 2 )
-                  Log( "Error: RollCorrectionStrength must be less than 2." );
+                  Log( "Warning: RollCorrectionStrength must be less than 2." );
                Settings.RollCorrectionStrength = 1.9999f; // Max! 1.99999 results in NaN in reverse correction
             }
             if ( Settings.RollCorrectionStrength != 1.0f )
@@ -66,8 +67,11 @@ namespace Sheepy.AttackImprovementMod {
                Log( "Error: Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched." );
          }
 
-         if ( Settings.ShowDecimalHitChance )
+         if ( Settings.ShowDecimalHitChance ) {
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChanceFormat", null );
+            if ( ! Settings.ShowRealWeaponHitChance )
+               Log( "Warning: ShowDecimalHitChance without ShowRealWeaponHitChance" );
+         }
       }
 
       // ============ UTILS ============
