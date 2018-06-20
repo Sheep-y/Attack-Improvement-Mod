@@ -27,7 +27,7 @@
       /* Display chance to one decimal IF AND ONLY IF called shot chance is overridden (above). Default false. */
       public bool ShowDecimalCalledChance = false;
 
-      /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, 2 for double.
+      /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, max is 2 for double strength.
        * Default is 0.5 for less correction. */
       public float RollCorrectionStrength = 0.5f;
 

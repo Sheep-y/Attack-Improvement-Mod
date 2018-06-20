@@ -44,6 +44,11 @@ namespace Sheepy.AttackImprovementMod {
                Log( "Error: RollCorrectionStrength must not be negative." );
                Settings.RollCorrectionStrength = 1.0f;
             }
+            if ( Settings.RollCorrectionStrength >= 2 ) {
+               if ( Settings.RollCorrectionStrength > 2 )
+                  Log( "Error: RollCorrectionStrength must be less than 2." );
+               Settings.RollCorrectionStrength = 1.9999f; // Max! 1.99999 results in NaN in reverse correction
+            }
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( AttackType, "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "PrefixGetCorrectedRoll", null );
 
@@ -76,8 +81,9 @@ namespace Sheepy.AttackImprovementMod {
          // Solving r for target = ((1.6r-0.8)^3+0.5)*(s/2)+r*(1-s/2)
          double t = target, t2 = t*t, s = strength, s2 = s*s, s3 = s2*s,
                 a = 125 * Math.Sqrt( ( 13824*t2*s - 13824*t*s - 125*s3 + 750*s2 + 1956*s + 1000 ) / s ),
-                b = Math.Pow( a / ( 4096*Math.Pow( 6, 3d/2d )*s ) + ( 250*t - 125 ) / ( 1024 * s ), 1d/3d );
-         return (float)( b + (125*s-250)/(1536*s*b) + 0.5 );
+                b = a / ( 4096*Math.Pow( 6, 3d/2d )*s ) + ( 250*t - 125 ) / ( 1024 * s ),
+                c = Math.Pow( b, 1d/3d );
+         return c == 0 ? target : (float)( c + (125*s-250)/(1536*s*c) + 0.5 );
       }
 
       // ============ Fixes ============
@@ -144,10 +150,10 @@ namespace Sheepy.AttackImprovementMod {
          thisCorrectedRoll = __result;
          if ( __result > thisHitChance ) // Miss, log now because hit location won't be rolled
             RollLog( GetHitLog() +
-               "\t-" + // Roll; Empty cells are added so that copy and paste will override any old data in Excel, instead of leaving them in place and make it confusing
-               "\t-\t-\t-\t-" +  // Head & Torsos
-               "\t-\t-\t-\t-" +  // Limbs
-               "\t-\t-\t-\t-" ); // called shot and result
+               "\t--" + // Roll; Empty cells are added so that copy and paste will override any old data in Excel, instead of leaving them in place and make it confusing
+               "\t--\t--\t--\t--" +  // Head & Torsos
+               "\t--\t--\t--\t--" +  // Limbs
+               "\t--\t--\t--\t--" ); // called shot and result
       }
 
       internal static string GetHitLog () {
