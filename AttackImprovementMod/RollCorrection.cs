@@ -25,9 +25,9 @@ namespace Sheepy.AttackImprovementMod {
          bool rollCorrected = (bool) rollCorrection.GetValue( null );
 
          if ( Settings.LogHitRolls ) {
-            Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "PrefixGetHits", null );
-            Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic | BindingFlags.Instance, "PrefixGetHits", null );
-            Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "PrefixLogRoll", "PostfixLogRoll" );
+            Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
+            Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
+            Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
             RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location" } ) );
          }
 
@@ -50,23 +50,24 @@ namespace Sheepy.AttackImprovementMod {
                Settings.RollCorrectionStrength = 1.9999f; // Max! 1.99999 results in NaN in reverse correction
             }
             if ( Settings.RollCorrectionStrength != 1.0f )
-               Patch( AttackType, "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "PrefixGetCorrectedRoll", null );
+               Patch( AttackType, "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
 
             if ( rollCorrected && Settings.ShowRealWeaponHitChance ) {
                for ( int i = 0 ; i < 20 ; i++ )
                   correctionCache[i] = ReverseRollCorrection( 0.05f * i, Settings.RollCorrectionStrength );
-               Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "PrefixWeaponHitChance", null );
+               Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowRealHitChance", null );
             }
          }
-         if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f )
+         if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
             StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
             if ( StreakBreakingValueProp != null )
-               Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "PrefixProcessRandomRoll", null );
+               Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
             else
-               Log( "Error: Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched." );            
+               Log( "Error: Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched." );
+         }
 
          if ( Settings.ShowDecimalHitChance )
-            Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "PrefixWeaponDecimalChance", null );
+            Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChanceFormat", null );
       }
 
       // ============ UTILS ============
@@ -95,7 +96,7 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Fixes ============
 
-      public static bool PrefixGetCorrectedRoll ( ref float __result, float roll, Team team ) {
+      public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) {
          try {
 				roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
 				if ( team != null )
@@ -108,7 +109,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       private static FieldInfo StreakBreakingValueProp = null;
-      public static bool PrefixProcessRandomRoll ( Team __instance, float targetValue, bool succeeded ) {
+      public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) {
          try {
 			   if ( succeeded ) {
                StreakBreakingValueProp.SetValue( __instance, 0f );
@@ -127,7 +128,7 @@ namespace Sheepy.AttackImprovementMod {
          }
       }
 
-      public static void PrefixWeaponHitChance ( ref float chance ) {
+      public static void ShowRealHitChance ( ref float chance ) {
          int i = (int)( ( chance + 0.00001f ) / 0.05f );
          if ( i >= 0 && i < 20 && Math.Abs( i * 0.05f - chance ) < 0.00001 )
             chance = correctionCache[ i ];
@@ -142,7 +143,7 @@ namespace Sheepy.AttackImprovementMod {
       private static object[] empty = new object[]{};
 
       // Override the original code to show accuracy in decimal points
-      public static bool PrefixWeaponDecimalChance ( CombatHUDWeaponSlot __instance, float chance ) {
+      public static bool OverrideWeaponHitChanceFormat ( CombatHUDWeaponSlot __instance, float chance ) {
          try {
             HitChance.Invoke( __instance, new object[]{ chance } );
 			   __instance.HitChanceText.text = string.Format( "{0:0.0}%", Math.Max( 0f, Math.Min( chance * 100f, 100f ) ) );
@@ -159,7 +160,7 @@ namespace Sheepy.AttackImprovementMod {
       internal static string thisAttacker = "(unknown)";
       internal static string thisWeapon = "(unknown)";
       internal static float thisHitChance;
-      public static void PrefixGetHits ( AttackDirector.AttackSequence __instance, Weapon weapon, float toHitChance ) {
+      public static void RecordAttacker ( AttackDirector.AttackSequence __instance, Weapon weapon, float toHitChance ) {
          thisAttacker = __instance.attacker.GetPilot()?.Callsign ?? __instance.attacker.Nickname;
          thisWeapon = weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId;
          thisHitChance = toHitChance;
@@ -167,13 +168,13 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static float thisRoll;
       internal static float thisStreak;
-      public static void PrefixLogRoll ( float roll, Team team ) {
+      public static void RecordAttackRoll ( float roll, Team team ) {
          thisRoll = roll;
          thisStreak = team?.StreakBreakingValue ?? 0;
       }
 
       internal static float thisCorrectedRoll;
-      public static void PostfixLogRoll ( float __result, float roll, Team team ) {
+      public static void LogMissedAttack ( float __result, float roll, Team team ) {
          thisCorrectedRoll = __result;
          if ( __result > thisHitChance ) // Miss, log now because hit location won't be rolled
             RollLog( GetHitLog() +

@@ -14,34 +14,28 @@ namespace Sheepy.AttackImprovementMod {
          if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance ) {
 
             Type CalledShot = typeof( CombatHUDCalledShotPopUp );
-
-            // Eavesdrops HUD assignment
-            Patch( CalledShot, "Init", typeof( CombatHUD ), null, "PostfixCombatHUDInit" );
-
-            // Eavesdrops Attack Direction
-            Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "PostfixShownAttackDirection" );
+            Patch( CalledShot, "Init", typeof( CombatHUD ), null, "RecordCombatHUD" );
+            Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
             if ( Settings.ShowRealMechCalledShotChance )
-               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "PrefixMechHUDPercent", null );
+               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
 
             if ( Settings.ShowRealVehicleCalledShotChance )
-               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "PrefixVehicleHUDPercent", null );
+               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
          }
       }
 
       // ============ Game States ============
 
-      private static CombatHUD HUD; // Save intercepted Combat HUD
-      public static void PostfixCombatHUDInit ( CombatHUD HUD ) {
+      private static float ActorCalledShotBonus { get { return HUD.SelectedActor.CalledShotBonusMultiplier; } }
+
+      private static CombatHUD HUD;
+      public static void RecordCombatHUD ( CombatHUD HUD ) {
          FixCalledShotPopUp.HUD = HUD;
       }
 
-      private static float ActorCalledShotBonus { // Defer property resolution until value is used
-         get { return HUD.SelectedActor.CalledShotBonusMultiplier; }
-      }
-
-      private static AttackDirection AttackDirection; // Save intercepted attack direction
-      public static void PostfixShownAttackDirection ( AttackDirection value ) {
+      private static AttackDirection AttackDirection;
+      public static void RecordAttackDirection ( AttackDirection value ) {
          AttackDirection = value;
       }
 
@@ -60,7 +54,7 @@ namespace Sheepy.AttackImprovementMod {
          return result;
       }
 
-		public static bool PrefixMechHUDPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) {
+		public static bool OverrideHUDMechCalledShotPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) {
          try {
             Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! FixHitLocation.CallShotClustered )
                                                     ? Combat.HitLocation.GetMechHitTable( AttackDirection )
@@ -79,7 +73,7 @@ namespace Sheepy.AttackImprovementMod {
          }
 		}
 
-		public static bool PrefixVehicleHUDPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) {
+		public static bool OverrideHUDVehicleCalledShotPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) {
          if ( ! Settings.FixVehicleCalledShot )
             targetedLocation = VehicleChassisLocations.None; // Disable called location if vehicle called shot is not fixed
 

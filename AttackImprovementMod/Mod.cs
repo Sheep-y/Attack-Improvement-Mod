@@ -79,6 +79,11 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       /* Find and patch a method with prefix and/or postfix. */
+      internal static void Patch ( Type patchedClass, string patchedMethod, string prefix, string postfix ) {
+         Patch( patchedClass, patchedMethod, BindingFlags.Public | BindingFlags.Instance, (Type[]) null, prefix, postfix );
+      }
+
+      /* Find and patch a method with prefix and/or postfix. */
       internal static void Patch ( Type patchedClass, string patchedMethod, Type parameterType, string prefix, string postfix ) {
          Patch( patchedClass, patchedMethod, BindingFlags.Public | BindingFlags.Instance, new Type[]{ parameterType }, prefix, postfix );
       }
@@ -110,7 +115,7 @@ namespace Sheepy.AttackImprovementMod {
             return;
          }
          harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
-         Log( string.Format( "Patched: {0} {1} [ {2} / {3} ]", new object[]{ patchedClass, patched, prefix, postfix } ) );
+         Log( string.Format( "Patched: {0} {1} [ {2} : {3} ]", new object[]{ patchedClass, patched, prefix, postfix } ) );
       }
 
       // ============ UTILS ============
