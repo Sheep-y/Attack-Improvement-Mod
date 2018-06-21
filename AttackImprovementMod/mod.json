@@ -3,7 +3,7 @@
    "Enabled": true,
 
    "Version": "1.0.0",
-   "Description": "Fix hit location distribution and called shot bugs, with options to improve attack HUD such as better called shot precision. Each fix and features can be configurated individually by editing mod.json.",
+   "Description": "Fix hit location distribution and called shot bugs, with options to improve attack HUD such as better called shot precision. Each fix and features can be configured individually by editing mod.json.",
    "Author": "Sheepy",
    "Website": "www.github.com/Sheep-y/BattleTech_Mods",
    "Contact": "your.sheepy@gmail.com",
