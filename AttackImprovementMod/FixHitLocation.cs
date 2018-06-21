@@ -39,7 +39,9 @@ namespace Sheepy.AttackImprovementMod {
                   harmony.Patch( GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ), FixArmour, LogArmour );
                if ( patchVehicle || patchPostfix )
                   harmony.Patch( GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) ), FixVehicle, LogVehicle );
-               Log( string.Format( "GetHitLocation patched: M:[ {0} / {1} ]   V:[ {2} / {3} ].", new object[]{ FixArmour?.method.Name, LogArmour?.method.Name, FixVehicle?.method.Name, LogVehicle?.method.Name } ) );
+               Log( string.Format( "Patched: HitLocation.GetHitLocation <Mech>[ {0} / {1} ] <Vehicle>[ {2} / {3} ].", new object[]{ FixArmour?.method.Name, LogArmour?.method.Name, FixVehicle?.method.Name, LogVehicle?.method.Name } ) );
+               if ( patchVehicle )
+                  Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static | BindingFlags.Public, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
             } else {
                Log( "GetHitLocation not patched." );
             }
@@ -234,7 +236,17 @@ namespace Sheepy.AttackImprovementMod {
          }
 		}
 
-      public static ArmorLocation translateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(int)location; }
-      public static VehicleChassisLocations translateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(int)location; }
+      public static bool FixVehicleCalledShotFloatie ( ref string __result, ArmorLocation location ) {
+         try {
+            if ( (int) location >= 0 ) return true;
+            __result = Vehicle.GetLongChassisLocation( translateLocation( location ) );
+            return false;
+         } catch ( Exception ex ) {
+            return Log( ex );
+         }
+      }
+
+      public static ArmorLocation translateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(-(int)location); }
+      public static VehicleChassisLocations translateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(-(int)location); }
    }
 }

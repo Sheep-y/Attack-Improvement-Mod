@@ -252,6 +252,7 @@
       <dd>If true: Postfix <code>SelectionStateFire.SetCalledShot</code> and <code>CombatHUDVehicleArmorHover.OnPointerClick</code>
       to save vehicle called shot location in mech called shot location, then later restore it
       by Overriding <code>Vehicle.GetHitLocation</code>.
+      Also Override <code>Mech.GetLongArmorLocation</code> to correct called shot floatie.
 
       <dt><code>FixHitDistribution</code>
       <dd>If true: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code> and <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>.
