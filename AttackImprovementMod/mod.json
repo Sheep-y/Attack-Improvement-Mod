@@ -1,5 +1,5 @@
 {
-   "Name": "Attack Improvement Mod",
+   "Name": "AIM: Attack Improvement Mod",
    "Enabled": true,
 
    "Version": "1.0.1",
@@ -56,6 +56,9 @@
 
       /* Show hit chance to one decimal in weapon panel. Default false. */
       "ShowDecimalHitChance" : false,
+
+      /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
+      "ShowHeatAndStab" : true,
 
       /* Log attacker, weapon, hit roll, correction, location roll, location weights etc. to "BATTLETECH\Mods\FixHitLocation\log_roll.txt", for copy and paste to Excel.
        * Default disabled. */
