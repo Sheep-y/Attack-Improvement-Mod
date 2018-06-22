@@ -12,7 +12,6 @@ namespace Sheepy.AttackImprovementMod {
       internal static void InitPatch () {
          if ( Settings.ShowHeatAndStab ) {
             Type actorDetails = typeof( CombatHUDActorDetailsDisplay );
-            Patch( actorDetails, "Init", typeof( CombatHUD ), null, "RecordCombatHUD" );
             Patch( actorDetails, "RefreshInfo", "ShowHeatAndStab", null );
          }
       }

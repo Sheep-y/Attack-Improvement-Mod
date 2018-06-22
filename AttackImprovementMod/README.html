@@ -17,6 +17,19 @@
 </p>
 
 <details>
+   <summary><h2>Change Log</h2></summary>
+   <dl>
+      <dt>2018-06-22 Version 1.0.1
+      <dd>Fix vehicle called shot shows mech location name. Override selection and target panel to show heat and stab number below jets count.
+      <dd>New mod setting: ShowHeatAndStab
+   </dl>
+   <dl>
+      <dt>2018-06-21 Version 1.0.0
+      <dd>Initial version with vehicle called shot fix, hit location fix, clustering called shot, roll correction adjustment, miss streak adjustment, and roll log.
+   </dl>
+</details>
+
+<details>
    <summary><h2>Install Instructions</h2></summary>
    <p>
       Most BATTLETECH mods requires BTML and ModTek. This mod is no exception.
@@ -271,51 +284,55 @@
 
       <dt><code>CalledShotUseClustering</code>
       <dd>If true: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>.
-      May be changed to prefix in future versions. </dd>
+      May be changed to prefix in future versions.
 
       <dt><code>MechCalledShotMultiplier</code>
       <dd>If != 1.0f: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>.
-      May be changed to prefix in future versions. </dd>
-      
+      May be changed to prefix in future versions.
+
       <dt><code>VehicleCalledShotMultiplier</code>
       <dd>If != 1.0f: Override <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>.
-      May be changed to prefix in future versions. </dd>
-      
+      May be changed to prefix in future versions.
+
       <dt><code>ShowRealMechCalledShotChance</code>
-      <dd>If true: Postfix <code>CombatHUDCalledShotPopUp.Init</code> and <code>CombatHUDCalledShotPopUp.set_ShownAttackDirection</code> for info,
-      then override <code>CombatHUDCalledShotPopUp.GetHitPercent&lt;ArmorLocation&gt;</code>. </dd>
+      <dd>If true: Postfix <code>CombatHUD.Init</code> and <code>CombatHUDCalledShotPopUp.set_ShownAttackDirection</code> for info,
+      then override <code>CombatHUDCalledShotPopUp.GetHitPercent&lt;ArmorLocation&gt;</code>.
 
       <dt><code>ShowRealVehicleCalledShotChance</code>
-      <dd>If true: Postfix <code>CombatHUDCalledShotPopUp.Init</code> and <code>CombatHUDCalledShotPopUp.set_ShownAttackDirection</code> for info,
-      then override <code>CombatHUDCalledShotPopUp.GetHitPercent&lt;VehicleChassisLocations&gt;</code>. </dd>
-      
+      <dd>If true: Postfix <code>CombatHUD.Init</code> and <code>CombatHUDCalledShotPopUp.set_ShownAttackDirection</code> for info,
+      then override <code>CombatHUDCalledShotPopUp.GetHitPercent&lt;VehicleChassisLocations&gt;</code>.
+
       <dt><code>ShowDecimalCalledChance</code>
-      <dd>Depends on <code>ShowRealMechCalledShotChance</code>/<code>ShowRealVehicleCalledShotChance</code> and does not add any new patch. </dd>
-      
+      <dd>Depends on <code>ShowRealMechCalledShotChance</code>/<code>ShowRealVehicleCalledShotChance</code> and does not add any new patch.
+
       <dt><code>RollCorrectionStrength</code>
-      <dd>If 0: Set <code>AttackDirector.AttackSequence.UseWeightedHitNumbers</code> to false and call it a day. </dd>
+      <dd>If 0: Set <code>AttackDirector.AttackSequence.UseWeightedHitNumbers</code> to false and call it a day.
       <dd>If not 0 and not 1: Override <code>AttackDirector.AttackSequence.GetCorrectedRoll</code>.
       New, weighted formula is <code>((1.6*roll-0.8)^3+0.5)*strength/2 + roll*(1-strength/2)</code>.</dd>
-      
+
       <dt><code>MissStreakBreakerThreshold</code>
-      <dd>If not 0.5: Override <code>Team.ProcessRandomRoll</code>. </dd>
-      
+      <dd>If not 0.5: Override <code>Team.ProcessRandomRoll</code>.
+
       <dt><code>MissStreakBreakerDivider</code>
-      <dd>If not 5: Override <code>Team.ProcessRandomRoll</code>. </dd>
+      <dd>If not 5: Override <code>Team.ProcessRandomRoll</code>.
 
       <dt><code>ShowRealWeaponHitChance</code>
-      <dd>If true and RollCorrectionStrength is not 0: Prefix <code>CombatHUDWeaponSlot.SetHitChance</code> to chance the chance. </dd>
-      
+      <dd>If true and RollCorrectionStrength is not 0: Prefix <code>CombatHUDWeaponSlot.SetHitChance</code> to chance the chance.
+
       <dt><code>ShowDecimalHitChance</code>
-      <dd>If true: Override <code>CombatHUDWeaponSlot.SetHitChance</code> to change the format. </dd>
+      <dd>If true: Override <code>CombatHUDWeaponSlot.SetHitChance</code> to change the format.
+
+      <dt><code>ShowHeatAndStab</code>
+      <dd>If true: Postfix <code>CombatHUD.Init</code> for info,
+      then override <code>CombatHUDActorDetailsDisplay.RefreshInfo</code> to show heat and stability number.
 
       <dt><code>LogHitRolls</code>
-      <dd>If true: 
-      Prefix <code>AttackDirector.AttackSequence.GetIndividualHits</code>, <code>AttackDirector.AttackSequence.GetClusteredHits</code>, and 
+      <dd>If true:
+      Prefix <code>AttackDirector.AttackSequence.GetIndividualHits</code>, <code>AttackDirector.AttackSequence.GetClusteredHits</code>, and
       <code>AttackDirector.AttackSequence.GetCorrectedRoll</code> to get attack data.
       Postfix <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>, <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>,
-      and <code>AttackDirector.AttackSequence.GetCorrectedRoll</code> to do actual log. </dd>
-      
+      and <code>AttackDirector.AttackSequence.GetCorrectedRoll</code> to do actual log.
+
    </dl>
 </details>
 
