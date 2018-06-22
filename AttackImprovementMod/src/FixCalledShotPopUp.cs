@@ -14,7 +14,6 @@ namespace Sheepy.AttackImprovementMod {
          if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance ) {
 
             Type CalledShot = typeof( CombatHUDCalledShotPopUp );
-            Patch( CalledShot, "Init", typeof( CombatHUD ), null, "RecordCombatHUD" );
             Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
             if ( Settings.ShowRealMechCalledShotChance )

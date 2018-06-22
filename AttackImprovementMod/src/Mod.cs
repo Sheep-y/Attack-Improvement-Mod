@@ -55,21 +55,10 @@ namespace Sheepy.AttackImprovementMod {
                Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RecordCombatHUD" );
             }
 
-            Log( "=== Patching Roll Corrections and Logger ===" );
-            patchClass = typeof( RollCorrection );
-            RollCorrection.InitPatch();
-
-            Log( "=== Patching Hit Location Bugfixs and Logger ===" );
-            patchClass = typeof( FixHitLocation );
-            FixHitLocation.InitPatch( harmony );
-
-            Log( "=== Patching Called Shot HUD ===" );
-            patchClass = typeof( FixCalledShotPopUp );
-            FixCalledShotPopUp.InitPatch();
-
-            Log( "=== Patching Heat and Stability ===" );
-            patchClass = typeof( HeatAndStab );
-            HeatAndStab.InitPatch();
+            LoadModule( "Roll Corrections and Logger", typeof( RollCorrection ) );
+            LoadModule( "Hit Location Bugfixs and Logger", typeof( FixHitLocation ) );
+            LoadModule( "Called Shot HUD", typeof( FixCalledShotPopUp ) );
+            LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
 
          } catch ( Exception ex ) {
             Log( ex );
@@ -83,7 +72,7 @@ namespace Sheepy.AttackImprovementMod {
       internal static HarmonyMethod MakePatch ( string method ) {
          if ( method == null ) return null;
          MethodInfo mi = patchClass.GetMethod( method );
-         if ( mi == null ) Log( "Cannot find patch method " + method );
+         if ( mi == null ) Log( "Errpr: Cannot find patch method " + method );
          return new HarmonyMethod( mi );
       }
 
@@ -152,6 +141,20 @@ namespace Sheepy.AttackImprovementMod {
       internal static int TryGet<T> ( Dictionary<T, int> table, T key ) {
          table.TryGetValue( key, out int result );
          return result;
+      }
+
+      private static void LoadModule( string name, Type module ) {
+         Log( "=== Patching " + name + " ===" );
+         patchClass = module;
+         MethodInfo m = module.GetMethod( "InitPatch", BindingFlags.Static | BindingFlags.NonPublic );
+         if ( m != null ) {
+            if ( m.GetParameters().Length <= 0 )
+               m.Invoke( null, null );
+            else
+               m.Invoke( null, new object[]{ harmony } );
+            return;
+         }
+         Log( "Cannot Initiate " + module );
       }
       
       // ============ Game States ============
