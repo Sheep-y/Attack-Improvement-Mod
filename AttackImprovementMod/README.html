@@ -325,6 +325,8 @@
       <dt><code>ShowHeatAndStab</code>
       <dd>If true: Postfix <code>CombatHUD.Init</code> for info,
       then override <code>CombatHUDActorDetailsDisplay.RefreshInfo</code> to show heat and stability number.
+      Postfix <code>CombatHUDActorInfo.RefreshPredictedHeatInfo</code> and<code>CombatHUDActorInfo.RefreshPredictedStabilityInfo</code> to watch refresh,
+      and Postfix <code>CombatHUDMechTray.Update</code> to do the refresh when the numbers potentially change.
 
       <dt><code>LogHitRolls</code>
       <dd>If true:
@@ -338,7 +340,7 @@
 
 
 <details>
-   <summary><h2>Moding this mod</h2></summary>
+   <summary><h2>Modding this mod</h2></summary>
    <p>
       The <a href="https://github.com/Sheep-y/BattleTech_Mods">source code</a> of this mod is open and free. <br>
       You can take it and modify it, provided that you include <i>your</i> code when you distribute your work, and don't claim my work as yours.
