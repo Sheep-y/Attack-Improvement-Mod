@@ -4,8 +4,6 @@ using System;
 
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
-   using System.Reflection;
-   using System.IO;
 
    public class HeatAndStab {
 
@@ -41,9 +39,9 @@ namespace Sheepy.AttackImprovementMod {
                   line2 = "Heat " + mech.CurrentHeat;
                line2 += "\n";
                if ( selection != null && selection.ProjectedStabilityForState != mech.CurrentStability && false )
-                  line2 += "Stab " + mech.CurrentStability + " >> " + selection.ProjectedStabilityForState;
+                  line2 += "Stab " + (int) mech.CurrentStability + " >> " + (int) selection.ProjectedStabilityForState;
                else
-                  line2 += "Stab " + mech.CurrentStability;
+                  line2 += "Stab " + (int) mech.CurrentStability;
 
             } else { // One line in target panel
                line2 = "Heat " + mech.CurrentHeat + ", Stab " + mech.CurrentStability;

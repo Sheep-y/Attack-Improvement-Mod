@@ -158,7 +158,6 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static CombatHUD HUD;
       public static void RecordCombatHUD ( CombatHUD __instance ) {
-         Log( __instance );
          Mod.HUD = __instance;
       }
 
