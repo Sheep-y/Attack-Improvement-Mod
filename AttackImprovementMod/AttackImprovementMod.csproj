@@ -59,12 +59,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HeatAndStab.cs" />
-    <Compile Include="RollCorrection.cs" />
-    <Compile Include="FixCalledShotPopUp.cs" />
-    <Compile Include="FixHitLocation.cs" />
-    <Compile Include="Mod.cs" />
-    <Compile Include="ModSettings.cs" />
+    <Compile Include="src\HeatAndStab.cs" />
+    <Compile Include="src\RollCorrection.cs" />
+    <Compile Include="src\FixCalledShotPopUp.cs" />
+    <Compile Include="src\FixHitLocation.cs" />
+    <Compile Include="src\Mod.cs" />
+    <Compile Include="src\ModSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
