@@ -46,6 +46,9 @@
       /* Show hit chance to one decimal in weapon panel. Default false. */
       public bool ShowDecimalHitChance = false;
 
+      /* Show heat and stability number in actor panel (bottom left). */
+      public bool ShowHeatAndStab = true;
+
       /* Log attacker, weapon, hit roll, correction, location roll, location weights etc. to "BATTLETECH\Mods\FixHitLocation\log_roll.txt", for copy and paste to Excel.
        * Default disabled. */
       public bool LogHitRolls = false;

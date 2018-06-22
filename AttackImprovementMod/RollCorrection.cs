@@ -28,6 +28,7 @@ namespace Sheepy.AttackImprovementMod {
             Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
             Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
             Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
+            // Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ typeof( Mech ), typeof( ChassisLocations ), typeof( bool ) }, null, "RecordBaseCrit" ); // Just a test to confirm the flow
             if ( ! File.Exists( ROLL_LOG ) )
                RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location" } ) );
          }
@@ -176,6 +177,13 @@ namespace Sheepy.AttackImprovementMod {
          thisRoll = roll;
          thisStreak = team?.StreakBreakingValue ?? 0;
       }
+
+      /*
+      internal static float thisBaseCrit;
+      public static void RecordBaseCrit ( float __result ) {
+         thisBaseCrit = __result;
+      }
+      */
 
       internal static float thisCorrectedRoll;
       public static void LogMissedAttack ( float __result, float roll, Team team ) {

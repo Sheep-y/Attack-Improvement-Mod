@@ -112,6 +112,7 @@
          to hit the head than blind shots.
          <p>This mod was intended to fix it, but 1.1 came out first.
          So this mod now restores the clustering effect, instead of fixing the head called shot bug.
+         Clustering strength can be modified in <code>constants\CombatGameConstants.json</code>
          <p>Note that this does not apply to Vehicle called shot;
          the default vehicle clustering is a real mess, and even when fixed there are too few locations to cluster.
       </details></li>
@@ -214,12 +215,22 @@
       </details></li>
 
       <li> <details>
+         <summary><h3> Show Heat and Stability number </h3></summary>
+         <p>Setting: <code>ShowHeatAndStab</code> (true/false, default true)<br>
+         <p>When enabled, selection and target panel will show heat and stability damage number,
+         below unit class and number of jump jets.
+      </details></li>
+
+      <li> <details>
          <summary><h3>(Advanced) Attack Log</h3></summary>
          <p>Setting: <code>LogHitRolls</code> (true/false, default false)<br>
          <p>When enabled, the mod will keep an attack log in the mod's folder.
          <p>It'll log various attack resolution info such as attacker, attack roll, corrected roll,
          streak breaker, location roll, hit table, and other info.
          The log is cleared every time the game launches and load this mod.
+         <p>Because critical roll happens when playing weapon effect,
+         rather than when the hit/location rolls are rolled before firing,
+         adding critical roll requires an architecture change of this mod's log system.
       </details></li>
 
       <li> <details>

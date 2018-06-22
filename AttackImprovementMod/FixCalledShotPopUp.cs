@@ -32,11 +32,6 @@ namespace Sheepy.AttackImprovementMod {
 
       private static float ActorCalledShotBonus { get { return HUD.SelectedActor.CalledShotBonusMultiplier; } }
 
-      private static CombatHUD HUD;
-      public static void RecordCombatHUD ( CombatHUD HUD ) {
-         FixCalledShotPopUp.HUD = HUD;
-      }
-
       private static AttackDirection AttackDirection;
       public static void RecordAttackDirection ( AttackDirection value ) {
          AttackDirection = value;

@@ -50,6 +50,11 @@ namespace Sheepy.AttackImprovementMod {
          }
 
          try {
+            if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowHeatAndStab ) {
+               patchClass = typeof( Mod );
+               Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RecordCombatHUD" );
+            }
+
             Log( "=== Patching Roll Corrections and Logger ===" );
             patchClass = typeof( RollCorrection );
             RollCorrection.InitPatch();
@@ -61,6 +66,10 @@ namespace Sheepy.AttackImprovementMod {
             Log( "=== Patching Called Shot HUD ===" );
             patchClass = typeof( FixCalledShotPopUp );
             FixCalledShotPopUp.InitPatch();
+
+            Log( "=== Patching Heat and Stability ===" );
+            patchClass = typeof( HeatAndStab );
+            HeatAndStab.InitPatch();
 
          } catch ( Exception ex ) {
             Log( ex );
@@ -141,6 +150,14 @@ namespace Sheepy.AttackImprovementMod {
       internal static int TryGet<T> ( Dictionary<T, int> table, T key ) {
          table.TryGetValue( key, out int result );
          return result;
+      }
+      
+      // ============ Game States ============
+
+      internal static CombatHUD HUD;
+      public static void RecordCombatHUD ( CombatHUD __instance ) {
+         Log( __instance );
+         Mod.HUD = __instance;
       }
 
       // A shortcut to get CombatGameConstants

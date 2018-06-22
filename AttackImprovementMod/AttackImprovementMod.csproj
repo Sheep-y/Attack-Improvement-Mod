@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HeatAndStab.cs" />
     <Compile Include="RollCorrection.cs" />
     <Compile Include="FixCalledShotPopUp.cs" />
     <Compile Include="FixHitLocation.cs" />
