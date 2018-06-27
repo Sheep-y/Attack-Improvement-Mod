@@ -8,7 +8,8 @@ namespace Sheepy.AttackImprovementMod {
    using System.IO;
 
    public class RollCorrection {
-
+      
+      internal const string ROLL_LOG = "Log_AttackRoll.txt";
       private static bool DisableRollCorrection = false;
       private static readonly float[] correctionCache = new float[20];
 
@@ -77,13 +78,11 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ UTILS ============
 
-      private static readonly string ROLL_LOG = Mod.LOG_DIR + "log_roll.txt";
-      internal static bool RollLog( String message ) {
-         File.AppendAllText( ROLL_LOG, message + "\r\n" );
-         return true;
+      internal static void RollLog ( String message ) {
+         WriteLog( ROLL_LOG, message + "\r\n" );
       }
 
-      public static float CorrectRoll( float roll, float strength ) {
+      public static float CorrectRoll ( float roll, float strength ) {
          strength /= 2;
          return (float)( (Math.Pow(1.6*roll-0.8,3)+0.5)*strength + roll*(1-strength) );
       }

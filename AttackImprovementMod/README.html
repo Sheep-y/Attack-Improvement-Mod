@@ -20,8 +20,8 @@
    <summary><h2>Change Log</h2></summary>
    <dl>
       <dt>2018-06-? Version 1.1
-      <dd>Fix vehicle called shot shows mech location name. Override selection and target panel to show heat and stab number below jets count. Add melee destination unlock.
-      <dd>New mod setting: ShowHeatAndStab, IncreaseMeleePositionChoice, IncreaseDFAPositionChoice, FreeMeleePositioning.
+      <dd>Fix vehicle called shot shows mech location name. Auto-detect log path and configurable. Override selection and target panel to show heat and stab number below jets count. Add melee and DFA destinations unlock.
+      <dd>New mod setting: ShowHeatAndStab, IncreaseMeleePositionChoice, IncreaseDFAPositionChoice, UnlockMeleePositioning, LogFolder.
    </dl>
    <dl>
       <dt>2018-06-21 Version 1.0.0
@@ -71,7 +71,7 @@
          <li> Download and extact this mod to the Mods folder of the game.
          <li> i.e. BATTLETECH\Mods\AttackImprovementMod\ should contains "mod.json", "AttackImprovementMod.dll", and other files and folders
          <li> Exit and Re-launch the game and the mod should be loaded.  If it doesn't, BTModLoader.log will log why.
-         <li> This mod also keeps its own log of what it can or cannot try to modify in the log folder.
+         <li> This mod also keeps its own log of what it can or cannot try to modify in the mod folder.
       </ol>
    </details>
 </details>
@@ -111,7 +111,7 @@
          <p>Called shot have absolutely no effect on vehicles, probably because there isn't enough time to implement it.
          <p>In the code, Mech Locations and Vehicle Locations are two separate data type, meaning there are two set of states and methods to handle hit location.
          And vehicle's called shot handling is incomplete. You can pick a called shot location, but it never reach the hit location routine.
-         This can be verified by disabling this setting and enabling hit log (below).
+         This can be verified by disabling this setting and enabling attack log (below).
       </details></li>
 
       <li> <details>
@@ -228,22 +228,19 @@
       </details></li>
 
       <li> <details>
-         <summary><h3> Show Heat and Stability number </h3></summary>
+         <summary><h3> Show Heat and Stability numbers </h3></summary>
          <p>Setting: <code>ShowHeatAndStab</code> (true/false, default true)<br>
          <p>When enabled, selection and target panel will show heat and stability damage number,
          below unit class and number of jump jets.
       </details></li>
 
       <li> <details>
-         <summary><h3> Allow all possible Melee and DFA positions </h3></summary>
+         <summary><h3> Allow free Melee and DFA positioning </h3></summary>
          <p>Setting: <code>IncreaseMeleePositionChoice</code> (true/false, default true)<br>
          <p>Setting: <code>IncreaseDFAPositionChoice</code> (true/false, default true)<br>
          <p>When enabled, melee and DFA can use all available positions, instead of nearest three.
-      </details></li>
-
-      <li> <details>
-         <summary><h3> Free melee position lock </h3></summary>
-         <p>Setting: <code>FreeMeleePositioning</code> (true/false, default true)<br>
+         <hr>
+         <p>Setting: <code>UnlockMeleePositioning</code> (true/false, default true)<br>
          <p>When enabled, free player units from standing still when target is already in melee range.
       </details></li>
 
@@ -257,12 +254,14 @@
          <p>Because critical roll happens when playing weapon effect,
          rather than when the hit/location rolls are rolled before firing,
          adding critical roll requires an architecture change of this mod's log system.
-      </details></li>
+         <hr>
 
-      <li> <details>
-         <summary><h3>(Advanced) Persistent Log</h3></summary>
-         <p>Setting: <code>Persistent</code> (true/false, default false)<br>
+         <p>Setting: <code>PersistentLog</code> (true/false, default false)<br>
          <p>When enabled, the attack log will not auto-clear on launch.
+         <hr>
+
+         <p>Setting: <code>LogFolder</code> (string, default "")<br>
+         <p>Set path of log files. Default is empty which will use mod folder.
       </details></li>
    </ul>
 </details>
@@ -276,7 +275,7 @@
    <p>
       As a DLL mod that potentially overrides quite a few functions, this mod may or may not be compatible with other DLL mods.
       This section lists all programming functions that are patched by each settings.
-      The mod will also create a log of all settings and patched methods (depending on settings) in the mod's folder.
+      The mod will also log settings and all patched methods (which depends on settings).
    </p>
    <p>
       If two mods <b>overrides</b> the same function, it is almost certain the mods are not compatible.
@@ -347,7 +346,7 @@
       <dt><code>IncreaseDFAPositionChoice</code>
       <dd>If true: Postfix <code>EncounterLayerParent.Start</code> to change <code>Combat.Constants.MoveConstants.NumDFADestinationChoices</code> to 6.
 
-      <dt><code>FreeMeleePositioning</code>
+      <dt><code>UnlockMeleePositioning</code>
       <dd>If true: Override <code>Pathing.GetMeleeDestsForTarget</code> to skip melee lock for players.
 
       <dt><code>LogHitRolls</code>

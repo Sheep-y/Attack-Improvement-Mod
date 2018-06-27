@@ -64,6 +64,9 @@
 
       /* If true, don't clear log on mod load (game launch). */
       public bool PersistentLog = false;
+
+      /* Location of mod log and roll log. Default is "" which auto detect mod folder. Relative path would be relative to BATTLETECH exe. */
+      public string LogFolder = "";
    }
 
 }
