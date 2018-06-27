@@ -21,7 +21,7 @@
    <dl>
       <dt>2018-06-? Version 1.1
       <dd>Fix vehicle called shot shows mech location name. Override selection and target panel to show heat and stab number below jets count. Add melee destination unlock.
-      <dd>New mod setting: ShowHeatAndStab, IncreaseMeleePositionChoice, FreeMeleePositioning, IncreaseDFAPositionChoice, FreeDFAPositioning.
+      <dd>New mod setting: ShowHeatAndStab, IncreaseMeleePositionChoice, IncreaseDFAPositionChoice, FreeMeleePositioning.
    </dl>
    <dl>
       <dt>2018-06-21 Version 1.0.0
@@ -235,6 +235,19 @@
       </details></li>
 
       <li> <details>
+         <summary><h3> Allow all possible Melee and DFA positions </h3></summary>
+         <p>Setting: <code>IncreaseMeleePositionChoice</code> (true/false, default true)<br>
+         <p>Setting: <code>IncreaseDFAPositionChoice</code> (true/false, default true)<br>
+         <p>When enabled, melee and DFA can use all available positions, instead of nearest three.
+      </details></li>
+
+      <li> <details>
+         <summary><h3> Free melee position lock </h3></summary>
+         <p>Setting: <code>FreeMeleePositioning</code> (true/false, default true)<br>
+         <p>When enabled, free player units from standing still when target is already in melee range.
+      </details></li>
+
+      <li> <details>
          <summary><h3>(Advanced) Attack Log</h3></summary>
          <p>Setting: <code>LogHitRolls</code> (true/false, default false)<br>
          <p>When enabled, the mod will keep an attack log in the mod's folder.
@@ -334,7 +347,8 @@
       <dt><code>IncreaseDFAPositionChoice</code>
       <dd>If true: Postfix <code>EncounterLayerParent.Start</code> to change <code>Combat.Constants.MoveConstants.NumDFADestinationChoices</code> to 6.
 
-      FreeMeleePositioning, , FreeDFAPositioning
+      <dt><code>FreeMeleePositioning</code>
+      <dd>If true: Override <code>Pathing.GetMeleeDestsForTarget</code> to skip melee lock for players.
 
       <dt><code>LogHitRolls</code>
       <dd>If true:
