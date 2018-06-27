@@ -46,6 +46,18 @@
       /* Show hit chance to one decimal in weapon panel. Default false. */
       public bool ShowDecimalHitChance = false;
 
+      /* Allow all possible melee attack positions. */
+      public bool IncreaseMeleePositionChoice = true;
+
+      /* Break the restriction that one must stay still to melee adjacent mech. */
+      public bool UnlockMeleePositioning = true;
+
+      /* Allow all possible melee attack positions. */
+      public bool IncreaseDFAPositionChoice = true;
+
+      /* Break the restriction that one must stay still to DFA adjacent mech. */
+      public bool UnlockDFAPositioning = true;
+
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       public bool ShowHeatAndStab = true;
 

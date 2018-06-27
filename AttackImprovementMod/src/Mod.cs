@@ -43,7 +43,7 @@ namespace Sheepy.AttackImprovementMod {
          Log( Pre_1_1 ? "Game is Pre-1.1 (Clustered Called Shot)" : "Game is Post-1.1 (Non-Clustered Called Shot)" );
 
          try {
-            Settings = JsonConvert.DeserializeObject<ModSettings>(settingsJSON);
+            Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
             Log( "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
          } catch ( Exception ex ) {
             Log( string.Format( "Error: Cannot read mod settings, using default: {0}", ex ) );
@@ -59,6 +59,8 @@ namespace Sheepy.AttackImprovementMod {
             LoadModule( "Hit Location Bugfixs and Logger", typeof( FixHitLocation ) );
             LoadModule( "Called Shot HUD", typeof( FixCalledShotPopUp ) );
             LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
+            //LoadModule( "Line of Fire", typeof( LineOfFire ) );
+            LoadModule( "Melee", typeof( Melee ) );
 
          } catch ( Exception ex ) {
             Log( ex );
@@ -126,7 +128,7 @@ namespace Sheepy.AttackImprovementMod {
          } catch ( Exception ) { }
       }
 
-      private static string LOG_NAME = LOG_DIR + "log.txt";
+      private static readonly string LOG_NAME = LOG_DIR + "log.txt";
       internal static bool Log( object message ) { Log( message.ToString() ); return true; }
       internal static void Log( string message ) {
          try {
@@ -147,14 +149,10 @@ namespace Sheepy.AttackImprovementMod {
          Log( "=== Patching " + name + " ===" );
          patchClass = module;
          MethodInfo m = module.GetMethod( "InitPatch", BindingFlags.Static | BindingFlags.NonPublic );
-         if ( m != null ) {
-            if ( m.GetParameters().Length <= 0 )
-               m.Invoke( null, null );
-            else
-               m.Invoke( null, new object[]{ harmony } );
-            return;
-         }
-         Log( "Cannot Initiate " + module );
+         if ( m != null ) 
+            m.Invoke( null, null );
+         else
+            Log( "Cannot Initiate " + module );
       }
       
       // ============ Game States ============

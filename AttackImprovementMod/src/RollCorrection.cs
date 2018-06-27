@@ -10,7 +10,7 @@ namespace Sheepy.AttackImprovementMod {
    public class RollCorrection {
 
       private static bool DisableRollCorrection = false;
-      private static float[] correctionCache = new float[20];
+      private static readonly float[] correctionCache = new float[20];
 
       internal static void InitPatch () {
          if ( ! Settings.PersistentLog ) DeleteLog( ROLL_LOG );
@@ -18,11 +18,11 @@ namespace Sheepy.AttackImprovementMod {
          Type AttackType = typeof( AttackDirector.AttackSequence );
 
          FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
-         if ( rollCorrection == null ) {
-            Log( "Error: Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers; roll correction settings not applied." );
-            return;
-         }
-         bool rollCorrected = (bool) rollCorrection.GetValue( null );
+         bool rollCorrected = true;
+         if ( rollCorrection == null )
+            Log( "Warning: Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
+         else 
+            rollCorrected = (bool) rollCorrection.GetValue( null );
 
          if ( Settings.LogHitRolls ) {
             Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
@@ -77,7 +77,7 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ UTILS ============
 
-      private static string ROLL_LOG = Mod.LOG_DIR + "log_roll.txt";
+      private static readonly string ROLL_LOG = Mod.LOG_DIR + "log_roll.txt";
       internal static bool RollLog( String message ) {
          File.AppendAllText( ROLL_LOG, message + "\r\n" );
          return true;
@@ -145,7 +145,7 @@ namespace Sheepy.AttackImprovementMod {
 
       private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", BindingFlags.Instance | BindingFlags.NonPublic );
       private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", BindingFlags.Instance | BindingFlags.NonPublic );
-      private static object[] empty = new object[]{};
+      private static readonly object[] empty = new object[]{};
 
       // Override the original code to show accuracy in decimal points
       public static bool OverrideWeaponHitChanceFormat ( CombatHUDWeaponSlot __instance, float chance ) {

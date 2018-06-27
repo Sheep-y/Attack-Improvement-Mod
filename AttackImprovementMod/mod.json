@@ -57,6 +57,18 @@
       /* Show hit chance to one decimal in weapon panel. Default false. */
       "ShowDecimalHitChance" : false,
 
+      /* Allow all possible melee attack positions. */
+      "IncreaseMeleePositionChoice" : true,
+
+      /* Break the restriction that one must stay still to melee adjacent mech. */
+      "FreeMeleePositioning" : true,
+
+      /* Allow all possible melee attack positions. */
+      "IncreaseDFAPositionChoice" : true,
+
+      /* Break the restriction that one must stay still to DFA adjacent mech. */
+      "FreeDFAPositioning" : true,
+
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       "ShowHeatAndStab" : true,
 

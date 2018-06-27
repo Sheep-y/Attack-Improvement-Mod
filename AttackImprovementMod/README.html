@@ -20,8 +20,8 @@
    <summary><h2>Change Log</h2></summary>
    <dl>
       <dt>2018-06-? Version 1.1
-      <dd>Fix vehicle called shot shows mech location name. Override selection and target panel to show heat and stab number below jets count.
-      <dd>New mod setting: ShowHeatAndStab
+      <dd>Fix vehicle called shot shows mech location name. Override selection and target panel to show heat and stab number below jets count. Add melee destination unlock.
+      <dd>New mod setting: ShowHeatAndStab, IncreaseMeleePositionChoice, FreeMeleePositioning, IncreaseDFAPositionChoice, FreeDFAPositioning.
    </dl>
    <dl>
       <dt>2018-06-21 Version 1.0.0
@@ -326,7 +326,15 @@
       <dd>If true: Postfix <code>CombatHUD.Init</code> for info,
       then override <code>CombatHUDActorDetailsDisplay.RefreshInfo</code> to show heat and stability number.
       Postfix <code>CombatHUDActorInfo.RefreshPredictedHeatInfo</code> and<code>CombatHUDActorInfo.RefreshPredictedStabilityInfo</code> to watch refresh,
-      and Postfix <code>CombatHUDMechTray.Update</code> to do the refresh when the numbers potentially change.
+      and Postfix <code>CombatHUDMechTray.Update</code> to refresh when the numbers potentially change.
+
+      <dt><code>IncreaseMeleePositionChoice</code>
+      <dd>If true: Postfix <code>EncounterLayerParent.Start</code> to change <code>Combat.Constants.MoveConstants.NumMeleeDestinationChoices</code> to 6.
+
+      <dt><code>IncreaseDFAPositionChoice</code>
+      <dd>If true: Postfix <code>EncounterLayerParent.Start</code> to change <code>Combat.Constants.MoveConstants.NumDFADestinationChoices</code> to 6.
+
+      FreeMeleePositioning, , FreeDFAPositioning
 
       <dt><code>LogHitRolls</code>
       <dd>If true:

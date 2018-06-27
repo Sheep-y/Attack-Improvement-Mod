@@ -18,7 +18,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
 
-      internal static void InitPatch ( HarmonyInstance harmony ) {
+      internal static void InitPatch () {
          scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering || Mod.Pre_1_1;
 
@@ -207,7 +207,7 @@ namespace Sheepy.AttackImprovementMod {
             HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
 				SelectionStateFire selectionState = Readout.HUD.SelectionHandler.ActiveState as SelectionStateFire;
             if ( selectionState != null )
-               selectionState.calledShotLocation = translateLocation( selectionState.calledShotVLocation );
+               selectionState.calledShotLocation = TranslateLocation( selectionState.calledShotVLocation );
          } catch ( Exception ex ) {
             Log( ex );
          }
@@ -215,12 +215,12 @@ namespace Sheepy.AttackImprovementMod {
 
       // Store vehicle called shot location in mech location, so that it will be passed down event chain
       public static void RecordVehicleCalledShotFireLocation ( SelectionStateFire __instance, VehicleChassisLocations location ) {
-         __instance.calledShotLocation = translateLocation( location );
+         __instance.calledShotLocation = TranslateLocation( location );
       }
 
       public static bool RestoreVehicleCalledShotLocation_1_0 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation ) {
          try {
-            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translateLocation( calledShotLocation ), attacker.CalledShotBonusMultiplier );
+            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), attacker.CalledShotBonusMultiplier );
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
@@ -229,7 +229,7 @@ namespace Sheepy.AttackImprovementMod {
 
       public static bool RestoreVehicleCalledShotLocation_1_1 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) {
          try {
-            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translateLocation( calledShotLocation ), bonusMultiplier );
+            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), bonusMultiplier );
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
@@ -239,14 +239,14 @@ namespace Sheepy.AttackImprovementMod {
       public static bool FixVehicleCalledShotFloatie ( ref string __result, ArmorLocation location ) {
          try {
             if ( (int) location >= 0 ) return true;
-            __result = Vehicle.GetLongChassisLocation( translateLocation( location ) );
+            __result = Vehicle.GetLongChassisLocation( TranslateLocation( location ) );
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
          }
       }
 
-      public static ArmorLocation translateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(-(int)location); }
-      public static VehicleChassisLocations translateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(-(int)location); }
+      public static ArmorLocation TranslateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(-(int)location); }
+      public static VehicleChassisLocations TranslateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(-(int)location); }
    }
 }

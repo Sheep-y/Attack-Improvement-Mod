@@ -11,7 +11,6 @@ namespace Sheepy.AttackImprovementMod {
       internal static void InitPatch () {
          if ( Settings.ShowHeatAndStab ) {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", "ShowHeatAndStab", null );
-            // Make sure info is always updated. Unfortunately this mean double update.
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDMechTray ), "Update", BindingFlags.NonPublic | BindingFlags.Instance, null, "RefreshHeatAndStab" );
