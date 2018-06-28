@@ -19,7 +19,7 @@
    <summary><h2>Change Log</h2></summary>
    <dl>
       <dt>2018-06-28 Version 1.0.1
-      <dd>Bug Fixes: Fix vehicle called shot no longer float mech location name. Autodetect Log directory. Cap accuracy between 0 and 100. Auto-bypass Hit Location bug fix on 1.1.1 and later.
+      <dd>Bug Fixes: Fix vehicle called shot no longer float mech location name. Autodetect Log directory. Cap accuracy between 0 and 100. Override called shot percent cap when ShowRealWeaponHitChance is true but ShowDecimalHitChance is false. Auto-bypass Hit Location bug fix on 1.1.1 and later.
    </dl>
    <dl>
       <dt>2018-06-21 Version 1.0.0
@@ -307,6 +307,7 @@
 
       <dt><code>ShowRealWeaponHitChance</code>
       <dd>If true and RollCorrectionStrength is not 0: Prefix <code>CombatHUDWeaponSlot.SetHitChance</code> to chance the chance.
+      Override <code>CombatHUDWeaponSlot.SetHitChance</code> to remove the cap on displayed range.
 
       <dt><code>ShowDecimalHitChance</code>
       <dd>If true: Override <code>CombatHUDWeaponSlot.SetHitChance</code> to change the format.

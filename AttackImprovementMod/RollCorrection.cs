@@ -12,7 +12,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal const string ROLL_LOG = "Log_AttackRoll.txt";
       private static bool DisableRollCorrection = false;
-      private static readonly float[] correctionCache = new float[20];
+      private static readonly float[] correctionCache = new float[21];
 
       internal static void InitPatch () {
          if ( ! Settings.PersistentLog ) DeleteLog( ROLL_LOG );
@@ -56,7 +56,7 @@ namespace Sheepy.AttackImprovementMod {
                Patch( AttackType, "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
 
             if ( rollCorrected && Settings.ShowRealWeaponHitChance ) {
-               for ( int i = 0 ; i < 20 ; i++ )
+               for ( int i = 0 ; i < 21 ; i++ )
                   correctionCache[i] = ReverseRollCorrection( 0.05f * i, Settings.RollCorrectionStrength );
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowRealHitChance", null );
             }
@@ -73,6 +73,8 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChanceFormat", null );
             if ( ! Settings.ShowRealWeaponHitChance )
                Log( "Warning: ShowDecimalHitChance without ShowRealWeaponHitChance" );
+         } else if ( Settings.ShowRealWeaponHitChance ) {
+            Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChanceRange", null );
          }
       }
 
@@ -146,6 +148,18 @@ namespace Sheepy.AttackImprovementMod {
       private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", BindingFlags.Instance | BindingFlags.NonPublic );
       private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", BindingFlags.Instance | BindingFlags.NonPublic );
       private static readonly object[] empty = new object[]{};
+
+      // Override the original code to show accuracy in decimal points
+      public static bool OverrideWeaponHitChanceRange ( CombatHUDWeaponSlot __instance, float chance ) {
+         try {
+            HitChance.Invoke( __instance, new object[]{ chance } );
+            __instance.HitChanceText.text = string.Format( "{0:0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
+            Refresh.Invoke( __instance, empty );
+            return false;
+         } catch ( Exception ex ) {
+            return Log( ex );
+         }
+      }
 
       // Override the original code to show accuracy in decimal points
       public static bool OverrideWeaponHitChanceFormat ( CombatHUDWeaponSlot __instance, float chance ) {

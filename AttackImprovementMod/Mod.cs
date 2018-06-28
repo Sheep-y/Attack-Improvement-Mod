@@ -18,7 +18,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
       internal static bool GameHitLocationBugged = false; // True if game version is less than 1.1.1
-      internal const string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod";
+      internal const string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod/";
       internal const string LOG_NAME = "Log_AttackImprovementMod.txt";
       internal static string LogDir = "";
       internal static HarmonyInstance harmony = HarmonyInstance.Create( "io.github.Sheep-y.AttackImprovementMod" );
@@ -49,7 +49,7 @@ namespace Sheepy.AttackImprovementMod {
             logCache = string.Format( "Error: Cannot read mod settings, using default: {0}", ex );
          }
 
-         LogDir = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location );
+         LogDir = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ) + "/";
          logCache += "\nLog folder set to " + LogDir + ". If that fails, fallback to " + FALLBACK_LOG_DIR + "." ;
          DeleteLog( LOG_NAME );
          Log( logCache );
@@ -148,7 +148,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static bool Log( object message ) { Log( message.ToString() ); return true; }
       internal static void Log( string message = "" ) {
-         string logName = LogDir + "/" + LOG_NAME;
+         string logName = LogDir + LOG_NAME;
          try {
             if ( ! File.Exists( logName ) ) 
                message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;
@@ -157,12 +157,12 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void WriteLog( string filename, string message ) {
-         string logName = LogDir + "/" + filename;
+         string logName = LogDir + filename;
          try {
             File.AppendAllText( logName, message );
          } catch ( Exception ) {
             try {
-               logName = FALLBACK_LOG_DIR + "/" + filename;
+               logName = FALLBACK_LOG_DIR + filename;
                File.AppendAllText( logName, message );
             } catch ( Exception ex ) {
                Console.WriteLine( message );
