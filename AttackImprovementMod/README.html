@@ -17,6 +17,18 @@
 </p>
 
 <details>
+   <summary><h2>Change Log</h2></summary>
+   <dl>
+      <dt>2018-06-28 Version 1.0.1
+      <dd>Bug Fixes: Fix vehicle called shot no longer float mech location name. Autodetect Log directory. Cap accuracy between 0 and 100.
+   </dl>
+   <dl>
+      <dt>2018-06-21 Version 1.0.0
+      <dd>Initial version with vehicle called shot fix, hit location fix, clustering called shot, roll correction adjustment, miss streak adjustment, and roll log.
+   </dl>
+</details>
+
+<details>
    <summary><h2>Install Instructions</h2></summary>
    <p>
       Most BATTLETECH mods requires BTML and ModTek. This mod is no exception.
@@ -58,7 +70,7 @@
          <li> Download and extact this mod to the Mods folder of the game.
          <li> i.e. BATTLETECH\Mods\AttackImprovementMod\ should contains "mod.json", "AttackImprovementMod.dll", and other files and folders
          <li> Exit and Re-launch the game and the mod should be loaded.  If it doesn't, BTModLoader.log will log why.
-         <li> This mod also keeps its own log of what it can or cannot try to modify in the log folder.
+         <li> This mod also keeps its own log of what it can or cannot try to modify in a log in the mod folder.
       </ol>
    </details>
 </details>
@@ -112,6 +124,7 @@
          to hit the head than blind shots.
          <p>This mod was intended to fix it, but 1.1 came out first.
          So this mod now restores the clustering effect, instead of fixing the head called shot bug.
+         Clustering strength can be modified in <code>constants\CombatGameConstants.json</code>
          <p>Note that this does not apply to Vehicle called shot;
          the default vehicle clustering is a real mess, and even when fixed there are too few locations to cluster.
       </details></li>
@@ -220,11 +233,9 @@
          <p>It'll log various attack resolution info such as attacker, attack roll, corrected roll,
          streak breaker, location roll, hit table, and other info.
          The log is cleared every time the game launches and load this mod.
-      </details></li>
 
-      <li> <details>
-         <summary><h3>(Advanced) Persistent Log</h3></summary>
-         <p>Setting: <code>Persistent</code> (true/false, default false)<br>
+         <hr>
+         <p>Setting: <code>PersistentLog</code> (true/false, default false)<br>
          <p>When enabled, the attack log will not auto-clear on launch.
       </details></li>
    </ul>
@@ -260,57 +271,57 @@
 
       <dt><code>CalledShotUseClustering</code>
       <dd>If true: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>.
-      May be changed to prefix in future versions. </dd>
+      May be changed to prefix in future versions.
 
       <dt><code>MechCalledShotMultiplier</code>
       <dd>If != 1.0f: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>.
-      May be changed to prefix in future versions. </dd>
-      
+      May be changed to prefix in future versions.
+
       <dt><code>VehicleCalledShotMultiplier</code>
       <dd>If != 1.0f: Override <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>.
-      May be changed to prefix in future versions. </dd>
-      
+      May be changed to prefix in future versions.
+
       <dt><code>ShowRealMechCalledShotChance</code>
-      <dd>If true: Postfix <code>CombatHUDCalledShotPopUp.Init</code> and <code>CombatHUDCalledShotPopUp.set_ShownAttackDirection</code> for info,
-      then override <code>CombatHUDCalledShotPopUp.GetHitPercent&lt;ArmorLocation&gt;</code>. </dd>
+      <dd>If true: Postfix <code>CombatHUD.Init</code> and <code>CombatHUDCalledShotPopUp.set_ShownAttackDirection</code> for info,
+      then override <code>CombatHUDCalledShotPopUp.GetHitPercent&lt;ArmorLocation&gt;</code>.
 
       <dt><code>ShowRealVehicleCalledShotChance</code>
-      <dd>If true: Postfix <code>CombatHUDCalledShotPopUp.Init</code> and <code>CombatHUDCalledShotPopUp.set_ShownAttackDirection</code> for info,
-      then override <code>CombatHUDCalledShotPopUp.GetHitPercent&lt;VehicleChassisLocations&gt;</code>. </dd>
-      
+      <dd>If true: Postfix <code>CombatHUD.Init</code> and <code>CombatHUDCalledShotPopUp.set_ShownAttackDirection</code> for info,
+      then override <code>CombatHUDCalledShotPopUp.GetHitPercent&lt;VehicleChassisLocations&gt;</code>.
+
       <dt><code>ShowDecimalCalledChance</code>
       <dd>Depends on <code>ShowRealMechCalledShotChance</code>/<code>ShowRealVehicleCalledShotChance</code> and does not add any new patch. </dd>
       
       <dt><code>RollCorrectionStrength</code>
-      <dd>If 0: Set <code>AttackDirector.AttackSequence.UseWeightedHitNumbers</code> to false and call it a day. </dd>
+      <dd>If 0: Set <code>AttackDirector.AttackSequence.UseWeightedHitNumbers</code> to false and call it a day.
       <dd>If not 0 and not 1: Override <code>AttackDirector.AttackSequence.GetCorrectedRoll</code>.
       New, weighted formula is <code>((1.6*roll-0.8)^3+0.5)*strength/2 + roll*(1-strength/2)</code>.</dd>
-      
+
       <dt><code>MissStreakBreakerThreshold</code>
-      <dd>If not 0.5: Override <code>Team.ProcessRandomRoll</code>. </dd>
-      
+      <dd>If not 0.5: Override <code>Team.ProcessRandomRoll</code>.
+
       <dt><code>MissStreakBreakerDivider</code>
-      <dd>If not 5: Override <code>Team.ProcessRandomRoll</code>. </dd>
+      <dd>If not 5: Override <code>Team.ProcessRandomRoll</code>.
 
       <dt><code>ShowRealWeaponHitChance</code>
-      <dd>If true and RollCorrectionStrength is not 0: Prefix <code>CombatHUDWeaponSlot.SetHitChance</code> to chance the chance. </dd>
-      
+      <dd>If true and RollCorrectionStrength is not 0: Prefix <code>CombatHUDWeaponSlot.SetHitChance</code> to chance the chance.
+
       <dt><code>ShowDecimalHitChance</code>
-      <dd>If true: Override <code>CombatHUDWeaponSlot.SetHitChance</code> to change the format. </dd>
+      <dd>If true: Override <code>CombatHUDWeaponSlot.SetHitChance</code> to change the format.
 
       <dt><code>LogHitRolls</code>
       <dd>If true: 
       Prefix <code>AttackDirector.AttackSequence.GetIndividualHits</code>, <code>AttackDirector.AttackSequence.GetClusteredHits</code>, and 
       <code>AttackDirector.AttackSequence.GetCorrectedRoll</code> to get attack data.
       Postfix <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>, <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>,
-      and <code>AttackDirector.AttackSequence.GetCorrectedRoll</code> to do actual log. </dd>
-      
+      and <code>AttackDirector.AttackSequence.GetCorrectedRoll</code> to do actual log.
+
    </dl>
 </details>
 
 
 <details>
-   <summary><h2>Moding this mod</h2></summary>
+   <summary><h2>Modding this mod</h2></summary>
    <p>
       The <a href="https://github.com/Sheep-y/BattleTech_Mods">source code</a> of this mod is open and free. <br>
       You can take it and modify it, provided that you include <i>your</i> code when you distribute your work, and don't claim my work as yours.

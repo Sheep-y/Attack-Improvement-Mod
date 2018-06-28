@@ -9,8 +9,9 @@ namespace Sheepy.AttackImprovementMod {
 
    public class RollCorrection {
 
+      internal const string ROLL_LOG = "Log_AttackRoll.txt";
       private static bool DisableRollCorrection = false;
-      private static float[] correctionCache = new float[20];
+      private static readonly float[] correctionCache = new float[20];
 
       internal static void InitPatch () {
          if ( ! Settings.PersistentLog ) DeleteLog( ROLL_LOG );
@@ -18,11 +19,11 @@ namespace Sheepy.AttackImprovementMod {
          Type AttackType = typeof( AttackDirector.AttackSequence );
 
          FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
-         if ( rollCorrection == null ) {
-            Log( "Error: Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers; roll correction settings not applied." );
-            return;
-         }
-         bool rollCorrected = (bool) rollCorrection.GetValue( null );
+         bool rollCorrected = true;
+         if ( rollCorrection == null )
+            Log( "Warning: Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
+         else 
+            rollCorrected = (bool) rollCorrection.GetValue( null );
 
          if ( Settings.LogHitRolls ) {
             Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
@@ -76,10 +77,8 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ UTILS ============
 
-      private static string ROLL_LOG = Mod.LOG_DIR + "log_roll.txt";
-      internal static bool RollLog( String message ) {
-         File.AppendAllText( ROLL_LOG, message + "\r\n" );
-         return true;
+      internal static void RollLog ( String message ) {
+         WriteLog( ROLL_LOG, message + "\r\n" );
       }
 
       public static float CorrectRoll( float roll, float strength ) {
@@ -102,10 +101,10 @@ namespace Sheepy.AttackImprovementMod {
 
       public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) {
          try {
-				roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
-				if ( team != null )
-					roll -= team.StreakBreakingValue;
-				__result = roll;
+            roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
+            if ( team != null )
+               roll -= team.StreakBreakingValue;
+            __result = roll;
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
@@ -115,17 +114,17 @@ namespace Sheepy.AttackImprovementMod {
       private static FieldInfo StreakBreakingValueProp = null;
       public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) {
          try {
-			   if ( succeeded ) {
+            if ( succeeded ) {
                StreakBreakingValueProp.SetValue( __instance, 0f );
 
-			   } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
+            } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
                float mod;
                if ( Settings.MissStreakBreakerDivider > 0 )
                   mod = ( targetValue - Settings.MissStreakBreakerThreshold ) / Settings.MissStreakBreakerDivider;
                else
                   mod = - Settings.MissStreakBreakerDivider;
                StreakBreakingValueProp.SetValue( __instance, __instance.StreakBreakingValue + mod );
-			   }
+            }
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
@@ -144,13 +143,13 @@ namespace Sheepy.AttackImprovementMod {
 
       private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", BindingFlags.Instance | BindingFlags.NonPublic );
       private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", BindingFlags.Instance | BindingFlags.NonPublic );
-      private static object[] empty = new object[]{};
+      private static readonly object[] empty = new object[]{};
 
       // Override the original code to show accuracy in decimal points
       public static bool OverrideWeaponHitChanceFormat ( CombatHUDWeaponSlot __instance, float chance ) {
          try {
             HitChance.Invoke( __instance, new object[]{ chance } );
-			   __instance.HitChanceText.text = string.Format( "{0:0.0}%", Math.Max( 0f, Math.Min( chance * 100f, 100f ) ) );
+            __instance.HitChanceText.text = string.Format( "{0:0.0}%", Math.Max( 0f, Math.Min( chance * 100f, 100f ) ) );
             Refresh.Invoke( __instance, empty );
             return false;
          } catch ( Exception ex ) {

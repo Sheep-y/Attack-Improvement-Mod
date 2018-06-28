@@ -14,7 +14,6 @@ namespace Sheepy.AttackImprovementMod {
          if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance ) {
 
             Type CalledShot = typeof( CombatHUDCalledShotPopUp );
-            Patch( CalledShot, "Init", typeof( CombatHUD ), null, "RecordCombatHUD" );
             Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
             if ( Settings.ShowRealMechCalledShotChance )
@@ -31,11 +30,6 @@ namespace Sheepy.AttackImprovementMod {
       // ============ Game States ============
 
       private static float ActorCalledShotBonus { get { return HUD.SelectedActor.CalledShotBonusMultiplier; } }
-
-      private static CombatHUD HUD;
-      public static void RecordCombatHUD ( CombatHUD HUD ) {
-         FixCalledShotPopUp.HUD = HUD;
-      }
 
       private static AttackDirection AttackDirection;
       public static void RecordAttackDirection ( AttackDirection value ) {
@@ -57,7 +51,7 @@ namespace Sheepy.AttackImprovementMod {
          return result;
       }
 
-		public static bool OverrideHUDMechCalledShotPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) {
+      public static bool OverrideHUDMechCalledShotPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) {
          try {
             Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! FixHitLocation.CallShotClustered )
                                                     ? Combat.HitLocation.GetMechHitTable( AttackDirection )
@@ -65,7 +59,7 @@ namespace Sheepy.AttackImprovementMod {
             if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
                HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
 
-			   int local = TryGet( hitTable, location ) * scale;
+            int local = TryGet( hitTable, location ) * scale;
             if ( location == targetedLocation )
                local = (int)( (float) local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
 
@@ -74,9 +68,9 @@ namespace Sheepy.AttackImprovementMod {
          } catch ( Exception ex ) {
             return Log( ex );
          }
-		}
+      }
 
-		public static bool OverrideHUDVehicleCalledShotPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) {
+      public static bool OverrideHUDVehicleCalledShotPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) {
          if ( ! Settings.FixVehicleCalledShot )
             targetedLocation = VehicleChassisLocations.None; // Disable called location if vehicle called shot is not fixed
 
@@ -85,7 +79,7 @@ namespace Sheepy.AttackImprovementMod {
             if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
                HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
 
-			   int local = TryGet( hitTable, location ) * scale;
+            int local = TryGet( hitTable, location ) * scale;
             if ( location == targetedLocation )
                local = (int)( (float) local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
 
@@ -94,7 +88,7 @@ namespace Sheepy.AttackImprovementMod {
          } catch ( Exception ex ) {
             return Log( ex );
          }
-		}
+      }
 
       // ============ Subroutines ============
 
@@ -113,19 +107,19 @@ namespace Sheepy.AttackImprovementMod {
          }
          //Log( "HUD M Total @ " + location + ( location == targetedLocation ? "(Called)" : "") + " = " + local + "/" + HitTableTotalWeight + "(x" + FixMultiplier( targetedLocation, ActorCalledShotBonus ) + "x" + scale + ")" );
          if ( Settings.ShowDecimalCalledChance )
-			   return DeciPercent( local );
+            return DeciPercent( local );
          else
-			   return IntPercent ( local );
+            return IntPercent ( local );
       }
 
       private static string DeciPercent ( int localWeight ) {
-			float perc = (float) localWeight * 100f / (float) HitTableTotalWeight;
-			return string.Format("{0:0.0}%", perc );
+         float perc = (float) localWeight * 100f / (float) HitTableTotalWeight;
+         return string.Format("{0:0.0}%", perc );
       }
 
       private static string IntPercent  ( int localWeight ) {
-			float perc = (float) localWeight * 100f / (float) HitTableTotalWeight;
-			return string.Format("{0:0}%", perc );
+         float perc = (float) localWeight * 100f / (float) HitTableTotalWeight;
+         return string.Format("{0:0}%", perc );
       }
    }
 }

@@ -17,7 +17,9 @@ namespace Sheepy.AttackImprovementMod {
       public static ModSettings Settings = new ModSettings();
 
       internal static bool Pre_1_1 = false; // True if game version is less than 1.1
-      internal const string LOG_DIR = "Mods/AttackImprovementMod/";
+      internal const string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod";
+      internal const string LOG_NAME = "Log_AttackImprovementMod.txt";
+      internal static string LogDir = "";
       internal static HarmonyInstance harmony = HarmonyInstance.Create( "io.github.Sheep-y.AttackImprovementMod" );
 
       static void Main () { // Sometimes I run quick tests as a console app here
@@ -38,29 +40,32 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static void Init ( string directory, string settingsJSON ) {
+         string logCache = "";
+         try {
+            Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
+            logCache =  "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented );
+         } catch ( Exception ex ) {
+            logCache = string.Format( "Error: Cannot read mod settings, using default: {0}", ex );
+         }
+
+         LogDir = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location );
+         logCache += "\nLog folder set to " + LogDir + ". If that fails, fallback to " + FALLBACK_LOG_DIR + "." ;
          DeleteLog( LOG_NAME );
+         Log( logCache );
+
          Pre_1_1 = ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0.";
          Log( Pre_1_1 ? "Game is Pre-1.1 (Clustered Called Shot)" : "Game is Post-1.1 (Non-Clustered Called Shot)" );
 
          try {
-            Settings = JsonConvert.DeserializeObject<ModSettings>(settingsJSON);
-            Log( "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
-         } catch ( Exception ex ) {
-            Log( string.Format( "Error: Cannot read mod settings, using default: {0}", ex ) );
-         }
+            if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowHeatAndStab ) {
+               patchClass = typeof( Mod );
+               Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RecordCombatHUD" );
+            }
 
-         try {
-            Log( "=== Patching Roll Corrections and Logger ===" );
-            patchClass = typeof( RollCorrection );
-            RollCorrection.InitPatch();
-
-            Log( "=== Patching Hit Location Bugfixs and Logger ===" );
-            patchClass = typeof( FixHitLocation );
-            FixHitLocation.InitPatch( harmony );
-
-            Log( "=== Patching Called Shot HUD ===" );
-            patchClass = typeof( FixCalledShotPopUp );
-            FixCalledShotPopUp.InitPatch();
+            LoadModule( "Roll Corrections and Logger", typeof( RollCorrection ) );
+            LoadModule( "Hit Location Bugfixs and Logger", typeof( FixHitLocation ) );
+            LoadModule( "Called Shot HUD", typeof( FixCalledShotPopUp ) );
+            LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
 
          } catch ( Exception ex ) {
             Log( ex );
@@ -74,7 +79,7 @@ namespace Sheepy.AttackImprovementMod {
       internal static HarmonyMethod MakePatch ( string method ) {
          if ( method == null ) return null;
          MethodInfo mi = patchClass.GetMethod( method );
-         if ( mi == null ) Log( "Cannot find patch method " + method );
+         if ( mi == null ) Log( "Error: Cannot find patch method " + method );
          return new HarmonyMethod( mi );
       }
 
@@ -114,6 +119,8 @@ namespace Sheepy.AttackImprovementMod {
             Log( string.Format( "Error: Cannot find {0}.{1}(...) to patch", new Object[]{ patchedClass.Name, patchedMethod } ) );
             return;
          }
+         HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
+         if ( pre == null && post == null ) return; // MakePatch would have reported method not found
          harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
          Log( string.Format( "Patched: {0} {1} [ {2} : {3} ]", new object[]{ patchedClass, patched, prefix, postfix } ) );
       }
@@ -122,25 +129,58 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void DeleteLog( string file ) {
          try {
-            File.Delete( file );
+            File.Delete( LogDir + file );
+         } catch ( Exception ) { }
+         try {
+            File.Delete( FALLBACK_LOG_DIR + file );
          } catch ( Exception ) { }
       }
 
-      private static string LOG_NAME = LOG_DIR + "log.txt";
       internal static bool Log( object message ) { Log( message.ToString() ); return true; }
       internal static void Log( string message ) {
+         string logName = LogDir + "/" + LOG_NAME;
          try {
-            if ( ! File.Exists( LOG_NAME ) ) message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;
-            File.AppendAllText( LOG_NAME, message + "\r\n" );
-         } catch ( Exception ex ) {
-            Console.WriteLine( message );
-            Console.Error.WriteLine( ex );
+            if ( ! File.Exists( logName ) ) 
+               message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;
+         } catch ( Exception ) {}
+         WriteLog( LOG_NAME, message + "\r\n" );
+      }
+
+      internal static void WriteLog( string filename, string message ) {
+         string logName = LogDir + "/" + filename;
+         try {
+            File.AppendAllText( logName, message );
+         } catch ( Exception ) {
+            try {
+               logName = FALLBACK_LOG_DIR + "/" + filename;
+               File.AppendAllText( logName, message );
+            } catch ( Exception ex ) {
+               Console.WriteLine( message );
+               Console.Error.WriteLine( ex );
+            }
          }
       }
 
       internal static int TryGet<T> ( Dictionary<T, int> table, T key ) {
          table.TryGetValue( key, out int result );
          return result;
+      }
+
+      private static void LoadModule( string name, Type module ) {
+         Log( "=== Patching " + name + " ===" );
+         patchClass = module;
+         MethodInfo m = module.GetMethod( "InitPatch", BindingFlags.Static | BindingFlags.NonPublic );
+         if ( m != null ) 
+            m.Invoke( null, null );
+         else
+            Log( "Cannot Initiate " + module );
+      }
+
+      // ============ Game States ============
+
+      internal static CombatHUD HUD;
+      public static void RecordCombatHUD ( CombatHUD __instance ) {
+         Mod.HUD = __instance;
       }
 
       // A shortcut to get CombatGameConstants

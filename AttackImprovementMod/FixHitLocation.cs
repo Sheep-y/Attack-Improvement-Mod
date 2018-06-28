@@ -18,7 +18,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
 
-      internal static void InitPatch ( HarmonyInstance harmony ) {
+      internal static void InitPatch () {
          scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering || Mod.Pre_1_1;
 
@@ -174,7 +174,7 @@ namespace Sheepy.AttackImprovementMod {
       // ============ GetHitLocation ============
 
       internal static int SumWeight<T> ( Dictionary<T, int> hitTable, T bonusLocation, float bonusLocationMultiplier, int SCALE ) {
-			int totalWeight = 0;
+         int totalWeight = 0;
          foreach ( int weight in hitTable.Values ) totalWeight += weight;
          totalWeight *= SCALE;
          if ( bonusLocationMultiplier != 1 && hitTable.ContainsKey( bonusLocation ) )
@@ -184,16 +184,16 @@ namespace Sheepy.AttackImprovementMod {
 
       public static T GetHitLocation<T> ( Dictionary<T, int> hitTable, float roll, T bonusLocation, float bonusLocationMultiplier ) {
          int totalWeight = SumWeight( hitTable, bonusLocation, bonusLocationMultiplier, SCALE );
-			int goal = (int)( roll * (double)totalWeight ), i = 0;
-			foreach ( KeyValuePair<T, int> location in hitTable ) {
-				if ( location.Value <= 0 ) continue;
-				if ( location.Key.Equals( bonusLocation ) )
-					i += (int)( (float) location.Value * bonusLocationMultiplier * SCALE );
-				else
-					i += location.Value * SCALE;
-				if ( i >= goal )
-					return location.Key;
-			}
+         int goal = (int)( roll * (double)totalWeight ), i = 0;
+         foreach ( KeyValuePair<T, int> location in hitTable ) {
+            if ( location.Value <= 0 ) continue;
+            if ( location.Key.Equals( bonusLocation ) )
+               i += (int)( (float) location.Value * bonusLocationMultiplier * SCALE );
+            else
+               i += location.Value * SCALE;
+            if ( i >= goal )
+               return location.Key;
+         }
          throw new ApplicationException( "No valid hit location. Enable logging to see hitTable." );
       }
 
@@ -205,9 +205,9 @@ namespace Sheepy.AttackImprovementMod {
       public static void RecordVehicleCalledShotClickLocation ( CombatHUDVehicleArmorHover __instance ) {
          try {
             HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
-				SelectionStateFire selectionState = Readout.HUD.SelectionHandler.ActiveState as SelectionStateFire;
+            SelectionStateFire selectionState = Readout.HUD.SelectionHandler.ActiveState as SelectionStateFire;
             if ( selectionState != null )
-               selectionState.calledShotLocation = translateLocation( selectionState.calledShotVLocation );
+               selectionState.calledShotLocation = TranslateLocation( selectionState.calledShotVLocation );
          } catch ( Exception ex ) {
             Log( ex );
          }
@@ -215,12 +215,12 @@ namespace Sheepy.AttackImprovementMod {
 
       // Store vehicle called shot location in mech location, so that it will be passed down event chain
       public static void RecordVehicleCalledShotFireLocation ( SelectionStateFire __instance, VehicleChassisLocations location ) {
-         __instance.calledShotLocation = translateLocation( location );
+         __instance.calledShotLocation = TranslateLocation( location );
       }
 
       public static bool RestoreVehicleCalledShotLocation_1_0 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation ) {
          try {
-            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translateLocation( calledShotLocation ), attacker.CalledShotBonusMultiplier );
+            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), attacker.CalledShotBonusMultiplier );
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
@@ -229,24 +229,24 @@ namespace Sheepy.AttackImprovementMod {
 
       public static bool RestoreVehicleCalledShotLocation_1_1 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) {
          try {
-            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, translateLocation( calledShotLocation ), bonusMultiplier );
-            return false;
-         } catch ( Exception ex ) {
-            return Log( ex );
-         }
-		}
-
-      public static bool FixVehicleCalledShotFloatie ( ref string __result, ArmorLocation location ) {
-         try {
-            if ( (int) location >= 0 ) return true;
-            __result = Vehicle.GetLongChassisLocation( translateLocation( location ) );
+            __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), bonusMultiplier );
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
          }
       }
 
-      public static ArmorLocation translateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(-(int)location); }
-      public static VehicleChassisLocations translateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(-(int)location); }
+      public static bool FixVehicleCalledShotFloatie ( ref string __result, ArmorLocation location ) {
+         try {
+            if ( (int) location >= 0 ) return true;
+            __result = Vehicle.GetLongChassisLocation( TranslateLocation( location ) );
+            return false;
+         } catch ( Exception ex ) {
+            return Log( ex );
+         }
+      }
+
+      public static ArmorLocation TranslateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(-(int)location); }
+      public static VehicleChassisLocations TranslateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(-(int)location); }
    }
 }
