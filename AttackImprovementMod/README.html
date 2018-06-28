@@ -6,8 +6,7 @@
 </p>
 
 <p style="clear: both">
-   This mod fixes a few attack related bugs in the BATTLETECH game, especially head shot chances and lack of vehicle called shot, so that they work <i>as intended</i>.
-   If you think you get too much headshots and you called shots miss too much, this is your mod.
+   This mod fixes and tweak the BATTLETECH game's attack experience, such as fixing vehicle called shot and tune down roll correction.
 </p>
 <p>
    This mod does <i>not</i> modify game data.  Saves made with this mod on will <i>not</i> be affected by disabling or removing this mod.
@@ -92,18 +91,6 @@
       All features apply equally to player and AI, to campaign and skirmish.
    </p>
    <ul>
-      <li> <details>
-         <summary><h3>Fix Hit Location Distribution</h3></summary>
-         <p>Setting: <code>FixHitDistribution</code> (true/false, default true)<br>
-         <p>You may have noticed abnormally high head shot chances from normal attack.
-         This is because the game's hit distribution is doing float to int conversion the wrong way.
-         This has two effects: First is it would "round up" headshot%, doubling the headshot chance of normal attacks.
-         Second is the chance is stolen from other location, typically Right Leg, causing a lower chance to hit it.
-         All attacks are affected, including called shots of all directions on all locations.
-         <p>This mod can replace the hit distribution routine with an improved version that has better precision.
-         Enabling this fix would lower global headshot chances to their intended level.
-      </details></li>
-
       <li> <details>
          <summary><h3>Enable Vehicle Called Shot</h3></summary>
          <p>Setting: <code>FixVehicleCalledShot</code> (true/false, default true)<br>
@@ -238,6 +225,20 @@
          <p>Setting: <code>PersistentLog</code> (true/false, default false)<br>
          <p>When enabled, the attack log will not auto-clear on launch.
       </details></li>
+
+      <li> <details>
+         <summary><h3>(Legacy) Fix Hit Location Distribution</h3></summary>
+         <p>Setting: <code>FixHitDistribution</code> (true/false, default true)<br>
+         <p>Before game version 1.1.1, you may have noticed abnormally high head shot chances from normal attack.
+         This is because the game's hit distribution is doing float to int conversion the wrong way.
+         This has two effects: First is it would "round up" headshot%, doubling the headshot chance of normal attacks.
+         Second is the chance is stolen from other location, typically Right Leg, causing a lower chance to hit it.
+         All attacks are affected, including called shots of all directions on all locations.
+         <p>This mod can replace the hit distribution routine with an improved version that has better precision.
+         Enabling this fix would lower global headshot chances to their intended level.
+         <p>The bug has been fixed in game ver 1.1.1, and the mod will automatically disregard this setting.
+         It should still work on old version, but since I only have Steam I can't test it on old versions.
+      </details></li>
    </ul>
 </details>
 
@@ -266,19 +267,20 @@
       Also Override <code>Mech.GetLongArmorLocation</code> to correct called shot floatie.
 
       <dt><code>FixHitDistribution</code>
-      <dd>If true: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code> and <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>.
-         Precision is increased by scaling up all integers in the calculation by 1024.</dd>
+      <dd>If true AND game version is below 1.1.1: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code> 
+      and <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>.
+      Precision is increased by scaling up all integers in the calculation by 1024.</dd>
 
       <dt><code>CalledShotUseClustering</code>
-      <dd>If true: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>.
+      <dd>If true: Prefix <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>.
       May be changed to prefix in future versions.
 
       <dt><code>MechCalledShotMultiplier</code>
-      <dd>If != 1.0f: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>.
+      <dd>If != 1.0f: Prefix <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>.
       May be changed to prefix in future versions.
 
       <dt><code>VehicleCalledShotMultiplier</code>
-      <dd>If != 1.0f: Override <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>.
+      <dd>If != 1.0f: Prefix <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>.
       May be changed to prefix in future versions.
 
       <dt><code>ShowRealMechCalledShotChance</code>

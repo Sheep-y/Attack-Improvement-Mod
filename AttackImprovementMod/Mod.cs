@@ -17,6 +17,7 @@ namespace Sheepy.AttackImprovementMod {
       public static ModSettings Settings = new ModSettings();
 
       internal static bool Pre_1_1 = false; // True if game version is less than 1.1
+      internal static bool Pre_1_1_1 = false; // True if game version is less than 1.1.1
       internal const string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod";
       internal const string LOG_NAME = "Log_AttackImprovementMod.txt";
       internal static string LogDir = "";
@@ -53,8 +54,16 @@ namespace Sheepy.AttackImprovementMod {
          DeleteLog( LOG_NAME );
          Log( logCache );
 
-         Pre_1_1 = ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0.";
-         Log( Pre_1_1 ? "Game is Pre-1.1 (Clustered Called Shot)" : "Game is Post-1.1 (Non-Clustered Called Shot)" );
+         // Need a proper version parsing routine. Next time.
+         if ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
+            Pre_1_1 = Pre_1_1_1 = true;
+            Log( "Game is 1.0.x (Clustered Called Shot, Hit Location bugged)" );
+         } else if ( VersionInfo.ProductVersion + ".0.0." ).Substring( 0, 6 ) == "1.1.0" ) {
+            Pre_1_1_1 = true;
+            Log( "Game is 1.1.0 (Non-Clustered Called Shot, Hit Location bugged)" );
+         } else {
+            Log( "Game is 1.1.1+ (Non-Clustered Called Shot, Hit Location fixed)" );
+         }
 
          try {
             if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowHeatAndStab ) {

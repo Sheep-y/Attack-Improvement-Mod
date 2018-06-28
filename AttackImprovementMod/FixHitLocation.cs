@@ -27,8 +27,8 @@ namespace Sheepy.AttackImprovementMod {
             Log( "Error: Cannot find HitLocation.GetHitLocation( ?, float, ?, float ) to patch" );
 
          } else {
-            bool patchMech    = Settings.CalledShotUseClustering || Settings.FixHitDistribution || Settings.MechCalledShotMultiplier != 1.0f,
-                 patchVehicle = Settings.FixHitDistribution || Settings.VehicleCalledShotMultiplier != 1.0f,
+            bool patchMech    = ( Settings.FixHitDistribution && Pre_1_1_1 ) || Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
+                 patchVehicle = ( Settings.FixHitDistribution && Pre_1_1_1 ) || Settings.VehicleCalledShotMultiplier != 1.0f,
                  patchPostfix = Settings.LogHitRolls;
             if ( patchMech || patchVehicle || patchPostfix ) {
                HarmonyMethod FixArmour  = patchMech    ? MakePatch( "OverrideMechCalledShot"    ) : null;
@@ -99,7 +99,7 @@ namespace Sheepy.AttackImprovementMod {
                if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
                   hitTable = Combat.Constants.GetMechClusterTable( bonusLocation, dir );
             }
-            if ( Settings.FixHitDistribution ) return true;
+            if ( ! Settings.FixHitDistribution || ! Pre_1_1_1 ) return true;
             __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
             return false;
          } catch ( Exception ex ) {
@@ -110,7 +110,7 @@ namespace Sheepy.AttackImprovementMod {
       public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) {
          try {
             bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-            if ( ! Settings.FixHitDistribution ) return true;
+            if ( ! Settings.FixHitDistribution || ! Pre_1_1_1 ) return true;
             __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
             return false;
          } catch ( Exception ex ) {
