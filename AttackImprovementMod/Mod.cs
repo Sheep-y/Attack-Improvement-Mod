@@ -16,8 +16,8 @@ namespace Sheepy.AttackImprovementMod {
 
       public static ModSettings Settings = new ModSettings();
 
-      internal static bool Pre_1_1 = false; // True if game version is less than 1.1
-      internal static bool Pre_1_1_1 = false; // True if game version is less than 1.1.1
+      internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
+      internal static bool GameHitLocationBugged = false; // True if game version is less than 1.1.1
       internal const string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod";
       internal const string LOG_NAME = "Log_AttackImprovementMod.txt";
       internal static string LogDir = "";
@@ -55,18 +55,19 @@ namespace Sheepy.AttackImprovementMod {
          Log( logCache );
 
          // Need a proper version parsing routine. Next time.
-         if ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
-            Pre_1_1 = Pre_1_1_1 = true;
+         if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
+            GameUseClusteredCallShot = GameHitLocationBugged = true;
             Log( "Game is 1.0.x (Clustered Called Shot, Hit Location bugged)" );
-         } else if ( VersionInfo.ProductVersion + ".0.0." ).Substring( 0, 6 ) == "1.1.0" ) {
-            Pre_1_1_1 = true;
+         } else if ( ( VersionInfo.ProductVersion + ".0.0." ).Substring( 0, 6 ) == "1.1.0" ) {
+            GameHitLocationBugged = true;
             Log( "Game is 1.1.0 (Non-Clustered Called Shot, Hit Location bugged)" );
          } else {
-            Log( "Game is 1.1.1+ (Non-Clustered Called Shot, Hit Location fixed)" );
+            Log( "Game is 1.1.1 or up (Non-Clustered Called Shot, Hit Location fixed)" );
          }
+         Log();
 
          try {
-            if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowHeatAndStab ) {
+            if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance ) {
                patchClass = typeof( Mod );
                Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RecordCombatHUD" );
             }
@@ -74,7 +75,7 @@ namespace Sheepy.AttackImprovementMod {
             LoadModule( "Roll Corrections and Logger", typeof( RollCorrection ) );
             LoadModule( "Hit Location Bugfixs and Logger", typeof( FixHitLocation ) );
             LoadModule( "Called Shot HUD", typeof( FixCalledShotPopUp ) );
-            LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
+            Log();
 
          } catch ( Exception ex ) {
             Log( ex );
@@ -146,7 +147,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static bool Log( object message ) { Log( message.ToString() ); return true; }
-      internal static void Log( string message ) {
+      internal static void Log( string message = "" ) {
          string logName = LogDir + "/" + LOG_NAME;
          try {
             if ( ! File.Exists( logName ) ) 

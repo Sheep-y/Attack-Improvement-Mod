@@ -20,15 +20,15 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void InitPatch () {
          scale = Settings.FixHitDistribution ? SCALE : 1;
-         CallShotClustered = Settings.CalledShotUseClustering || Mod.Pre_1_1;
+         CallShotClustered = Settings.CalledShotUseClustering || Mod.GameUseClusteredCallShot;
 
          MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Public | BindingFlags.Static ); // Only one public static GetHitLocation method.
          if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
             Log( "Error: Cannot find HitLocation.GetHitLocation( ?, float, ?, float ) to patch" );
 
          } else {
-            bool patchMech    = ( Settings.FixHitDistribution && Pre_1_1_1 ) || Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
-                 patchVehicle = ( Settings.FixHitDistribution && Pre_1_1_1 ) || Settings.VehicleCalledShotMultiplier != 1.0f,
+            bool patchMech    = ( Settings.FixHitDistribution && GameHitLocationBugged ) || Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
+                 patchVehicle = ( Settings.FixHitDistribution && GameHitLocationBugged ) || Settings.VehicleCalledShotMultiplier != 1.0f,
                  patchPostfix = Settings.LogHitRolls;
             if ( patchMech || patchVehicle || patchPostfix ) {
                HarmonyMethod FixArmour  = patchMech    ? MakePatch( "OverrideMechCalledShot"    ) : null;
@@ -56,10 +56,9 @@ namespace Sheepy.AttackImprovementMod {
             else
                Log( "Error: Can't find CombatHUDVehicleArmorHover.Readout. OnPointerClick not patched. Vehicle called shot may not work." );
 
-            // Restore popup location
-            if ( Mod.Pre_1_1 )
+            if ( Mod.GameUseClusteredCallShot ) // 1.0.x
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "RestoreVehicleCalledShotLocation_1_0", null );
-            else
+            else // 1.1.x
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, "RestoreVehicleCalledShotLocation_1_1", null );
          }
       }
@@ -99,7 +98,7 @@ namespace Sheepy.AttackImprovementMod {
                if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
                   hitTable = Combat.Constants.GetMechClusterTable( bonusLocation, dir );
             }
-            if ( ! Settings.FixHitDistribution || ! Pre_1_1_1 ) return true;
+            if ( ! Settings.FixHitDistribution || ! GameHitLocationBugged ) return true;
             __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
             return false;
          } catch ( Exception ex ) {
@@ -110,7 +109,7 @@ namespace Sheepy.AttackImprovementMod {
       public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) {
          try {
             bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-            if ( ! Settings.FixHitDistribution || ! Pre_1_1_1 ) return true;
+            if ( ! Settings.FixHitDistribution || ! GameHitLocationBugged ) return true;
             __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
             return false;
          } catch ( Exception ex ) {

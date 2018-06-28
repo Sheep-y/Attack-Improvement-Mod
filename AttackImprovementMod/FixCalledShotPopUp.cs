@@ -93,7 +93,7 @@ namespace Sheepy.AttackImprovementMod {
       // ============ Subroutines ============
 
       private static string FineTuneAndFormat<T> ( Dictionary<T, int> hitTable, T location, int local  ) {
-         if ( ! Settings.FixHitDistribution && ! Pre_1_1_1 ) { // If hit distribution is bugged, simulate it
+         if ( ! Settings.FixHitDistribution && ! GameHitLocationBugged ) { // If hit distribution is bugged, simulate it
             T def = default(T), last = def;
             foreach ( KeyValuePair<T, int> pair in hitTable ) {
                if ( pair.Value == 0 ) continue;
