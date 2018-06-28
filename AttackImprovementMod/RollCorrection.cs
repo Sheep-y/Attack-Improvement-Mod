@@ -6,6 +6,7 @@ namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using System.Reflection;
    using System.IO;
+   using UnityEngine;
 
    public class RollCorrection {
 
@@ -132,8 +133,9 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static void ShowRealHitChance ( ref float chance ) {
+         chance = Mathf.Clamp( chance, 0f, 1f );
          int i = (int)( ( chance + 0.00001f ) / 0.05f );
-         if ( i >= 0 && i < 20 && Math.Abs( i * 0.05f - chance ) < 0.00001 )
+         if ( Math.Abs( i * 0.05f - chance ) < 0.00001f )
             chance = correctionCache[ i ];
          else {
             Log( "Uncached hit chance reversal from " + chance + ", diff: " + ( i * 0.05f - chance ) );
@@ -149,7 +151,7 @@ namespace Sheepy.AttackImprovementMod {
       public static bool OverrideWeaponHitChanceFormat ( CombatHUDWeaponSlot __instance, float chance ) {
          try {
             HitChance.Invoke( __instance, new object[]{ chance } );
-            __instance.HitChanceText.text = string.Format( "{0:0.0}%", Math.Max( 0f, Math.Min( chance * 100f, 100f ) ) );
+            __instance.HitChanceText.text = string.Format( "{0:0.0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
             Refresh.Invoke( __instance, empty );
             return false;
          } catch ( Exception ex ) {
