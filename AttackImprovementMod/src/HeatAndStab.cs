@@ -13,7 +13,7 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", "ShowHeatAndStab", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
-            Patch( typeof( CombatHUDMechTray ), "Update", BindingFlags.NonPublic | BindingFlags.Instance, null, "RefreshHeatAndStab" );
+            Patch( typeof( CombatHUDMechTray ), "Update", BindingFlags.NonPublic, null, "RefreshHeatAndStab" );
          }
       }
 

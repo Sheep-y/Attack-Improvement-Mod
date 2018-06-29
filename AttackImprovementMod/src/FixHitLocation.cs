@@ -15,7 +15,7 @@ namespace Sheepy.AttackImprovementMod {
       internal static int scale = SCALE; // Actual scale. Determined by FixHitDistribution.
 
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
-      internal static MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Public | BindingFlags.Static ); // Only one public static GetHitLocation method.
+      internal static MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static ); // Only one public static GetHitLocation method.
 
       internal static void InitPatch () {
          scale = Settings.FixHitDistribution && GameHitLocationBugged ? SCALE : 1;
@@ -32,7 +32,7 @@ namespace Sheepy.AttackImprovementMod {
             if ( prefixVehicle )
                Patch( VehicleGetHit, "PrefixVehicleCalledShot", null );
             if ( prefixVehicle )
-               Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static | BindingFlags.Public, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
+               Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
             if ( fixHitBug ) {
                Patch( MechGetHit, "OverrideMechCalledShot", null );
                Patch( VehicleGetHit, "OverrideVehicleCalledShot", null );
@@ -42,7 +42,7 @@ namespace Sheepy.AttackImprovementMod {
          if ( Settings.FixVehicleCalledShot ) {
             // Store popup location
             Patch( typeof( SelectionStateFire ), "SetCalledShot", typeof( VehicleChassisLocations ), null, "RecordVehicleCalledShotFireLocation" );
-            ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", BindingFlags.NonPublic | BindingFlags.Instance );
+            ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", BindingFlags.NonPublic );
             if ( ReadoutProp != null )
                Patch( typeof( CombatHUDVehicleArmorHover ), "OnPointerClick", typeof( PointerEventData ), null, "RecordVehicleCalledShotClickLocation" );
             else
@@ -58,6 +58,7 @@ namespace Sheepy.AttackImprovementMod {
       // ============ UTILS ============
 
       internal static float FixMultiplier ( ArmorLocation location, float multiplier ) {
+         if ( location == ArmorLocation.None ) return 0;
          if ( Settings.MechCalledShotMultiplier != 1.0f )
             multiplier *= Settings.MechCalledShotMultiplier;
          if ( location == ArmorLocation.Head && CallShotClustered && Combat.Constants.ToHit.ClusterChanceNeverMultiplyHead )
@@ -66,6 +67,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static float FixMultiplier ( VehicleChassisLocations location, float multiplier ) {
+         if ( location == VehicleChassisLocations.None ) return 0;
          if ( Settings.VehicleCalledShotMultiplier != 1.0f )
             multiplier *= Settings.VehicleCalledShotMultiplier;
          // ClusterChanceNeverMultiplyHead does not apply to Vehicle

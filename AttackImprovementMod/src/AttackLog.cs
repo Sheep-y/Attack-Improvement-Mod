@@ -14,7 +14,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void InitPatch () {
          if ( Mod.Settings.LogHitRolls ) {
-            GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Public | BindingFlags.Static ); // Only one public static GetHitLocation method.
+            GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static ); // Only one public static GetHitLocation method.
             if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
                Log( "Error: Cannot patch HitLocation.GetHitLocation( ?, float, ?, float ). Called shot modding and attack logging disabled." );
                return;
@@ -22,9 +22,9 @@ namespace Sheepy.AttackImprovementMod {
 
             Type AttackType = typeof( AttackDirector.AttackSequence );
             if ( ! Mod.Settings.PersistentLog ) DeleteLog( ROLL_LOG );
-            Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
-            Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
-            Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
+            Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic, "RecordAttacker", null );
+            Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic, "RecordAttacker", null );
+            Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
             MethodInfo MechGetHit    = GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ),
                        VehicleGetHit = GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) );
             Patch( MechGetHit, null, "LogMechHit" );

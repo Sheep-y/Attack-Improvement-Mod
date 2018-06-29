@@ -17,10 +17,10 @@ namespace Sheepy.AttackImprovementMod {
             Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
             if ( Settings.ShowRealMechCalledShotChance )
-               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
+               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
 
             if ( Settings.ShowRealVehicleCalledShotChance )
-               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
+               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
 
          } else if ( Settings.ShowDecimalCalledChance ) {
             Log( "Warning: Decimal Called Shot Chance requires ShowRealMechCalledShotChance and/or ShowRealVehicleCalledShotChance" );

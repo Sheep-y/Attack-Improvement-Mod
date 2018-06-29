@@ -42,7 +42,7 @@ namespace Sheepy.AttackImprovementMod {
             }
 
             if ( Settings.RollCorrectionStrength != 1.0f )
-               Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
+               Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
             if ( rollCorrected && Settings.ShowRealWeaponHitChance ) {
                for ( int i = 0 ; i < 21 ; i++ )
                   correctionCache[i] = ReverseRollCorrection( 0.05f * i, Settings.RollCorrectionStrength );
@@ -50,7 +50,7 @@ namespace Sheepy.AttackImprovementMod {
             }
          }
          if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
-            StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
+            StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic );
             if ( StreakBreakingValueProp != null )
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
             else
