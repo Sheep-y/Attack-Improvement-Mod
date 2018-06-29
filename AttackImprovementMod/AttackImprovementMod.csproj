@@ -68,6 +68,7 @@
     <Compile Include="src\Mod.cs" />
     <Compile Include="src\ModSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mod.json" />
