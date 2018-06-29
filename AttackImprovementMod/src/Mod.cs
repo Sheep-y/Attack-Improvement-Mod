@@ -32,12 +32,14 @@ namespace Sheepy.AttackImprovementMod {
          } catch ( Exception ex ) {
             logCache = string.Format( "Error: Cannot read mod settings, using default: {0}", ex );
          }
-         if ( Settings.LogFolder.Length <= 0 ) {
-            LogDir = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ) + "/";
-            logCache += "\nLog folder set to " + LogDir + ". If that fails, fallback to " + FALLBACK_LOG_DIR + "." ;
-         }
-         DeleteLog( LOG_NAME );
-         Log( logCache );
+         try {
+            if ( Settings.LogFolder.Length <= 0 ) {
+               LogDir = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ) + "/";
+               logCache += "\nLog folder set to " + LogDir + ". If that fails, fallback to " + FALLBACK_LOG_DIR + "." ;
+            }
+            DeleteLog( LOG_NAME );
+            Log( logCache );
+         } catch ( Exception ex ) { Log( ex ); }
 
          // Detect game features. Need a proper version parsing routine. Next time.
          if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
@@ -52,23 +54,18 @@ namespace Sheepy.AttackImprovementMod {
          Log();
 
          // Patching
-         try {
-            if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowHeatAndStab ) {
-               patchClass = typeof( Mod );
-               Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RecordCombatHUD" );
-            }
-
-            LoadModule( "Roll Corrections and Logger", typeof( RollCorrection ) );
-            LoadModule( "Hit Location Bugfixs and Logger", typeof( FixHitLocation ) );
-            LoadModule( "Called Shot HUD", typeof( FixCalledShotPopUp ) );
-            LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
-            //LoadModule( "Line of Fire", typeof( LineOfFire ) );
-            LoadModule( "Melee", typeof( Melee ) );
-            Log();
-
-         } catch ( Exception ex ) {
-            Log( ex );
+         if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowHeatAndStab ) {
+            patchClass = typeof( Mod );
+            Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RecordCombatHUD" );
          }
+
+         LoadModule( "Roll Corrections and Logger", typeof( RollCorrection ) );
+         LoadModule( "Hit Location Bugfixs and Logger", typeof( FixHitLocation ) );
+         LoadModule( "Called Shot HUD", typeof( FixCalledShotPopUp ) );
+         LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
+         //LoadModule( "Line of Fire", typeof( LineOfFire ) );
+         LoadModule( "Melee", typeof( Melee ) );
+         Log();
       }
 
       // ============ Harmony ============
@@ -162,11 +159,13 @@ namespace Sheepy.AttackImprovementMod {
       private static void LoadModule( string name, Type module ) {
          Log( "=== Patching " + name + " ===" );
          patchClass = module;
-         MethodInfo m = module.GetMethod( "InitPatch", BindingFlags.Static | BindingFlags.NonPublic );
-         if ( m != null ) 
-            m.Invoke( null, null );
-         else
-            Log( "Cannot Initiate " + module );
+         try {
+            MethodInfo m = module.GetMethod( "InitPatch", BindingFlags.Static | BindingFlags.NonPublic );
+            if ( m != null ) 
+               m.Invoke( null, null );
+            else
+               Log( "Cannot Initiate " + module );
+         } catch ( Exception ex ) { Log( ex ); }
       }
 
       // ============ Game States ============

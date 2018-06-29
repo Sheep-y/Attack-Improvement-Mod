@@ -30,7 +30,6 @@ namespace Sheepy.AttackImprovementMod {
             Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
             Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
             Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
-            // Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ typeof( Mech ), typeof( ChassisLocations ), typeof( bool ) }, null, "RecordBaseCrit" ); // Just a test to confirm the flow
             if ( ! File.Exists( ROLL_LOG ) )
                RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location" } ) );
          }
@@ -102,39 +101,31 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Fixes ============
 
-      public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) {
-         try {
-            roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
-            if ( team != null )
-               roll -= team.StreakBreakingValue;
-            __result = roll;
-            return false;
-         } catch ( Exception ex ) {
-            return Log( ex );
-         }
-      }
+      public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) { try {
+         roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
+         if ( team != null )
+            roll -= team.StreakBreakingValue;
+         __result = roll;
+         return false;
+      }                 catch ( Exception ex ) { return Log( ex ); } }
 
       private static FieldInfo StreakBreakingValueProp = null;
-      public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) {
-         try {
-               if ( succeeded ) {
-               StreakBreakingValueProp.SetValue( __instance, 0f );
+      public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) { try {
+         if ( succeeded ) {
+            StreakBreakingValueProp.SetValue( __instance, 0f );
 
-               } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
-               float mod;
-               if ( Settings.MissStreakBreakerDivider > 0 )
-                  mod = ( targetValue - Settings.MissStreakBreakerThreshold ) / Settings.MissStreakBreakerDivider;
-               else
-                  mod = - Settings.MissStreakBreakerDivider;
-               StreakBreakingValueProp.SetValue( __instance, __instance.StreakBreakingValue + mod );
-            }
-            return false;
-         } catch ( Exception ex ) {
-            return Log( ex );
+            } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
+            float mod;
+            if ( Settings.MissStreakBreakerDivider > 0 )
+               mod = ( targetValue - Settings.MissStreakBreakerThreshold ) / Settings.MissStreakBreakerDivider;
+            else
+               mod = - Settings.MissStreakBreakerDivider;
+            StreakBreakingValueProp.SetValue( __instance, __instance.StreakBreakingValue + mod );
          }
-      }
+         return false;
+      }                 catch ( Exception ex ) { return Log( ex ); } }
 
-      public static void ShowRealHitChance ( ref float chance ) {
+      public static void ShowRealHitChance ( ref float chance ) { try {
          chance = Mathf.Clamp( chance, 0f, 1f );
          int i = (int)( ( chance + 0.00001f ) / 0.05f );
          if ( Math.Abs( i * 0.05f - chance ) < 0.00001f )
@@ -143,35 +134,27 @@ namespace Sheepy.AttackImprovementMod {
             Log( "Uncached hit chance reversal from " + chance + ", diff: " + ( i * 0.05f - chance ) );
             chance = ReverseRollCorrection( chance, Settings.RollCorrectionStrength );
          }
-      }
+      }                 catch ( Exception ex ) { Log( ex ); } }
 
       private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", BindingFlags.Instance | BindingFlags.NonPublic );
       private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", BindingFlags.Instance | BindingFlags.NonPublic );
       private static readonly object[] empty = new object[]{};
 
       // Override the original code to show accuracy in decimal points
-      public static bool OverrideWeaponHitChanceRange ( CombatHUDWeaponSlot __instance, float chance ) {
-         try {
-            HitChance.Invoke( __instance, new object[]{ chance } );
-            __instance.HitChanceText.text = string.Format( "{0:0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
-            Refresh.Invoke( __instance, empty );
-            return false;
-         } catch ( Exception ex ) {
-            return Log( ex );
-         }
-      }
+      public static bool OverrideWeaponHitChanceRange ( CombatHUDWeaponSlot __instance, float chance ) { try {
+         HitChance.Invoke( __instance, new object[]{ chance } );
+         __instance.HitChanceText.text = string.Format( "{0:0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
+         Refresh.Invoke( __instance, empty );
+         return false;
+      }                 catch ( Exception ex ) { return Log( ex ); } }
 
       // Override the original code to show accuracy in decimal points
-      public static bool OverrideWeaponHitChanceFormat ( CombatHUDWeaponSlot __instance, float chance ) {
-         try {
-            HitChance.Invoke( __instance, new object[]{ chance } );
-            __instance.HitChanceText.text = string.Format( "{0:0.0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
-            Refresh.Invoke( __instance, empty );
-            return false;
-         } catch ( Exception ex ) {
-            return Log( ex );
-         }
-      }
+      public static bool OverrideWeaponHitChanceFormat ( CombatHUDWeaponSlot __instance, float chance ) { try {
+         HitChance.Invoke( __instance, new object[]{ chance } );
+         __instance.HitChanceText.text = string.Format( "{0:0.0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
+         Refresh.Invoke( __instance, empty );
+         return false;
+      }                 catch ( Exception ex ) { return Log( ex ); } }
 
       // ============ Log ============
 
@@ -191,13 +174,6 @@ namespace Sheepy.AttackImprovementMod {
          thisRoll = roll;
          thisStreak = team?.StreakBreakingValue ?? 0;
       }
-
-      /*
-      internal static float thisBaseCrit;
-      public static void RecordBaseCrit ( float __result ) {
-         thisBaseCrit = __result;
-      }
-      */
 
       internal static float thisCorrectedRoll;
       public static void LogMissedAttack ( float __result, float roll, Team team ) {

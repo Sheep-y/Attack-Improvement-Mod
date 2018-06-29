@@ -19,43 +19,39 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Fixes ============
 
-      public static bool ShowHeatAndStab ( CombatHUDActorDetailsDisplay __instance ) {
-         try {
-            // Only override mechs. Other actors are unimportant to us.
-            if ( __instance.DisplayedActor == null || ! ( __instance.DisplayedActor is Mech ) )
-               return true;
+      public static bool ShowHeatAndStab ( CombatHUDActorDetailsDisplay __instance ) { try {
+         // Only override mechs. Other actors are unimportant to us.
+         if ( __instance.DisplayedActor == null || ! ( __instance.DisplayedActor is Mech ) )
+            return true;
 
-            Mech mech = (Mech) __instance.DisplayedActor;
-            int jets = mech.WorkingJumpjets;
-            string line1 = mech.weightClass.ToString(), line2;
-            if ( jets > 0 ) line1 += ", " + jets + " JETS";
-            int baseHeat = mech.CurrentHeat + mech.TempHeat,
-                baseStab = (int) mech.CurrentStability;
-            if ( __instance.DisplayedActor.team.IsLocalPlayer ) { // Two lines in selection panel
-               line1 = "·\n" + line1;
-               CombatSelectionHandler selection = HUD?.SelectionHandler;
-               int newHeat = baseHeat, newStab = baseStab;
-               if ( selection != null && selection.SelectedActor == mech ) {
-                  newHeat += selection.ProjectedHeatForState;
-                  if ( ! mech.HasMovedThisRound )
-                     newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
-                  if ( ! mech.HasAppliedHeatSinks )
-                     newHeat = Math.Min( Math.Max( 0, newHeat - mech.AdjustedHeatsinkCapacity ), mech.MaxHeat );
-                  newStab += (int) selection.ProjectedStabilityForState;
-               }
-               line2  = "Heat " + baseHeat + ( baseHeat == newHeat ? "" :  " >> " + newHeat ) + "\n";
-               line2 += "Stab " + (int) mech.CurrentStability + ( baseStab == newStab ? "" :  " >> " + newStab );
-
-            } else { // One line in target panel
-               line2 = "Heat " + baseHeat + ", Stab " + baseStab;
+         Mech mech = (Mech) __instance.DisplayedActor;
+         int jets = mech.WorkingJumpjets;
+         string line1 = mech.weightClass.ToString(), line2;
+         if ( jets > 0 ) line1 += ", " + jets + " JETS";
+         int baseHeat = mech.CurrentHeat + mech.TempHeat,
+               baseStab = (int) mech.CurrentStability;
+         if ( __instance.DisplayedActor.team.IsLocalPlayer ) { // Two lines in selection panel
+            line1 = "·\n" + line1;
+            CombatSelectionHandler selection = HUD?.SelectionHandler;
+            int newHeat = baseHeat, newStab = baseStab;
+            if ( selection != null && selection.SelectedActor == mech ) {
+               newHeat += selection.ProjectedHeatForState;
+               if ( ! mech.HasMovedThisRound )
+                  newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
+               if ( ! mech.HasAppliedHeatSinks )
+                  newHeat = Math.Min( Math.Max( 0, newHeat - mech.AdjustedHeatsinkCapacity ), mech.MaxHeat );
+               newStab += (int) selection.ProjectedStabilityForState;
             }
-            __instance.ActorWeightText.text = line1 + "\n" + line2;
-            __instance.JumpJetsHolder.SetActive( false );
-            return false;
-         } catch ( Exception ex ) {
-            return Log( ex );
+            line2  = "Heat " + baseHeat + ( baseHeat == newHeat ? "" :  " >> " + newHeat ) + "\n";
+            line2 += "Stab " + (int) mech.CurrentStability + ( baseStab == newStab ? "" :  " >> " + newStab );
+
+         } else { // One line in target panel
+            line2 = "Heat " + baseHeat + ", Stab " + baseStab;
          }
-      }
+         __instance.ActorWeightText.text = line1 + "\n" + line2;
+         __instance.JumpJetsHolder.SetActive( false );
+         return false;
+      }                 catch ( Exception ex ) { return Log( ex ); } }
 
       private static bool needRefresh = false;
       public static void RecordRefresh () {
