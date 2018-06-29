@@ -87,19 +87,18 @@ namespace Sheepy.AttackImprovementMod {
       // ============ Subroutines ============
 
       private static string FineTuneAndFormat<T> ( Dictionary<T, int> hitTable, T location, int local  ) {
-         if ( ! Settings.FixHitDistribution && ! GameHitLocationBugged ) { // If hit distribution is bugged, simulate it
+         if ( GameHitLocationBugged && ! Settings.FixHitDistribution ) { // If hit distribution is bugged, simulate it
             T def = default(T), last = def;
-            foreach ( KeyValuePair<T, int> pair in hitTable ) {
-               if ( pair.Value == 0 ) continue;
-               if ( last.Equals( def ) && pair.Key.Equals( location ) ) {
+            foreach ( KeyValuePair<T, int> e in hitTable ) {
+               if ( e.Value == 0 ) continue;
+               if ( last.Equals( def ) && e.Key.Equals( location ) ) {
                   local++; // First location get one more weight
                   break;
                }
-               last = pair.Key;
+               last = e.Key;
             }
             if ( last.Equals( location ) ) local--; // Last location get one less weight
          }
-         //Log( "HUD M Total @ " + location + ( location == targetedLocation ? "(Called)" : "") + " = " + local + "/" + HitTableTotalWeight + "(x" + FixMultiplier( targetedLocation, ActorCalledShotBonus ) + "x" + scale + ")" );
          string format = Settings.ShowDecimalCalledChance ? "{0:0.0}%" : "{0:0}%";
          float perc = (float) local * 100f / (float) HitTableTotalWeight;
          return string.Format( format, perc );

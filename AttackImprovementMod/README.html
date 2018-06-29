@@ -106,6 +106,17 @@
       </details></li>
 
       <li> <details>
+         <summary><h3>Precise Hit Location Distribution</h3></summary>
+         <p>Setting: <code>FixHitDistribution</code> (true/false, default true)<br>
+         <p>Game version 1.1 introduced degrading called shot effect for SRM and MG,
+         but because the code that determine hit distribution is not designed for fraction called shot weight,
+         the actual distribution is slightly bugged.
+         <p>This mod can replace the hit distribution routine with an improved version that has better precision.
+         On game version 1.1.0 and before, this would also fix the bug that cause abnormally high head hit chances.
+         <hr>
+      </details></li>
+
+      <li> <details>
          <summary><h3>Enable Clustering Called Shot</h3></summary>
          <p>Setting: <code>CalledShotUseClustering</code> (true/false, default true)<br>
          <p>When enabled, called shot has a higher chance to hit adjacent locations.
@@ -140,28 +151,18 @@
       </details></li>
 
       <li> <details>
-         <summary><h3>Fix Mech Called Shot Popup</h3></summary>
+         <summary><h3>Fix Called Shot Popup</h3></summary>
          <p>Setting: <code>ShowRealMechCalledShotChance</code> (true/false, default true)<br>
-         <p>The percentages in called shot popup does not take into account of the hit location bug
-         (or, in older versions, the clustering effect and the headshot bug that causes).
-         When enabled, the popup will reflect true hit distribution depending on whether
-         distribution bug is unfixed, clustering is enabled, and other relevant settings of this mod.
-      </details></li>
-
-      <li> <details>
-         <summary><h3>Fix Vehicle Called Shot Popup</h3></summary>
          <p>Setting: <code>ShowRealVehicleCalledShotChance</code> (true/false, default true)<br>
-         <p>Since vehicle called shot does not work in vanilla game, the whole popup is meaningless.
-         When enabled, the popup will reflect true hit distribution depending on whether
-         vehicle called shot is fixed, whether distribution bug is unfixed,
-         and other relevant settings of this mod.
+         <p>When enabled, the popups will reflect modded hit distribution.
+         Also, if vehicle called shot fix is disabled, vehicle called shot chance will be updated to reflect disabled called shot.
       </details></li>
 
       <li> <details>
          <summary><h3>(Advanced) Show Hit Distribution in Decimal</h3></summary>
          <p>Setting: <code>ShowDecimalCalledChance</code> (true/false, default false)<br>
          <p>When enabled, called shot popup will show all percentages to one decimal point.
-         This option affects <i>only</i> fixed popups, since the rendering is not separated from display.
+         This option affects <i>only</i> fixed popups (above), since the rendering is not separated from display.
       </details></li>
 
       <li> <details>
@@ -248,22 +249,7 @@
          <hr>
          <p>Setting: <code>PersistentLog</code> (true/false, default false)<br>
          <p>When enabled, the attack log will not auto-clear on launch.
-      </details></li>
-
-      <li> <details>
-         <summary><h3>(Legacy) Fix Hit Location Distribution</h3></summary>
-         <p>Setting: <code>FixHitDistribution</code> (true/false, default true)<br>
-         <p>Before game version 1.1.1, you may have noticed abnormally high head shot chances from normal attack.
-         This is because the game's hit distribution is doing float to int conversion the wrong way.
-         This has two effects: First is it would "round up" headshot%, doubling the headshot chance of normal attacks.
-         Second is the chance is stolen from other location, typically Right Leg, causing a lower chance to hit it.
-         All attacks are affected, including called shots of all directions on all locations.
-         <p>This mod can replace the hit distribution routine with an improved version that has better precision.
-         Enabling this fix would lower global headshot chances to their intended level.
-         <p>The bug has been fixed in game ver 1.1.1, and the mod will automatically disregard this setting.
-         It should still work on old version, but since I only have Steam I can't test it on old versions.
          <hr>
-
          <p>Setting: <code>LogFolder</code> (string, default "")<br>
          <p>Set path of log files. Default is empty which will use mod folder.
       </details></li>

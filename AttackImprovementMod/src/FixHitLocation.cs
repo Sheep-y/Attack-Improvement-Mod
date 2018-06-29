@@ -18,13 +18,12 @@ namespace Sheepy.AttackImprovementMod {
       internal static MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static ); // Only one public static GetHitLocation method.
 
       internal static void InitPatch () {
-         scale = Settings.FixHitDistribution && GameHitLocationBugged ? SCALE : 1;
+         scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering || Mod.GameUseClusteredCallShot;
 
          if ( GetHitLocation != null ) try {
             bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
-                 prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot,
-                 fixHitBug     = Settings.FixHitDistribution && GameHitLocationBugged;
+                 prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot;
             MethodInfo MechGetHit    = GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ),
                        VehicleGetHit = GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) );
             if ( prefixMech )
@@ -33,7 +32,7 @@ namespace Sheepy.AttackImprovementMod {
                Patch( VehicleGetHit, "PrefixVehicleCalledShot", null );
             if ( prefixVehicle )
                Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
-            if ( fixHitBug ) {
+            if ( Settings.FixHitDistribution ) {
                Patch( MechGetHit, "OverrideMechCalledShot", null );
                Patch( VehicleGetHit, "OverrideVehicleCalledShot", null );
             }
