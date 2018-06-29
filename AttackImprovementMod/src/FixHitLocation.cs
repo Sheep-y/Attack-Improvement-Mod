@@ -2,10 +2,8 @@ using BattleTech;
 using BattleTech.UI;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Sheepy.AttackImprovementMod {
-   using Harmony;
    using System.Reflection;
    using UnityEngine;
    using UnityEngine.EventSystems;
@@ -17,26 +15,22 @@ namespace Sheepy.AttackImprovementMod {
       internal static int scale = SCALE; // Actual scale. Determined by FixHitDistribution.
 
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
+      internal static MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Public | BindingFlags.Static ); // Only one public static GetHitLocation method.
 
       internal static void InitPatch () {
-         scale = Settings.FixHitDistribution ? SCALE : 1;
+         scale = Settings.FixHitDistribution && GameHitLocationBugged ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering || Mod.GameUseClusteredCallShot;
 
-         MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Public | BindingFlags.Static ); // Only one public static GetHitLocation method.
-         if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
-            Log( "Error: Cannot find HitLocation.GetHitLocation( ?, float, ?, float ) to patch" );
-
-         } else try {
+         if ( GetHitLocation != null ) try {
             bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
                  prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot,
-                 fixHitBug     = Settings.FixHitDistribution && GameHitLocationBugged,
-                 postfixLog    = Settings.LogHitRolls;
+                 fixHitBug     = Settings.FixHitDistribution && GameHitLocationBugged;
             MethodInfo MechGetHit    = GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ),
                        VehicleGetHit = GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) );
-            if ( prefixMech    || postfixLog )
-               Patch( MechGetHit, prefixMech ? "PrefixMechCalledShot" : null   , postfixLog ? "LogMechHit" : null );
-            if ( prefixVehicle || postfixLog )
-               Patch( MechGetHit, prefixMech ? "PrefixVehicleCalledShot" : null, postfixLog ? "LogVehicleHit" : null );
+            if ( prefixMech )
+               Patch( MechGetHit, "PrefixMechCalledShot", null );
+            if ( prefixVehicle )
+               Patch( VehicleGetHit, "PrefixVehicleCalledShot", null );
             if ( prefixVehicle )
                Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static | BindingFlags.Public, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
             if ( fixHitBug ) {
@@ -97,7 +91,7 @@ namespace Sheepy.AttackImprovementMod {
       }                 catch ( Exception ex ) { Log( ex ); } }
 
       public static bool OverrideMechCalledShot ( ref ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
-         __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
+         __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
       }                 catch ( Exception ex ) { return Log( ex ); } }
 
@@ -106,54 +100,9 @@ namespace Sheepy.AttackImprovementMod {
       }                 catch ( Exception ex ) { Log( ex ); } }
 
       public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
-         __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
+         __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
       }                 catch ( Exception ex ) { return Log( ex ); } }
-
-      // ============ Postfix (log results) ============
-      // Won't be patched if Settings.LogHitLocationCalculation is false
-
-      public static void LogMechHit ( ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
-         // "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location"
-         int totalWeight = SumWeight( hitTable, bonusLocation, bonusLocationMultiplier, scale );
-         RollCorrection.RollLog(
-               RollCorrection.GetHitLog() + "\t" +
-               randomRoll + "\t" +
-               TryGet( hitTable, ArmorLocation.Head ) + "\t" +
-               ( TryGet( hitTable, ArmorLocation.CenterTorso ) + TryGet( hitTable, ArmorLocation.CenterTorsoRear ) ) + "\t" +
-               ( TryGet( hitTable, ArmorLocation.LeftTorso   ) + TryGet( hitTable, ArmorLocation.LeftTorsoRear   ) ) + "\t" +
-               ( TryGet( hitTable, ArmorLocation.RightTorso  ) + TryGet( hitTable, ArmorLocation.RightTorsoRear  ) ) + "\t" +
-               TryGet( hitTable, ArmorLocation.LeftArm  ) + "\t" +
-               TryGet( hitTable, ArmorLocation.RightArm ) + "\t" +
-               TryGet( hitTable, ArmorLocation.LeftLeg  ) + "\t" +
-               TryGet( hitTable, ArmorLocation.RightLeg ) + "\t" +
-               bonusLocation + "\t" +
-               bonusLocationMultiplier + "\t" +
-               totalWeight + "\t" +
-               (int)( randomRoll * totalWeight ) + "\t" +
-               __result );
-      } catch ( Exception ex ) { Log( ex ); } }
-
-      public static void LogVehicleHit ( VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
-         // "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location"
-         int totalWeight = SumWeight( hitTable, bonusLocation, bonusLocationMultiplier, scale );
-         RollCorrection.RollLog(
-               RollCorrection.GetHitLog() + "\t" +
-               randomRoll + "\t" +
-               TryGet( hitTable, VehicleChassisLocations.Turret ) + "\t" +
-               TryGet( hitTable, VehicleChassisLocations.Front  ) + "\t" +
-               TryGet( hitTable, VehicleChassisLocations.Left   ) + "\t" +
-               TryGet( hitTable, VehicleChassisLocations.Right  ) + "\t" +
-               TryGet( hitTable, VehicleChassisLocations.Rear   ) + "\t" +
-               "\t" +
-               "\t" +
-               "\t" +
-               bonusLocation + "\t" +
-               bonusLocationMultiplier + "\t" +
-               totalWeight + "\t" +
-               (int)( randomRoll * totalWeight ) + "\t" +
-               __result );
-      } catch ( Exception ex ) { Log( ex ); } }
 
       // ============ GetHitLocation ============
 
@@ -166,7 +115,7 @@ namespace Sheepy.AttackImprovementMod {
          return totalWeight;
       }
 
-      public static T GetHitLocation<T> ( Dictionary<T, int> hitTable, float roll, T bonusLocation, float bonusLocationMultiplier ) {
+      public static T GetHitLocationFixed<T> ( Dictionary<T, int> hitTable, float roll, T bonusLocation, float bonusLocationMultiplier ) {
          int totalWeight = SumWeight( hitTable, bonusLocation, bonusLocationMultiplier, SCALE );
          int goal = (int)( roll * (double)totalWeight ), i = 0;
          foreach ( KeyValuePair<T, int> location in hitTable ) {

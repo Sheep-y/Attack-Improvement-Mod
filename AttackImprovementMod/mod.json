@@ -29,10 +29,10 @@
        * Default is 0.75 to balance vehicle's lower number of locations. */
       "VehicleCalledShotMultiplier" : 0.75,
 
-      /* Override called shot percentage display of mech locations to show true shot distribution, with bug fix or not. Default true. */
+      /* Override called shot percentage display of mech locations to show modded shot distribution. Default true. */
       "ShowRealMechCalledShotChance" : true,
 
-      /* Override called shot percentage display of vehicle locations to show true shot distribution, with bug fix or not. Default true. */
+      /* Override called shot percentage display of vehicle locations to show modded shot distribution. Default true. */
       "ShowRealVehicleCalledShotChance" : true,
 
       /* Display chance to one decimal IF AND ONLY IF called shot chance is overridden (above). Default false. */

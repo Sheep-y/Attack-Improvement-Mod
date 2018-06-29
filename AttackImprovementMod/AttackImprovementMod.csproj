@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\AttackLog.cs" />
     <Compile Include="src\HeatAndStab.cs" />
     <Compile Include="src\Melee.cs" />
     <Compile Include="src\LineOfFire.cs" />

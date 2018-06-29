@@ -59,8 +59,10 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RecordCombatHUD" );
          }
 
-         LoadModule( "Roll Corrections and Logger", typeof( RollCorrection ) );
-         LoadModule( "Hit Location Bugfixs and Logger", typeof( FixHitLocation ) );
+         if ( Settings.LogHitRolls )
+            LoadModule( "Logger", typeof( AttackLog ) );
+         LoadModule( "Roll Corrections", typeof( RollCorrection ) );
+         LoadModule( "Called Shot and Hit Location", typeof( FixHitLocation ) );
          LoadModule( "Called Shot HUD", typeof( FixCalledShotPopUp ) );
          LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
          //LoadModule( "Line of Fire", typeof( LineOfFire ) );
@@ -101,6 +103,8 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void Patch( Type patchedClass, string patchedMethod, BindingFlags flags, Type[] parameterTypes, string prefix, string postfix ) {
          MethodInfo patched;
+         if ( ( flags | BindingFlags.Static | BindingFlags.Instance  ) == 0  ) flags |= BindingFlags.Instance;
+         if ( ( flags | BindingFlags.Public | BindingFlags.NonPublic ) == 0  ) flags |= BindingFlags.Public;
          if ( parameterTypes == null )
             patched = patchedClass.GetMethod( patchedMethod, flags );
          else

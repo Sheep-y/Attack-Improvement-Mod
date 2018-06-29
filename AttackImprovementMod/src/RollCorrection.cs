@@ -5,20 +5,16 @@ using System;
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using System.Reflection;
-   using System.IO;
    using UnityEngine;
 
    public class RollCorrection {
       
-      internal const string ROLL_LOG = "Log_AttackRoll.txt";
       private static bool DisableRollCorrection = false;
       private static readonly float[] correctionCache = new float[21];
       private static string WeaponHitChanceFormat = "{0:0}%";
 
       internal static void InitPatch () {
-         if ( ! Settings.PersistentLog ) DeleteLog( ROLL_LOG );
          DisableRollCorrection = Settings.RollCorrectionStrength == 0.0f;
-         Type AttackType = typeof( AttackDirector.AttackSequence );
 
          FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
          bool rollCorrected = true;
@@ -26,14 +22,6 @@ namespace Sheepy.AttackImprovementMod {
             Log( "Warning: Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
          else 
             rollCorrected = (bool) rollCorrection.GetValue( null );
-
-         if ( Settings.LogHitRolls ) {
-            Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
-            Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic | BindingFlags.Instance, "RecordAttacker", null );
-            Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
-            if ( ! File.Exists( ROLL_LOG ) )
-               RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location" } ) );
-         }
 
          if ( DisableRollCorrection ) {
             if ( ! rollCorrected ) {
@@ -54,7 +42,7 @@ namespace Sheepy.AttackImprovementMod {
             }
 
             if ( Settings.RollCorrectionStrength != 1.0f )
-               Patch( AttackType, "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
+               Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
             if ( rollCorrected && Settings.ShowRealWeaponHitChance ) {
                for ( int i = 0 ; i < 21 ; i++ )
                   correctionCache[i] = ReverseRollCorrection( 0.05f * i, Settings.RollCorrectionStrength );
@@ -80,10 +68,6 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       // ============ UTILS ============
-
-      internal static void RollLog ( String message ) {
-         WriteLog( ROLL_LOG, message + "\r\n" );
-      }
 
       public static float CorrectRoll ( float roll, float strength ) {
          strength /= 2;
@@ -149,39 +133,5 @@ namespace Sheepy.AttackImprovementMod {
          Refresh.Invoke( __instance, empty );
          return false;
       }                 catch ( Exception ex ) { return Log( ex ); } }
-
-      // ============ Log ============
-
-      // Get attacker, weapon and hitchance before logging
-      internal static string thisAttacker = "(unknown)";
-      internal static string thisWeapon = "(unknown)";
-      internal static float thisHitChance;
-      public static void RecordAttacker ( AttackDirector.AttackSequence __instance, Weapon weapon, float toHitChance ) {
-         thisAttacker = __instance.attacker.GetPilot()?.Callsign ?? __instance.attacker.Nickname;
-         thisWeapon = weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId;
-         thisHitChance = toHitChance;
-      }
-
-      internal static float thisRoll;
-      internal static float thisStreak;
-      public static void RecordAttackRoll ( float roll, Team team ) {
-         thisRoll = roll;
-         thisStreak = team?.StreakBreakingValue ?? 0;
-      }
-
-      internal static float thisCorrectedRoll;
-      public static void LogMissedAttack ( float __result, float roll, Team team ) {
-         thisCorrectedRoll = __result;
-         if ( __result > thisHitChance ) // Miss, log now because hit location won't be rolled
-            RollLog( GetHitLog() +
-               "\t--" + // Roll; Empty cells are added so that copy and paste will override any old data in Excel, instead of leaving them in place and make it confusing
-               "\t--\t--\t--\t--" +  // Head & Torsos
-               "\t--\t--\t--\t--" +  // Limbs
-               "\t--\t--\t--\t--" ); // called shot and result
-      }
-
-      internal static string GetHitLog () {
-         return thisAttacker + "\t" + thisWeapon + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance;
-      }
    }
 }
