@@ -26,26 +26,24 @@ namespace Sheepy.AttackImprovementMod {
          if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
             Log( "Error: Cannot find HitLocation.GetHitLocation( ?, float, ?, float ) to patch" );
 
-         } else {
-            bool patchMech    = ( Settings.FixHitDistribution && GameHitLocationBugged ) || Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
-                 patchVehicle = ( Settings.FixHitDistribution && GameHitLocationBugged ) || Settings.VehicleCalledShotMultiplier != 1.0f,
-                 patchPostfix = Settings.LogHitRolls;
-            if ( patchMech || patchVehicle || patchPostfix ) {
-               HarmonyMethod FixArmour  = patchMech    ? MakePatch( "OverrideMechCalledShot"    ) : null;
-               HarmonyMethod FixVehicle = patchVehicle ? MakePatch( "OverrideVehicleCalledShot" ) : null;
-               HarmonyMethod LogArmour  = patchPostfix ? MakePatch( "LogMechHit"    ) : null;
-               HarmonyMethod LogVehicle = patchPostfix ? MakePatch( "LogVehicleHit" ) : null;
-               if ( patchMech    || patchPostfix )
-                  harmony.Patch( GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ), FixArmour, LogArmour );
-               if ( patchVehicle || patchPostfix )
-                  harmony.Patch( GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) ), FixVehicle, LogVehicle );
-               Log( string.Format( "Patched: HitLocation.GetHitLocation <Mech>[ {0} / {1} ] <Vehicle>[ {2} / {3} ].", new object[]{ FixArmour?.method.Name, LogArmour?.method.Name, FixVehicle?.method.Name, LogVehicle?.method.Name } ) );
-               if ( patchVehicle )
-                  Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static | BindingFlags.Public, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
-            } else {
-               Log( "GetHitLocation not patched." );
+         } else try {
+            bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
+                 prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot,
+                 fixHitBug     = Settings.FixHitDistribution && GameHitLocationBugged,
+                 postfixLog    = Settings.LogHitRolls;
+            MethodInfo MechGetHit    = GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ),
+                       VehicleGetHit = GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) );
+            if ( prefixMech    || postfixLog )
+               Patch( MechGetHit, prefixMech ? "PrefixMechCalledShot" : null   , postfixLog ? "LogMechHit" : null );
+            if ( prefixVehicle || postfixLog )
+               Patch( MechGetHit, prefixMech ? "PrefixVehicleCalledShot" : null, postfixLog ? "LogVehicleHit" : null );
+            if ( prefixVehicle )
+               Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static | BindingFlags.Public, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
+            if ( fixHitBug ) {
+               Patch( MechGetHit, "OverrideMechCalledShot", null );
+               Patch( VehicleGetHit, "OverrideVehicleCalledShot", null );
             }
-         }
+         } catch ( Exception ex ) { Log( ex ); }
 
          if ( Settings.FixVehicleCalledShot ) {
             // Store popup location
@@ -82,8 +80,7 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Prefix (fix things) ============
 
-
-      public static bool OverrideMechCalledShot ( ref ArmorLocation __result, ref Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
+      public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
          if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None ) {
             HitTableConstantsDef hitTables = Combat.Constants.HitTables;
@@ -97,14 +94,18 @@ namespace Sheepy.AttackImprovementMod {
             if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
                hitTable = Combat.Constants.GetMechClusterTable( bonusLocation, dir );
          }
-         if ( ! Settings.FixHitDistribution || ! GameHitLocationBugged ) return true;
+      }                 catch ( Exception ex ) { Log( ex ); } }
+
+      public static bool OverrideMechCalledShot ( ref ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
          __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
       }                 catch ( Exception ex ) { return Log( ex ); } }
 
-      public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) { try {
+      public static void PrefixVehicleCalledShot ( VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-         if ( ! Settings.FixHitDistribution || ! GameHitLocationBugged ) return true;
+      }                 catch ( Exception ex ) { Log( ex ); } }
+
+      public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
          __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
       }                 catch ( Exception ex ) { return Log( ex ); } }
@@ -187,7 +188,7 @@ namespace Sheepy.AttackImprovementMod {
       // Somehow PostfixSetCalledShot is NOT called since 1.1 beta. So need to override PostPointerClick to make sure called shot location is translated
       public static void RecordVehicleCalledShotClickLocation ( CombatHUDVehicleArmorHover __instance ) { try {
          HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
-         SelectionStateFire selectionState = Readout.HUD.SelectionHandler.ActiveState as SelectionStateFire;
+         SelectionStateFire selectionState = Readout?.HUD?.SelectionHandler?.ActiveState as SelectionStateFire;
          if ( selectionState != null )
             selectionState.calledShotLocation = TranslateLocation( selectionState.calledShotVLocation );
       }                 catch ( Exception ex ) { Log( ex ); } }

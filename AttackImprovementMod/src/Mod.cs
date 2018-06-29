@@ -109,10 +109,14 @@ namespace Sheepy.AttackImprovementMod {
             Log( string.Format( "Error: Cannot find {0}.{1}(...) to patch", new Object[]{ patchedClass.Name, patchedMethod } ) );
             return;
          }
+         Patch( patched, prefix, postfix );
+      }
+
+      internal static void Patch( MethodInfo patched, string prefix, string postfix ) {
          HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
          if ( pre == null && post == null ) return; // MakePatch would have reported method not found
          harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
-         Log( string.Format( "Patched: {0} {1} [ {2} : {3} ]", new object[]{ patchedClass, patched, prefix, postfix } ) );
+         Log( string.Format( "Patched: {0} {1} [ {2} : {3} ]", new object[]{ patched.DeclaringType, patched, prefix, postfix } ) );
       }
 
       // ============ UTILS ============
