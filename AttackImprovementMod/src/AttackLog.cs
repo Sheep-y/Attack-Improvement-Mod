@@ -14,7 +14,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void InitPatch () {
          if ( Mod.Settings.LogHitRolls ) {
-            GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static ); // Only one public static GetHitLocation method.
+            GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static | BindingFlags.Public ); // Only one public static GetHitLocation method.
             if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
                Log( "Error: Cannot patch HitLocation.GetHitLocation( ?, float, ?, float ). Called shot modding and attack logging disabled." );
                return;

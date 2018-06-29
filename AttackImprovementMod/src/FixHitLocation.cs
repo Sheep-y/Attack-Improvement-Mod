@@ -42,7 +42,7 @@ namespace Sheepy.AttackImprovementMod {
          if ( Settings.FixVehicleCalledShot ) {
             // Store popup location
             Patch( typeof( SelectionStateFire ), "SetCalledShot", typeof( VehicleChassisLocations ), null, "RecordVehicleCalledShotFireLocation" );
-            ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", BindingFlags.NonPublic );
+            ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", BindingFlags.NonPublic | BindingFlags.Instance );
             if ( ReadoutProp != null )
                Patch( typeof( CombatHUDVehicleArmorHover ), "OnPointerClick", typeof( PointerEventData ), null, "RecordVehicleCalledShotClickLocation" );
             else
@@ -126,7 +126,7 @@ namespace Sheepy.AttackImprovementMod {
                i += (int)( (float) location.Value * bonusLocationMultiplier * SCALE );
             else
                i += location.Value * SCALE;
-            if ( i >= goal )
+            if ( i > goal )
                return location.Key;
          }
          throw new ApplicationException( "No valid hit location. Enable logging to see hitTable." );

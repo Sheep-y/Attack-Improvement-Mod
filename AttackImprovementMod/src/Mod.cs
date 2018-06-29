@@ -103,8 +103,8 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void Patch( Type patchedClass, string patchedMethod, BindingFlags flags, Type[] parameterTypes, string prefix, string postfix ) {
          MethodInfo patched;
-         if ( ( flags | BindingFlags.Static | BindingFlags.Instance  ) == 0  ) flags |= BindingFlags.Instance;
-         if ( ( flags | BindingFlags.Public | BindingFlags.NonPublic ) == 0  ) flags |= BindingFlags.Public;
+         if ( ( flags & ( BindingFlags.Static | BindingFlags.Instance  ) ) == 0  ) flags |= BindingFlags.Instance;
+         if ( ( flags & ( BindingFlags.Public | BindingFlags.NonPublic ) ) == 0  ) flags |= BindingFlags.Public;
          if ( parameterTypes == null )
             patched = patchedClass.GetMethod( patchedMethod, flags );
          else

@@ -50,7 +50,7 @@ namespace Sheepy.AttackImprovementMod {
             }
          }
          if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
-            StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic );
+            StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
             if ( StreakBreakingValueProp != null )
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
             else
@@ -100,7 +100,7 @@ namespace Sheepy.AttackImprovementMod {
          if ( succeeded ) {
             StreakBreakingValueProp.SetValue( __instance, 0f );
 
-            } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
+         } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
             float mod;
             if ( Settings.MissStreakBreakerDivider > 0 )
                mod = ( targetValue - Settings.MissStreakBreakerThreshold ) / Settings.MissStreakBreakerDivider;

@@ -35,7 +35,7 @@
        * Default is 0.5, same as game default. Set to 1 to disable miss streak breaker. */
       public float MissStreakBreakerThreshold = 0.5f;
 
-      /* Set miss streak breaker divider. Set to negative or zero to make it a (positive) constant.
+      /* Set miss streak breaker divider. Set to negative integer or zero to make it a (positive) constant %.
        * Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.
        * Default is 5, same as game default. */
       public float MissStreakBreakerDivider = 5f;
