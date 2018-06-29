@@ -46,15 +46,14 @@ namespace Sheepy.AttackImprovementMod {
             if ( Settings.RollCorrectionStrength < 0 ) {
                Log( "Error: RollCorrectionStrength must not be negative." );
                Settings.RollCorrectionStrength = 1.0f;
-            }
-            if ( Settings.RollCorrectionStrength >= 2 ) {
+            } else if ( Settings.RollCorrectionStrength > 1.9999f ) {
                if ( Settings.RollCorrectionStrength > 2 )
                   Log( "Warning: RollCorrectionStrength must be less than 2." );
                Settings.RollCorrectionStrength = 1.9999f; // Max! 1.99999 results in NaN in reverse correction
             }
+
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( AttackType, "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
-
             if ( rollCorrected && Settings.ShowRealWeaponHitChance ) {
                for ( int i = 0 ; i < 21 ; i++ )
                   correctionCache[i] = ReverseRollCorrection( 0.05f * i, Settings.RollCorrectionStrength );

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 
 namespace Sheepy.AttackImprovementMod {
 
@@ -23,7 +24,25 @@ namespace Sheepy.AttackImprovementMod {
       internal static string LogDir = "";
       internal static HarmonyInstance harmony = HarmonyInstance.Create( "io.github.Sheep-y.AttackImprovementMod" );
 
+      private static void checkNaN ( float count ) {
+         float block = 2f/5f, add = count*block, max = 100000;
+         for ( int i = 0 ; i <= max ; i++ ) {
+            float strength = add + ((float)i)*block/max;
+            if ( strength > 1.9999f ) continue;
+            for ( int j = 0 ; j <= 10000 ; j++ ) {
+               float acc = ((float)j)/10000f, corrected = RollCorrection.ReverseRollCorrection( acc, strength );
+               if ( float.IsNaN( corrected ) ) Console.WriteLine( corrected + " = " + acc + ", " + strength );
+            }
+         }
+      }
+
       static void Main () { // Sometimes I run quick tests as a console app here
+         /*
+         new Thread( () => checkNaN(0) ).Start();
+         new Thread( () => checkNaN(1) ).Start();
+         new Thread( () => checkNaN(2) ).Start();
+         new Thread( () => checkNaN(3) ).Start();
+         new Thread( () => checkNaN(4) ).Start();
          /**
          foreach ( MemberInfo e in typeof( Team ).GetMembers( BindingFlags.NonPublic | BindingFlags.Instance ) )
             Console.WriteLine( e );
@@ -38,6 +57,7 @@ namespace Sheepy.AttackImprovementMod {
             Console.WriteLine( string.Format( "{0:0.00} => [Half correction] {1:0.0000}, Re-rev {2:0.0000}   [Full] {3:0.0000}, Re-rev {4:0.0000}   [Double] {5:0.0000}, Re-rev {6:0.0000}",
                new object[]{ roll, rev1, rrev1, rev2, rrev2, rev3, rrev3 } ) );
          } /**/
+         Console.ReadKey();
       }
 
       public static void Init ( string directory, string settingsJSON ) {
