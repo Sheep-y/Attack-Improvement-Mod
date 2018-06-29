@@ -15,7 +15,7 @@
       /* Enable Vehicle Called Shot, which the game did not implement fully. Default true. */
       "FixVehicleCalledShot" : true,
 
-      /* (Legacy) Fix hit distribution bug which increase head shot % of all attacks. Default true. Auto-disable on game ver 1.1.1 and above. */
+      /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
       "FixHitDistribution" : true,
 
       /* Enable clustering effect for called shots against mechs. Default true. */
@@ -38,12 +38,12 @@
       /* Display chance to one decimal IF AND ONLY IF called shot chance is overridden (above). Default false. */
       "ShowDecimalCalledChance" : false,
 
-      /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, 2 for double strength.
+      /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, max is 2 for double strength.
        * Default is 0.5 for less correction. */
       "RollCorrectionStrength" : 0.5,
 
       /* Set miss streak breaker threshold. Only attacks with hit rate above the threshold will add to streak breaker.
-       * Default is 0.5, same as game default. */
+       * Default is 0.5, same as game default. Set to 1 to disable miss streak breaker. */
       "MissStreakBreakerThreshold" : 0.5,
 
       /* Set miss streak breaker divider. Set to negative or zero to make it a (positive) constant.
@@ -51,7 +51,7 @@
        * Default is 5, same as game default. */
       "MissStreakBreakerDivider" : 5,
 
-      /* Show adjusted hit chance in weapon panel, instead of original (fake) hit chance. Default false. */
+      /* Show adjusted hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker. Default false. */
       "ShowRealWeaponHitChance" : false,
 
       /* Show hit chance to one decimal in weapon panel. Default false. */

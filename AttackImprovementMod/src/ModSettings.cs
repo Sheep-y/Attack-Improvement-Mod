@@ -4,7 +4,7 @@
       /* Enable Vehicle Called Shot, which the game did not implement fully. Default true. */
       public bool FixVehicleCalledShot = true;
 
-      /* Fix hit distribution bug which increase head shot % of all attacks. Default true. */
+      /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
       public bool FixHitDistribution = true;
 
       /* Enable clustering effect for called shots against mechs. Default true. */
@@ -18,10 +18,10 @@
        * Default is 0.75 to balance vehicle's lower number of locations. */
       public float VehicleCalledShotMultiplier = 0.75f;
 
-      /* Override called shot percentage display of mech locations to show true shot distribution, with bug fix or not. Default true. */
+      /* Override called shot percentage display of mech locations to show modded shot distribution. Default true. */
       public bool ShowRealMechCalledShotChance = true;
 
-      /* Override called shot percentage display of vehicle locations to show true shot distribution, with bug fix or not. Default true. */
+      /* Override called shot percentage display of vehicle locations to show modded shot distribution. Default true. */
       public bool ShowRealVehicleCalledShotChance = true;
 
       /* Display chance to one decimal IF AND ONLY IF called shot chance is overridden (above). Default false. */
