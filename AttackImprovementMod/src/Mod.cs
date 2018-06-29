@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 
 namespace Sheepy.AttackImprovementMod {
 
@@ -16,13 +17,32 @@ namespace Sheepy.AttackImprovementMod {
 
       public static ModSettings Settings = new ModSettings();
 
-      internal static bool Pre_1_1 = false; // True if game version is less than 1.1
-      internal const string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod";
+      internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
+      internal static bool GameHitLocationBugged = false; // True if game version is less than 1.1.1
+      internal const string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod/";
       internal const string LOG_NAME = "Log_AttackImprovementMod.txt";
       internal static string LogDir = "";
       internal static HarmonyInstance harmony = HarmonyInstance.Create( "io.github.Sheep-y.AttackImprovementMod" );
 
+      private static void checkNaN ( float count ) {
+         float block = 2f/5f, add = count*block, max = 100000;
+         for ( int i = 0 ; i <= max ; i++ ) {
+            float strength = add + ((float)i)*block/max;
+            if ( strength > 1.9999f ) continue;
+            for ( int j = 0 ; j <= 10000 ; j++ ) {
+               float acc = ((float)j)/10000f, corrected = RollCorrection.ReverseRollCorrection( acc, strength );
+               if ( float.IsNaN( corrected ) ) Console.WriteLine( corrected + " = " + acc + ", " + strength );
+            }
+         }
+      }
+
       static void Main () { // Sometimes I run quick tests as a console app here
+         /*
+         new Thread( () => checkNaN(0) ).Start();
+         new Thread( () => checkNaN(1) ).Start();
+         new Thread( () => checkNaN(2) ).Start();
+         new Thread( () => checkNaN(3) ).Start();
+         new Thread( () => checkNaN(4) ).Start();
          /**
          foreach ( MemberInfo e in typeof( Team ).GetMembers( BindingFlags.NonPublic | BindingFlags.Instance ) )
             Console.WriteLine( e );
@@ -37,6 +57,7 @@ namespace Sheepy.AttackImprovementMod {
             Console.WriteLine( string.Format( "{0:0.00} => [Half correction] {1:0.0000}, Re-rev {2:0.0000}   [Full] {3:0.0000}, Re-rev {4:0.0000}   [Double] {5:0.0000}, Re-rev {6:0.0000}",
                new object[]{ roll, rev1, rrev1, rev2, rrev2, rev3, rrev3 } ) );
          } /**/
+         Console.ReadKey();
       }
 
       public static void Init ( string directory, string settingsJSON ) {
@@ -49,14 +70,23 @@ namespace Sheepy.AttackImprovementMod {
          }
 
          if ( Settings.LogFolder.Length <= 0 ) {
-            LogDir = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location );
+            LogDir = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ) + "/";
             logCache += "\nLog folder set to " + LogDir + ". If that fails, fallback to " + FALLBACK_LOG_DIR + "." ;
          }
          DeleteLog( LOG_NAME );
          Log( logCache );
 
-         Pre_1_1 = ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0.";
-         Log( Pre_1_1 ? "Game is Pre-1.1 (Clustered Called Shot)" : "Game is Post-1.1 (Non-Clustered Called Shot)" );
+         // Need a proper version parsing routine. Next time.
+         if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
+            GameUseClusteredCallShot = GameHitLocationBugged = true;
+            Log( "Game is 1.0.x (Clustered Called Shot, Hit Location bugged)" );
+         } else if ( ( VersionInfo.ProductVersion + ".0.0." ).Substring( 0, 6 ) == "1.1.0" ) {
+            GameHitLocationBugged = true;
+            Log( "Game is 1.1.0 (Non-Clustered Called Shot, Hit Location bugged)" );
+         } else {
+            Log( "Game is 1.1.1 or up (Non-Clustered Called Shot, Hit Location fixed)" );
+         }
+         Log();
 
          try {
             if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowHeatAndStab ) {
@@ -70,6 +100,7 @@ namespace Sheepy.AttackImprovementMod {
             LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
             //LoadModule( "Line of Fire", typeof( LineOfFire ) );
             LoadModule( "Melee", typeof( Melee ) );
+            Log();
 
          } catch ( Exception ex ) {
             Log( ex );
@@ -141,8 +172,8 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static bool Log( object message ) { Log( message.ToString() ); return true; }
-      internal static void Log( string message ) {
-         string logName = LogDir + "/" + LOG_NAME;
+      internal static void Log( string message = "" ) {
+         string logName = LogDir + LOG_NAME;
          try {
             if ( ! File.Exists( logName ) ) 
                message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;
@@ -151,12 +182,12 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void WriteLog( string filename, string message ) {
-         string logName = LogDir + "/" + filename;
+         string logName = LogDir + filename;
          try {
             File.AppendAllText( logName, message );
          } catch ( Exception ) {
             try {
-               logName = FALLBACK_LOG_DIR + "/" + filename;
+               logName = FALLBACK_LOG_DIR + filename;
                File.AppendAllText( logName, message );
             } catch ( Exception ex ) {
                Console.WriteLine( message );
@@ -179,7 +210,7 @@ namespace Sheepy.AttackImprovementMod {
          else
             Log( "Cannot Initiate " + module );
       }
-      
+
       // ============ Game States ============
 
       internal static CombatHUD HUD;

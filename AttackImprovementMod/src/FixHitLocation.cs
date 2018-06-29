@@ -20,15 +20,15 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void InitPatch () {
          scale = Settings.FixHitDistribution ? SCALE : 1;
-         CallShotClustered = Settings.CalledShotUseClustering || Mod.Pre_1_1;
+         CallShotClustered = Settings.CalledShotUseClustering || Mod.GameUseClusteredCallShot;
 
          MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Public | BindingFlags.Static ); // Only one public static GetHitLocation method.
          if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
             Log( "Error: Cannot find HitLocation.GetHitLocation( ?, float, ?, float ) to patch" );
 
          } else {
-            bool patchMech    = Settings.CalledShotUseClustering || Settings.FixHitDistribution || Settings.MechCalledShotMultiplier != 1.0f,
-                 patchVehicle = Settings.FixHitDistribution || Settings.VehicleCalledShotMultiplier != 1.0f,
+            bool patchMech    = ( Settings.FixHitDistribution && GameHitLocationBugged ) || Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
+                 patchVehicle = ( Settings.FixHitDistribution && GameHitLocationBugged ) || Settings.VehicleCalledShotMultiplier != 1.0f,
                  patchPostfix = Settings.LogHitRolls;
             if ( patchMech || patchVehicle || patchPostfix ) {
                HarmonyMethod FixArmour  = patchMech    ? MakePatch( "OverrideMechCalledShot"    ) : null;
@@ -56,10 +56,9 @@ namespace Sheepy.AttackImprovementMod {
             else
                Log( "Error: Can't find CombatHUDVehicleArmorHover.Readout. OnPointerClick not patched. Vehicle called shot may not work." );
 
-            // Restore popup location
-            if ( Mod.Pre_1_1 )
+            if ( Mod.GameUseClusteredCallShot ) // 1.0.x
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "RestoreVehicleCalledShotLocation_1_0", null );
-            else
+            else // 1.1.x
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, "RestoreVehicleCalledShotLocation_1_1", null );
          }
       }
@@ -99,7 +98,7 @@ namespace Sheepy.AttackImprovementMod {
                if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
                   hitTable = Combat.Constants.GetMechClusterTable( bonusLocation, dir );
             }
-            if ( Settings.FixHitDistribution ) return true;
+            if ( ! Settings.FixHitDistribution || ! GameHitLocationBugged ) return true;
             __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
             return false;
          } catch ( Exception ex ) {
@@ -110,7 +109,7 @@ namespace Sheepy.AttackImprovementMod {
       public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) {
          try {
             bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-            if ( ! Settings.FixHitDistribution ) return true;
+            if ( ! Settings.FixHitDistribution || ! GameHitLocationBugged ) return true;
             __result = GetHitLocation( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
             return false;
          } catch ( Exception ex ) {
@@ -174,7 +173,7 @@ namespace Sheepy.AttackImprovementMod {
       // ============ GetHitLocation ============
 
       internal static int SumWeight<T> ( Dictionary<T, int> hitTable, T bonusLocation, float bonusLocationMultiplier, int SCALE ) {
-			int totalWeight = 0;
+         int totalWeight = 0;
          foreach ( int weight in hitTable.Values ) totalWeight += weight;
          totalWeight *= SCALE;
          if ( bonusLocationMultiplier != 1 && hitTable.ContainsKey( bonusLocation ) )
@@ -184,16 +183,16 @@ namespace Sheepy.AttackImprovementMod {
 
       public static T GetHitLocation<T> ( Dictionary<T, int> hitTable, float roll, T bonusLocation, float bonusLocationMultiplier ) {
          int totalWeight = SumWeight( hitTable, bonusLocation, bonusLocationMultiplier, SCALE );
-			int goal = (int)( roll * (double)totalWeight ), i = 0;
-			foreach ( KeyValuePair<T, int> location in hitTable ) {
-				if ( location.Value <= 0 ) continue;
-				if ( location.Key.Equals( bonusLocation ) )
-					i += (int)( (float) location.Value * bonusLocationMultiplier * SCALE );
-				else
-					i += location.Value * SCALE;
-				if ( i >= goal )
-					return location.Key;
-			}
+         int goal = (int)( roll * (double)totalWeight ), i = 0;
+         foreach ( KeyValuePair<T, int> location in hitTable ) {
+            if ( location.Value <= 0 ) continue;
+            if ( location.Key.Equals( bonusLocation ) )
+               i += (int)( (float) location.Value * bonusLocationMultiplier * SCALE );
+            else
+               i += location.Value * SCALE;
+            if ( i >= goal )
+               return location.Key;
+         }
          throw new ApplicationException( "No valid hit location. Enable logging to see hitTable." );
       }
 
@@ -205,7 +204,7 @@ namespace Sheepy.AttackImprovementMod {
       public static void RecordVehicleCalledShotClickLocation ( CombatHUDVehicleArmorHover __instance ) {
          try {
             HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
-				SelectionStateFire selectionState = Readout.HUD.SelectionHandler.ActiveState as SelectionStateFire;
+            SelectionStateFire selectionState = Readout.HUD.SelectionHandler.ActiveState as SelectionStateFire;
             if ( selectionState != null )
                selectionState.calledShotLocation = TranslateLocation( selectionState.calledShotVLocation );
          } catch ( Exception ex ) {
@@ -234,7 +233,7 @@ namespace Sheepy.AttackImprovementMod {
          } catch ( Exception ex ) {
             return Log( ex );
          }
-		}
+      }
 
       public static bool FixVehicleCalledShotFloatie ( ref string __result, ArmorLocation location ) {
          try {

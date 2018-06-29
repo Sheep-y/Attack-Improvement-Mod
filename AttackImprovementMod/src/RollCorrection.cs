@@ -6,12 +6,13 @@ namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using System.Reflection;
    using System.IO;
+   using UnityEngine;
 
    public class RollCorrection {
       
       internal const string ROLL_LOG = "Log_AttackRoll.txt";
       private static bool DisableRollCorrection = false;
-      private static readonly float[] correctionCache = new float[20];
+      private static readonly float[] correctionCache = new float[21];
 
       internal static void InitPatch () {
          if ( ! Settings.PersistentLog ) DeleteLog( ROLL_LOG );
@@ -46,17 +47,16 @@ namespace Sheepy.AttackImprovementMod {
             if ( Settings.RollCorrectionStrength < 0 ) {
                Log( "Error: RollCorrectionStrength must not be negative." );
                Settings.RollCorrectionStrength = 1.0f;
-            }
-            if ( Settings.RollCorrectionStrength >= 2 ) {
+            } else if ( Settings.RollCorrectionStrength > 1.9999f ) {
                if ( Settings.RollCorrectionStrength > 2 )
                   Log( "Warning: RollCorrectionStrength must be less than 2." );
                Settings.RollCorrectionStrength = 1.9999f; // Max! 1.99999 results in NaN in reverse correction
             }
+
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( AttackType, "GetCorrectedRoll", BindingFlags.NonPublic | BindingFlags.Instance, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
-
             if ( rollCorrected && Settings.ShowRealWeaponHitChance ) {
-               for ( int i = 0 ; i < 20 ; i++ )
+               for ( int i = 0 ; i < 21 ; i++ )
                   correctionCache[i] = ReverseRollCorrection( 0.05f * i, Settings.RollCorrectionStrength );
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowRealHitChance", null );
             }
@@ -73,6 +73,8 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChanceFormat", null );
             if ( ! Settings.ShowRealWeaponHitChance )
                Log( "Warning: ShowDecimalHitChance without ShowRealWeaponHitChance" );
+         } else if ( Settings.ShowRealWeaponHitChance ) {
+            Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChanceRange", null );
          }
       }
 
@@ -102,10 +104,10 @@ namespace Sheepy.AttackImprovementMod {
 
       public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) {
          try {
-				roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
-				if ( team != null )
-					roll -= team.StreakBreakingValue;
-				__result = roll;
+            roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
+            if ( team != null )
+               roll -= team.StreakBreakingValue;
+            __result = roll;
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
@@ -115,17 +117,17 @@ namespace Sheepy.AttackImprovementMod {
       private static FieldInfo StreakBreakingValueProp = null;
       public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) {
          try {
-			   if ( succeeded ) {
+               if ( succeeded ) {
                StreakBreakingValueProp.SetValue( __instance, 0f );
 
-			   } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
+               } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
                float mod;
                if ( Settings.MissStreakBreakerDivider > 0 )
                   mod = ( targetValue - Settings.MissStreakBreakerThreshold ) / Settings.MissStreakBreakerDivider;
                else
                   mod = - Settings.MissStreakBreakerDivider;
                StreakBreakingValueProp.SetValue( __instance, __instance.StreakBreakingValue + mod );
-			   }
+            }
             return false;
          } catch ( Exception ex ) {
             return Log( ex );
@@ -133,8 +135,9 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static void ShowRealHitChance ( ref float chance ) {
+         chance = Mathf.Clamp( chance, 0f, 1f );
          int i = (int)( ( chance + 0.00001f ) / 0.05f );
-         if ( i >= 0 && i < 20 && Math.Abs( i * 0.05f - chance ) < 0.00001 )
+         if ( Math.Abs( i * 0.05f - chance ) < 0.00001f )
             chance = correctionCache[ i ];
          else {
             Log( "Uncached hit chance reversal from " + chance + ", diff: " + ( i * 0.05f - chance ) );
@@ -147,10 +150,22 @@ namespace Sheepy.AttackImprovementMod {
       private static readonly object[] empty = new object[]{};
 
       // Override the original code to show accuracy in decimal points
+      public static bool OverrideWeaponHitChanceRange ( CombatHUDWeaponSlot __instance, float chance ) {
+         try {
+            HitChance.Invoke( __instance, new object[]{ chance } );
+            __instance.HitChanceText.text = string.Format( "{0:0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
+            Refresh.Invoke( __instance, empty );
+            return false;
+         } catch ( Exception ex ) {
+            return Log( ex );
+         }
+      }
+
+      // Override the original code to show accuracy in decimal points
       public static bool OverrideWeaponHitChanceFormat ( CombatHUDWeaponSlot __instance, float chance ) {
          try {
             HitChance.Invoke( __instance, new object[]{ chance } );
-			   __instance.HitChanceText.text = string.Format( "{0:0.0}%", Math.Max( 0f, Math.Min( chance * 100f, 100f ) ) );
+            __instance.HitChanceText.text = string.Format( "{0:0.0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
             Refresh.Invoke( __instance, empty );
             return false;
          } catch ( Exception ex ) {
