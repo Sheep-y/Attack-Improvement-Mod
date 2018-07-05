@@ -26,28 +26,30 @@ namespace Sheepy.AttackImprovementMod {
 
          Mech mech = (Mech) __instance.DisplayedActor;
          int jets = mech.WorkingJumpjets;
-         string line1 = mech.weightClass.ToString(), line2;
+         string line1 = mech.weightClass.ToString(), line2 = null;
          if ( jets > 0 ) line1 += ", " + jets + " JETS";
-         int baseHeat = mech.CurrentHeat + mech.TempHeat,
-               baseStab = (int) mech.CurrentStability;
+
+         int baseHeat = mech.CurrentHeat, newHeat = baseHeat,
+             baseStab = (int) mech.CurrentStability, newStab = baseStab;
          if ( __instance.DisplayedActor.team.IsLocalPlayer ) { // Two lines in selection panel
             line1 = "·\n" + line1;
             CombatSelectionHandler selection = HUD?.SelectionHandler;
-            int newHeat = baseHeat, newStab = baseStab;
+            newHeat += mech.TempHeat;
             if ( selection != null && selection.SelectedActor == mech ) {
                newHeat += selection.ProjectedHeatForState;
                if ( ! mech.HasMovedThisRound )
                   newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
                if ( ! mech.HasAppliedHeatSinks )
                   newHeat = Math.Min( Math.Max( 0, newHeat - mech.AdjustedHeatsinkCapacity ), mech.MaxHeat );
-               newStab += (int) selection.ProjectedStabilityForState;
+               newStab = (int) selection.ProjectedStabilityForState;
             }
-            line2  = "Heat " + baseHeat + ( baseHeat == newHeat ? "" :  " >> " + newHeat ) + "\n";
-            line2 += "Stab " + (int) mech.CurrentStability + ( baseStab == newStab ? "" :  " >> " + newStab );
-
-         } else { // One line in target panel
-            line2 = "Heat " + baseHeat + ", Stab " + baseStab;
          }
+
+         line2  = "Heat " + baseHeat;
+         if ( baseHeat == newHeat ) line2 += "/" + mech.MaxHeat; else line2 += " >> " + newHeat;
+         line2 += "\nStab " + baseStab;
+         if ( baseStab == newStab ) line2 += "/" + mech.MaxStability; else line2 += " >> " + newStab;
+
          __instance.ActorWeightText.text = line1 + "\n" + line2;
          __instance.JumpJetsHolder.SetActive( false );
          return false;
