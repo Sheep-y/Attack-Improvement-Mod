@@ -63,6 +63,7 @@
     <Compile Include="src\HeatAndStab.cs" />
     <Compile Include="src\Melee.cs" />
     <Compile Include="src\LineOfFire.cs" />
+    <Compile Include="src\RollModifier.cs" />
     <Compile Include="src\RollCorrection.cs" />
     <Compile Include="src\FixCalledShotPopUp.cs" />
     <Compile Include="src\FixHitLocation.cs" />

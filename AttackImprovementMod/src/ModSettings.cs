@@ -43,30 +43,38 @@
       /* Allow bonus total modifier to increase hit chance. */
       public bool AllowBonusHitChance = true;
 
-      /* Remove the 5% step of hit chance. Allow odd piloting stat to enjoy their 2.5% hit chance. */
-      public bool UnlockHitChanceStep = true;
+      /* Step of hit chance, range 0 to 0.2.  Default 0.05, or 5%, same as game default.  Hit chance is always rounded down.
+       * Set to 0.001 to change the hit chance step to 0.1% to allow odd piloting stat to enjoy their 2.5% hit chance.
+       * Changing to 0 is possible but not advised because of the stress on reverse roll correction cache. */
+      public float HitChanceStep = 0.05f;
 
-      /* Modify base hit chance. Negative to adjust everything down, positive to adjust everything up. */
-      public float BaseHitChanceModifier = -0.05f;
+      /* Modify base hit chance. Negative to adjust everything down, positive to adjust everything up. Default 0. */
+      public float BaseHitChanceModifier = -0.01f;
 
-      /* Max hit chance after all modifiers but before roll correction. */
+      /* Max hit chance after all modifiers but before roll correction. Default 0.95, same as game default.
+       * Note that 100% hit chance (max) may still miss if roll correction is enabled. */
       public float MaxFinalHitChance = 0.95f;
 
-      /* Min hit chance after all modifiers but before roll correction. */
+      /* Min hit chance after all modifiers but before roll correction. Default 0.05, same as game default. */
       public float MinFinalHitChance = 0.05f;
 
-      /* Make hit chance modifier has diminishing return rather than simple add and subtract. */
+      /* Make hit chance modifier has diminishing return rather than simple add and subtract. Default false. */
       public bool DiminishingHitChanceModifier = true;
 
-      /* Diminishing Bonus = 2-Base^(Bonus/Divisor), 2 - 0.75^(Bonus/6).
-         Example: +3 Bonus @ 80% Base ToHit = 1.1 x 0.8 = 88% Hit */
-      public float DiminishingBonusPowerBase = 0.8f;
-      public float DiminishingBonusPowerDivisor = 6f;
 
-      /* Diminishing Penalty = Base^(Penalty/Divisor), Default 0.85^(Penalty/1.6)
-         Example: +6 Penalty @ 80% Base ToHit = 54% x 0.8 = 43% Hit */
-      public float DiminishingPenaltyPowerBase = 0.85f;
-      public float DiminishingPenaltyPowerDivisor = 1.5f;
+      /* Diminishing Bonus = 2-Base^(Bonus/Divisor), Default 2 - 0.75^(Bonus/6).
+         Example: +3 Bonus @ 80% Base ToHit = 1.1 x 0.8 = 88% Hit
+         Pre-calcuated table caps at 16 by default. */
+      public double DiminishingBonusPowerBase = 0.8f;
+      public double DiminishingBonusPowerDivisor = 6f;
+      public int DiminishingBonusMax = 16;
+
+      /* Diminishing Penalty = Base^(Penalty/Divisor), Default 0.85^(Penalty/1.6).
+         Example: +6 Penalty @ 80% Base ToHit = 54% x 0.8 = 43% Hit
+         Pre-calcuated table caps at 32 by default. */
+      public double DiminishingPenaltyPowerBase = 0.85f;
+      public double DiminishingPenaltyPowerDivisor = 1.5f;
+      public int DiminishingPenaltyMax = 32;
 
       /// 
       /// To Hit Rolls Correction

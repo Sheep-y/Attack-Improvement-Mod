@@ -16,8 +16,6 @@ namespace Sheepy.AttackImprovementMod {
          Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
          DisableRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 
-         Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideGetUMChance", null );
-
          if ( ! DisableRollCorrection ) {
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
@@ -69,10 +67,6 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       // ============ Fixes ============
-
-      public static bool OverrideGetUMChance ( float baseChance, float totalModifiers ) { try {
-         return true;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) { try {
          roll = CorrectRoll( roll, Settings.RollCorrectionStrength );

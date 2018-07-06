@@ -12,8 +12,6 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void InitPatch () {
          ModSettings Settings = Mod.Settings;
-         if ( Settings.IncreaseMeleePositionChoice || Mod.Settings.IncreaseDFAPositionChoice )
-            Patch( typeof( EncounterLayerParent ), "Start", null, "ClearMeleeDFALocationLimit" );
          if ( Settings.UnlockMeleePositioning )
             Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), "OverrideMeleeDestinations", null );
          /*

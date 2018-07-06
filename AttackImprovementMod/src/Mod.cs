@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 namespace Sheepy.AttackImprovementMod {
 
@@ -33,6 +34,7 @@ namespace Sheepy.AttackImprovementMod {
          CacheCombatState();
 
          modules.Add( "Logger", new AttackLog() );
+         modules.Add( "Roll Modifier", new RollModifier() );
          modules.Add( "Roll Corrections", new RollCorrection() );
          modules.Add( "Called Shot and Hit Location", new FixHitLocation() );
          modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
@@ -53,9 +55,9 @@ namespace Sheepy.AttackImprovementMod {
          string logCache = "Mod Folder: " + directory + "\n";
          try {
             Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
-            logCache =  "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented );
+            logCache +=  "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented );
          } catch ( Exception ex ) {
-            logCache = string.Format( "Error: Cannot read mod settings, using default: {0}", ex );
+            logCache += string.Format( "Error: Cannot read mod settings, using default: {0}", ex );
          }
          try {
             if ( Settings.LogFolder.Length <= 0 ) {
@@ -137,6 +139,15 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       // ============ UTILS ============
+
+      internal static string Join<T> ( string separator, T[] array ) {
+         StringBuilder result = new StringBuilder();
+         for ( int i = 0, len = array.Length ; i < len ; i++ ) {
+            if ( i > 0 ) result.Append( separator );
+            result.Append( array[i]?.ToString() );
+         }
+         return result.ToString();
+      }
 
       internal static int TryGet<T> ( Dictionary<T, int> table, T key ) {
          table.TryGetValue( key, out int result );
@@ -228,8 +239,8 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static void CacheCombatState () {
-         Combat = UnityGameInstance.BattleTechGame.Combat;
-         Constants = Combat.Constants;
+         Combat = UnityGameInstance.BattleTechGame?.Combat;
+         Constants = Combat?.Constants;
       }
    }
 
