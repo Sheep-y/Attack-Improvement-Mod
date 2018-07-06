@@ -26,7 +26,9 @@ namespace Sheepy.AttackImprovementMod {
             HUD.ShowCalledShotPopUp( __instance.SelectedActor, __instance.TargetedCombatant as AbstractActor );
       }                 catch ( Exception ex ) { Log( ex ); } }
 
+      private static float MaxMeleeVerticalOffset = 8f;
       public override void CombatStarts () {
+         MaxMeleeVerticalOffset = Constants.MoveConstants.MaxMeleeVerticalOffset;
          PropertyInfo move = typeof( CombatGameConstants ).GetProperty( "MoveConstants" );
          MovementConstants con = Constants.MoveConstants;
          if ( Mod.Settings.IncreaseMeleePositionChoice )
@@ -42,17 +44,19 @@ namespace Sheepy.AttackImprovementMod {
          if ( ! owner.team.IsLocalPlayer || owner.VisibilityToTargetUnit( target ) < VisibilityLevel.LOSFull )
             return true;
 
-         List<Vector3> adjacentPointsOnGrid = Combat.HexGrid.GetAdjacentPointsOnGrid( target.CurrentPosition );
+         Vector3 pos = target.CurrentPosition;
+         float currentY = pos.y;
          PathNodeGrid grids = __instance.CurrentGrid;
-         MovementConstants moves = Constants.MoveConstants;
 
+         List<Vector3> adjacentPointsOnGrid = Combat.HexGrid.GetAdjacentPointsOnGrid( pos );
          List<PathNode> pathNodesForPoints = Pathing.GetPathNodesForPoints( adjacentPointsOnGrid, grids );
          for ( int i = pathNodesForPoints.Count - 1; i >= 0; i-- ) {
-            if ( Mathf.Abs( pathNodesForPoints[i].Position.y - target.CurrentPosition.y ) > moves.MaxMeleeVerticalOffset || grids.FindBlockerReciprocal( pathNodesForPoints[i].Position, target.CurrentPosition ) )
+            if ( Mathf.Abs( pathNodesForPoints[i].Position.y - currentY ) > MaxMeleeVerticalOffset || grids.FindBlockerReciprocal( pathNodesForPoints[i].Position, pos ) )
                pathNodesForPoints.RemoveAt( i );
          }
 
-         if ( pathNodesForPoints.Count > 1 ) {
+         if ( ! Mod.Settings.IncreaseMeleePositionChoice && pathNodesForPoints.Count > 1 ) {
+            MovementConstants moves = Constants.MoveConstants;
             if ( moves.SortMeleeHexesByPathingCost )
                pathNodesForPoints.Sort( (a, b) => a.CostToThisNode.CompareTo( b.CostToThisNode ) );
             else

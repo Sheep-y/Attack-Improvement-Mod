@@ -51,6 +51,13 @@ namespace Sheepy.AttackImprovementMod {
          }
       }
 
+      private static bool ClusterChanceNeverMultiplyHead = true;
+      private static float ClusterChanceOriginalLocationMultiplier = 1f;
+      public override void CombatStarts () {
+         ClusterChanceNeverMultiplyHead = Constants.ToHit.ClusterChanceNeverMultiplyHead;
+         ClusterChanceOriginalLocationMultiplier = Constants.ToHit.ClusterChanceOriginalLocationMultiplier;
+      }
+
       // ============ UTILS ============
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
@@ -61,8 +68,8 @@ namespace Sheepy.AttackImprovementMod {
          if ( location == ArmorLocation.None ) return 0;
          if ( Settings.MechCalledShotMultiplier != 1.0f )
             multiplier *= Settings.MechCalledShotMultiplier;
-         if ( location == ArmorLocation.Head && CallShotClustered && Constants.ToHit.ClusterChanceNeverMultiplyHead )
-            return multiplier * Constants.ToHit.ClusterChanceOriginalLocationMultiplier;
+         if ( location == ArmorLocation.Head && CallShotClustered && ClusterChanceNeverMultiplyHead )
+            return multiplier * ClusterChanceOriginalLocationMultiplier;
          return multiplier;
       }
 

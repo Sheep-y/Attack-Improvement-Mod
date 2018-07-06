@@ -22,7 +22,7 @@ namespace Sheepy.AttackImprovementMod {
             Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
             Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
             if ( ! File.Exists( ROLL_LOG ) )
-               RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location" } ) );
+               RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Hit Location" } ) );
          }
       }
 
@@ -59,12 +59,11 @@ namespace Sheepy.AttackImprovementMod {
                "\t--" + // Roll; Empty cells are added so that copy and paste will override any old data in Excel, instead of leaving them in place and make it confusing
                "\t--\t--\t--\t--" +  // Head & Torsos
                "\t--\t--\t--\t--" +  // Limbs
-               "\t--\t--\t--\t--" ); // called shot and result
+               "\t--\t--\t--" ); // called shot and result
       }
 
       public static void LogMechHit ( ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
          // "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location"
-         int totalWeight = SumWeight( hitTable, bonusLocation, bonusLocationMultiplier, scale );
          RollLog(
                GetHitLog() + "\t" +
                randomRoll + "\t" +
@@ -78,14 +77,11 @@ namespace Sheepy.AttackImprovementMod {
                TryGet( hitTable, ArmorLocation.RightLeg ) + "\t" +
                bonusLocation + "\t" +
                bonusLocationMultiplier + "\t" +
-               totalWeight + "\t" +
-               (int)( randomRoll * totalWeight ) + "\t" +
                __result );
       } catch ( Exception ex ) { Log( ex ); } }
 
       public static void LogVehicleHit ( VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
          // "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location"
-         int totalWeight = SumWeight( hitTable, bonusLocation, bonusLocationMultiplier, scale );
          RollLog(
                GetHitLog() + "\t" +
                randomRoll + "\t" +
@@ -99,8 +95,6 @@ namespace Sheepy.AttackImprovementMod {
                "\t" +
                bonusLocation + "\t" +
                bonusLocationMultiplier + "\t" +
-               totalWeight + "\t" +
-               (int)( randomRoll * totalWeight ) + "\t" +
                __result );
       } catch ( Exception ex ) { Log( ex ); } }
 

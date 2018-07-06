@@ -39,9 +39,9 @@ namespace Sheepy.AttackImprovementMod {
       public override void CombatStarts () {
          if ( Settings.AllowBonusHitChance ) {
             PropertyInfo res = typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" );
-            CombatResolutionConstantsDef conf = Constants.ResolutionConstants;
-            conf.AllowTotalNegativeModifier = true;
-            res.SetValue( Constants, conf, null );
+            CombatResolutionConstantsDef con = Constants.ResolutionConstants;
+            con.AllowTotalNegativeModifier = true;
+            res.SetValue( Constants, con, null );
          }
       }
 
