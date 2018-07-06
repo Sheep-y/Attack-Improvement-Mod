@@ -9,21 +9,22 @@ namespace Sheepy.AttackImprovementMod {
    using static FixHitLocation;
 
    public class FixCalledShotPopUp : ModModule {
+      
+      private static string CalledShotHitChanceFormat = "{0:0}%";
 
       public override void InitPatch () {
-         if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance ) {
+         if ( Settings.ShowDecimalCalledChance )
+            CalledShotHitChanceFormat = "{0:0.0}%";
 
+         if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowDecimalCalledChance ) {
             Type CalledShot = typeof( CombatHUDCalledShotPopUp );
             Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
-            if ( Settings.ShowRealMechCalledShotChance )
+            if ( Settings.ShowRealMechCalledShotChance || Settings.ShowDecimalCalledChance )
                Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
 
-            if ( Settings.ShowRealVehicleCalledShotChance )
+            if ( Settings.ShowRealVehicleCalledShotChance || Settings.ShowDecimalCalledChance )
                Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
-
-         } else if ( Settings.ShowDecimalCalledChance ) {
-            Warn( "Decimal Called Shot Chance requires ShowRealMechCalledShotChance and/or ShowRealVehicleCalledShotChance" );
          }
       }
 
@@ -39,7 +40,7 @@ namespace Sheepy.AttackImprovementMod {
       // ============ HUD Override ============
 
       private static Object LastHitTable;
-      private static int HitTableTotalWeight;
+      private static float HitTableTotalWeight;
       private static int lastCalledShotLocation;
 
       private static bool CacheNeedRefresh ( Object hitTable, int targetedLocation ) {
@@ -52,42 +53,42 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static bool OverrideHUDMechCalledShotPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) { try {
-         Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! FixHitLocation.CallShotClustered )
+         Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! FixHitLocation.CallShotClustered || ! Settings.ShowRealMechCalledShotChance )
                                                    ? Combat.HitLocation.GetMechHitTable( AttackDirection )
-                                                   : Combat.Constants.GetMechClusterTable( targetedLocation, AttackDirection );
+                                                   : Constants.GetMechClusterTable( targetedLocation, AttackDirection );
          if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
-            HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
+            HitTableTotalWeight = (float) SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
 
          int local = TryGet( hitTable, location ) * scale;
          if ( location == targetedLocation )
             local = (int)( (float) local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
 
-         __result = FineTuneAndFormat( hitTable, location, local );
+         __result = FineTuneAndFormat( hitTable, location, local, Settings.ShowRealMechCalledShotChance );
          return false;
 
       } catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool OverrideHUDVehicleCalledShotPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) { try {
-         if ( ! Settings.FixVehicleCalledShot )
+         if ( ! Settings.FixVehicleCalledShot || ! Settings.ShowRealVehicleCalledShotChance )
             targetedLocation = VehicleChassisLocations.None; // Disable called location if vehicle called shot is not fixed
 
          Dictionary<VehicleChassisLocations, int> hitTable = Combat.HitLocation.GetVehicleHitTable( AttackDirection );
          if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
-            HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
+            HitTableTotalWeight = (float) SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
 
          int local = TryGet( hitTable, location ) * scale;
          if ( location == targetedLocation )
             local = (int)( (float) local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
 
-         __result = FineTuneAndFormat( hitTable, location, local );
+         __result = FineTuneAndFormat( hitTable, location, local, Settings.ShowRealVehicleCalledShotChance );
          return false;
 
       } catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ Subroutines ============
 
-      private static string FineTuneAndFormat<T> ( Dictionary<T, int> hitTable, T location, int local  ) {
-         if ( GameHitLocationBugged && ! Settings.FixHitDistribution ) { // If hit distribution is bugged, simulate it
+      private static string FineTuneAndFormat<T> ( Dictionary<T, int> hitTable, T location, int local, bool simulate  ) {
+         if ( GameHitLocationBugged && ! Settings.FixHitDistribution && simulate ) { // If hit distribution is bugged, simulate it.
             T def = default(T), last = def;
             foreach ( KeyValuePair<T, int> e in hitTable ) {
                if ( e.Value == 0 ) continue;
@@ -99,9 +100,8 @@ namespace Sheepy.AttackImprovementMod {
             }
             if ( last.Equals( location ) ) local--; // Last location get one less weight
          }
-         string format = Settings.ShowDecimalCalledChance ? "{0:0.0}%" : "{0:0}%";
-         float perc = (float) local * 100f / (float) HitTableTotalWeight;
-         return string.Format( format, perc );
+         float perc = ( (float) local ) * 100f / HitTableTotalWeight;
+         return string.Format( CalledShotHitChanceFormat, perc );
       }
    }
 }

@@ -33,7 +33,7 @@
       /* Override called shot percentage display of vehicle locations to show modded shot distribution. Default true. */
       public bool ShowRealVehicleCalledShotChance = true;
 
-      /* Display chance to one decimal IF AND ONLY IF called shot chance is overridden (above). Default false. */
+      /* Display chance to one decimal. Default false. If true, will also enables ShowRealMechCalledShotChance and ShowRealVehicleCalledShotChance. */
       public bool ShowDecimalCalledChance = false;
 
       /// 

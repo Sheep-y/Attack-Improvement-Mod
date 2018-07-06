@@ -14,21 +14,13 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void InitPatch () {
          if ( Mod.Settings.LogHitRolls ) {
-            GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static | BindingFlags.Public ); // Only one public static GetHitLocation method.
-            if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
-               Error( "Cannot patch HitLocation.GetHitLocation( ?, float, ?, float ). Called shot modding and attack logging disabled." );
-               return;
-            }
-
             Type AttackType = typeof( AttackDirector.AttackSequence );
             if ( ! Mod.Settings.PersistentLog ) DeleteLog( ROLL_LOG );
             Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic, "RecordAttacker", null );
             Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic, "RecordAttacker", null );
             Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
-            MethodInfo MechGetHit    = GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ),
-                       VehicleGetHit = GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) );
-            Patch( MechGetHit, null, "LogMechHit" );
-            Patch( VehicleGetHit, null, "LogVehicleHit" );
+            Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
+            Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
             if ( ! File.Exists( ROLL_LOG ) )
                RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location" } ) );
          }

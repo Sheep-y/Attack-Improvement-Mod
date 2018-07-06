@@ -15,28 +15,25 @@ namespace Sheepy.AttackImprovementMod {
       internal static int scale = SCALE; // Actual scale. Determined by FixHitDistribution.
 
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
-      internal static MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static ); // Only one public static GetHitLocation method.
 
       public override void InitPatch () {
          scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering || Mod.GameUseClusteredCallShot;
 
-         if ( GetHitLocation != null ) try {
-            bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
-                 prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot;
-            MethodInfo MechGetHit    = GetHitLocation.MakeGenericMethod( typeof( ArmorLocation ) ),
-                       VehicleGetHit = GetHitLocation.MakeGenericMethod( typeof( VehicleChassisLocations ) );
-            if ( prefixMech )
-               Patch( MechGetHit, "PrefixMechCalledShot", null );
-            if ( prefixVehicle )
-               Patch( VehicleGetHit, "PrefixVehicleCalledShot", null );
-            if ( prefixVehicle )
-               Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
-            if ( Settings.FixHitDistribution ) {
-               Patch( MechGetHit, "OverrideMechCalledShot", null );
-               Patch( VehicleGetHit, "OverrideVehicleCalledShot", null );
-            }
-         } catch ( Exception ex ) { Log( ex ); }
+         bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
+              prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot;
+         MethodInfo MechGetHit    = GetHitLocation( typeof( ArmorLocation ) ),
+                    VehicleGetHit = GetHitLocation( typeof( VehicleChassisLocations ) );
+         if ( prefixMech )
+            Patch( MechGetHit, "PrefixMechCalledShot", null );
+         if ( prefixVehicle )
+            Patch( VehicleGetHit, "PrefixVehicleCalledShot", null );
+         if ( prefixVehicle )
+            Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
+         if ( Settings.FixHitDistribution ) {
+            Patch( MechGetHit, "OverrideMechCalledShot", null );
+            Patch( VehicleGetHit, "OverrideVehicleCalledShot", null );
+         }
 
          if ( Settings.FixVehicleCalledShot ) {
             // Store popup location
@@ -56,12 +53,16 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ UTILS ============
 
+      internal static MethodInfo GetHitLocation ( Type generic ) {
+         return typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static | BindingFlags.Public ).MakeGenericMethod( generic );
+      }
+
       internal static float FixMultiplier ( ArmorLocation location, float multiplier ) {
          if ( location == ArmorLocation.None ) return 0;
          if ( Settings.MechCalledShotMultiplier != 1.0f )
             multiplier *= Settings.MechCalledShotMultiplier;
-         if ( location == ArmorLocation.Head && CallShotClustered && Combat.Constants.ToHit.ClusterChanceNeverMultiplyHead )
-            return multiplier * Combat.Constants.ToHit.ClusterChanceOriginalLocationMultiplier;
+         if ( location == ArmorLocation.Head && CallShotClustered && Constants.ToHit.ClusterChanceNeverMultiplyHead )
+            return multiplier * Constants.ToHit.ClusterChanceOriginalLocationMultiplier;
          return multiplier;
       }
 
@@ -78,7 +79,7 @@ namespace Sheepy.AttackImprovementMod {
       public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
          if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None ) {
-            HitTableConstantsDef hitTables = Combat.Constants.HitTables;
+            HitTableConstantsDef hitTables = Constants.HitTables;
             AttackDirection dir = AttackDirection.None;
             if      ( hitTable == hitTables.HitMechLocationFromFront ) dir = AttackDirection.FromFront;
             else if ( hitTable == hitTables.HitMechLocationFromLeft  ) dir = AttackDirection.FromLeft;
@@ -87,7 +88,7 @@ namespace Sheepy.AttackImprovementMod {
             else if ( hitTable == hitTables.HitMechLocationProne     ) dir = AttackDirection.ToProne;
             else if ( hitTable == hitTables.HitMechLocationFromTop   ) dir = AttackDirection.FromTop;
             if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
-               hitTable = Combat.Constants.GetMechClusterTable( bonusLocation, dir );
+               hitTable = Constants.GetMechClusterTable( bonusLocation, dir );
          }
       }                 catch ( Exception ex ) { Log( ex ); } }
 

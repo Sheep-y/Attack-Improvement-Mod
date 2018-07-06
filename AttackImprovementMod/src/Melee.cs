@@ -28,15 +28,15 @@ namespace Sheepy.AttackImprovementMod {
             HUD.ShowCalledShotPopUp( __instance.SelectedActor, __instance.TargetedCombatant as AbstractActor );
       }                 catch ( Exception ex ) { Log( ex ); } }
 
-      public static void ClearMeleeDFALocationLimit () { try {
+      public override void CombatStarts () {
          PropertyInfo move = typeof( CombatGameConstants ).GetProperty( "MoveConstants" );
-         MovementConstants con = Combat.Constants.MoveConstants;
+         MovementConstants con = Constants.MoveConstants;
          if ( Mod.Settings.IncreaseMeleePositionChoice )
             con.NumMeleeDestinationChoices = 6;
          if ( Mod.Settings.IncreaseDFAPositionChoice )
             con.NumDFADestinationChoices = 6;
-         move.SetValue( Combat.Constants, con, null );
-      }                 catch ( Exception ex ) { Log( ex ); } }
+         move.SetValue( Constants, con, null );
+      }
 
       public static bool OverrideMeleeDestinations ( ref List<PathNode> __result, Pathing __instance, AbstractActor target ) { try {
          AbstractActor owner = __instance.OwningActor;
@@ -46,7 +46,7 @@ namespace Sheepy.AttackImprovementMod {
 
          List<Vector3> adjacentPointsOnGrid = Combat.HexGrid.GetAdjacentPointsOnGrid( target.CurrentPosition );
          PathNodeGrid grids = __instance.CurrentGrid;
-         MovementConstants moves = Combat.Constants.MoveConstants;
+         MovementConstants moves = Constants.MoveConstants;
 
          List<PathNode> pathNodesForPoints = Pathing.GetPathNodesForPoints( adjacentPointsOnGrid, grids );
          for ( int i = pathNodesForPoints.Count - 1; i >= 0; i-- ) {

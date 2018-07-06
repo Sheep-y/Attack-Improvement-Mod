@@ -30,6 +30,7 @@ namespace Sheepy.AttackImprovementMod {
          // Hook to combat starts
          patchClass = typeof( Mod );
          Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
+         CacheCombatState();
 
          modules.Add( "Logger", new AttackLog() );
          modules.Add( "Roll Corrections", new RollCorrection() );
@@ -47,7 +48,6 @@ namespace Sheepy.AttackImprovementMod {
          Log();
       }
 
-      
       public static void LogSettings ( string directory, string settingsJSON ) {
          // Get log settings
          string logCache = "Mod Folder: " + directory + "\n";
@@ -126,6 +126,10 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void Patch( MethodInfo patched, string prefix, string postfix ) {
+         if ( patched == null ) {
+            Error( "Method not found. Cannot patch [ " + prefix + " : " + postfix + " ]" );
+            return;
+         }
          HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
          if ( pre == null && post == null ) return; // MakePatch would have reported method not found
          harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
@@ -213,19 +217,24 @@ namespace Sheepy.AttackImprovementMod {
       // ============ Game States ============
 
       internal static CombatHUD HUD;
+      internal static CombatGameState Combat;
+      internal static CombatGameConstants Constants;
       public static void CombatInit ( CombatHUD __instance ) {
+         CacheCombatState();
          Mod.HUD = __instance;
          foreach ( var mod in modules ) try {
             mod.Value.CombatStarts();
          } catch ( Exception ex ) { Error( ex ); }
       }
 
-      // A shortcut to get CombatGameConstants
-      internal static CombatGameState Combat { get { return UnityGameInstance.BattleTechGame.Combat; } }
+      public static void CacheCombatState () {
+         Combat = UnityGameInstance.BattleTechGame.Combat;
+         Constants = Combat.Constants;
+      }
    }
 
    public abstract class ModModule {
       public abstract void InitPatch();
-      public void CombatStarts () { }
+      public virtual void CombatStarts () { }
    }
 }

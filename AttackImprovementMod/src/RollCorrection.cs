@@ -11,7 +11,6 @@ namespace Sheepy.AttackImprovementMod {
       
       private static bool DisableRollCorrection = false;
       private static readonly float[] correctionCache = new float[21];
-      private static string WeaponHitChanceFormat = "{0:0}%";
 
       public override void InitPatch () {
          Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
@@ -19,30 +18,16 @@ namespace Sheepy.AttackImprovementMod {
 
          Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideGetUMChance", null );
 
-         FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
-         bool rollCorrected = true;
-         if ( rollCorrection == null )
-            Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
-         else 
-            rollCorrected = (bool) rollCorrection.GetValue( null );
-
-         if ( DisableRollCorrection ) {
-            if ( ! rollCorrected ) {
-               Log( "Roll correction is already disabled." );
-            } else {
-               rollCorrection.SetValue( null, false );
-            }
-            rollCorrected = false;
-
-         } else {
+         if ( ! DisableRollCorrection ) {
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
-            if ( rollCorrected && Settings.ShowRealWeaponHitChance ) {
+            if ( Settings.ShowRealWeaponHitChance ) {
                for ( int i = 0 ; i < 21 ; i++ )
                   correctionCache[i] = ReverseRollCorrection( 0.05f * i, Settings.RollCorrectionStrength );
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowRealHitChance", null );
             }
          }
+
          if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
             StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
             if ( StreakBreakingValueProp != null )
@@ -51,13 +36,17 @@ namespace Sheepy.AttackImprovementMod {
                Error( "Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched." );
          }
 
-         if ( Settings.ShowDecimalHitChance ) {
-            WeaponHitChanceFormat = "{0:0.0}%";
+         if ( Settings.ShowDecimalHitChance )
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChance", null );
-            if ( ! Settings.ShowRealWeaponHitChance )
-               Warn( "Warning: ShowDecimalHitChance without ShowRealWeaponHitChance" );
-         } else if ( Settings.ShowRealWeaponHitChance ) {
-            Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChance", null );
+      }
+
+      public override void CombatStarts () {
+         FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
+         if ( rollCorrection == null )
+            Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
+         else {
+            if ( DisableRollCorrection && (bool) rollCorrection.GetValue( null ) )
+               rollCorrection.SetValue( null, false );
          }
       }
 
@@ -125,7 +114,7 @@ namespace Sheepy.AttackImprovementMod {
       // Override the original code to remove accuracy cap on display, since correction can push it above 95%.
       public static bool OverrideWeaponHitChance ( CombatHUDWeaponSlot __instance, float chance ) { try {
          HitChance.Invoke( __instance, new object[]{ chance } );
-         __instance.HitChanceText.text = string.Format( WeaponHitChanceFormat, Mathf.Clamp( chance * 100f, 0f, 100f ) );
+         __instance.HitChanceText.text = string.Format( "{0:0.0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
          Refresh.Invoke( __instance, empty );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
