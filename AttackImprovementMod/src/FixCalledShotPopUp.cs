@@ -8,9 +8,9 @@ namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using static FixHitLocation;
 
-   public class FixCalledShotPopUp {
+   public class FixCalledShotPopUp : ModModule {
 
-      internal static void InitPatch () {
+      public override void InitPatch () {
          if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance ) {
 
             Type CalledShot = typeof( CombatHUDCalledShotPopUp );

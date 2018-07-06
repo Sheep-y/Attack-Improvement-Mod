@@ -9,7 +9,7 @@ namespace Sheepy.AttackImprovementMod {
    using UnityEngine.EventSystems;
    using static Mod;
 
-   public class FixHitLocation {
+   public class FixHitLocation : ModModule {
 
       private const int SCALE = 1024; // Increase precisions of float to int conversions. Set it too high may cause overflow.
       internal static int scale = SCALE; // Actual scale. Determined by FixHitDistribution.
@@ -17,7 +17,7 @@ namespace Sheepy.AttackImprovementMod {
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
       internal static MethodInfo GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static ); // Only one public static GetHitLocation method.
 
-      internal static void InitPatch () {
+      public override void InitPatch () {
          scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering || Mod.GameUseClusteredCallShot;
 

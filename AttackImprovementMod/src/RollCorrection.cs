@@ -7,13 +7,14 @@ namespace Sheepy.AttackImprovementMod {
    using System.Reflection;
    using UnityEngine;
 
-   public class RollCorrection {
+   public class RollCorrection : ModModule {
       
       private static bool DisableRollCorrection = false;
       private static readonly float[] correctionCache = new float[21];
       private static string WeaponHitChanceFormat = "{0:0}%";
 
-      internal static void InitPatch () {
+      public override void InitPatch () {
+         Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
          DisableRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 
          Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideGetUMChance", null );
@@ -34,8 +35,6 @@ namespace Sheepy.AttackImprovementMod {
             rollCorrected = false;
 
          } else {
-            Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
-
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
             if ( rollCorrected && Settings.ShowRealWeaponHitChance ) {

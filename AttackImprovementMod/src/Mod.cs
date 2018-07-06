@@ -18,14 +18,39 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
       internal static bool GameHitLocationBugged = false; // True if game version is less than 1.1.1
-      internal const string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod/";
+      internal static string FALLBACK_LOG_DIR = "Mods/AttackImprovementMod/";
       internal const string LOG_NAME = "Log_AttackImprovementMod.txt";
       internal static string LogDir = "";
-      internal static HarmonyInstance harmony = HarmonyInstance.Create( "io.github.Sheep-y.AttackImprovementMod" );
+      internal static readonly HarmonyInstance harmony = HarmonyInstance.Create( "io.github.Sheep-y.AttackImprovementMod" );
+      internal static readonly Dictionary<string, ModModule> modules = new Dictionary<string, ModModule>();
 
       public static void Init ( string directory, string settingsJSON ) {
+         LogSettings( directory, settingsJSON );
+
+         // Hook to combat starts
+         patchClass = typeof( Mod );
+         Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
+
+         modules.Add( "Logger", new AttackLog() );
+         modules.Add( "Roll Corrections", new RollCorrection() );
+         modules.Add( "Called Shot and Hit Location", new FixHitLocation() );
+         modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
+         modules.Add( "Heat and Stability", new HeatAndStab() );
+         //modules.Add( "Line of Fire", new LineOfFire() );
+         modules.Add( "Melee", new Melee() );
+
+         foreach ( var mod in modules )  try {
+            Log( "=== Patching " + mod.Key + " ===" );
+            patchClass = mod.Value.GetType();
+            mod.Value.InitPatch();
+         } catch ( Exception ex ) { Error( ex ); }
+         Log();
+      }
+
+      
+      public static void LogSettings ( string directory, string settingsJSON ) {
          // Get log settings
-         string logCache = "";
+         string logCache = "Mod Folder: " + directory + "\n";
          try {
             Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
             logCache =  "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented );
@@ -51,22 +76,6 @@ namespace Sheepy.AttackImprovementMod {
          } else {
             Log( "Game is 1.1.1 or up (Non-Clustered Called Shot, Hit Location fixed)" );
          }
-         Log();
-
-         // Patching
-         if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.ShowHeatAndStab ) {
-            patchClass = typeof( Mod );
-            Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RecordCombatHUD" );
-         }
-
-         if ( Settings.LogHitRolls )
-            LoadModule( "Logger", typeof( AttackLog ) );
-         LoadModule( "Roll Corrections", typeof( RollCorrection ) );
-         LoadModule( "Called Shot and Hit Location", typeof( FixHitLocation ) );
-         LoadModule( "Called Shot HUD", typeof( FixCalledShotPopUp ) );
-         LoadModule( "Heat and Stability", typeof( HeatAndStab ) );
-         //LoadModule( "Line of Fire", typeof( LineOfFire ) );
-         LoadModule( "Melee", typeof( Melee ) );
          Log();
       }
 
@@ -135,31 +144,24 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static float RangeCheck ( string name, float val, float shownMin, float realMin, float realMax, float shownMax ) {
-         if ( realMin > realMax ) Error( "Incorrect range check params on " + name );
-         if ( val > realMin && val < realMax ) return val;
-         string message = "Warning: " + name + " must be ";
-         if ( shownMin > float.MinValue )
-            if ( shownMax < float.MaxValue )
-               message += " between " + shownMin + " and " + shownMax;
+         if ( realMin > realMax || shownMin > shownMax ) Error( "Incorrect range check params on " + name );
+         float orig = val;
+         if ( val < realMin )
+            val = realMin;
+         else if ( val > realMax )
+            val = realMax;
+         if ( orig < shownMin && orig > shownMax ) {
+            string message = "Warning: " + name + " must be ";
+            if ( shownMin > float.MinValue )
+               if ( shownMax < float.MaxValue )
+                  message += " between " + shownMin + " and " + shownMax;
+               else
+                  message += " >= " + shownMin;
             else
-               message += " >= " + shownMin;
-         else
-            message += " <= " + shownMin;
-         val = val < realMin ? realMin : realMax;
-         Log( message + ". Setting to " + val );
+               message += " <= " + shownMin;
+            Log( message + ". Setting to " + val );
+         }
          return val;
-      }
-
-      private static void LoadModule( string name, Type module ) {
-         Log( "=== Patching " + name + " ===" );
-         patchClass = module;
-         try {
-            MethodInfo m = module.GetMethod( "InitPatch", BindingFlags.Static | BindingFlags.NonPublic );
-            if ( m != null ) 
-               m.Invoke( null, null );
-            else
-               Log( "Cannot Initiate " + module );
-         } catch ( Exception ex ) { Log( ex ); }
       }
 
       // ============ LOGS ============
@@ -211,11 +213,19 @@ namespace Sheepy.AttackImprovementMod {
       // ============ Game States ============
 
       internal static CombatHUD HUD;
-      public static void RecordCombatHUD ( CombatHUD __instance ) {
+      public static void CombatInit ( CombatHUD __instance ) {
          Mod.HUD = __instance;
+         foreach ( var mod in modules ) try {
+            mod.Value.CombatStarts();
+         } catch ( Exception ex ) { Error( ex ); }
       }
 
       // A shortcut to get CombatGameConstants
       internal static CombatGameState Combat { get { return UnityGameInstance.BattleTechGame.Combat; } }
+   }
+
+   public abstract class ModModule {
+      public abstract void InitPatch();
+      public void CombatStarts () { }
    }
 }

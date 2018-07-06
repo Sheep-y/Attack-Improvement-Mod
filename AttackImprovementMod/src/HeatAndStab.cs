@@ -6,9 +6,9 @@ namespace Sheepy.AttackImprovementMod {
    using System.Reflection;
    using static Mod;
 
-   public class HeatAndStab {
+   public class HeatAndStab : ModModule {
 
-      internal static void InitPatch () {
+      public override void InitPatch () {
          if ( Settings.ShowHeatAndStab ) {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", "ShowHeatAndStab", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );

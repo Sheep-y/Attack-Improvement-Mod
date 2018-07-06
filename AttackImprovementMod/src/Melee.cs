@@ -8,9 +8,9 @@ namespace Sheepy.AttackImprovementMod {
    using UnityEngine;
    using static Mod;
 
-   class Melee {
+   public class Melee : ModModule {
 
-      internal static void InitPatch () {
+      public override void InitPatch () {
          ModSettings Settings = Mod.Settings;
          if ( Settings.IncreaseMeleePositionChoice || Mod.Settings.IncreaseDFAPositionChoice )
             Patch( typeof( EncounterLayerParent ), "Start", null, "ClearMeleeDFALocationLimit" );

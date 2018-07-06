@@ -49,10 +49,10 @@
       /* Modify base hit chance. Negative to adjust everything down, positive to adjust everything up. */
       public float BaseHitChanceModifier = -0.05f;
 
-      /* Max hit chance after all modifiers. */
+      /* Max hit chance after all modifiers but before roll correction. */
       public float MaxFinalHitChance = 0.95f;
 
-      /* Min hit chance after all modifiers. */
+      /* Min hit chance after all modifiers but before roll correction. */
       public float MinFinalHitChance = 0.05f;
 
       /* Make hit chance modifier has diminishing return rather than simple add and subtract. */

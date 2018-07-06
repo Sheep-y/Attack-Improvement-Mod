@@ -8,11 +8,11 @@ namespace Sheepy.AttackImprovementMod {
    using BattleTech;
    using System.Collections.Generic;
 
-   class AttackLog {
+   public class AttackLog : ModModule {
 
       internal const string ROLL_LOG = "Log_AttackRoll.txt";
 
-      internal static void InitPatch () {
+      public override void InitPatch () {
          if ( Mod.Settings.LogHitRolls ) {
             GetHitLocation = typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static | BindingFlags.Public ); // Only one public static GetHitLocation method.
             if ( GetHitLocation.GetParameters().Length != 4 || GetHitLocation.GetParameters()[1].ParameterType != typeof( float ) || GetHitLocation.GetParameters()[3].ParameterType != typeof( float ) ) {
