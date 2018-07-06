@@ -2,6 +2,7 @@
 
 namespace Sheepy.AttackImprovementMod {
    using BattleTech;
+   using BattleTech.UI;
    using System.Collections.Generic;
    using System.Reflection;
    using UnityEngine;
@@ -10,11 +11,22 @@ namespace Sheepy.AttackImprovementMod {
    class Melee {
 
       internal static void InitPatch () {
-         if ( Mod.Settings.IncreaseMeleePositionChoice || Mod.Settings.IncreaseDFAPositionChoice )
+         ModSettings Settings = Mod.Settings;
+         if ( Settings.IncreaseMeleePositionChoice || Mod.Settings.IncreaseDFAPositionChoice )
             Patch( typeof( EncounterLayerParent ), "Start", null, "ClearMeleeDFALocationLimit" );
-         if ( Mod.Settings.UnlockMeleePositioning )
+         if ( Settings.UnlockMeleePositioning )
             Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), "OverrideMeleeDestinations", null );
+         /*
+         if ( Settings.AllowDFACalledShotVehicle ) {
+            Patch( typeof( SelectionStateJump ), "SetMeleeDest", BindingFlags.NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
+         }
+         */
       }
+
+      public static void ShowDFACalledShotPopup ( SelectionStateJump __instance ) { try {
+         if ( __instance.TargetedCombatant is Vehicle )
+            HUD.ShowCalledShotPopUp( __instance.SelectedActor, __instance.TargetedCombatant as AbstractActor );
+      }                 catch ( Exception ex ) { Log( ex ); } }
 
       public static void ClearMeleeDFALocationLimit () { try {
          PropertyInfo move = typeof( CombatGameConstants ).GetProperty( "MoveConstants" );
