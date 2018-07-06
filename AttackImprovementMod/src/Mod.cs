@@ -60,10 +60,10 @@ namespace Sheepy.AttackImprovementMod {
             logCache += string.Format( "Error: Cannot read mod settings, using default: {0}", ex );
          }
          try {
-            if ( Settings.LogFolder.Length <= 0 ) {
-               LogDir = Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location ) + "/";
-               logCache += "\nLog folder set to " + LogDir + ". If that fails, fallback to " + FALLBACK_LOG_DIR + "." ;
-            }
+            LogDir = Settings.LogFolder;
+            if ( Settings.LogFolder.Length <= 0 )
+               LogDir = directory + "/";
+            logCache += "\nLog folder set to " + LogDir + ". If that fails, fallback to " + FALLBACK_LOG_DIR + "." ;
             DeleteLog( LOG_NAME );
             Log( logCache );
          } catch ( Exception ex ) { Log( ex ); }

@@ -44,8 +44,7 @@
       public bool AllowBonusHitChance = true;
 
       /* Step of hit chance, range 0 to 0.2.  Default 0.05, or 5%, same as game default.  Hit chance is always rounded down.
-       * Set to 0.001 to change the hit chance step to 0.1% to allow odd piloting stat to enjoy their 2.5% hit chance.
-       * Changing to 0 is possible but not advised because of the stress on reverse roll correction cache. */
+       * Set to 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
       public float HitChanceStep = 0.05f;
 
       /* Modify base hit chance. Negative to adjust everything down, positive to adjust everything up. Default 0. */

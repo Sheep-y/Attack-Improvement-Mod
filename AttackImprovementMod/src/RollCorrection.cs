@@ -6,11 +6,12 @@ namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using System.Reflection;
    using UnityEngine;
+   using System.Collections.Generic;
 
    public class RollCorrection : ModModule {
       
       private static bool DisableRollCorrection = false;
-      private static readonly float[] correctionCache = new float[21];
+      private static readonly Dictionary<float, float> correctionCache = new Dictionary<float, float>(20);
 
       public override void InitPatch () {
          Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
@@ -19,11 +20,8 @@ namespace Sheepy.AttackImprovementMod {
          if ( ! DisableRollCorrection ) {
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
-            if ( Settings.ShowRealWeaponHitChance ) {
-               for ( int i = 0 ; i < 21 ; i++ )
-                  correctionCache[i] = ReverseRollCorrection( 0.05f * i, Settings.RollCorrectionStrength );
+            if ( Settings.ShowRealWeaponHitChance )
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowRealHitChance", null );
-            }
          }
 
          if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
@@ -94,11 +92,11 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void ShowRealHitChance ( ref float chance ) { try {
          chance = Mathf.Clamp( chance, 0f, 1f );
-         int i = (int)( ( chance + 0.00001f ) / 0.05f );
-         if ( Math.Abs( i * 0.05f - chance ) < 0.00001f )
-            chance = correctionCache[ i ];
-         else
-            chance = ReverseRollCorrection( chance, Settings.RollCorrectionStrength );
+         float corrected = float.NaN;
+         correctionCache.TryGetValue( chance, out corrected );
+         if ( corrected == float.NaN )
+            correctionCache.Add( chance, corrected = ReverseRollCorrection( chance, Settings.RollCorrectionStrength ) );
+         chance = corrected;
       }                 catch ( Exception ex ) { Log( ex ); } }
 
       private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", BindingFlags.Instance | BindingFlags.NonPublic );
