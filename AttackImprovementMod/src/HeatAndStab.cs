@@ -53,7 +53,7 @@ namespace Sheepy.AttackImprovementMod {
          __instance.ActorWeightText.text = line1 + "\n" + line2;
          __instance.JumpJetsHolder.SetActive( false );
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       private static bool needRefresh = false;
       public static void RecordRefresh () {

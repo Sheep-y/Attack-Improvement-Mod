@@ -23,7 +23,7 @@ namespace Sheepy.AttackImprovementMod {
                Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
 
          } else if ( Settings.ShowDecimalCalledChance ) {
-            Log( "Warning: Decimal Called Shot Chance requires ShowRealMechCalledShotChance and/or ShowRealVehicleCalledShotChance" );
+            Warn( "Decimal Called Shot Chance requires ShowRealMechCalledShotChance and/or ShowRealVehicleCalledShotChance" );
          }
       }
 
@@ -65,7 +65,7 @@ namespace Sheepy.AttackImprovementMod {
          __result = FineTuneAndFormat( hitTable, location, local );
          return false;
 
-      } catch ( Exception ex ) { return Log( ex ); } }
+      } catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool OverrideHUDVehicleCalledShotPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) { try {
          if ( ! Settings.FixVehicleCalledShot )
@@ -82,7 +82,7 @@ namespace Sheepy.AttackImprovementMod {
          __result = FineTuneAndFormat( hitTable, location, local );
          return false;
 
-      } catch ( Exception ex ) { return Log( ex ); } }
+      } catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ Subroutines ============
 

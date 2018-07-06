@@ -45,7 +45,7 @@ namespace Sheepy.AttackImprovementMod {
             if ( ReadoutProp != null )
                Patch( typeof( CombatHUDVehicleArmorHover ), "OnPointerClick", typeof( PointerEventData ), null, "RecordVehicleCalledShotClickLocation" );
             else
-               Log( "Error: Can't find CombatHUDVehicleArmorHover.Readout. OnPointerClick not patched. Vehicle called shot may not work." );
+               Error( "Can't find CombatHUDVehicleArmorHover.Readout. OnPointerClick not patched. Vehicle called shot may not work." );
 
             if ( Mod.GameUseClusteredCallShot ) // 1.0.x
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "RestoreVehicleCalledShotLocation_1_0", null );
@@ -94,7 +94,7 @@ namespace Sheepy.AttackImprovementMod {
       public static bool OverrideMechCalledShot ( ref ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
          __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static void PrefixVehicleCalledShot ( VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
@@ -103,7 +103,7 @@ namespace Sheepy.AttackImprovementMod {
       public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
          __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ GetHitLocation ============
 
@@ -151,18 +151,18 @@ namespace Sheepy.AttackImprovementMod {
       public static bool RestoreVehicleCalledShotLocation_1_0 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation ) { try {
          __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), attacker.CalledShotBonusMultiplier );
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool RestoreVehicleCalledShotLocation_1_1 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) { try {
          __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), bonusMultiplier );
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool FixVehicleCalledShotFloatie ( ref string __result, ArmorLocation location ) { try {
          if ( (int) location >= 0 ) return true;
          __result = Vehicle.GetLongChassisLocation( TranslateLocation( location ) );
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static ArmorLocation TranslateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(-(int)location); }
       public static VehicleChassisLocations TranslateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(-(int)location); }

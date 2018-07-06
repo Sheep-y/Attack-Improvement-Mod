@@ -16,10 +16,12 @@ namespace Sheepy.AttackImprovementMod {
       internal static void InitPatch () {
          DisableRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 
+         Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideGetUMChance", null );
+
          FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
          bool rollCorrected = true;
          if ( rollCorrection == null )
-            Log( "Warning: Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
+            Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
          else 
             rollCorrected = (bool) rollCorrection.GetValue( null );
 
@@ -32,14 +34,7 @@ namespace Sheepy.AttackImprovementMod {
             rollCorrected = false;
 
          } else {
-            if ( Settings.RollCorrectionStrength < 0 ) {
-               Log( "Error: RollCorrectionStrength must not be negative." );
-               Settings.RollCorrectionStrength = 1.0f;
-            } else if ( Settings.RollCorrectionStrength > 1.9999f ) {
-               if ( Settings.RollCorrectionStrength > 2 )
-                  Log( "Warning: RollCorrectionStrength must be less than 2." );
-               Settings.RollCorrectionStrength = 1.9999f; // Max! 1.99999 results in NaN in reverse correction
-            }
+            Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
 
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
@@ -54,14 +49,14 @@ namespace Sheepy.AttackImprovementMod {
             if ( StreakBreakingValueProp != null )
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
             else
-               Log( "Error: Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched." );
+               Error( "Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched." );
          }
 
          if ( Settings.ShowDecimalHitChance ) {
             WeaponHitChanceFormat = "{0:0.0}%";
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChance", null );
             if ( ! Settings.ShowRealWeaponHitChance )
-               Log( "Warning: ShowDecimalHitChance without ShowRealWeaponHitChance" );
+               Warn( "Warning: ShowDecimalHitChance without ShowRealWeaponHitChance" );
          } else if ( Settings.ShowRealWeaponHitChance ) {
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChance", null );
          }
@@ -87,13 +82,17 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Fixes ============
 
+      public static bool OverrideGetUMChance ( float baseChance, float totalModifiers ) { try {
+         return true;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
+
       public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) { try {
          roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
          if ( team != null )
             roll -= team.StreakBreakingValue;
          __result = roll;
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       private static FieldInfo StreakBreakingValueProp = null;
       public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) { try {
@@ -109,17 +108,15 @@ namespace Sheepy.AttackImprovementMod {
             StreakBreakingValueProp.SetValue( __instance, __instance.StreakBreakingValue + mod );
          }
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static void ShowRealHitChance ( ref float chance ) { try {
          chance = Mathf.Clamp( chance, 0f, 1f );
          int i = (int)( ( chance + 0.00001f ) / 0.05f );
          if ( Math.Abs( i * 0.05f - chance ) < 0.00001f )
             chance = correctionCache[ i ];
-         else {
-            Log( "Uncached hit chance reversal from " + chance + ", diff: " + ( i * 0.05f - chance ) );
+         else
             chance = ReverseRollCorrection( chance, Settings.RollCorrectionStrength );
-         }
       }                 catch ( Exception ex ) { Log( ex ); } }
 
       private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", BindingFlags.Instance | BindingFlags.NonPublic );
@@ -132,6 +129,6 @@ namespace Sheepy.AttackImprovementMod {
          __instance.HitChanceText.text = string.Format( WeaponHitChanceFormat, Mathf.Clamp( chance * 100f, 0f, 100f ) );
          Refresh.Invoke( __instance, empty );
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
    }
 }

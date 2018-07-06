@@ -66,6 +66,6 @@ namespace Sheepy.AttackImprovementMod {
          }
          __result = pathNodesForPoints;
          return false;
-      }                 catch ( Exception ex ) { return Log( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
    }
 }

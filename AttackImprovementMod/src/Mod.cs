@@ -77,7 +77,7 @@ namespace Sheepy.AttackImprovementMod {
       internal static HarmonyMethod MakePatch ( string method ) {
          if ( method == null ) return null;
          MethodInfo mi = patchClass.GetMethod( method );
-         if ( mi == null ) Log( "Error: Cannot find patch method " + method );
+         if ( mi == null ) Error( "Cannot find patch method " + method );
          return new HarmonyMethod( mi );
       }
 
@@ -110,7 +110,7 @@ namespace Sheepy.AttackImprovementMod {
          else
             patched = patchedClass.GetMethod( patchedMethod, flags, null, parameterTypes, null );
          if ( patched == null ) {
-            Log( string.Format( "Error: Cannot find {0}.{1}(...) to patch", new Object[]{ patchedClass.Name, patchedMethod } ) );
+            Error( string.Format( "Cannot find {0}.{1}(...) to patch", new Object[]{ patchedClass.Name, patchedMethod } ) );
             return;
          }
          Patch( patched, prefix, postfix );
@@ -125,6 +125,45 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ UTILS ============
 
+      internal static int TryGet<T> ( Dictionary<T, int> table, T key ) {
+         table.TryGetValue( key, out int result );
+         return result;
+      }
+
+      internal static float RangeCheck ( string name, float val, float min, float max ) {
+         return RangeCheck( name, val, min, min, max, max );
+      }
+
+      internal static float RangeCheck ( string name, float val, float shownMin, float realMin, float realMax, float shownMax ) {
+         if ( realMin > realMax ) Error( "Incorrect range check params on " + name );
+         if ( val > realMin && val < realMax ) return val;
+         string message = "Warning: " + name + " must be ";
+         if ( shownMin > float.MinValue )
+            if ( shownMax < float.MaxValue )
+               message += " between " + shownMin + " and " + shownMax;
+            else
+               message += " >= " + shownMin;
+         else
+            message += " <= " + shownMin;
+         val = val < realMin ? realMin : realMax;
+         Log( message + ". Setting to " + val );
+         return val;
+      }
+
+      private static void LoadModule( string name, Type module ) {
+         Log( "=== Patching " + name + " ===" );
+         patchClass = module;
+         try {
+            MethodInfo m = module.GetMethod( "InitPatch", BindingFlags.Static | BindingFlags.NonPublic );
+            if ( m != null ) 
+               m.Invoke( null, null );
+            else
+               Log( "Cannot Initiate " + module );
+         } catch ( Exception ex ) { Log( ex ); }
+      }
+
+      // ============ LOGS ============
+
       internal static void DeleteLog( string file ) {
          try {
             File.Delete( LogDir + file );
@@ -134,7 +173,7 @@ namespace Sheepy.AttackImprovementMod {
          } catch ( Exception ) { }
       }
 
-      internal static bool Log( object message ) { Log( message.ToString() ); return true; }
+      internal static void Log( object message ) { Log( message.ToString() ); }
       internal static void Log( string message = "" ) {
          string logName = LogDir + LOG_NAME;
          try {
@@ -142,6 +181,16 @@ namespace Sheepy.AttackImprovementMod {
                message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;
          } catch ( Exception ) {}
          WriteLog( LOG_NAME, message + "\r\n" );
+      }
+
+      internal static void Warn( object message ) { Warn( message.ToString() ); }
+      internal static void Warn( string message ) {
+         Log( "Warning: " + message );
+      }
+
+      internal static bool Error( object message ) { Error( message.ToString() ); return true; }
+      internal static void Error( string message ) {
+         Log( "Error: " + message );
       }
 
       internal static void WriteLog( string filename, string message ) {
@@ -157,23 +206,6 @@ namespace Sheepy.AttackImprovementMod {
                Console.Error.WriteLine( ex );
             }
          }
-      }
-
-      internal static int TryGet<T> ( Dictionary<T, int> table, T key ) {
-         table.TryGetValue( key, out int result );
-         return result;
-      }
-
-      private static void LoadModule( string name, Type module ) {
-         Log( "=== Patching " + name + " ===" );
-         patchClass = module;
-         try {
-            MethodInfo m = module.GetMethod( "InitPatch", BindingFlags.Static | BindingFlags.NonPublic );
-            if ( m != null ) 
-               m.Invoke( null, null );
-            else
-               Log( "Cannot Initiate " + module );
-         } catch ( Exception ex ) { Log( ex ); }
       }
 
       // ============ Game States ============
