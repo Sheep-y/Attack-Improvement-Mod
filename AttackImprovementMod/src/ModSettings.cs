@@ -60,18 +60,16 @@
       /* Make hit chance modifier has diminishing return rather than simple add and subtract. Default false. */
       public bool DiminishingHitChanceModifier = false;
 
-      /* Diminishing Bonus: 2-Base^(Bonus/Divisor), Default 2-0.75^(Bonus/6).
-         Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit
-         Pre-calculated table caps at 16 by default. */
+      /* Diminishing Bonus: 2-Base^(Bonus/Divisor), Default 2-0.75^(Bonus/6) and caps at +16.
+         Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit */
       public double DiminishingBonusPowerBase = 0.8f;
       public double DiminishingBonusPowerDivisor = 6f;
       public int DiminishingBonusMax = 16;
 
-      /* Diminishing Penalty: Base^(Penalty/Divisor), Default 0.85^(Penalty/1.6).
-         Example: +6 Penalty @ 80% Base ToHit == 54% x 0.8 == 43% Hit
-         Pre-calculated table caps at 32 by default. */
-      public double DiminishingPenaltyPowerBase = 0.85f;
-      public double DiminishingPenaltyPowerDivisor = 1.5f;
+      /* Diminishing Penalty: Base^(Penalty/Divisor), Default 0.8^(Penalty/3.3) and caps at +32.
+         Example: +6 Penalty @ 80% Base ToHit == 67% x 0.8 == 53% Hit */
+      public double DiminishingPenaltyPowerBase = 0.8f;
+      public double DiminishingPenaltyPowerDivisor = 3.3f;
       public int DiminishingPenaltyMax = 32;
 
       ///
