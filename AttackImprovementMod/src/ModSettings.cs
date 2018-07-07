@@ -9,9 +9,9 @@
       public bool ShowHeatAndStab = true;
 
 
-      /// 
+      ///
       /// Called Shots
-      /// 
+      ///
 
       /* Enable Vehicle Called Shot, which the game did not implement fully. Default true. */
       public bool FixVehicleCalledShot = true;
@@ -36,12 +36,12 @@
       /* Display chance to one decimal. Default false. If true, will also enables ShowRealMechCalledShotChance and ShowRealVehicleCalledShotChance. */
       public bool ShowDecimalCalledChance = false;
 
-      /// 
+      ///
       /// To Hit Bonus and Penalty
-      /// 
+      ///
 
       /* Allow bonus total modifier to increase hit chance. Defaul false. */
-      public bool AllowBonusHitChance = false;
+      public bool AllowNetBonusModifier = false;
 
       /* Step of hit chance, range 0 to 0.2.  Default 0.05, or 5%, same as game default.  Hit chance is always rounded down.
        * Set to 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
@@ -74,9 +74,9 @@
       public double DiminishingPenaltyPowerDivisor = 1.5f;
       public int DiminishingPenaltyMax = 32;
 
-      /// 
+      ///
       /// To Hit Rolls Correction
-      /// 
+      ///
 
       /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, max is 2 for double strength.
        * Default is 0.5 for less correction. */
@@ -97,9 +97,9 @@
       /* Show hit chance to one decimal in weapon panel. Default false. */
       public bool ShowDecimalHitChance = false;
 
-      /// 
+      ///
       /// Melee and DFA
-      /// 
+      ///
 
       /* Allow all possible melee attack positions. */
       public bool IncreaseMeleePositionChoice = true;
@@ -113,9 +113,9 @@
       /* Allow DFA called shot on vehicles *
       public bool AllowDFACalledShotVehicle = true;
 
-      /// 
+      ///
       /// Logging
-      /// 
+      ///
 
       /* Log attacker, weapon, hit roll, correction, location roll, location weights etc. to "BATTLETECH\Mods\FixHitLocation\Log_AttackRoll.txt", for copy and paste to Excel.
        * Default disabled. */

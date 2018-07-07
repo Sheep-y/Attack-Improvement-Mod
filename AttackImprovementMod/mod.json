@@ -20,9 +20,9 @@
       "ShowHeatAndStab": true,
 
 
-      /// 
+      ///
       /// Called Shots
-      /// 
+      ///
 
       /* Enable Vehicle Called Shot, which the game did not implement fully. Default true. */
       "FixVehicleCalledShot": true,
@@ -47,12 +47,12 @@
       /* Display chance to one decimal. Default false. If true, will also enables ShowRealMechCalledShotChance and ShowRealVehicleCalledShotChance. */
       "ShowDecimalCalledChance": false,
 
-      /// 
+      ///
       /// To Hit Bonus and Penalty
-      /// 
+      ///
 
       /* Allow bonus total modifier to increase hit chance. Defaul false. */
-      "AllowBonusHitChance": false,
+      "AllowNetBonusModifier": false,
 
       /* Step of hit chance, range 0 to 0.2.  Default 0.05, or 5%, same as game default.  Hit chance is always rounded down.
        * Set to 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
@@ -85,9 +85,9 @@
       "DiminishingPenaltyPowerDivisor": 1.5,
       "DiminishingPenaltyMax": 32,
 
-      /// 
+      ///
       /// To Hit Rolls Correction
-      /// 
+      ///
 
       /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, max is 2 for double strength.
        * Default is 0.5 for less correction. */
@@ -108,9 +108,9 @@
       /* Show hit chance to one decimal in weapon panel. Default false. */
       "ShowDecimalHitChance": false,
 
-      /// 
+      ///
       /// Melee and DFA
-      /// 
+      ///
 
       /* Allow all possible melee attack positions. */
       "IncreaseMeleePositionChoice": true,
@@ -121,9 +121,9 @@
       /* Break the restriction that one must stay still to melee adjacent mech. */
       "UnlockMeleePositioning": true,
 
-      /// 
+      ///
       /// Logging
-      /// 
+      ///
 
       /* Log attacker, weapon, hit roll, correction, location roll, location weights etc. to "BATTLETECH\Mods\FixHitLocation\Log_AttackRoll.txt", for copy and paste to Excel.
        * Default disabled. */

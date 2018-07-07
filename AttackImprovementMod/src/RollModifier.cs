@@ -13,6 +13,8 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void InitPatch () {
          ModSettings Settings = Mod.Settings;
+         if ( Settings.AllowNetBonusModifier )
+            Patch( typeof( ToHit ), "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );
          if ( Settings.BaseHitChanceModifier != 0f )
             Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "ModifyBaseHitChance", null );
 
@@ -21,7 +23,7 @@ namespace Sheepy.AttackImprovementMod {
          Settings.MinFinalHitChance = RangeCheck( "MinFinalHitChance", Settings.MinFinalHitChance, 0f, 1f );
          if ( Settings.HitChanceStep != 0.05f || Settings.MaxFinalHitChance != 0.95f || Settings.MinFinalHitChance != 0.05f || Settings.DiminishingHitChanceModifier ) {
             if ( ! Settings.DiminishingHitChanceModifier )
-               Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChance", null );
+               Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceStepNClamp", null );
             else {
                Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceDiminishing", null );
                diminishingBonus = new float[ Settings.DiminishingBonusMax ];
@@ -37,7 +39,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public override void CombatStarts () {
-         if ( Settings.AllowBonusHitChance ) {
+         if ( Settings.AllowNetBonusModifier ) {
             PropertyInfo res = typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" );
             CombatResolutionConstantsDef con = Constants.ResolutionConstants;
             con.AllowTotalNegativeModifier = true;
@@ -49,7 +51,33 @@ namespace Sheepy.AttackImprovementMod {
          baseChance += Settings.BaseHitChanceModifier;
       }
 
-      public static bool OverrideHitChance ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) {
+      public static bool ProcessNetBonusModifier ( ref float __result, float originalHitChance, float modifier ) {
+         if ( modifier > 0 ) // Penalty
+            __result = GetSteppedValue( originalHitChance, modifier );
+         else if ( modifier == 0 )
+            __result = originalHitChance;
+         else { // Negative modifier, i.e. net bonus
+            float afterMod = GetSteppedValue( originalHitChance, -modifier );
+            __result = originalHitChance * 2 - afterMod;
+         }
+         return false;
+      }
+
+      internal static float GetSteppedValue ( float chance, float modifier ) {
+         int[] Levels = Constants.ToHit.ToHitStepThresholds;
+         float[] values = Constants.ToHit.ToHitStepValues;
+         int mod = Mathf.RoundToInt( modifier ), lastLevel = int.MaxValue;
+         for ( int i = Levels.Length - 1 ; i >= 0 ; i-- ) {
+            int level = Levels[ i ];
+            if ( mod < level ) continue;
+            int modInLevel = Mathf.Min( mod - level, lastLevel - level );
+            chance -= (float)modInLevel * values[ i ];
+            lastLevel = level;
+         }
+         return chance;
+      }
+
+      public static bool OverrideHitChanceStepNClamp ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) {
          // A pretty intense routine that AI use to evaluate attacks, try catch disabled.
          __result = ClampHitChance( __instance.GetSteppedValue( baseChance, totalModifiers ) );
          return false;
@@ -73,10 +101,10 @@ namespace Sheepy.AttackImprovementMod {
          float step = Settings.HitChanceStep;
          if ( step > 0f ) {
             chance += step/2f;
-            chance -= chance % Settings.HitChanceStep;
+            chance -= chance % step;
          }
-         if      ( chance > Settings.MaxFinalHitChance ) return Settings.MaxFinalHitChance;
-         else if ( chance < Settings.MinFinalHitChance ) return Settings.MinFinalHitChance;
+         if      ( chance >= Settings.MaxFinalHitChance ) return Settings.MaxFinalHitChance;
+         else if ( chance <= Settings.MinFinalHitChance ) return Settings.MinFinalHitChance;
          return chance;
       }
    }

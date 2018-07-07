@@ -12,6 +12,7 @@ namespace Sheepy.AttackImprovementMod {
       
       private static bool NoRollCorrection = false;
       private static readonly Dictionary<float, float> correctionCache = new Dictionary<float, float>(20);
+      private static string WeaponHitChanceFormat = "{0:0}%";
 
       public override void InitPatch () {
          Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
@@ -27,7 +28,7 @@ namespace Sheepy.AttackImprovementMod {
 
          if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
             if ( Settings.MissStreakBreakerThreshold == 1f || Settings.MissStreakBreakerDivider == 0f )
-               Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "DisableMissStreakBreaker", null );
+               Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "BypassMissStreakBreaker", null );
             else {
                StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
                if ( StreakBreakingValueProp != null )
@@ -38,7 +39,9 @@ namespace Sheepy.AttackImprovementMod {
          }
 
          if ( Settings.ShowDecimalHitChance )
-            Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChance", null );
+            WeaponHitChanceFormat = "{0:0.0}%";
+         if ( Settings.ShowDecimalHitChance || Settings.ShowCorrectedHitChance || Settings.MinFinalHitChance < 0.05f || Settings.MaxFinalHitChance > 0.95f )
+            Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideDisplayedHitChance", null );
       }
 
       FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
@@ -79,7 +82,7 @@ namespace Sheepy.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      public static bool DisableMissStreakBreaker () {
+      public static bool BypassMissStreakBreaker () {
          return false;
       }
 
@@ -111,10 +114,10 @@ namespace Sheepy.AttackImprovementMod {
       private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", BindingFlags.Instance | BindingFlags.NonPublic );
       private static readonly object[] empty = new object[]{};
 
-      // Override the original code to remove accuracy cap on display, since correction can push it above 95%.
-      public static bool OverrideWeaponHitChance ( CombatHUDWeaponSlot __instance, float chance ) { try {
+      // Override the original code to remove accuracy cap on display, since correction or other settings can push it above 95%.
+      public static bool OverrideDisplayedHitChance ( CombatHUDWeaponSlot __instance, float chance ) { try {
          HitChance.Invoke( __instance, new object[]{ chance } );
-         __instance.HitChanceText.text = string.Format( "{0:0.0}%", Mathf.Clamp( chance * 100f, 0f, 100f ) );
+         __instance.HitChanceText.text = string.Format( WeaponHitChanceFormat, Mathf.Clamp( chance * 100f, 0f, 100f ) );
          Refresh.Invoke( __instance, empty );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
