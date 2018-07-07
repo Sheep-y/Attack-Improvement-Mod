@@ -90,9 +90,9 @@ namespace Sheepy.AttackImprovementMod {
                TryGet( hitTable, VehicleChassisLocations.Left   ) + "\t" +
                TryGet( hitTable, VehicleChassisLocations.Right  ) + "\t" +
                TryGet( hitTable, VehicleChassisLocations.Rear   ) + "\t" +
-               "\t" +
-               "\t" +
-               "\t" +
+               "--\t" +
+               "--\t" +
+               "--\t" +
                bonusLocation + "\t" +
                bonusLocationMultiplier + "\t" +
                __result );

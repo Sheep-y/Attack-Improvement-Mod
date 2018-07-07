@@ -51,16 +51,12 @@ namespace Sheepy.AttackImprovementMod {
 
       public static bool OverrideHitChance ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) {
          // A pretty intense routine that AI use to evaluate attacks, try catch disabled.
-         baseChance = __instance.GetSteppedValue( baseChance, totalModifiers ) + 0.025f;
-         if ( Settings.HitChanceStep > 0f )
-			   baseChance -= baseChance % Settings.HitChanceStep;
-         if      ( baseChance > Settings.MaxFinalHitChance ) baseChance = Settings.MaxFinalHitChance;
-         else if ( baseChance < Settings.MinFinalHitChance ) baseChance = Settings.MinFinalHitChance;
-         __result = baseChance;
+         __result = ClampHitChance( __instance.GetSteppedValue( baseChance, totalModifiers ) );
          return false;
       }
 
       public static bool OverrideHitChanceDiminishing ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) { try {
+         // A pretty intense routine that AI use to evaluate attacks, try catch disabled.
          int mod = Mathf.RoundToInt( totalModifiers );
          if ( mod < 0 ) {
             mod = Math.Min( Settings.DiminishingBonusMax, -mod );
@@ -69,12 +65,19 @@ namespace Sheepy.AttackImprovementMod {
             mod = Math.Min( Settings.DiminishingPenaltyMax, mod );
             baseChance *= diminishingPenalty[ mod -1 ];
          }
-         if ( Settings.HitChanceStep > 0f )
-			   baseChance -= baseChance % Settings.HitChanceStep;
-         if      ( baseChance > Settings.MaxFinalHitChance ) baseChance = Settings.MaxFinalHitChance;
-         else if ( baseChance < Settings.MinFinalHitChance ) baseChance = Settings.MinFinalHitChance;
-         __result = baseChance;
+         __result = ClampHitChance( baseChance );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      private static float ClampHitChance( float chance ) {
+         float step = Settings.HitChanceStep;
+         if ( step > 0f ) {
+            chance += step/2f;
+            chance -= chance % Settings.HitChanceStep;
+         }
+         if      ( chance > Settings.MaxFinalHitChance ) return Settings.MaxFinalHitChance;
+         else if ( chance < Settings.MinFinalHitChance ) return Settings.MinFinalHitChance;
+         return chance;
+      }
    }
 }

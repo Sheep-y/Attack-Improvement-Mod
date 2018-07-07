@@ -10,40 +10,45 @@ namespace Sheepy.AttackImprovementMod {
 
    public class RollCorrection : ModModule {
       
-      private static bool DisableRollCorrection = false;
+      private static bool NoRollCorrection = false;
       private static readonly Dictionary<float, float> correctionCache = new Dictionary<float, float>(20);
 
       public override void InitPatch () {
          Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
-         DisableRollCorrection = Settings.RollCorrectionStrength == 0.0f;
+         NoRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 
-         if ( ! DisableRollCorrection ) {
+         if ( ! NoRollCorrection ) {
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
-            if ( Settings.ShowRealWeaponHitChance )
-               Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowRealHitChance", null );
-         }
+            if ( Settings.ShowCorrectedHitChance )
+               Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowCorrectedHitChance", null );
+         } else if ( Settings.ShowCorrectedHitChance )
+            Log( "ShowCorrectedHitChance auto-disabled because roll Corection is disabled." );
 
          if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
-            StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
-            if ( StreakBreakingValueProp != null )
-               Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
-            else
-               Error( "Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched." );
+            if ( Settings.MissStreakBreakerThreshold == 1f || Settings.MissStreakBreakerDivider == 0f )
+               Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "DisableMissStreakBreaker", null );
+            else {
+               StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
+               if ( StreakBreakingValueProp != null )
+                  Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
+               else
+                  Error( "Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched. (Can instead try to disable it.)" );
+            }
          }
 
          if ( Settings.ShowDecimalHitChance )
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideWeaponHitChance", null );
       }
 
+      FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
+
       public override void CombatStarts () {
-         FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
-         if ( rollCorrection == null )
-            Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
-         else {
-            if ( DisableRollCorrection && (bool) rollCorrection.GetValue( null ) )
+         if ( rollCorrection != null ) {
+            if ( NoRollCorrection )
                rollCorrection.SetValue( null, false );
-         }
+         } else
+            Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
       }
 
       // ============ UTILS ============
@@ -74,6 +79,10 @@ namespace Sheepy.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
+      public static bool DisableMissStreakBreaker () {
+         return false;
+      }
+
       private static FieldInfo StreakBreakingValueProp = null;
       public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) { try {
          if ( succeeded ) {
@@ -90,11 +99,10 @@ namespace Sheepy.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      public static void ShowRealHitChance ( ref float chance ) { try {
+      public static void ShowCorrectedHitChance ( ref float chance ) { try {
          chance = Mathf.Clamp( chance, 0f, 1f );
-         float corrected = float.NaN;
-         correctionCache.TryGetValue( chance, out corrected );
-         if ( corrected == float.NaN )
+         float corrected = 0;
+         if ( ! correctionCache.TryGetValue( chance, out corrected ) )
             correctionCache.Add( chance, corrected = ReverseRollCorrection( chance, Settings.RollCorrectionStrength ) );
          chance = corrected;
       }                 catch ( Exception ex ) { Log( ex ); } }
