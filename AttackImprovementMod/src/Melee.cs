@@ -4,7 +4,6 @@ namespace Sheepy.AttackImprovementMod {
    using BattleTech;
    using BattleTech.UI;
    using System.Collections.Generic;
-   using System.Reflection;
    using UnityEngine;
    using static Mod;
 
@@ -27,15 +26,15 @@ namespace Sheepy.AttackImprovementMod {
       }                 catch ( Exception ex ) { Log( ex ); } }
 
       private static float MaxMeleeVerticalOffset = 8f;
+
       public override void CombatStarts () {
-         MaxMeleeVerticalOffset = Constants.MoveConstants.MaxMeleeVerticalOffset;
-         PropertyInfo move = typeof( CombatGameConstants ).GetProperty( "MoveConstants" );
          MovementConstants con = Constants.MoveConstants;
+         MaxMeleeVerticalOffset = con.MaxMeleeVerticalOffset;
          if ( Mod.Settings.IncreaseMeleePositionChoice )
             con.NumMeleeDestinationChoices = 6;
          if ( Mod.Settings.IncreaseDFAPositionChoice )
             con.NumDFADestinationChoices = 6;
-         move.SetValue( Constants, con, null );
+         typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( Constants, con, null );
       }
 
       public static bool OverrideMeleeDestinations ( ref List<PathNode> __result, Pathing __instance, AbstractActor target ) { try {

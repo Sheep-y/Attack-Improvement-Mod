@@ -3,13 +3,10 @@ using System;
 
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
-   using System.Reflection;
    using UnityEngine;
+   using System.Collections.Generic;
 
    public class RollModifier : ModModule {
-
-      static float[] diminishingBonus;
-      static float[] diminishingPenalty;
 
       public override void InitPatch () {
          ModSettings Settings = Mod.Settings;
@@ -28,53 +25,80 @@ namespace Sheepy.AttackImprovementMod {
                Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceDiminishing", null );
                diminishingBonus = new float[ Settings.DiminishingBonusMax ];
                diminishingPenalty = new float[ Settings.DiminishingPenaltyMax ];
-               for ( int i = 1 ; i <= Settings.DiminishingBonusMax ; i++ )
-                  diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( Settings.DiminishingBonusPowerBase, (double) i / Settings.DiminishingBonusPowerDivisor ) );
-               for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
-                  diminishingPenalty[ i-1 ] = (float) Math.Pow( Settings.DiminishingPenaltyPowerBase, (double) i / Settings.DiminishingPenaltyPowerDivisor );
-               Log( "Diminishing Bonus\t" + Join( "\t", diminishingBonus ) );
-               Log( "Diminishing Penalty\t" + Join( "\t", diminishingPenalty ) );
+               FillDiminishingModifiers();
             }
          }
       }
 
       public override void CombatStarts () {
          if ( Settings.AllowNetBonusModifier ) {
-            PropertyInfo res = typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" );
             CombatResolutionConstantsDef con = Constants.ResolutionConstants;
             con.AllowTotalNegativeModifier = true;
-            res.SetValue( Constants, con, null );
+            typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" ).SetValue( Constants, con, null );
          }
+         if ( Settings.AllowNetBonusModifier && steppingModifier == null )
+            FillSteppedModifiers(); // Use Combat Constants and must be lazily loaded 
       }
+
+      // ============ Preparations ============
+
+      private static float[] steppingModifier, diminishingBonus, diminishingPenalty;
+
+      private static void FillSteppedModifiers () {
+         List<float> mods = new List<float>(22);
+         float lastMod = float.NaN;
+         for ( int i = 1 ; ; i++ ) {
+            float mod = GetSteppedValue( i );
+            if ( float.IsNaN( mod ) || mod == lastMod ) break;
+            mods.Add( mod );
+            if ( mod == 0 || mod <= -1f ) break;
+            lastMod = mod;
+         }
+         steppingModifier = mods.ToArray();
+         Log( "Stepping Modifier\t" + Join( "\t", steppingModifier ) );
+      }
+
+      internal static float GetSteppedValue ( float modifier ) {
+         int[] Levels = Constants.ToHit.ToHitStepThresholds;
+         float[] values = Constants.ToHit.ToHitStepValues;
+         int mod = Mathf.RoundToInt( modifier ), lastLevel = int.MaxValue;
+         float result = 0;
+         for ( int i = Levels.Length - 1 ; i >= 0 ; i-- ) {
+            int level = Levels[ i ];
+            if ( mod < level ) continue;
+            int modInLevel = Mathf.Min( mod - level, lastLevel - level );
+            result -= (float)modInLevel * values[ i ];
+            lastLevel = level;
+         }
+         return result;
+      }
+
+      private static void FillDiminishingModifiers () {
+         for ( int i = 1 ; i <= Settings.DiminishingBonusMax ; i++ )
+            diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( Settings.DiminishingBonusPowerBase, (double) i / Settings.DiminishingBonusPowerDivisor ) );
+         for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
+            diminishingPenalty[ i-1 ] = (float) Math.Pow( Settings.DiminishingPenaltyPowerBase, (double) i / Settings.DiminishingPenaltyPowerDivisor );
+         Log( "Diminishing Bonus\t" + Join( "\t", diminishingBonus ) );
+         Log( "Diminishing Penalty\t" + Join( "\t", diminishingPenalty ) );
+      }
+
+      // ============ Fixes ============
 
       public static void ModifyBaseHitChance ( ref float baseChance ) {
          baseChance += Settings.BaseHitChanceModifier;
       }
 
       public static bool ProcessNetBonusModifier ( ref float __result, float originalHitChance, float modifier ) {
-         if ( modifier > 0 ) // Penalty
-            __result = GetSteppedValue( originalHitChance, modifier );
-         else if ( modifier == 0 )
-            __result = originalHitChance;
-         else { // Negative modifier, i.e. net bonus
-            float afterMod = GetSteppedValue( originalHitChance, -modifier );
-            __result = originalHitChance * 2 - afterMod;
+         int mod = Mathf.RoundToInt( modifier );
+         __result = originalHitChance;
+         if ( mod < 0 ) { // Bonus
+            mod = Math.Min( -mod, steppingModifier.Length );
+            __result -= steppingModifier[ mod - 1 ];
+         }  else if ( mod > 0 ) { // Penalty
+            mod = Math.Min( mod, steppingModifier.Length );
+            __result += steppingModifier[ mod - 1 ];
          }
          return false;
-      }
-
-      internal static float GetSteppedValue ( float chance, float modifier ) {
-         int[] Levels = Constants.ToHit.ToHitStepThresholds;
-         float[] values = Constants.ToHit.ToHitStepValues;
-         int mod = Mathf.RoundToInt( modifier ), lastLevel = int.MaxValue;
-         for ( int i = Levels.Length - 1 ; i >= 0 ; i-- ) {
-            int level = Levels[ i ];
-            if ( mod < level ) continue;
-            int modInLevel = Mathf.Min( mod - level, lastLevel - level );
-            chance -= (float)modInLevel * values[ i ];
-            lastLevel = level;
-         }
-         return chance;
       }
 
       public static bool OverrideHitChanceStepNClamp ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) {

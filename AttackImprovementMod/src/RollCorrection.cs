@@ -11,7 +11,7 @@ namespace Sheepy.AttackImprovementMod {
    public class RollCorrection : ModModule {
       
       private static bool NoRollCorrection = false;
-      private static readonly Dictionary<float, float> correctionCache = new Dictionary<float, float>(20);
+      private static Dictionary<float, float> correctionCache;
       private static string WeaponHitChanceFormat = "{0:0}%";
 
       public override void InitPatch () {
@@ -21,8 +21,10 @@ namespace Sheepy.AttackImprovementMod {
          if ( ! NoRollCorrection ) {
             if ( Settings.RollCorrectionStrength != 1.0f )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
-            if ( Settings.ShowCorrectedHitChance )
+            if ( Settings.ShowCorrectedHitChance ) {
+               correctionCache = new Dictionary<float, float>(20);
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowCorrectedHitChance", null );
+            }
          } else if ( Settings.ShowCorrectedHitChance )
             Log( "ShowCorrectedHitChance auto-disabled because roll Corection is disabled." );
 
@@ -47,6 +49,8 @@ namespace Sheepy.AttackImprovementMod {
       FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
 
       public override void CombatStarts () {
+         if ( correctionCache != null )
+            Log( "Combat starts with " + correctionCache.Count + " reverse roll correction cached from previous battles." );
          if ( rollCorrection != null ) {
             if ( NoRollCorrection )
                rollCorrection.SetValue( null, false );
