@@ -108,8 +108,7 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void ShowCorrectedHitChance ( ref float chance ) { try {
          chance = Mathf.Clamp( chance, 0f, 1f );
-         float corrected = 0;
-         if ( ! correctionCache.TryGetValue( chance, out corrected ) )
+         if ( ! correctionCache.TryGetValue( chance, out float corrected ) )
             correctionCache.Add( chance, corrected = ReverseRollCorrection( chance, Settings.RollCorrectionStrength ) );
          chance = corrected;
       }                 catch ( Exception ex ) { Log( ex ); } }

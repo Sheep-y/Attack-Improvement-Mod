@@ -19,7 +19,6 @@
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       "ShowHeatAndStab": true,
 
-
       ///
       /// Called Shots
       ///
@@ -111,10 +110,8 @@
       /// Melee and DFA
       ///
 
-      /* Allow all possible melee attack positions. */
+      /* Allow all possible melee / DFA attack positions. */
       "IncreaseMeleePositionChoice": true,
-
-      /* Allow all possible melee attack positions. */
       "IncreaseDFAPositionChoice": true,
 
       /* Break the restriction that one must stay still to melee adjacent mech. */

@@ -146,8 +146,7 @@ namespace Sheepy.AttackImprovementMod {
       // Somehow PostfixSetCalledShot is NOT called since 1.1 beta. So need to override PostPointerClick to make sure called shot location is translated
       public static void RecordVehicleCalledShotClickLocation ( CombatHUDVehicleArmorHover __instance ) { try {
          HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
-         SelectionStateFire selectionState = Readout?.HUD?.SelectionHandler?.ActiveState as SelectionStateFire;
-         if ( selectionState != null )
+         if ( Readout?.HUD?.SelectionHandler?.ActiveState is SelectionStateFire selectionState )
             selectionState.calledShotLocation = TranslateLocation( selectionState.calledShotVLocation );
       }                 catch ( Exception ex ) { Log( ex ); } }
 

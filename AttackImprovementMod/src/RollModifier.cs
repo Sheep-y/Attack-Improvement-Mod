@@ -55,7 +55,7 @@ namespace Sheepy.AttackImprovementMod {
             lastMod = mod;
          }
          steppingModifier = mods.ToArray();
-         Log( "Stepping Modifier\t" + Join( "\t", steppingModifier ) );
+         Log( "Stepping ToHit Multipliers\t" + Join( "\t", steppingModifier ) );
       }
 
       internal static float GetSteppedValue ( float modifier ) {
@@ -78,8 +78,8 @@ namespace Sheepy.AttackImprovementMod {
             diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( Settings.DiminishingBonusPowerBase, (double) i / Settings.DiminishingBonusPowerDivisor ) );
          for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
             diminishingPenalty[ i-1 ] = (float) Math.Pow( Settings.DiminishingPenaltyPowerBase, (double) i / Settings.DiminishingPenaltyPowerDivisor );
-         Log( "Diminishing Bonus\t" + Join( "\t", diminishingBonus ) );
-         Log( "Diminishing Penalty\t" + Join( "\t", diminishingPenalty ) );
+         Log( "Bonus ToHit Multipliers\t" + Join( "\t", diminishingBonus ) );
+         Log( "Penalty ToHit Multipliers\t" + Join( "\t", diminishingPenalty ) );
       }
 
       // ============ Fixes ============

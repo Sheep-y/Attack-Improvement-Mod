@@ -18,7 +18,7 @@ namespace Sheepy.AttackImprovementMod {
          Console.ReadKey();
       }
 
-      internal static void listRollCorrection () {
+      internal static void ListRollCorrection () {
          for ( int i = 0 ; i < 20 ; i++ ) {
             float roll = i * 0.05f;
             float rev1 = RollCorrection.ReverseRollCorrection( roll, 0.5f  ), rrev1 = RollCorrection.CorrectRoll( rev1, 0.5f ),
@@ -29,15 +29,15 @@ namespace Sheepy.AttackImprovementMod {
          }
       }
 
-      internal static void runReverseRollTest () {
-         new Thread( () => checkReverseNaN(0) ).Start();
-         new Thread( () => checkReverseNaN(1) ).Start();
-         new Thread( () => checkReverseNaN(2) ).Start();
-         new Thread( () => checkReverseNaN(3) ).Start();
-         new Thread( () => checkReverseNaN(4) ).Start();
+      internal static void RunReverseRollTest () {
+         new Thread( () => CheckReverseNaN(0) ).Start();
+         new Thread( () => CheckReverseNaN(1) ).Start();
+         new Thread( () => CheckReverseNaN(2) ).Start();
+         new Thread( () => CheckReverseNaN(3) ).Start();
+         new Thread( () => CheckReverseNaN(4) ).Start();
       }
 
-      private static void checkReverseNaN ( float count ) {
+      private static void CheckReverseNaN ( float count ) {
          float block = 2f/5f, add = count*block, max = 100000;
          for ( int i = 0 ; i <= max ; i++ ) {
             float strength = add + ((float)i)*block/max;
