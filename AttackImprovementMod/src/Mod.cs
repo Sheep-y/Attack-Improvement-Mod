@@ -16,7 +16,7 @@ namespace Sheepy.AttackImprovementMod {
     */
    public class Mod {
 
-      public const string VERSION = "1.5.0.0";
+      public const string VERSION = "2.0 preview 20180709";
       public static ModSettings Settings = new ModSettings();
 
       internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1

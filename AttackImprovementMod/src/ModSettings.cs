@@ -26,11 +26,12 @@
       public bool LOSBlockedPreDotted  = false;
       public bool LOSBlockedPostDotted = false;
 
-      /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Default empty to leave alone. */
+      /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Set to empty to leave alone.
+         Default #C6FF for blocked line and empty for the rest. */
       public string LOSMeleeColor = "";
       public string LOSClearColor = "";
-      public string LOSBlockedPreColor  = "#F0FF";
-      public string LOSBlockedPostColor = "#F0FF";
+      public string LOSBlockedPreColor  = "#C6FF";
+      public string LOSBlockedPostColor = "#C6FF";
       public string LOSIndirectColor = "";
       public string LOSNoAttackColor = "";
 
@@ -68,12 +69,12 @@
       /// To Hit Bonus and Penalty
       ///
 
-      /* Allow bonus total modifier to increase hit chance. Defaul false. */
-      public bool AllowNetBonusModifier = false;
+      /* Allow bonus total modifier to increase hit chance. Defaul true. */
+      public bool AllowNetBonusModifier = true;
 
-      /* Step of hit chance, range 0 to 0.2.  Default 0.05, or 5%, same as game default.  Hit chance is always rounded down.
-       * Set to 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
-      public float HitChanceStep = 0.05f;
+      /* Step of hit chance, range 0 to 0.2.  Game default is 0.05, or 5%.  Hit chance is always rounded down.
+       * Default 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
+      public float HitChanceStep = 0;
 
       /* Modify base hit chance. -0.05 to make all base accuracy -5%, 0.1 to make all base accuracy +10% etc. Default 0. */
       public float BaseHitChanceModifier = 0f;
