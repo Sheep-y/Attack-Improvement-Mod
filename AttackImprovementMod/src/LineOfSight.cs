@@ -16,10 +16,10 @@ namespace Sheepy.AttackImprovementMod {
          Type Indicator = typeof( WeaponRangeIndicators );
 
          // Colours that fail to parse will be changed to empty string
-         Settings.LOSWidthMultiplier = RangeCheck( "LOSWidthMultiplier", Settings.LOSWidthMultiplier, 0.1f, 10f );
-         Settings.LOSWidthBlockedMultiplier = RangeCheck( "LOSWidthBlockedMultiplier", Settings.LOSWidthBlockedMultiplier, 0.1f, 20f );
-         Settings.LOSMarkerBlockedMultiplier = RangeCheck( "LOSMarkerBlockedMultiplier", Settings.LOSMarkerBlockedMultiplier, 0f, 10f );
-         Settings.LOSIndirectSegment = Mathf.RoundToInt( RangeCheck( "LOSIndirectSegment", Settings.LOSIndirectSegment, 1, 1000 ) );
+         RangeCheck( "LOSWidthMultiplier", ref Settings.LOSWidthMultiplier, 0.1f, 10f );
+         RangeCheck( "LOSWidthBlockedMultiplier", ref Settings.LOSWidthBlockedMultiplier, 0.1f, 20f );
+         RangeCheck( "LOSMarkerBlockedMultiplier", ref Settings.LOSMarkerBlockedMultiplier, 0f, 10f );
+         RangeCheck( "LOSIndirectSegment", ref Settings.LOSIndirectSegment, 1, 1000 );
          Parse( ref Settings.LOSMeleeColor );
          Parse( ref Settings.LOSClearColor );
          Parse( ref Settings.LOSBlockedPreColor );

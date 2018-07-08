@@ -15,7 +15,7 @@ namespace Sheepy.AttackImprovementMod {
       private static string WeaponHitChanceFormat = "{0:0}%";
 
       public override void InitPatch () {
-         Settings.RollCorrectionStrength = RangeCheck( "RollCorrectionStrength", Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
+         RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
          NoRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 
          if ( ! NoRollCorrection ) {

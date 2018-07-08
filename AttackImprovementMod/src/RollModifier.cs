@@ -15,9 +15,9 @@ namespace Sheepy.AttackImprovementMod {
          if ( Settings.BaseHitChanceModifier != 0f )
             Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "ModifyBaseHitChance", null );
 
-         Settings.HitChanceStep = RangeCheck( "MaxFinalHitChance", Settings.HitChanceStep, 0f, 0.2f );
-         Settings.MaxFinalHitChance = RangeCheck( "MaxFinalHitChance", Settings.MaxFinalHitChance, 0.1f, 1f );
-         Settings.MinFinalHitChance = RangeCheck( "MinFinalHitChance", Settings.MinFinalHitChance, 0f, 1f );
+         RangeCheck( "MaxFinalHitChance", ref Settings.HitChanceStep, 0f, 0.2f );
+         RangeCheck( "MaxFinalHitChance", ref Settings.MaxFinalHitChance, 0.1f, 1f );
+         RangeCheck( "MinFinalHitChance", ref Settings.MinFinalHitChance, 0f, 1f );
          if ( Settings.HitChanceStep != 0.05f || Settings.MaxFinalHitChance != 0.95f || Settings.MinFinalHitChance != 0.05f || Settings.DiminishingHitChanceModifier ) {
             if ( ! Settings.DiminishingHitChanceModifier )
                Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceStepNClamp", null );

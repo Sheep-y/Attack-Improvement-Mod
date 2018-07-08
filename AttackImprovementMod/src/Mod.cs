@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using UnityEngine;
 
 namespace Sheepy.AttackImprovementMod {
 
@@ -122,7 +123,7 @@ namespace Sheepy.AttackImprovementMod {
          else
             patched = patchedClass.GetMethod( patchedMethod, flags, null, parameterTypes, null );
          if ( patched == null ) {
-            Error( string.Format( "Cannot find {0}.{1}(...) to patch", new Object[]{ patchedClass.Name, patchedMethod } ) );
+            Error( string.Format( "Cannot find {0}.{1}(...) to patch", new object[]{ patchedClass.Name, patchedMethod } ) );
             return;
          }
          Patch( patched, prefix, postfix );
@@ -155,11 +156,17 @@ namespace Sheepy.AttackImprovementMod {
          return result;
       }
 
-      internal static float RangeCheck ( string name, float val, float min, float max ) {
-         return RangeCheck( name, val, min, min, max, max );
+      internal static void RangeCheck ( string name, ref int val, int min, int max ) {
+         float v = val;
+         RangeCheck( name, ref v, min, min, max, max );
+         val = Mathf.RoundToInt( v );
       }
 
-      internal static float RangeCheck ( string name, float val, float shownMin, float realMin, float realMax, float shownMax ) {
+      internal static void RangeCheck ( string name, ref float val, float min, float max ) {
+         RangeCheck( name, ref val, min, min, max, max );
+      }
+
+      internal static void RangeCheck ( string name, ref float val, float shownMin, float realMin, float realMax, float shownMax ) {
          if ( realMin > realMax || shownMin > shownMax ) Error( "Incorrect range check params on " + name );
          float orig = val;
          if ( val < realMin )
@@ -177,7 +184,6 @@ namespace Sheepy.AttackImprovementMod {
                message += " <= " + shownMin;
             Log( message + ". Setting to " + val );
          }
-         return val;
       }
 
       // ============ LOGS ============
