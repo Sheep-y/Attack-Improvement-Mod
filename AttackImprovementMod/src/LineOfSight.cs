@@ -180,7 +180,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       private static Material NewMat ( string name, bool origInRange, string color, bool dotted ) {
-         if ( dotted == origInRange && color == "" ) return null;
+         if ( dotted != origInRange && color == "" ) return null;
          Material mat = new Material( dotted ? OrigOutOfRangeMat : OrigInRangeMat );
          Color newColour = Parse( ref color );
          if ( color == "" ) // Restore original colour since dotted/solid is reversed

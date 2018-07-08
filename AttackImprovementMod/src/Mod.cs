@@ -33,7 +33,6 @@ namespace Sheepy.AttackImprovementMod {
          // Hook to combat starts
          patchClass = typeof( Mod );
          Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
-         CacheCombatState();
 
          modules.Add( "Logger", new AttackLog() );
          modules.Add( "Roll Modifier", new RollModifier() );
