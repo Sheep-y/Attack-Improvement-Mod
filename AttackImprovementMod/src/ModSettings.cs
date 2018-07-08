@@ -8,6 +8,22 @@
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       public bool ShowHeatAndStab = true;
 
+      ///
+      /// Line of Sight
+      ///
+
+      /* Make non-dotted lines wider or thinner.  Range 0.1 to 10.  Default 1.5 times of default width . */
+      public float LOSWidthMultiplier = 1.5f;
+
+      /* Make indirect attack or no attack dotted instead of solid. Default both true. */
+      public bool LOSIndirectDotted = true;
+
+      /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Default empty to leave alone. */
+      public string LOSMeleeColor = "";
+      public string LOSClearColor = "";
+      public string LOSBlockedColor = "";
+      public string LOSIndirectColor = "";
+      public string LOSNoAttackColor = "";
 
       ///
       /// Called Shots
@@ -99,10 +115,8 @@
       /// Melee and DFA
       ///
 
-      /* Allow all possible melee attack positions. */
+      /* Allow all possible melee / DFA attack positions. */
       public bool IncreaseMeleePositionChoice = true;
-
-      /* Allow all possible melee attack positions. */
       public bool IncreaseDFAPositionChoice = true;
 
       /* Break the restriction that one must stay still to melee adjacent mech. */

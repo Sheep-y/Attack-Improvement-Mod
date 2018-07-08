@@ -39,7 +39,7 @@ namespace Sheepy.AttackImprovementMod {
          modules.Add( "Called Shot and Hit Location", new FixHitLocation() );
          modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
          modules.Add( "Heat and Stability", new HeatAndStab() );
-         //modules.Add( "Line of Fire", new LineOfFire() );
+         modules.Add( "Line of Fire", new LineOfSight() );
          modules.Add( "Melee", new Melee() );
 
          foreach ( var mod in modules )  try {
