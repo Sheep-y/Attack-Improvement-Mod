@@ -12,18 +12,30 @@
       /// Line of Sight
       ///
 
-      /* Make non-dotted lines wider or thinner.  Range 0.1 to 10.  Default 1.5 times of default width . */
-      public float LOSWidthMultiplier = 1.5f;
+      /* Make lines wider or thinner.  Default 2 times, 3 times, and 1.5 times. */
+      public float LOSWidthMultiplier = 2f;
+      public float LOSWidthBlockedMultiplier = 3f;
+      public float LOSMarkerBlockedMultiplier = 1.5f;
 
-      /* Make indirect attack or no attack dotted instead of solid. Default both true. */
+      /* Controls whether indirect attack lines / can't attack lines are dotted. Default both true. */
       public bool LOSIndirectDotted = true;
+      public bool LOSNoAttackDotted = true;
+      /* Controls whether other attack lines are dotted. Default all false. */
+      public bool LOSMeleeDotted = false;
+      public bool LOSClearDotted = false;
+      public bool LOSBlockedPreDotted  = false;
+      public bool LOSBlockedPostDotted = false;
 
       /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Default empty to leave alone. */
       public string LOSMeleeColor = "";
       public string LOSClearColor = "";
-      public string LOSBlockedColor = "";
+      public string LOSBlockedPreColor  = "#F0FF";
+      public string LOSBlockedPostColor = "#F0FF";
       public string LOSIndirectColor = "";
       public string LOSNoAttackColor = "";
+
+      /* Number of segments of indirect attack lines. Game use 17. Default 48 for a smoother curve. */
+      public int LOSIndirectSegment = 48;
 
       ///
       /// Called Shots

@@ -15,6 +15,7 @@ namespace Sheepy.AttackImprovementMod {
     */
    public class Mod {
 
+      public const string VERSION = "1.5.0.0";
       public static ModSettings Settings = new ModSettings();
 
       internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
@@ -52,7 +53,7 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void LogSettings ( string directory, string settingsJSON ) {
          // Get log settings
-         string logCache = "Mod Folder: " + directory + "\n";
+         string logCache = "AIM Version: " + VERSION + "\nMod Folder: " + directory + "\n";
          try {
             Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
             logCache +=  "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented );

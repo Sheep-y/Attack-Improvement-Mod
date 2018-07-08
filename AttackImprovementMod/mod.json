@@ -20,6 +20,35 @@
       "ShowHeatAndStab": true,
 
       ///
+      /// Line of Sight
+      ///
+
+      /* Make lines wider or thinner.  Default 2 times, 3 times, and 1.5 times. */
+      "LOSWidthMultiplier": 2,
+      "LOSWidthBlockedMultiplier": 3,
+      "LOSMarkerBlockedMultiplier": 1.5,
+
+      /* Controls whether indirect attack lines / can't attack lines are dotted. Default both true. */
+      "LOSIndirectDotted": true,
+      "LOSNoAttackDotted": true,
+      /* Controls whether other attack lines are dotted. Default all false. */
+      "LOSMeleeDotted": false,
+      "LOSClearDotted": false,
+      "LOSBlockedPreDotted" : false,
+      "LOSBlockedPostDotted": false,
+
+      /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Default empty to leave alone. */
+      "LOSMeleeColor": "",
+      "LOSClearColor": "",
+      "LOSBlockedPreColor": "#F0FF",
+      "LOSBlockedPostColor": "#F0FF",
+      "LOSIndirectColor": "",
+      "LOSNoAttackColor": "",
+
+      /* Number of segments of indirect attack lines. Game use 17. Default 48 for a smoother curve. */
+      "LOSIndirectSegment": 48,
+
+      ///
       /// Called Shots
       ///
 
