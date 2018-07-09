@@ -7,6 +7,7 @@ namespace Sheepy.AttackImprovementMod {
    using System.IO;
    using BattleTech;
    using System.Collections.Generic;
+   using System.Text;
 
    public class AttackLog : ModModule {
 
@@ -32,12 +33,12 @@ namespace Sheepy.AttackImprovementMod {
       private static StringBuilder logBuffer = new StringBuilder();
 
       internal static void RollLog ( string message = "" ) {
-         logBuffer.Append( message ).Append( '\r\n' );
+         logBuffer.Append( message ).Append( "\r\n" );
       }
 
       internal static void WriteRollLog () {
          WriteLog( ROLL_LOG, logBuffer.ToString() );
-         logBuffer.Clear();
+         logBuffer.Length = 0;
       }
 
       // ============ Log ============

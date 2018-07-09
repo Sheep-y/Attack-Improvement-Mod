@@ -57,7 +57,7 @@ namespace Sheepy.AttackImprovementMod {
          try {
             Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
             logCache.AppendFormat( "Mod Settings: {0}\n", JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
-         } catch ( Exception ex ) {
+         } catch ( Exception ) {
             logCache.Append( "Error: Cannot parse mod settings, using default." );
          }
          try {
@@ -197,11 +197,16 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void Log( object message ) { Log( message.ToString() ); }
-      internal static void Log( string message = "", params object[] args = null ) {
-         string logName = LogDir + LOG_NAME;
+      internal static void Log( string message, params object[] args ) {
          try {
             if ( args != null && args.Length > 0 )
                message = string.Format( message, args );
+         } catch ( Exception ) {}
+         Log( message );
+      }
+      internal static void Log( string message = "" ) {
+         string logName = LogDir + LOG_NAME;
+         try {
             if ( ! File.Exists( logName ) ) 
                message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;
          } catch ( Exception ) {}
@@ -209,14 +214,12 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void Warn( object message ) { Warn( message.ToString() ); }
-      internal static void Warn( string message, params object[] args = null ) {
-         Log( "Warning: " + message, args );
-      }
+      internal static void Warn( string message ) { Log( "Warning: " + message ); }
+      internal static void Warn( string message, params object[] args ) { Log( "Warning: " + message, args ); }
 
       internal static bool Error( object message ) { Error( message.ToString() ); return true; }
-      internal static void Error( string message, params object[] args = null ) {
-         Log( "Error: " + message, args );
-      }
+      internal static void Error( string message ) { Log( "Error: " + message ); }
+      internal static void Error( string message, params object[] args ) { Log( "Error: " + message, args ); }
 
       internal static void WriteLog( string filename, string message ) {
          string logName = LogDir + filename;
