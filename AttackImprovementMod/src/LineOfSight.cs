@@ -3,8 +3,8 @@
 namespace Sheepy.AttackImprovementMod {
    using BattleTech;
    using BattleTech.UI;
-   using System.Reflection;
    using UnityEngine;
+   using static System.Reflection.BindingFlags;
    using static Mod;
 
    public class LineOfSight : ModModule {
@@ -19,7 +19,7 @@ namespace Sheepy.AttackImprovementMod {
          RangeCheck( "LOSWidthMultiplier", ref Settings.LOSWidthMultiplier, 0.1f, 10f );
          RangeCheck( "LOSWidthBlockedMultiplier", ref Settings.LOSWidthBlockedMultiplier, 0.1f, 20f );
          RangeCheck( "LOSMarkerBlockedMultiplier", ref Settings.LOSMarkerBlockedMultiplier, 0f, 10f );
-         RangeCheck( "LOSIndirectSegment", ref Settings.LOSIndirectSegment, 1, 1000 );
+         RangeCheck( "ArcLineSegments", ref Settings.ArcLinePoints, 1, 1000 );
          Parse( ref Settings.LOSMeleeColor );
          Parse( ref Settings.LOSClearColor );
          Parse( ref Settings.LOSBlockedPreColor );
@@ -38,14 +38,17 @@ namespace Sheepy.AttackImprovementMod {
             Patch( Indicator, "Init", null, "ResizeLOS" );
          if ( LineChanged || Settings.LOSNoAttackColor != "" || ! Settings.LOSNoAttackDotted )
             Patch( Indicator, "Init", null, "CreateNewLOS" );
-         if ( Settings.LOSIndirectSegment != 17 || PrePostDiff )
-            Patch( Indicator, "getLine" , BindingFlags.NonPublic, null, "RecordLOS" );
-         if ( Settings.LOSIndirectSegment != 17 )
-            Patch( Indicator, "DrawLine", BindingFlags.NonPublic, null, "SetIndirectSegments" );
+         if ( Settings.ArcLinePoints != 18 || PrePostDiff )
+            Patch( Indicator, "getLine" , NonPublic, null, "RecordLOS" );
          if ( PrePostDiff )
-            Patch( Indicator, "DrawLine", BindingFlags.NonPublic, null, "SetBlockedLOS" );
+            Patch( Indicator, "DrawLine", NonPublic, null, "SetBlockedLOS" );
          if ( LineChanged )
-            Patch( Indicator, "DrawLine", BindingFlags.NonPublic, "SetupLOS", "CleanupLOS" );
+            Patch( Indicator, "DrawLine", NonPublic, "SetupLOS", "CleanupLOS" );
+         if ( Settings.ArcLinePoints != 18 ) {
+            Patch( Indicator, "GetPointsForArc", Static, "RecordArcHeight", null );
+            Patch( Indicator, "DrawLine", NonPublic, null, "SetIndirectSegments" );
+            Patch( typeof( CombatPathLine ), "DrawJumpPath", null, "SetPathSegments" );
+         }
       }
 
       // ============ Line change ============
@@ -117,6 +120,7 @@ namespace Sheepy.AttackImprovementMod {
 
       private static bool RestoreMat = false;
       private static LineRenderer thisLine;
+      private static float thisArcHeight;
 
       public static void RecordLOS ( LineRenderer __result ) {
          thisLine = __result;
@@ -126,8 +130,6 @@ namespace Sheepy.AttackImprovementMod {
          WeaponRangeIndicators me = __instance;
          if ( isMelee )
             SwapMat( me, MeleeMat, ref me.LOSLockedTarget );
-         else if ( usingMultifire )
-            return;
          else if ( IndirectMat != null || ClearMat != null || BlockedPreMat != null || BlockedPostMat != null ) {
             FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( target );
             if ( info.HasLOF )
@@ -159,14 +161,17 @@ namespace Sheepy.AttackImprovementMod {
          }
       } catch ( Exception ex ) { Log( ex ); } }
 
-      public static void SetIndirectSegments () { try {
-         if ( thisLine.positionCount == 18 ) {
-            int segments = Settings.LOSIndirectSegment + 1;
-            Vector3 start = thisLine.GetPosition( 0 ), end = thisLine.GetPosition( 17 );
-            thisLine.positionCount = segments;
-            thisLine.SetPositions( WeaponRangeIndicators.GetPointsForArc( segments, 30f, start, end ) );
-         }
-      } catch ( Exception ex ) { Log( ex ); } }
+      public static void RecordArcHeight ( float minArcHeight ) {
+         thisArcHeight = minArcHeight;
+      }
+
+      public static void SetIndirectSegments () {
+         if ( thisLine.positionCount == 18 ) SetArc( thisLine );
+      }
+
+      public static void SetPathSegments ( CombatPathLine __instance ) {
+         SetArc( __instance.line );
+      }
 
       // ============ UTILS ============
 
@@ -202,6 +207,12 @@ namespace Sheepy.AttackImprovementMod {
          __instance.MaterialInRange = newMat;
          lineColor = newMat.color;
          RestoreMat = true;
+      }
+
+      private static void SetArc ( LineRenderer line ) {
+         // Unfortunately re-calculate the points is the simplest course of mod
+         line.positionCount = Settings.ArcLinePoints;
+         line.SetPositions( WeaponRangeIndicators.GetPointsForArc( Settings.ArcLinePoints, thisArcHeight, line.GetPosition( 0 ), line.GetPosition( 17 ) ) );
       }
 
       /*
