@@ -47,7 +47,7 @@
       public string LOSIndirectColor = "";
       public string LOSNoAttackColor = "";
 
-      /* Number of points of indirect attack lines and jump lines. Game use 18. Default 48 for a smoother curve. */
+      /* Number of points of indirect attack lines and jump lines. Game uses 18. Default 48 for a smoother curve. */
       public int ArcLinePoints = 48;
 
       ///

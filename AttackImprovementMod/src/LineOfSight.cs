@@ -45,9 +45,9 @@ namespace Sheepy.AttackImprovementMod {
          if ( LineChanged )
             Patch( Indicator, "DrawLine", NonPublic, "SetupLOS", "CleanupLOS" );
          if ( Settings.ArcLinePoints != 18 ) {
-            Patch( Indicator, "GetPointsForArc", Static, "RecordArcHeight", null );
+            Patch( Indicator, "GetPointsForArc", Static, "OverrideGetPointsForArc", null );
             Patch( Indicator, "DrawLine", NonPublic, null, "SetIndirectSegments" );
-            Patch( typeof( CombatPathLine ), "DrawJumpPath", null, "SetPathSegments" );
+            Patch( typeof( CombatPathLine ), "DrawJumpPath", null, "SetJumpPathSegments" );
          }
       }
 
@@ -120,7 +120,6 @@ namespace Sheepy.AttackImprovementMod {
 
       private static bool RestoreMat = false;
       private static LineRenderer thisLine;
-      private static float thisArcHeight;
 
       public static void RecordLOS ( LineRenderer __result ) {
          thisLine = __result;
@@ -161,18 +160,6 @@ namespace Sheepy.AttackImprovementMod {
          }
       } catch ( Exception ex ) { Log( ex ); } }
 
-      public static void RecordArcHeight ( float minArcHeight ) {
-         thisArcHeight = minArcHeight;
-      }
-
-      public static void SetIndirectSegments () {
-         if ( thisLine.positionCount == 18 ) SetArc( thisLine );
-      }
-
-      public static void SetPathSegments ( CombatPathLine __instance ) {
-         SetArc( __instance.line );
-      }
-
       // ============ UTILS ============
 
       public static Color Parse ( ref string htmlColour ) {
@@ -209,10 +196,34 @@ namespace Sheepy.AttackImprovementMod {
          RestoreMat = true;
       }
 
+      // ============ ARCS ============
+
+      private static float thisArcHeight;
+      private static Vector3[] linePoints = new Vector3[18];
+
+      public static bool OverrideGetPointsForArc ( ref Vector3[] __result, int numPoints, float minArcHeight, Vector3 begin, Vector3 end ) {
+         if ( numPoints == 2 || numPoints == 18 ) {
+            thisArcHeight = minArcHeight;
+            linePoints[0] = begin;
+            linePoints[1] = end;
+            __result = linePoints; // Skip all calculations
+            return false;
+         }
+         return true;
+      }
+
+      public static void SetIndirectSegments () {
+         if ( thisLine.positionCount == 18 ) SetArc( thisLine );
+      }
+
+      public static void SetJumpPathSegments ( CombatPathLine __instance ) {
+         SetArc( __instance.line );
+      }
+
       private static void SetArc ( LineRenderer line ) {
          // Unfortunately re-calculate the points is the simplest course of mod
          line.positionCount = Settings.ArcLinePoints;
-         line.SetPositions( WeaponRangeIndicators.GetPointsForArc( Settings.ArcLinePoints, thisArcHeight, line.GetPosition( 0 ), line.GetPosition( 17 ) ) );
+         line.SetPositions( WeaponRangeIndicators.GetPointsForArc( Settings.ArcLinePoints, thisArcHeight, linePoints[ 0 ], linePoints[ 1 ] ) );
       }
 
       /*
