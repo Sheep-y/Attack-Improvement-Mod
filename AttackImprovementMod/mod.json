@@ -1,151 +1,151 @@
 {
-   "Name": "AIM: Attack Improvement Mod",
-   "Enabled": true,
+   "Name" : "AIM: Attack Improvement Mod",
+   "Enabled" : true,
 
-   "Version": "2.0 preview 20180709",
-   "Description": "Fix, enhance, and upgrade various aspects of attacking, from Line of Sight to Hit Distribution. Each features can be configured individually by editing mod.json.",
-   "Author": "Sheepy",
-   "Website": "https://github.com/Sheep-y/BattleTech_Mods",
-   "Contact": "your.sheepy@gmail.com",
+   "Version" : "2.0 preview 20180709",
+   "Description" : "Fix, enhance, and upgrade various aspects of attacking, from Line of Sight to Hit Distribution. Each features can be configured individually.",
+   "Author" : "Sheepy",
+   "Website" : "https://github.com/Sheep-y/BattleTech_Mods",
+   "Contact" : "your.sheepy@gmail.com",
 
-   "DLL": "AttackImprovementMod.dll",
-   "DLLEntryPoint": "Sheepy.AttackImprovementMod.Mod.Init",
+   "DLL" : "AttackImprovementMod.dll",
+   "DLLEntryPoint" : "Sheepy.AttackImprovementMod.Mod.Init",
 
-   "Settings": {
-
-      /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
-      "FixHitDistribution": true,
+   "Settings" : {
 
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
-      "ShowHeatAndStab": true,
+      "ShowHeatAndStab" : true,
 
       ///
       /// Line of Sight
       ///
 
       /* Make lines wider or thinner.  Default 2 times, 3 times, and 1.5 times. */
-      "LOSWidthMultiplier": 2,
-      "LOSWidthBlockedMultiplier": 3,
-      "LOSMarkerBlockedMultiplier": 1.5,
+      "LOSWidthMultiplier" : 2,
+      "LOSWidthBlockedMultiplier" : 3,
+      "LOSMarkerBlockedMultiplier" : 1.5,
 
       /* Controls whether indirect attack lines / can't attack lines are dotted. Default both true. */
-      "LOSIndirectDotted": true,
-      "LOSNoAttackDotted": true,
+      "LOSIndirectDotted" : true,
+      "LOSNoAttackDotted" : true,
       /* Controls whether other attack lines are dotted. Default all false. */
-      "LOSMeleeDotted": false,
-      "LOSClearDotted": false,
+      "LOSMeleeDotted" : false,
+      "LOSClearDotted" : false,
       "LOSBlockedPreDotted" : false,
-      "LOSBlockedPostDotted": false,
+      "LOSBlockedPostDotted" : false,
       
       /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Set to empty to leave alone.
          Default #C6FF for blocked line and empty for the rest. */
-      "LOSMeleeColor": "",
-      "LOSClearColor": "",
-      "LOSBlockedPreColor": "#C6FF",
-      "LOSBlockedPostColor": "#C6FF",
-      "LOSIndirectColor": "",
-      "LOSNoAttackColor": "",
+      "LOSMeleeColor" : "",
+      "LOSClearColor" : "",
+      "LOSBlockedPreColor" : "#C6FF",
+      "LOSBlockedPostColor" : "#C6FF",
+      "LOSIndirectColor" : "",
+      "LOSNoAttackColor" : "",
 
       /* Number of segments of indirect attack lines. Game use 17. Default 48 for a smoother curve. */
-      "LOSIndirectSegment": 48,
+      "LOSIndirectSegment" : 48,
 
       ///
       /// Called Shots
       ///
 
       /* Enable Vehicle Called Shot, which the game did not implement fully. Default true. */
-      "FixVehicleCalledShot": true,
+      "FixVehicleCalledShot" : true,
 
       /* Enable clustering effect for called shots against mechs. Default true. */
-      "CalledShotUseClustering": true,
+      "CalledShotUseClustering" : true,
 
       /* Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.
        * Default is 0.33 to counter the effect of CalledShotClusterStrength. */
-      "MechCalledShotMultiplier": 0.33,
+      "MechCalledShotMultiplier" : 0.33,
 
       /* Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.
        * Default is 0.75 to balance vehicle's lower number of locations. */
-      "VehicleCalledShotMultiplier": 0.75,
+      "VehicleCalledShotMultiplier" : 0.75,
 
       /* Override called shot percentage display of mech locations to show modded shot distribution. Default true. */
-      "ShowRealMechCalledShotChance": true,
+      "ShowRealMechCalledShotChance" : true,
 
       /* Override called shot percentage display of vehicle locations to show modded shot distribution. Default true. */
-      "ShowRealVehicleCalledShotChance": true,
+      "ShowRealVehicleCalledShotChance" : true,
 
       /* Display chance to one decimal. Default false. If true, will also enables ShowRealMechCalledShotChance and ShowRealVehicleCalledShotChance. */
-      "ShowDecimalCalledChance": false,
+      "ShowDecimalCalledChance" : false,
 
       ///
       /// To Hit Bonus and Penalty
       ///
       
       /* Allow bonus total modifier to increase hit chance. Defaul true. */
-      "AllowNetBonusModifier": true,
+      "AllowNetBonusModifier" : true,
 
       /* Step of hit chance, range 0 to 0.2.  Game default is 0.05, or 5%.  Hit chance is always rounded down.
        * Default 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
-      "HitChanceStep": 0,
+      "HitChanceStep" : 0,
 
       /* Modify base hit chance. -0.05 to make all base accuracy -5%, 0.1 to make all base accuracy +10% etc. Default 0. */
-      "BaseHitChanceModifier": 0,
+      "BaseHitChanceModifier" : 0,
 
       /* Max hit chance after all modifiers but before roll correction. Default 0.95, same as game default.
        * Note that 100% hit chance (max) may still miss if roll correction is enabled. */
-      "MaxFinalHitChance": 0.95,
+      "MaxFinalHitChance" : 0.95,
 
       /* Min hit chance after all modifiers but before roll correction. Default 0.05, same as game default. */
-      "MinFinalHitChance": 0.05,
+      "MinFinalHitChance" : 0.05,
 
       /* Make hit chance modifier has diminishing return rather than simple add and subtract. Default false. */
-      "DiminishingHitChanceModifier": false,
+      "DiminishingHitChanceModifier" : false,
 
       /* Diminishing Bonus: 2-Base^(Bonus/Divisor), Default 2-0.75^(Bonus/6) and caps at +16.
          Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit
           */
-      "DiminishingBonusPowerBase": 0.8,
-      "DiminishingBonusPowerDivisor": 6,
-      "DiminishingBonusMax": 16,
+      "DiminishingBonusPowerBase" : 0.8,
+      "DiminishingBonusPowerDivisor" : 6,
+      "DiminishingBonusMax" : 16,
 
       /* Diminishing Penalty: Base^(Penalty/Divisor), Default 0.8^(Penalty/3.3) and caps at +32.
          Example: +6 Penalty @ 80% Base ToHit == 67% x 0.8 == 53% Hit */
-      "DiminishingPenaltyPowerBase": 0.8,
-      "DiminishingPenaltyPowerDivisor": 3.3,
-      "DiminishingPenaltyMax": 32,
+      "DiminishingPenaltyPowerBase" : 0.8,
+      "DiminishingPenaltyPowerDivisor" : 3.3,
+      "DiminishingPenaltyMax" : 32,
 
       ///
-      /// To Hit Rolls Correction
+      /// To Hit Rolls
       ///
+
+      /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
+      "FixHitDistribution" : true,
 
       /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, max is 2 for double strength.
        * Default is 0.5 for less correction. */
-      "RollCorrectionStrength": 0.5,
+      "RollCorrectionStrength" : 0.5,
 
       /* Set miss streak breaker threshold. Only attacks with hit rate above the threshold will add to streak breaker.
        * Default is 0.5, same as game default. Set to 1 to disable miss streak breaker. */
-      "MissStreakBreakerThreshold": 0.5,
+      "MissStreakBreakerThreshold" : 0.5,
 
       /* Set miss streak breaker divider. Set to negative integer or zero to make it a (positive) constant %.
        * Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.
        * Default is 5, same as game default. */
-      "MissStreakBreakerDivider": 5,
+      "MissStreakBreakerDivider" : 5,
 
       /* Show corrected hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker. Default false. */
-      "ShowCorrectedHitChance": false,
+      "ShowCorrectedHitChance" : false,
 
       /* Show hit chance to one decimal in weapon panel. Default false. */
-      "ShowDecimalHitChance": false,
+      "ShowDecimalHitChance" : false,
 
       ///
       /// Melee and DFA
       ///
 
       /* Allow all possible melee / DFA attack positions. */
-      "IncreaseMeleePositionChoice": true,
-      "IncreaseDFAPositionChoice": true,
+      "IncreaseMeleePositionChoice" : true,
+      "IncreaseDFAPositionChoice" : true,
 
       /* Break the restriction that one must stay still to melee adjacent mech. */
-      "UnlockMeleePositioning": true,
+      "UnlockMeleePositioning" : true,
 
       ///
       /// Logging
@@ -153,12 +153,12 @@
 
       /* Log attacker, weapon, hit roll, correction, location roll, location weights etc. to "BATTLETECH\Mods\FixHitLocation\Log_AttackRoll.txt", for copy and paste to Excel.
        * Default disabled. */
-      "LogHitRolls": false,
+      "LogHitRolls" : false,
 
       /* If true, don't clear log on mod load (game launch). */
-      "PersistentLog": false,
+      "PersistentLog" : false,
 
       /* Location of mod log and roll log. Default is "" to put them in mod folder. Relative path would be relative to BATTLETECH exe. */
-      "LogFolder": "",
+      "LogFolder" : "",
    }
 }

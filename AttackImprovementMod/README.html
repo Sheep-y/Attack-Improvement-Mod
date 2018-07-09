@@ -12,25 +12,39 @@
 <p class="warn"> This documentation is outdated and will be updated later. See mod.json for up to date description of settings. </p>
 
 <p style="clear: both">
-   This mod fixes and tweak the BATTLETECH game's attack experience, such as fixing vehicle called shot and tune down roll correction.
+   This mod fixes, tweaks, and enhances the BATTLETECH game's attack experience, such as fixing vehicle called shot, tune down roll correction, and show heat and stability numbers.
 </p>
 <p>
    This mod does <i>not</i> modify game data.  Saves made with this mod on will <i>not</i> be affected by disabling or removing this mod.
 </p>
 <p>
-   By editing this mod's "mod.json" as a text file, you can also adjust strength of roll correction, see real and detailed hit chances, and/or log hit rolls and location rolls.
+   All features of this mod can be customised by editing this mod's "mod.json" as a text file.
+   Advanced (almost fancy) features can be enabled, enhancements can be disabled, and tweaks can be fine tuned.
 </p>
 
 <details>
    <summary><h2>Change Log</h2></summary>
    <dl>
-      <dt>2018-07-07 Version 1.5 Beta
-      <dd>Add log path setting. Override selection and target panel to show heat and stab number below jets count. Add melee and DFA destinations unlock. Add hit chance adjustment and diminishing modifier.
-      <dd>New mod setting: ShowHeatAndStab, IncreaseMeleePositionChoice, IncreaseDFAPositionChoice, UnlockMeleePositioning, LogFolder.
+      <dt>Current Version 2.0 Preview
+      <dd>New: Change styles of targeting lines.
+      <dd>New: Show heat and stability numbers in combat.
+      <dd>New: Unlock Melee and DFA positioning.
+      <dd>New: Allow net bonus hit modifier and diminishing modifier.
+      <dd>Fix: Defer combat constants access to improves compatibility and robustness.
+      <dd>Fix: Attack log now fill in all blanks even when missing.
+      <dd>Change: Re-enable hit location fix by default on ver 1.1.1 and up.
+      <dd>Change: Speed up attack logging (reduce disk write from once per shot to once per attack). It also no longer log sum of weight which is costy and easy to misunderstand.
+      <dd>Change: Minimised settings dependency, e.g. ShowDecimalCalledChance no longer depends on ShowRealMechCalledShotChance and ShowRealVehicleCalledShotChance.
+      <dd>Change: Internal architecture rework and general speed ups.
+      <dd>Change: Log folder may now be set. ShowRealWeaponHitChance renamed to ShowCorrectedHitChance.
    </dl>
    <dl>
       <dt>2018-06-28 Version 1.0.1
-      <dd>Bug Fixes: Fix vehicle called shot no longer float mech location name. Autodetect Log directory. Cap accuracy between 0 and 100. Override called shot percent cap when ShowRealWeaponHitChance is true but ShowDecimalHitChance is false. Auto-bypass Hit Location bug fix on 1.1.1 and later.
+      <dd>Fix: Fix vehicle called shot no longer float mech location name.
+      <dd>Fix: Autodetect Log directory.
+      <dd>Fix: Cap accuracy between 0 and 100.
+      <dd>Fix: Override called shot percent cap when ShowRealWeaponHitChance is true but ShowDecimalHitChance is false.
+      <dd>Fix: Auto-bypass Hit Location bug fix on 1.1.1 and up.
    </dl>
    <dl>
       <dt>2018-06-21 Version 1.0.0
@@ -88,19 +102,83 @@
 <details open>
    <summary><h2>Features</h2></summary>
    <p>
-      The defaul options aim to fix and tune the game to a similar balance level with the vanilla game,
-      make the numbers you see closer to the actual numbers, without overwhelming you.
-      Not all features are enabled by default.
+      The default options aim to enhance your BattleTech experience while staying close to the vanilla balance and design, without overwhelming you.
+      But if you want to learn what this mod can really do, perhaps to customised your experience, this section describes each settings in details.
    </p>
    <p>
       Each feature can be individually enabled, disabled, or sometimes adjusted.
-      Disabled features will not load and will cause no overhead.
+      Do not worry about performance; I love optimising my code.
+      For example heavy calculations are cached, and disabled features will not add overhead to the game.
    </p>
    <p>
-      The mod is developed and tested on BATTLETECH v1.1 (Beta).
-      Some features may not work or may work incorrectly in other game versions.
-      All features apply equally to player and AI, to campaign and skirmish.
+      Most features apply equally to player and AI, to campaign and skirmish.
+      Exception is melee position unlock, which affect only player options.
    </p>
+   <details open>
+      <summary><h3>Heat and Stability</h3></summary>
+      <ul>
+         <li> <details>
+            <summary><h3>Show Heat and Stability Numbers</h3></summary>
+            <p>Setting: <code>ShowHeatAndStab</code> (true/false, default true)<br>
+            Show heat and stability number in the selection panel (bottom left) and targeting panel (top center).
+            <p>When planning your action, the numbers will display current state and predicted state.  The prediction is supplied by the game and is subject to all its quirks and bugs.
+         </details></li>
+      </ul>
+   </details>
+   <details open>
+      <summary><h3>Targeting Line</h3></summary>
+      <ul>
+         <li> <details>
+            <summary><h3>Change Widths of Targeting Lines</h3></summary>
+            <p>Setting: <code>LOSWidthMultiplier</code> (0.1 to 10, default 2) <br>
+            Scale width of all targeting lines (direct, indirect, blocked, can't attack etc.). <br>
+            Set to 1 to leave at game default. <br>
+            Default is 2 meaning the widths are doubled from default. <br>
+
+            <p>Setting: <code>LOSWidthBlockedMultiplier</code> (0.1 to 20, default 3) <br>
+            Scale width of obstructed part of an obstructed targeting lines, which is thinner than other lines by default. <br>
+            Set to 1 to leave at game default, which is half that of other lines. <br>
+            Set it to double of <code>LOSWidthMultiplier</code> will make it same width as the non-obstructed part. <br>
+            Default is 3 meaning the widths are tripled from default.
+         </details></li>
+         <li> <details>
+            <summary><h3>Change Widths of Obstruction Marker</h3></summary>
+            <p>Setting: <code>LOSMarkerBlockedMultiplier</code> (0 to 10, default 1.5)
+            <p>Scale the obstruction marker of targeting lines. 2 means double width and height, 0.5 means half-half. <br>
+            Set to 1 to leave at game default. <br>
+            Set to 0 will not remove them from game but will effectively hide them.
+         </details></li>
+         <li> <details>
+            <summary><h3>Change Styles of Targeting Lines</h3></summary>
+
+            <p>Setting: <code>LOSIndirectDotted</code> (Default true, game default false)<br>
+               Setting: <code>LOSNoAttackDotted</code> (Default true)<br>
+               Setting: <code>LOSMeleeDotted</code> (Default false)<br>
+               Setting: <code>LOSClearDotted</code> (Default false)<br>
+               Setting: <code>LOSBlockedPreDotted</code>  (Default false)<br>
+               Setting: <code>LOSBlockedPostDotted</code> (Default false)<br>
+               Setting: <code>LOSMeleeColor</code> (Default "")<br>
+               Setting: <code>LOSClearColor</code> (Default "")<br>
+               Setting: <code>LOSBlockedPreColor</code><br>
+               Setting: <code>LOSBlockedPostColor</code><br>
+               Setting: <code>LOSIndirectColor</code> (Default "")<br>
+               Setting: <code>LOSNoAttackColor</code> (Default "")<br>
+
+            <p>Set the colour and style of various targeting lines.
+            Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.
+
+            <p>Colours are either empty or in HTML hash syntax.  #F00 = red, #0F0 = green, #00F = blue, #FFF = white, #888 = grey, #000 = black.  Four parts means RGBA, while three parts mean full opacity RGB. Support full and short form. e.g. #28B = #2288BB = #2288BBFF.
+         </details></li>
+         <li> <details>
+            <summary><h3>Refine or Rough Indirect Fire Arc</h3></summary>
+            <p>Setting: <code>LOSIndirectSegment</code> (1 to 1000, default 48, game default 17)
+
+            <p>On a high resolution monitor it is easy to see the hard corners of the arc of indirect targeting lines.  Lines are quick to draw, so this mod will happily improves the quality of the arcs. <br>
+            Set it to 1 to make them flat like other lines.
+         </details></li>
+      </ul>
+   </details>
+
    <ul>
       <li> <details>
          <summary><h3>Enable Vehicle Called Shot</h3></summary>
@@ -287,7 +365,7 @@
       Also Override <code>Mech.GetLongArmorLocation</code> to correct called shot floatie.
 
       <dt><code>FixHitDistribution</code>
-      <dd>If true AND game version is below 1.1.1: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code> 
+      <dd>If true AND game version is below 1.1.1: Override <code>HitLocation.GetHitLocation&lt;ArmorLocation&gt;</code>
       and <code>HitLocation.GetHitLocation&lt;VehicleChassisLocations&gt;</code>.
          Precision is increased by scaling up all integers in the calculation by 1024.</dd>
 

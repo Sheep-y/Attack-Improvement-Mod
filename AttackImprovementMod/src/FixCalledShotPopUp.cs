@@ -9,7 +9,7 @@ namespace Sheepy.AttackImprovementMod {
    using static FixHitLocation;
 
    public class FixCalledShotPopUp : ModModule {
-      
+
       private static string CalledShotHitChanceFormat = "{0:0}%";
 
       public override void InitPatch () {
@@ -40,7 +40,7 @@ namespace Sheepy.AttackImprovementMod {
       // ============ HUD Override ============
 
       private static Object LastHitTable;
-      private static float HitTableTotalWeight;
+      private static int HitTableTotalWeight;
       private static int lastCalledShotLocation;
 
       private static bool CacheNeedRefresh ( Object hitTable, int targetedLocation ) {
@@ -57,7 +57,7 @@ namespace Sheepy.AttackImprovementMod {
                                                    ? Combat.HitLocation.GetMechHitTable( AttackDirection )
                                                    : Constants.GetMechClusterTable( targetedLocation, AttackDirection );
          if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
-            HitTableTotalWeight = (float) SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
+            HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
 
          int local = TryGet( hitTable, location ) * scale;
          if ( location == targetedLocation )
@@ -74,7 +74,7 @@ namespace Sheepy.AttackImprovementMod {
 
          Dictionary<VehicleChassisLocations, int> hitTable = Combat.HitLocation.GetVehicleHitTable( AttackDirection );
          if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
-            HitTableTotalWeight = (float) SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
+            HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
 
          int local = TryGet( hitTable, location ) * scale;
          if ( location == targetedLocation )
@@ -100,7 +100,7 @@ namespace Sheepy.AttackImprovementMod {
             }
             if ( last.Equals( location ) ) local--; // Last location get one less weight
          }
-         float perc = ( (float) local ) * 100f / HitTableTotalWeight;
+         float perc = (float) local * 100f / (float) HitTableTotalWeight;
          return string.Format( CalledShotHitChanceFormat, perc );
       }
    }

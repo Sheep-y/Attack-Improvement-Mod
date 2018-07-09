@@ -2,11 +2,23 @@
 
    public class ModSettings {
 
-      /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
-      public bool FixHitDistribution = true;
-
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       public bool ShowHeatAndStab = true;
+
+      /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
+      public bool FixHeatPrediction = true;
+
+      /* Float heat number after jump, ranged attack, or end of turn (Brace, Melee, or DFA). Default true. *
+      public bool FloatHeatAfterJump   = true;
+      public bool FloatHeatAfterAttack = true;
+      public bool FloatHeatAtTurnEnd   = true;
+
+      /* Float target stability number after attack. Default true. *
+      public bool FloatTargetStability = true;
+
+      /* Float self stability number after DFA attack or end of turn. *
+      public bool FloatStabilityAfterDFA  = true;
+      public bool FloatStabilityAtTurnEnd = true;
 
       ///
       /// Line of Sight
@@ -105,6 +117,9 @@
       /// To Hit Rolls Correction
       ///
 
+      /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
+      public bool FixHitDistribution = true;
+
       /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, max is 2 for double strength.
        * Default is 0.5 for less correction. */
       public float RollCorrectionStrength = 0.5f;
@@ -134,6 +149,12 @@
 
       /* Break the restriction that one must stay still to melee adjacent mech. */
       public bool UnlockMeleePositioning = true;
+
+      /* Allow melee attack on sprint. Default false. */
+      public bool AllowChargeAttack = false;
+
+      /* Fire support weapon after sprint.  Default false. */
+      public bool FireSupportWeaponOnCharge = false;
 
       /* Allow DFA called shot on vehicles *
       public bool AllowDFACalledShotVehicle = true;
