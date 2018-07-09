@@ -50,7 +50,7 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void CombatStarts () {
          if ( correctionCache != null )
-            Log( "Combat starts with " + correctionCache.Count + " reverse roll correction cached from previous battles." );
+            Log( "Combat starts with {0} reverse roll correction cached from previous battles.", correctionCache.Count );
          if ( rollCorrection != null ) {
             if ( NoRollCorrection )
                rollCorrection.SetValue( null, false );

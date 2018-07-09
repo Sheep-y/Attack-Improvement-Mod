@@ -193,7 +193,7 @@ namespace Sheepy.AttackImprovementMod {
             mat.mainTextureScale = s;
          }
          mat.name = name.Replace( ' ', '_' ) + "_LOS";
-         Log( string.Format( "{0} {1}, Color {2} = {3}", new object[]{ mat.name, dotted ? "Dotted":"Solid", color, newColour } ) );
+         Log( "{0} {1}, Color {2} = {3}", mat.name, dotted ? "Dotted":"Solid", color, newColour );
          return mat;
       }
 

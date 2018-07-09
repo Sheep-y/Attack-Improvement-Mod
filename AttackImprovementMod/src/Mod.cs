@@ -53,20 +53,20 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void LogSettings ( string directory, string settingsJSON ) {
          // Get log settings
-         string logCache = "AIM Version: " + VERSION + "\nMod Folder: " + directory + "\n";
+         StringBuilder logCache = new StringBuilder().AppendFormat( "AIM Version: {0}\nMod Folder: {1}\n", VERSION, directory );
          try {
             Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
-            logCache +=  "Mod Settings: " + JsonConvert.SerializeObject( Settings, Formatting.Indented );
+            logCache.AppendFormat( "Mod Settings: {0}\n", JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
          } catch ( Exception ex ) {
-            logCache += string.Format( "Error: Cannot read mod settings, using default: {0}", ex );
+            logCache.Append( "Error: Cannot parse mod settings, using default." );
          }
          try {
             LogDir = Settings.LogFolder;
-            if ( Settings.LogFolder.Length <= 0 )
+            if ( LogDir.Length <= 0 )
                LogDir = directory + "/";
-            logCache += "\nLog folder set to " + LogDir + ". If that fails, fallback to " + FALLBACK_LOG_DIR + "." ;
+            logCache.AppendFormat( "Log folder set to {0}. If that fails, fallback to {1}.", LogDir, FALLBACK_LOG_DIR );
             DeleteLog( LOG_NAME );
-            Log( logCache );
+            Log( logCache.ToString() );
          } catch ( Exception ex ) { Log( ex ); }
 
          // Detect game features. Need a proper version parsing routine. Next time.
@@ -122,7 +122,7 @@ namespace Sheepy.AttackImprovementMod {
          else
             patched = patchedClass.GetMethod( patchedMethod, flags, null, parameterTypes, null );
          if ( patched == null ) {
-            Error( string.Format( "Cannot find {0}.{1}(...) to patch", new object[]{ patchedClass.Name, patchedMethod } ) );
+            Error( "Cannot find {0}.{1}(...) to patch", patchedClass.Name, patchedMethod );
             return;
          }
          Patch( patched, prefix, postfix );
@@ -130,13 +130,13 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void Patch( MethodInfo patched, string prefix, string postfix ) {
          if ( patched == null ) {
-            Error( "Method not found. Cannot patch [ " + prefix + " : " + postfix + " ]" );
+            Error( "Method not found. Cannot patch [ {0} : {1} ]", prefix, postfix );
             return;
          }
          HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
          if ( pre == null && post == null ) return; // MakePatch would have reported method not found
          harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
-         Log( string.Format( "Patched: {0} {1} [ {2} : {3} ]", new object[]{ patched.DeclaringType, patched, prefix, postfix } ) );
+         Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, prefix, postfix );
       }
 
       // ============ UTILS ============
@@ -197,9 +197,11 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void Log( object message ) { Log( message.ToString() ); }
-      internal static void Log( string message = "" ) {
+      internal static void Log( string message = "", params object[] args = null ) {
          string logName = LogDir + LOG_NAME;
          try {
+            if ( args != null && args.Length > 0 )
+               message = string.Format( message, args );
             if ( ! File.Exists( logName ) ) 
                message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;
          } catch ( Exception ) {}
@@ -207,13 +209,13 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void Warn( object message ) { Warn( message.ToString() ); }
-      internal static void Warn( string message ) {
-         Log( "Warning: " + message );
+      internal static void Warn( string message, params object[] args = null ) {
+         Log( "Warning: " + message, args );
       }
 
       internal static bool Error( object message ) { Error( message.ToString() ); return true; }
-      internal static void Error( string message ) {
-         Log( "Error: " + message );
+      internal static void Error( string message, params object[] args = null ) {
+         Log( "Error: " + message, args );
       }
 
       internal static void WriteLog( string filename, string message ) {
