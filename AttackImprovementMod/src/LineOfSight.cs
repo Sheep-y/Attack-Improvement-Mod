@@ -55,9 +55,7 @@ namespace Sheepy.AttackImprovementMod {
 
       private static Material OrigInRangeMat;
       private static Material OrigOutOfRangeMat;
-      private static Color OrigLockedColour;
-      private static Color OrigClearColour;
-      private static Color OrigBlockedColour;
+      private static Color[] OrigColours;
 
       private static Material MeleeMat;
       private static Material ClearMat;
@@ -101,9 +99,7 @@ namespace Sheepy.AttackImprovementMod {
          WeaponRangeIndicators me = __instance;
          OrigInRangeMat = me.MaterialInRange;
          OrigOutOfRangeMat = me.MaterialOutOfRange;
-         OrigLockedColour = me.LOSLockedTarget;
-         OrigClearColour = me.LOSInRange;
-         OrigBlockedColour = me.LOSBlocked;
+         OrigColours = new Color[]{ me.LOSInRange, me.LOSOutOfRange, me.LOSUnlockedTarget, me.LOSLockedTarget, me.LOSMultiTargetKBSelection, me.LOSBlocked };
 
          MeleeMat = NewMat( "Melee", true, Settings.LOSMeleeColor, Settings.LOSMeleeDotted );
          ClearMat = NewMat( "Clear", true, Settings.LOSClearColor, Settings.LOSClearDotted );
@@ -118,6 +114,7 @@ namespace Sheepy.AttackImprovementMod {
          }
       }
 
+      private static bool IsMultifire = false;
       private static bool RestoreMat = false;
       private static LineRenderer thisLine;
 
@@ -127,16 +124,18 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void SetupLOS ( WeaponRangeIndicators __instance, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          WeaponRangeIndicators me = __instance;
-         if ( isMelee )
+         if ( isMelee ) {
+            IsMultifire = false;
             SwapMat( me, MeleeMat, ref me.LOSLockedTarget );
-         else if ( IndirectMat != null || ClearMat != null || BlockedPreMat != null || BlockedPostMat != null ) {
+         }  else if ( IndirectMat != null || ClearMat != null || BlockedPreMat != null || BlockedPostMat != null ) {
+            IsMultifire = usingMultifire;
             FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( target );
             if ( info.HasLOF )
                if ( info.LOFLevel == LineOfFireLevel.LOFClear )
                   SwapMat( me, ClearMat, ref me.LOSInRange );
                else {
                   SwapMat( me, BlockedPreMat, ref me.LOSInRange );
-                  SwapMat( me, BlockedPreMat, ref me.LOSBlocked );
+                  me.LOSBlocked = BlockedPreMat.color;
                }
             else
                SwapMat( me, IndirectMat, ref me.LOSInRange );
@@ -145,10 +144,13 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void CleanupLOS ( WeaponRangeIndicators __instance ) {
          if ( RestoreMat ) {
-            __instance.MaterialInRange = OrigInRangeMat;
-            __instance.LOSLockedTarget = OrigLockedColour;
-            __instance.LOSInRange = OrigClearColour;
-            __instance.LOSBlocked = OrigBlockedColour;
+            WeaponRangeIndicators me = __instance;
+            me.MaterialInRange = OrigInRangeMat;
+            me.LOSInRange = OrigColours[0];
+            me.LOSUnlockedTarget = OrigColours[2];
+            me.LOSLockedTarget = OrigColours[3];
+            me.LOSMultiTargetKBSelection = OrigColours[4];
+            me.LOSBlocked = OrigColours[5];
             RestoreMat = false;
          }
       }
@@ -190,10 +192,17 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       private static void SwapMat ( WeaponRangeIndicators __instance, Material newMat, ref Color lineColor ) {
-         if ( newMat == null ) return;
-         __instance.MaterialInRange = newMat;
-         lineColor = newMat.color;
-         RestoreMat = true;
+         if ( newMat != null ) {
+            WeaponRangeIndicators me = __instance;
+            me.MaterialInRange = newMat;
+            lineColor = newMat.color;
+            if ( IsMultifire ) {
+               Color multi = me.LOSLockedTarget = lineColor;
+               multi.a *= 0.8f;
+               me.LOSUnlockedTarget = me.LOSMultiTargetKBSelection = multi;
+            }
+            RestoreMat = true;
+         }
       }
 
       // ============ ARCS ============
