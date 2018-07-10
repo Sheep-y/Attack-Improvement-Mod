@@ -144,7 +144,7 @@ namespace Sheepy.AttackImprovementMod {
             else
                SwapMat( me, Indirect, ref me.LOSInRange, usingMultifire );
          }
-      } catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void CleanupLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
          if ( RestoreMat ) {
@@ -166,7 +166,7 @@ namespace Sheepy.AttackImprovementMod {
             thisLine.material = Mats[ BlockedPost ];
             thisLine.startColor = thisLine.endColor = Mats[ BlockedPost ].color;
          }
-      } catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ UTILS ============
 

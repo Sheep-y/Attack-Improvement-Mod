@@ -98,7 +98,7 @@ namespace Sheepy.AttackImprovementMod {
             if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
                hitTable = Constants.GetMechClusterTable( bonusLocation, dir );
          }
-      }                 catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static bool OverrideMechCalledShot ( ref ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
          __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
@@ -107,7 +107,7 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void PrefixVehicleCalledShot ( VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-      }                 catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
          __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
@@ -149,7 +149,7 @@ namespace Sheepy.AttackImprovementMod {
          HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
          if ( Readout?.HUD?.SelectionHandler?.ActiveState is SelectionStateFire selectionState )
             selectionState.calledShotLocation = TranslateLocation( selectionState.calledShotVLocation );
-      }                 catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // Store vehicle called shot location in mech location, so that it will be passed down event chain
       public static void RecordVehicleCalledShotFireLocation ( SelectionStateFire __instance, VehicleChassisLocations location ) {

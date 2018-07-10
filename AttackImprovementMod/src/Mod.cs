@@ -49,7 +49,7 @@ namespace Sheepy.AttackImprovementMod {
             Log( "=== Patching " + mod.Key + " ===" );
             patchClass = mod.Value.GetType();
             mod.Value.InitPatch();
-         } catch ( Exception ex ) { Error( ex ); }
+         }                 catch ( Exception ex ) { Error( ex ); }
          Log();
       }
 
@@ -69,7 +69,7 @@ namespace Sheepy.AttackImprovementMod {
             logCache.AppendFormat( "Log folder set to {0}. If that fails, fallback to {1}.", LogDir, FALLBACK_LOG_DIR );
             DeleteLog( LOG_NAME );
             Log( logCache.ToString() );
-         } catch ( Exception ex ) { Log( ex ); }
+         }                 catch ( Exception ex ) { Error( ex ); }
 
          // Detect game features. Need a proper version parsing routine. Next time.
          if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
@@ -248,7 +248,7 @@ namespace Sheepy.AttackImprovementMod {
          Mod.HUD = __instance;
          foreach ( var mod in modules ) try {
             mod.Value.CombatStarts();
-         } catch ( Exception ex ) { Error( ex ); }
+         }                 catch ( Exception ex ) { Error( ex ); }
       }
 
       public static void CacheCombatState () {

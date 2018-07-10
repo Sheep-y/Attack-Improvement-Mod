@@ -87,7 +87,7 @@ namespace Sheepy.AttackImprovementMod {
                bonusLocation + "\t" +
                bonusLocationMultiplier + "\t" +
                __result );
-      } catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void LogVehicleHit ( VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
          // "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Total Weight", "Goal", "Hit Location"
@@ -105,7 +105,7 @@ namespace Sheepy.AttackImprovementMod {
                bonusLocation + "\t" +
                bonusLocationMultiplier + "\t" +
                __result );
-      } catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       internal static string GetHitLog () {
          return thisAttacker + "\t" + thisWeapon + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance;

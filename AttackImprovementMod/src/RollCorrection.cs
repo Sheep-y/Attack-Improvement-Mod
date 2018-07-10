@@ -112,7 +112,7 @@ namespace Sheepy.AttackImprovementMod {
          if ( ! correctionCache.TryGetValue( chance, out float corrected ) )
             correctionCache.Add( chance, corrected = ReverseRollCorrection( chance, Settings.RollCorrectionStrength ) );
          chance = corrected;
-      }                 catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", Instance | NonPublic );
       private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", Instance | NonPublic );

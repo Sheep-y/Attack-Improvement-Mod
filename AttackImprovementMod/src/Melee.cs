@@ -23,7 +23,7 @@ namespace Sheepy.AttackImprovementMod {
       public static void ShowDFACalledShotPopup ( SelectionStateJump __instance ) { try {
          if ( __instance.TargetedCombatant is Vehicle )
             HUD.ShowCalledShotPopUp( __instance.SelectedActor, __instance.TargetedCombatant as AbstractActor );
-      }                 catch ( Exception ex ) { Log( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static float MaxMeleeVerticalOffset = 8f;
 

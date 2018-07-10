@@ -66,8 +66,7 @@ namespace Sheepy.AttackImprovementMod {
 
          __result = FineTuneAndFormat( hitTable, location, local, Settings.ShowRealMechCalledShotChance );
          return false;
-
-      } catch ( Exception ex ) { return Error( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool OverrideHUDVehicleCalledShotPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) { try {
          if ( ! Settings.FixVehicleCalledShot || ! Settings.ShowRealVehicleCalledShotChance )
@@ -84,7 +83,7 @@ namespace Sheepy.AttackImprovementMod {
          __result = FineTuneAndFormat( hitTable, location, local, Settings.ShowRealVehicleCalledShotChance );
          return false;
 
-      } catch ( Exception ex ) { return Error( ex ); } }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ Subroutines ============
 
