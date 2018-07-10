@@ -12,26 +12,20 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void InitPatch () {
          if ( Mod.Settings.FixMultiTargetBackout ) {
-            Patch( typeof( CombatSelectionHandler ), "BackOutOneStep", NonPublic, null, "PreventMultiTargetBackout" );
-            Patch( typeof( SelectionStateFireMulti ), "get_CanBackOut", "OverrideMultiTargetCanBackout", null );
-            Patch( typeof( SelectionStateFireMulti ), "BackOut", "OverrideMultiTargetBackout", null );
-            //Patch( typeof( WeaponRangeIndicators ), "ShowLinesToAllEnemies", NonPublic, "LogB", null );
+            if ( targetedCombatant == null )
+               Warn( "Cannot find SelectionState.targetedCombatant." );
+            if ( RemoveTargetedCombatant == null )
+               Error( "Cannot find RemoveTargetedCombatant(), SelectionStateFireMulti not patched" );
+            else {
+               Patch( typeof( CombatSelectionHandler ), "BackOutOneStep", NonPublic, null, "PreventMultiTargetBackout" );
+               Patch( typeof( SelectionStateFireMulti ), "get_CanBackOut", "OverrideMultiTargetCanBackout", null );
+               Patch( typeof( SelectionStateFireMulti ), "BackOut", "OverrideMultiTargetBackout", null );
+               //Patch( typeof( WeaponRangeIndicators ), "ShowLinesToAllEnemies", NonPublic, "LogB", null );
+            }
          }
       }
 
       // ============ Fixes ============
-
-      public static void LogB ( AbstractActor selectedActor, bool usingMultiFire, List<ICombatant> lockedTargets, bool isMelee ) {
-         // Trying to debug LOS not updated correctly after backout.  State seems to be correct.
-         if ( ! isMelee && usingMultiFire ) {
-            List<AbstractActor> allEnemies = selectedActor.Combat.AllEnemies;
-            List<ICombatant> allPossibleTargets = HUD.SelectionHandler.ActiveState.FiringPreview.AllPossibleTargets;
-            Log( "{0} Enemies, {1} Possible.", allEnemies.Count, allPossibleTargets.Count );
-            foreach ( ICombatant tar in allPossibleTargets )
-               Log( "{0} is {1}", tar.GetPilot().Callsign, lockedTargets.Contains( tar ) ? "locked" : "unlocked" );
-         }
-      }
-
 
       private static bool ReAddStateData = false;
 
@@ -46,14 +40,17 @@ namespace Sheepy.AttackImprovementMod {
          return false;
       }
 
+      private static FieldInfo targetedCombatant = typeof( SelectionState ).GetField( "targetedCombatant", NonPublic | Instance );
       private static MethodInfo RemoveTargetedCombatant = typeof( SelectionStateFireMulti ).GetMethod( "RemoveTargetedCombatant", NonPublic | Instance );
       private static object[] RemoveTargetParams = new object[]{ null, false };
 
       public static bool OverrideMultiTargetBackout ( SelectionStateFireMulti __instance ) { try {
          SelectionStateFireMulti me = __instance;
-         if ( me.AllTargetedCombatantsCount > 0 ) {
+         int count = me.AllTargetedCombatantsCount;
+         if ( count > 0 ) {
+            // Change target to reset keyboard focus and thus dim cancelled target's LOS
+            targetedCombatant?.SetValue( me, count > 1 ? me.AllTargetedCombatants[ count - 2 ] : null );
             RemoveTargetedCombatant.Invoke( me, RemoveTargetParams );
-            //WeaponRangeIndicators.Instance.UpdateTargetingLines( me.SelectedActor, me.PreviewPos, me.PreviewRot, me.IsPositionLocked, me.TargetedCombatant, true, me.AllTargetedCombatants, false );
             ReAddStateData = true;
          }
          return true;

@@ -27,23 +27,24 @@ namespace Sheepy.AttackImprovementMod {
          Parse( ref Settings.LOSIndirectColor );
          Parse( ref Settings.LOSNoAttackColor );
 
-         bool LineChanged = Settings.LOSIndirectDotted || Settings.LOSIndirectColor != "" ||
-                             ! Settings.LOSMeleeDotted || Settings.LOSMeleeColor != "" ||
-                             ! Settings.LOSClearDotted || Settings.LOSClearColor != "" ||
-                        ! Settings.LOSBlockedPreDotted || Settings.LOSBlockedPreColor != "" ||
-                       ! Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != "" ;  // NoAttackLine is overriden once and leave alone.
+         bool SolidLinesChanged = Settings.LOSIndirectDotted || Settings.LOSIndirectColor != "" ||
+                                   ! Settings.LOSMeleeDotted || Settings.LOSMeleeColor != "" ||
+                                   ! Settings.LOSClearDotted || Settings.LOSClearColor != "" ||
+                              ! Settings.LOSBlockedPreDotted || Settings.LOSBlockedPreColor != "" ||
+                             ! Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != "" ; 
+                                  // NoAttackLine is overriden once and leave alone.
 
          bool TwoSectionsLOS = Settings.LOSBlockedPreDotted != Settings.LOSBlockedPostDotted || Settings.LOSBlockedPreColor != Settings.LOSBlockedPostColor;
 
          if ( Settings.LOSWidthMultiplier != 1f || Settings.LOSWidthBlockedMultiplier != 1f || Settings.LOSMarkerBlockedMultiplier != 1f )
             Patch( Indicator, "Init", null, "ResizeLOS" );
-         if ( LineChanged || Settings.LOSNoAttackColor != "" || ! Settings.LOSNoAttackDotted )
+         if ( SolidLinesChanged || Settings.LOSNoAttackColor != "" || ! Settings.LOSNoAttackDotted )
             Patch( Indicator, "Init", null, "CreateLOSTexture" );
          if ( Settings.ArcLinePoints != 18 || TwoSectionsLOS )
             Patch( Indicator, "getLine" , NonPublic, null, "RecordLOS" );
          if ( TwoSectionsLOS )
             Patch( Indicator, "DrawLine", NonPublic, null, "SetBlockedLOS" );
-         if ( LineChanged )
+         if ( SolidLinesChanged )
             Patch( Indicator, "DrawLine", NonPublic, "SetupLOS", "CleanupLOS" );
          if ( Settings.ArcLinePoints != 18 ) {
             Patch( Indicator, "GetPointsForArc", Static, "OverrideGetPointsForArc", null );
