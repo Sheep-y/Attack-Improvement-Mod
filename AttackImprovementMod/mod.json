@@ -13,6 +13,10 @@
 
    "Settings" : {
 
+      /* Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode. Default true.
+         You can still quickly switch out of it by pressing another action. */
+      "FixMultiTargetBackout" : true,
+
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       "ShowHeatAndStab" : true,
 

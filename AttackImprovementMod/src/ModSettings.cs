@@ -2,6 +2,10 @@
 
    public class ModSettings {
 
+      /* Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode. Default true.
+         You can still quickly switch out of it by pressing another action. */
+      public bool FixMultiTargetBackout = true;
+      
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       public bool ShowHeatAndStab = true;
 

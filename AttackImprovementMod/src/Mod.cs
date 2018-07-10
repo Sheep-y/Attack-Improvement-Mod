@@ -35,14 +35,15 @@ namespace Sheepy.AttackImprovementMod {
          patchClass = typeof( Mod );
          Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
 
-         modules.Add( "Logger", new AttackLog() );
-         modules.Add( "Roll Modifier", new RollModifier() );
-         modules.Add( "Roll Corrections", new RollCorrection() );
-         modules.Add( "Called Shot and Hit Location", new FixHitLocation() );
-         modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
          modules.Add( "Heat and Stability", new HeatAndStab() );
          modules.Add( "Line of Fire", new LineOfSight() );
+         modules.Add( "Attack Action", new AttackAction() );
+         modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
          modules.Add( "Melee", new Melee() );
+         modules.Add( "Roll Modifier", new RollModifier() );
+         modules.Add( "Roll Corrections", new RollCorrection() );
+         modules.Add( "Hit Distribution", new FixHitLocation() );
+         modules.Add( "Logger", new AttackLog() );
 
          foreach ( var mod in modules )  try {
             Log( "=== Patching " + mod.Key + " ===" );
