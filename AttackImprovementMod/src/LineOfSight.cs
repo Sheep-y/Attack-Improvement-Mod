@@ -31,16 +31,17 @@ namespace Sheepy.AttackImprovementMod {
                              ! Settings.LOSMeleeDotted || Settings.LOSMeleeColor != "" ||
                              ! Settings.LOSClearDotted || Settings.LOSClearColor != "" ||
                         ! Settings.LOSBlockedPreDotted || Settings.LOSBlockedPreColor != "" ||
-                       ! Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != "" ;
-         bool PrePostDiff = Settings.LOSBlockedPreDotted != Settings.LOSBlockedPostDotted || Settings.LOSBlockedPreColor != Settings.LOSBlockedPostColor;
+                       ! Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != "" ;  // NoAttackLine is overriden once and leave alone.
+
+         bool TwoSectionsLOS = Settings.LOSBlockedPreDotted != Settings.LOSBlockedPostDotted || Settings.LOSBlockedPreColor != Settings.LOSBlockedPostColor;
 
          if ( Settings.LOSWidthMultiplier != 1f || Settings.LOSWidthBlockedMultiplier != 1f || Settings.LOSMarkerBlockedMultiplier != 1f )
             Patch( Indicator, "Init", null, "ResizeLOS" );
          if ( LineChanged || Settings.LOSNoAttackColor != "" || ! Settings.LOSNoAttackDotted )
-            Patch( Indicator, "Init", null, "CreateNewLOS" );
-         if ( Settings.ArcLinePoints != 18 || PrePostDiff )
+            Patch( Indicator, "Init", null, "CreateLOSTexture" );
+         if ( Settings.ArcLinePoints != 18 || TwoSectionsLOS )
             Patch( Indicator, "getLine" , NonPublic, null, "RecordLOS" );
-         if ( PrePostDiff )
+         if ( TwoSectionsLOS )
             Patch( Indicator, "DrawLine", NonPublic, null, "SetBlockedLOS" );
          if ( LineChanged )
             Patch( Indicator, "DrawLine", NonPublic, "SetupLOS", "CleanupLOS" );
@@ -53,25 +54,19 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Line change ============
 
-      private static Material OrigInRangeMat;
-      private static Material OrigOutOfRangeMat;
-      private static Color[] OrigColours;
-
-      private static Material MeleeMat;
-      private static Material ClearMat;
-      private static Material BlockedPreMat;
-      private static Material BlockedPostMat;
-      private static Material IndirectMat;
-      private static Material NoAttackMat;
+      private static float newScale = float.NaN;
 
       public static void ResizeLOS ( WeaponRangeIndicators __instance ) {
          WeaponRangeIndicators me = __instance;
+         if ( me.LOSWidthBegin == newScale ) return;
+         Log( "Scaling LOS width by {0} and {1}", Settings.LOSWidthMultiplier, Settings.LOSWidthBlockedMultiplier );
+
          float scale = Settings.LOSWidthMultiplier;
          if ( scale != 1f ) {
-            Log( "Scaling LOS width by " + scale );
             // Scale solid line width
             me.LOSWidthBegin *= scale;
             me.LOSWidthEnd *= scale;
+            newScale = me.LOSWidthBegin;
             // Scale Out of Range line width, when line is solid
             me.LineTemplate.startWidth *= scale;
             me.LineTemplate.endWidth *= scale;
@@ -80,14 +75,13 @@ namespace Sheepy.AttackImprovementMod {
             s.x /= scale;
             me.MaterialOutOfRange.mainTextureScale = s;
          }
+
          scale = Settings.LOSWidthBlockedMultiplier;
-         if ( scale != 1f ) {
-            Log( "Scaling Blocked LOS width by " + scale );
+         if ( scale != 1f )
             me.LOSWidthBlocked *= scale;
-         }
+
          scale = Settings.LOSMarkerBlockedMultiplier;
          if ( scale != 1f ) {
-            Log( "Scaling Blocked LOS Marker size by " + scale );
             Vector3 zoom = me.CoverTemplate.transform.localScale;
             zoom.x *= scale;
             zoom.y *= scale;
@@ -95,26 +89,38 @@ namespace Sheepy.AttackImprovementMod {
          }
       }
 
-      public static void CreateNewLOS ( WeaponRangeIndicators __instance ) {
-         WeaponRangeIndicators me = __instance;
-         OrigInRangeMat = me.MaterialInRange;
-         OrigOutOfRangeMat = me.MaterialOutOfRange;
-         OrigColours = new Color[]{ me.LOSInRange, me.LOSOutOfRange, me.LOSUnlockedTarget, me.LOSLockedTarget, me.LOSMultiTargetKBSelection, me.LOSBlocked };
+      private const int Melee = 0, Clear = 1, BlockedPre = 2, BlockedPost = 3, Indirect = 4, NoAttack = 5;
+      private enum Line { Melee = 0, Clear = 1, BlockedPre = 2, BlockedPost = 3, Indirect = 4, NoAttack = 5 }
 
-         MeleeMat = NewMat( "Melee", true, Settings.LOSMeleeColor, Settings.LOSMeleeDotted );
-         ClearMat = NewMat( "Clear", true, Settings.LOSClearColor, Settings.LOSClearDotted );
-         IndirectMat = NewMat( "Indirect" , true , Settings.LOSIndirectColor, Settings.LOSIndirectDotted );
-         NoAttackMat = NewMat( "No Attack", false, Settings.LOSNoAttackColor, Settings.LOSNoAttackDotted );
-         BlockedPreMat  = NewMat( "Blocked Pre" , true, Settings.LOSBlockedPreColor , Settings.LOSBlockedPreDotted  );
-         BlockedPostMat = NewMat( "Blocked Post", true, Settings.LOSBlockedPostColor, Settings.LOSBlockedPostDotted );
-         // Make sure post mat is applied even if pre mat was not modified
-         if ( BlockedPostMat != null && BlockedPreMat == null ) {
-            BlockedPreMat = new Material( OrigInRangeMat );
-            BlockedPreMat.name = "Blocked_Pre_LOS";
+      private static Material Solid, OrigInRangeMat, Dotted, OrigOutOfRangeMat;
+      private static Color[] OrigColours;
+      private static Material[] Mats;
+      private static bool OverwriteNonMeleeLine = false;
+
+      public static void CreateLOSTexture ( WeaponRangeIndicators __instance ) {
+         WeaponRangeIndicators me = __instance;
+         if ( Solid == null ) {
+            Solid = OrigInRangeMat = me.MaterialInRange;
+            Dotted = OrigOutOfRangeMat = me.MaterialOutOfRange;
+            OrigColours = new Color[]{ me.LOSInRange, me.LOSOutOfRange, me.LOSUnlockedTarget, me.LOSLockedTarget, me.LOSMultiTargetKBSelection, me.LOSBlocked };
+
+            Mats = new Material[ NoAttack + 1 ];
+            foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) )
+               NewMat( line );
+
+            // Make sure post mat is applied even if pre mat was not modified
+            if ( Mats[ BlockedPost ] != null && Mats[ BlockedPre ] == null ) {
+               Mats[ BlockedPre ] = new Material( OrigInRangeMat );
+               Mats[ BlockedPre ].name = "BlockedPreLOS";
+            }
+            OverwriteNonMeleeLine = Mats[ Indirect ] != null || Mats[ Clear ] != null || Mats[ BlockedPre ] != null;
+         }
+         if ( Mats[ NoAttack ] != null ) {
+            me.MaterialOutOfRange = Mats[ NoAttack ];
+            me.LOSOutOfRange = Mats[ NoAttack ].color;
          }
       }
 
-      private static bool IsMultifire = false;
       private static bool RestoreMat = false;
       private static LineRenderer thisLine;
 
@@ -124,41 +130,41 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void SetupLOS ( WeaponRangeIndicators __instance, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          WeaponRangeIndicators me = __instance;
-         if ( isMelee ) {
-            IsMultifire = false;
-            SwapMat( me, MeleeMat, ref me.LOSLockedTarget );
-         }  else if ( IndirectMat != null || ClearMat != null || BlockedPreMat != null || BlockedPostMat != null ) {
-            IsMultifire = usingMultifire;
+         if ( isMelee )
+            SwapMat( me, Melee, ref me.LOSLockedTarget, false );
+         else if ( OverwriteNonMeleeLine ) {
             FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( target );
             if ( info.HasLOF )
                if ( info.LOFLevel == LineOfFireLevel.LOFClear )
-                  SwapMat( me, ClearMat, ref me.LOSInRange );
+                  SwapMat( me, Clear, ref me.LOSInRange, usingMultifire );
                else {
-                  SwapMat( me, BlockedPreMat, ref me.LOSInRange );
-                  me.LOSBlocked = BlockedPreMat.color;
+                  SwapMat( me, BlockedPre, ref me.LOSInRange, usingMultifire );
+                  me.LOSBlocked = Mats[ BlockedPre ].color;
                }
             else
-               SwapMat( me, IndirectMat, ref me.LOSInRange );
+               SwapMat( me, Indirect, ref me.LOSInRange, usingMultifire );
          }
       } catch ( Exception ex ) { Log( ex ); } }
 
-      public static void CleanupLOS ( WeaponRangeIndicators __instance ) {
+      public static void CleanupLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
          if ( RestoreMat ) {
             WeaponRangeIndicators me = __instance;
             me.MaterialInRange = OrigInRangeMat;
             me.LOSInRange = OrigColours[0];
-            me.LOSUnlockedTarget = OrigColours[2];
-            me.LOSLockedTarget = OrigColours[3];
-            me.LOSMultiTargetKBSelection = OrigColours[4];
+            if ( usingMultifire ) {
+               me.LOSUnlockedTarget = OrigColours[2];
+               me.LOSLockedTarget = OrigColours[3];
+               me.LOSMultiTargetKBSelection = OrigColours[4];
+            }
             me.LOSBlocked = OrigColours[5];
             RestoreMat = false;
          }
       }
 
       public static void SetBlockedLOS () { try {
-         if ( thisLine.material.name.StartsWith( "Blocked_Pre_LOS" ) ) {
-            thisLine.material = BlockedPostMat;
-            thisLine.startColor = thisLine.endColor = BlockedPostMat.color;
+         if ( thisLine.material.name.StartsWith( "BlockedPreLOS" ) ) {
+            thisLine.material = Mats[ BlockedPost ];
+            thisLine.startColor = thisLine.endColor = Mats[ BlockedPost ].color;
          }
       } catch ( Exception ex ) { Log( ex ); } }
 
@@ -173,33 +179,44 @@ namespace Sheepy.AttackImprovementMod {
          return new Color();
       }
 
+      private static void NewMat ( Line line ) {
+         string name = line.ToString();
+         string color = (string) typeof( ModSettings ).GetField( "LOS" + name + "Color"  ).GetValue( Settings );
+         bool dotted  = (bool)   typeof( ModSettings ).GetField( "LOS" + name + "Dotted" ).GetValue( Settings );
+         Mats[ (int) line ] = NewMat( name, name != "NoAttack", color, dotted );
+      }
+
       private static Material NewMat ( string name, bool origInRange, string color, bool dotted ) {
-         if ( dotted != origInRange && color == "" ) return null;
-         Material mat = new Material( dotted ? OrigOutOfRangeMat : OrigInRangeMat );
-         Color newColour = Parse( ref color );
-         if ( color == "" ) // Restore original colour since dotted/solid is reversed
-            newColour = origInRange ? OrigInRangeMat.color : OrigOutOfRangeMat.color;
+         Material mat = new Material( dotted ? Dotted : Solid );
+         Color newColour;
+         if ( color != "" )
+            newColour = Parse( ref color );
+         else
+            newColour = origInRange ? OrigInRangeMat.color : OrigOutOfRangeMat.color; // Restore original colour if dotted/solid is reversed
+         if ( dotted != origInRange && newColour == mat.color )
+            return null; // Nothing changed. Skip.
+
          mat.color = newColour;
          // Blocked Post scale need to be override if normal width is not same as blocked width
-         if ( name == "Blocked Post" && dotted && Settings.LOSWidthMultiplier != Settings.LOSWidthBlockedMultiplier ) {
+         if ( name == "BlockedPost" && dotted && Settings.LOSWidthMultiplier != Settings.LOSWidthBlockedMultiplier ) {
             Vector2 s = mat.mainTextureScale;
             s.x *= Settings.LOSWidthMultiplier / Settings.LOSWidthBlockedMultiplier;
             mat.mainTextureScale = s;
          }
-         mat.name = name.Replace( ' ', '_' ) + "_LOS";
-         Log( "{0} {1}, Color {2} = {3}", mat.name, dotted ? "Dotted":"Solid", color, newColour );
+         mat.name = name + "LOS";
+         Log( "Created {0} {1}, Color {2} = {3}", mat.name, dotted ? "Dotted":"Solid", color, newColour );
          return mat;
       }
 
-      private static void SwapMat ( WeaponRangeIndicators __instance, Material newMat, ref Color lineColor ) {
+      private static void SwapMat ( WeaponRangeIndicators __instance, int matIndex, ref Color lineColor, bool IsMultifire ) {
+         Material newMat = Mats[ matIndex ];
          if ( newMat != null ) {
             WeaponRangeIndicators me = __instance;
             me.MaterialInRange = newMat;
             lineColor = newMat.color;
             if ( IsMultifire ) {
-               Color multi = me.LOSLockedTarget = lineColor;
-               multi.a *= 0.8f;
-               me.LOSUnlockedTarget = me.LOSMultiTargetKBSelection = multi;
+               me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = lineColor;
+               me.LOSUnlockedTarget.a *= 0.8f;
             }
             RestoreMat = true;
          }

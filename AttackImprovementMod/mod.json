@@ -35,11 +35,11 @@
       "LOSBlockedPostDotted" : false,
       
       /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Set to empty to leave alone.
-         Default #C6FF for blocked line and empty for the rest. */
+         Default #D0F for blocked pre, #C8E for blocked post, and empty for the rest. */
       "LOSMeleeColor" : "",
       "LOSClearColor" : "",
-      "LOSBlockedPreColor" : "#C6FF",
-      "LOSBlockedPostColor" : "#C6FF",
+      "LOSBlockedPreColor" : "#D0F",
+      "LOSBlockedPostColor" : "#C8E",
       "LOSIndirectColor" : "",
       "LOSNoAttackColor" : "",
 

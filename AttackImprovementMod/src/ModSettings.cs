@@ -39,11 +39,11 @@
       public bool LOSBlockedPostDotted = false;
 
       /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Set to empty to leave alone.
-         Default #C6FF for blocked line and empty for the rest. */
+         Default #D0F for blocked pre, #C8E for blocked post, and empty for the rest. */
       public string LOSMeleeColor = "";
       public string LOSClearColor = "";
-      public string LOSBlockedPreColor  = "#C6FF";
-      public string LOSBlockedPostColor = "#C6FF";
+      public string LOSBlockedPreColor  = "#D0F";
+      public string LOSBlockedPostColor = "#C8E";
       public string LOSIndirectColor = "";
       public string LOSNoAttackColor = "";
 
