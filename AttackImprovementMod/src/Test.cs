@@ -4,15 +4,17 @@ using System.Reflection;
 using System.Threading;
 
 namespace Sheepy.AttackImprovementMod {
+   using static System.Reflection.BindingFlags;
+
    /* Colllection of test code that I don't want to cluster the main code */
    class Test {
 
       static void Main () { // Sometimes I run quick tests as a console app here
          // runReverseRollTest();
          /**/
-         foreach ( MemberInfo e in typeof( Team ).GetMembers( BindingFlags.NonPublic | BindingFlags.Instance ) )
+         foreach ( MemberInfo e in typeof( Team ).GetMembers( NonPublic | Instance ) )
             Console.WriteLine( e );
-         FieldInfo m1 = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
+         FieldInfo m1 = typeof( Team ).GetField( "streakBreakingValue", NonPublic | Instance );
          Console.WriteLine( m1 ); /**/
 
          Console.ReadKey();

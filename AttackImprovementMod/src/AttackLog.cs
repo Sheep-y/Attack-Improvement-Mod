@@ -3,6 +3,7 @@
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using static FixHitLocation;
+   using static System.Reflection.BindingFlags;
    using System.Reflection;
    using System.IO;
    using BattleTech;
@@ -17,9 +18,9 @@ namespace Sheepy.AttackImprovementMod {
          if ( Mod.Settings.LogHitRolls ) {
             Type AttackType = typeof( AttackDirector.AttackSequence );
             if ( ! Mod.Settings.PersistentLog ) DeleteLog( ROLL_LOG );
-            Patch( AttackType, "GetIndividualHits", BindingFlags.NonPublic, "RecordAttacker", null );
-            Patch( AttackType, "GetClusteredHits" , BindingFlags.NonPublic, "RecordAttacker", null );
-            Patch( AttackType, "GetCorrectedRoll" , BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
+            Patch( AttackType, "GetIndividualHits", NonPublic, "RecordAttacker", null );
+            Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordAttacker", null );
+            Patch( AttackType, "GetCorrectedRoll" , NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "RecordAttackRoll", "LogMissedAttack" );
             Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
             Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
             Patch( AttackType, "OnAttackSequenceFire", null, "WriteRollLog" );

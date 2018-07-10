@@ -4,6 +4,7 @@ using System;
 
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
+   using static System.Reflection.BindingFlags;
    using System.Reflection;
    using UnityEngine;
    using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace Sheepy.AttackImprovementMod {
 
          if ( ! NoRollCorrection ) {
             if ( Settings.RollCorrectionStrength != 1.0f )
-               Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", BindingFlags.NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
+               Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
             if ( Settings.ShowCorrectedHitChance ) {
                correctionCache = new Dictionary<float, float>(20);
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowCorrectedHitChance", null );
@@ -32,7 +33,7 @@ namespace Sheepy.AttackImprovementMod {
             if ( Settings.MissStreakBreakerThreshold == 1f || Settings.MissStreakBreakerDivider == 0f )
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "BypassMissStreakBreaker", null );
             else {
-               StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", BindingFlags.NonPublic | BindingFlags.Instance );
+               StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", NonPublic | Instance );
                if ( StreakBreakingValueProp != null )
                   Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
                else
@@ -46,7 +47,7 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideDisplayedHitChance", null );
       }
 
-      FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", BindingFlags.Static | BindingFlags.NonPublic );
+      FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", Static | NonPublic );
 
       public override void CombatStarts () {
          if ( correctionCache != null )
@@ -113,8 +114,8 @@ namespace Sheepy.AttackImprovementMod {
          chance = corrected;
       }                 catch ( Exception ex ) { Log( ex ); } }
 
-      private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", BindingFlags.Instance | BindingFlags.NonPublic );
-      private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", BindingFlags.Instance | BindingFlags.NonPublic );
+      private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", Instance | NonPublic );
+      private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", Instance | NonPublic );
       private static readonly object[] empty = new object[]{};
 
       // Override the original code to remove accuracy cap on display, since correction or other settings can push it above 95%.

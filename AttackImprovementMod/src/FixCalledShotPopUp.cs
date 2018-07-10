@@ -7,6 +7,7 @@ namespace Sheepy.AttackImprovementMod {
    using System.Reflection;
    using static Mod;
    using static FixHitLocation;
+   using static System.Reflection.BindingFlags;
 
    public class FixCalledShotPopUp : ModModule {
 
@@ -21,10 +22,10 @@ namespace Sheepy.AttackImprovementMod {
             Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
             if ( Settings.ShowRealMechCalledShotChance || Settings.ShowDecimalCalledChance )
-               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
+               Patch( CalledShot, "GetHitPercent", NonPublic, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
 
             if ( Settings.ShowRealVehicleCalledShotChance || Settings.ShowDecimalCalledChance )
-               Patch( CalledShot, "GetHitPercent", BindingFlags.NonPublic, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
+               Patch( CalledShot, "GetHitPercent", NonPublic, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
          }
       }
 

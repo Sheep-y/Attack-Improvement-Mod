@@ -10,6 +10,7 @@ using System.Text;
 using UnityEngine;
 
 namespace Sheepy.AttackImprovementMod {
+   using static System.Reflection.BindingFlags;
 
    /*
     * Fix hit location distribution and called shot bugs, with options to improve attack HUD such as better called shot precision. Each fix and features can be configurated individually by editing mod.json.
@@ -94,15 +95,15 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void Patch ( Type patchedClass, string patchedMethod, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, BindingFlags.Public | BindingFlags.Instance, (Type[]) null, prefix, postfix );
+         Patch( patchedClass, patchedMethod, Public | Instance, (Type[]) null, prefix, postfix );
       }
 
       internal static void Patch ( Type patchedClass, string patchedMethod, Type parameterType, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, BindingFlags.Public | BindingFlags.Instance, new Type[]{ parameterType }, prefix, postfix );
+         Patch( patchedClass, patchedMethod, Public | Instance, new Type[]{ parameterType }, prefix, postfix );
       }
 
       internal static void Patch ( Type patchedClass, string patchedMethod, Type[] parameterTypes, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, BindingFlags.Public | BindingFlags.Instance, parameterTypes, prefix, postfix );
+         Patch( patchedClass, patchedMethod, Public | Instance, parameterTypes, prefix, postfix );
       }
 
       internal static void Patch ( Type patchedClass, string patchedMethod, BindingFlags flags, string prefix, string postfix ) {
@@ -115,8 +116,8 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static void Patch( Type patchedClass, string patchedMethod, BindingFlags flags, Type[] parameterTypes, string prefix, string postfix ) {
          MethodInfo patched;
-         if ( ( flags & ( BindingFlags.Static | BindingFlags.Instance  ) ) == 0  ) flags |= BindingFlags.Instance;
-         if ( ( flags & ( BindingFlags.Public | BindingFlags.NonPublic ) ) == 0  ) flags |= BindingFlags.Public;
+         if ( ( flags & ( Static | Instance  ) ) == 0  ) flags |= Instance;
+         if ( ( flags & ( Public | NonPublic ) ) == 0  ) flags |= Public;
          if ( parameterTypes == null )
             patched = patchedClass.GetMethod( patchedMethod, flags );
          else

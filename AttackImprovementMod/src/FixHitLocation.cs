@@ -8,6 +8,7 @@ namespace Sheepy.AttackImprovementMod {
    using UnityEngine;
    using UnityEngine.EventSystems;
    using static Mod;
+   using static System.Reflection.BindingFlags;
 
    public class FixHitLocation : ModModule {
 
@@ -29,7 +30,7 @@ namespace Sheepy.AttackImprovementMod {
          if ( prefixVehicle )
             Patch( VehicleGetHit, "PrefixVehicleCalledShot", null );
          if ( prefixVehicle )
-            Patch( typeof( Mech ), "GetLongArmorLocation", BindingFlags.Static, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
+            Patch( typeof( Mech ), "GetLongArmorLocation", Static, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
          if ( Settings.FixHitDistribution ) {
             Patch( MechGetHit, "OverrideMechCalledShot", null );
             Patch( VehicleGetHit, "OverrideVehicleCalledShot", null );
@@ -38,7 +39,7 @@ namespace Sheepy.AttackImprovementMod {
          if ( Settings.FixVehicleCalledShot ) {
             // Store popup location
             Patch( typeof( SelectionStateFire ), "SetCalledShot", typeof( VehicleChassisLocations ), null, "RecordVehicleCalledShotFireLocation" );
-            ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", BindingFlags.NonPublic | BindingFlags.Instance );
+            ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", NonPublic | Instance );
             if ( ReadoutProp != null )
                Patch( typeof( CombatHUDVehicleArmorHover ), "OnPointerClick", typeof( PointerEventData ), null, "RecordVehicleCalledShotClickLocation" );
             else
@@ -61,7 +62,7 @@ namespace Sheepy.AttackImprovementMod {
       // ============ UTILS ============
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
-         return typeof( HitLocation ).GetMethod( "GetHitLocation", BindingFlags.Static | BindingFlags.Public ).MakeGenericMethod( generic );
+         return typeof( HitLocation ).GetMethod( "GetHitLocation", Static | Public ).MakeGenericMethod( generic );
       }
 
       internal static float FixMultiplier ( ArmorLocation location, float multiplier ) {
