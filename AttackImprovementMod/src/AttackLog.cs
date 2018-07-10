@@ -4,7 +4,6 @@ namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using static FixHitLocation;
    using static System.Reflection.BindingFlags;
-   using System.Reflection;
    using System.IO;
    using BattleTech;
    using System.Collections.Generic;
@@ -24,8 +23,8 @@ namespace Sheepy.AttackImprovementMod {
             Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
             Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
             Patch( AttackType, "OnAttackSequenceFire", null, "WriteRollLog" );
-            if ( ! File.Exists( ROLL_LOG ) )
-               RollLog( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Hit Location" } ) );
+            if ( ! File.Exists( LogDir + ROLL_LOG ) )
+               logBuffer.Append( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Hit Location" } ) ).Append( "\r\n" );
          }
       }
 
@@ -37,7 +36,7 @@ namespace Sheepy.AttackImprovementMod {
          logBuffer.Append( message ).Append( "\r\n" );
       }
 
-      internal static void WriteRollLog () {
+      public static void WriteRollLog () {
          WriteLog( ROLL_LOG, logBuffer.ToString() );
          logBuffer.Length = 0;
       }
