@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace Sheepy.AttackImprovementMod {
+   using System.Collections.Generic;
    using BattleTech;
    using BattleTech.UI;
    using UnityEngine;
@@ -42,8 +43,10 @@ namespace Sheepy.AttackImprovementMod {
             Patch( Indicator, "Init", null, "CreateLOSTexture" );
          if ( Settings.ArcLinePoints != 18 || TwoSectionsLOS )
             Patch( Indicator, "getLine" , NonPublic, null, "RecordLOS" );
-         if ( TwoSectionsLOS )
+         if ( TwoSectionsLOS ) {
             Patch( Indicator, "DrawLine", NonPublic, null, "SetBlockedLOS" );
+            Patch( Indicator, "ShowLineToTarget", NonPublic, null, "ShowBlockedLOS" );
+         }
          if ( SolidLinesChanged )
             Patch( Indicator, "DrawLine", NonPublic, "SetupLOS", "CleanupLOS" );
          if ( Settings.ArcLinePoints != 18 ) {
@@ -127,7 +130,7 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void RecordLOS ( LineRenderer __result ) {
          thisLine = __result;
-      }      
+      }
 
       public static void SetupLOS ( WeaponRangeIndicators __instance, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          WeaponRangeIndicators me = __instance;
@@ -163,11 +166,17 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static void SetBlockedLOS () { try {
+         //Log( "Mat is " + thisLine.material.name );
          if ( thisLine.material.name.StartsWith( "BlockedPreLOS" ) ) {
             thisLine.material = Mats[ BlockedPost ];
             thisLine.startColor = thisLine.endColor = Mats[ BlockedPost ].color;
+            //Log( "Swap to blocked post " + thisLine.material.name );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ShowBlockedLOS () {
+         thisLine?.gameObject?.SetActive( true );
+      }
 
       // ============ UTILS ============
 
@@ -219,6 +228,7 @@ namespace Sheepy.AttackImprovementMod {
                me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = lineColor;
                me.LOSUnlockedTarget.a *= 0.8f;
             }
+            //Log( "Swapped to " + matIndex + " " + newMat.name );
             RestoreMat = true;
          }
       }
