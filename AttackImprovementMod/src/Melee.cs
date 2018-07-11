@@ -23,6 +23,7 @@ namespace Sheepy.AttackImprovementMod {
          if ( Settings.MeleeAccuracyFactors.Trim() != "" ) {
             initMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
             if ( Modifiers.Count > 0 ) {
+               Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );
                Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
                Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "OverrideMeleeToolTips", null );
             }
@@ -89,11 +90,21 @@ namespace Sheepy.AttackImprovementMod {
       private static Dictionary<string, Func<float>> Modifiers = new Dictionary<string, Func<float>>();
 
       private static ToHit Hit;
-      private static CombatHUDWeaponSlot slot;
       private static CombatHUDTooltipHoverElement tip;
       private static ICombatant they;
       private static Mech us;
       private static MeleeAttackType attackType;
+      private static Weapon attackWeapon;
+      private static Vector3 attackPos;
+      private static string thisModifier;
+
+      private static void SaveStates ( Mech attacker, ICombatant target, Weapon weapon, MeleeAttackType type ) {
+         they = target;
+         us = attacker;
+         attackType = type;
+         attackWeapon = weapon;
+         thisModifier = "(init)";
+      }
 
       internal static void initMeleeModifiers ( string[] factors ) {
          HashSet<string> Factors = new HashSet<string>();
@@ -118,7 +129,7 @@ namespace Sheepy.AttackImprovementMod {
                   if ( attackType == MeleeAttackType.DFA ) {
                      return Hit.GetHeightModifier( us.CurrentPosition.y, they.TargetPosition.y );
                   } else {
-                     float diff = HUD.SelectionHandler.ActiveState.PreviewPos.y - they.CurrentPosition.y;
+                     float diff = attackPos.y - they.CurrentPosition.y;
                      if ( Math.Abs( diff ) < HalfMaxMeleeVerticalOffset || ( diff < 0 && ! Constants.ToHit.ToHitElevationApplyPenalties ) ) return 0;
                      float mod = Constants.ToHit.ToHitElevationModifierPerLevel;
                      return diff <= 0 ? mod : -mod;
@@ -132,7 +143,7 @@ namespace Sheepy.AttackImprovementMod {
                Modifiers.Add( "OBSTRUCTED", () => Hit.GetCoverModifier( us, they, HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( they ).LOFLevel ) ); break;
 
             case "refire":
-               Modifiers.Add( "RE-ATTACK", () => Hit.GetRefireModifier( slot.DisplayedWeapon ) ); break;
+               Modifiers.Add( "RE-ATTACK", () => Hit.GetRefireModifier( attackWeapon ) ); break;
 
             case "selfchassis" :
                Modifiers.Add( "CHASSIS PENALTY\nCHASSIS BONUS", () => Hit.GetMeleeChassisToHitModifier( us, attackType ) ); break;
@@ -144,7 +155,7 @@ namespace Sheepy.AttackImprovementMod {
                Modifiers.Add( "STOOD UP", () => Hit.GetStoodUpModifier( us ) ); break;
 
             case "selfterrain" :
-               Modifiers.Add( "TERRAIN", () => Hit.GetSelfTerrainModifier( HUD.SelectionHandler.ActiveState.PreviewPos, false ) ); break;
+               Modifiers.Add( "TERRAIN", () => Hit.GetSelfTerrainModifier( attackPos, false ) ); break;
 
             case "selfwalked" :
                Modifiers.Add( "ATTACK AFTER MOVE", () => Hit.GetSelfSpeedModifier( us ) ); break;
@@ -161,7 +172,7 @@ namespace Sheepy.AttackImprovementMod {
             case "targetevasion" :
                Modifiers.Add( "TARGET MOVED", () => {
                   if ( ! ( they is AbstractActor ) ) return 0f;
-                  return Hit.GetEvasivePipsModifier( ((AbstractActor)they).EvasivePipsCurrent, slot.DisplayedWeapon );
+                  return Hit.GetEvasivePipsModifier( ((AbstractActor)they).EvasivePipsCurrent, attackWeapon );
                } ); break;
 
             case "targetprone" :
@@ -180,7 +191,7 @@ namespace Sheepy.AttackImprovementMod {
                Modifiers.Add( "TARGET TERRAIN ", () => Hit.GetTargetTerrainModifier( they, they.CurrentPosition, true ) ); break;
 
             case "weaponaccuracy" :
-               Modifiers.Add( "WEAPON ACCURACY", () => Hit.GetWeaponAccuracyModifier( us, slot.DisplayedWeapon ) ); break;
+               Modifiers.Add( "WEAPON ACCURACY", () => Hit.GetWeaponAccuracyModifier( us, attackWeapon ) ); break;
 
             default :
                Warn( "Ignoring unknown accuracy component \"{0}\"", e ); break;
@@ -195,33 +206,43 @@ namespace Sheepy.AttackImprovementMod {
       private static MethodInfo contemplatingDFA = typeof( CombatHUDWeaponSlot ).GetMethod( "contemplatingDFA", NonPublic | Instance );
 
       public static bool OverrideMeleeToolTips ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
-         slot = __instance;
+         CombatHUDWeaponSlot slot = __instance;
          tip = slot.ToolTipHoverElement;
-         they = target;
-         us = HUD.SelectedActor as Mech;
-         bool isDFA = (bool) contemplatingDFA.Invoke( slot, new object[]{ they } );
-         attackType = isDFA ? MeleeAttackType.DFA : MeleeAttackType.Punch;
+         attackPos = HUD.SelectionHandler.ActiveState.PreviewPos;
+         bool isDFA = (bool) contemplatingDFA.Invoke( slot, new object[]{ target } );
+         SaveStates( HUD.SelectedActor as Mech, target, slot.DisplayedWeapon, isDFA ? MeleeAttackType.DFA : MeleeAttackType.Punch );
          tip.BasicModifierInt = (int) Combat.ToHit.GetAllMeleeModifiers( us, they, they.CurrentPosition, attackType );
-         foreach ( var factors in Modifiers )
+         foreach ( var factors in Modifiers ) {
+            thisModifier = factors.Key;
             AddToolTipDetail( factors.Key, (int) factors.Value() );
+         }
          return false;
       } catch ( Exception ex ) {
          // Reset before handing over control
          tip.DebuffStrings.Clear();
          tip.BuffStrings.Clear();
-         return Error( ex ); 
+         return Error( new ApplicationException( "Melee modifier '" + thisModifier + "' error", ex ) ); 
       } }
+
+      public static void RecordAttackPosition ( Vector3 attackPosition ) {
+         attackPos = attackPosition;
+      }
 
       public static bool OverrideMeleeModifiers ( ref float __result, Mech attacker, ICombatant target, Vector3 targetPosition, MeleeAttackType meleeAttackType) { try {
          Weapon weapon = ( meleeAttackType == MeleeAttackType.DFA ) ? attacker.DFAWeapon : attacker.MeleeWeapon;
+         SaveStates( attacker, target, weapon, meleeAttackType );
          int modifiers = 0;
-         foreach ( var factors in Modifiers )
+         foreach ( var factors in Modifiers ) {
+            thisModifier = factors.Key;
             modifiers += (int) factors.Value();
+         }
          if ( modifiers < 0 && ! Constants.ResolutionConstants.AllowTotalNegativeModifier )
             modifiers = 0;
          __result = modifiers;
          return false;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
+      } catch ( Exception ex ) {
+         return Error( new ApplicationException( "Melee modifier '" + thisModifier + "' error", ex ) );
+      } }
 
       private static void AddToolTipDetail( string desc, int modifier ) {
          if ( modifier == 0 ) return;
