@@ -172,10 +172,10 @@
       /* Allow DFA called shot on vehicles *
       public bool AllowDFACalledShotVehicle = true;
 
-      /* Add to or remove hit modifiers from melee and DFA. Leave empty to keep it unchanged. Order and letter case does not matter.
-       * Default "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy".
-       * Potential options are "ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain,TargetEvasion". */
-      public string MeleeAccuracyComponent = "";
+      /* Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged. Order and letter case does not matter.
+       * Default "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy".
+       * Other options are "ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain". */
+      public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
 
       ///
       /// Logging

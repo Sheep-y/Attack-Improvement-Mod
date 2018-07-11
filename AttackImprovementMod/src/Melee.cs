@@ -20,8 +20,13 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( SelectionStateJump ), "SetMeleeDest", BindingFlags.NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
          }
          */
-         if ( Settings.MeleeAccuracyComponent.Trim() != "" )
-            initMeleeAccuacyOverride( Settings.MeleeAccuracyComponent.Split( ',' ) );
+         if ( Settings.MeleeAccuracyFactors.Trim() != "" ) {
+            initMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
+            if ( Modifiers.Count > 0 ) {
+               Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
+               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "OverrideMeleeToolTips", null );
+            }
+         }
       }
 
       /*
@@ -90,7 +95,7 @@ namespace Sheepy.AttackImprovementMod {
       private static Mech us;
       private static MeleeAttackType attackType;
 
-      internal static void initMeleeAccuacyOverride ( string[] factors ) {
+      internal static void initMeleeModifiers ( string[] factors ) {
          HashSet<string> Factors = new HashSet<string>();
          foreach ( string e in factors ) Factors.Add( e.Trim().ToLower() );
 
@@ -181,9 +186,6 @@ namespace Sheepy.AttackImprovementMod {
                Warn( "Ignoring unknown accuracy component \"{0}\"", e ); break;
             }
          }
-         if ( Modifiers.Count > 0 ) {
-            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "OverrideMeleeToolTips", null );
-         }
 
          string[] array = new string[ Factors.Count ];
          Factors.CopyTo( array );
@@ -209,6 +211,17 @@ namespace Sheepy.AttackImprovementMod {
          tip.BuffStrings.Clear();
          return Error( ex ); 
       } }
+
+      public static bool OverrideMeleeModifiers ( ref float __result, Mech attacker, ICombatant target, Vector3 targetPosition, MeleeAttackType meleeAttackType) { try {
+         Weapon weapon = ( meleeAttackType == MeleeAttackType.DFA ) ? attacker.DFAWeapon : attacker.MeleeWeapon;
+         int modifiers = 0;
+         foreach ( var factors in Modifiers )
+            modifiers += (int) factors.Value();
+         if ( modifiers < 0 && ! Constants.ResolutionConstants.AllowTotalNegativeModifier )
+            modifiers = 0;
+         __result = modifiers;
+         return false;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       private static void AddToolTipDetail( string desc, int modifier ) {
          if ( modifier == 0 ) return;
