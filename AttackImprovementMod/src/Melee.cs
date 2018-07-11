@@ -81,10 +81,11 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Melee Accuracy ============
 
-      private static Action[] ToolTips;
+      private static Dictionary<string, Func<float>> Modifiers = new Dictionary<string, Func<float>>();
 
       private static ToHit Hit;
       private static CombatHUDWeaponSlot slot;
+      private static CombatHUDTooltipHoverElement tip;
       private static ICombatant they;
       private static Mech us;
       private static MeleeAttackType attackType;
@@ -93,100 +94,94 @@ namespace Sheepy.AttackImprovementMod {
          HashSet<string> Factors = new HashSet<string>();
          foreach ( string e in factors ) Factors.Add( e.Trim().ToLower() );
 
-         var tooltips = new List<Action>();
          foreach ( string e in Factors ) {
             switch ( e ) {
             case "armmounted":
-               tooltips.Add( () => {
-                  if ( attackType == MeleeAttackType.DFA || they is Vehicle || they.IsProne ) return;
+               Modifiers.Add( "PUNCHING ARM", () => {
+                  if ( attackType == MeleeAttackType.DFA || they is Vehicle || they.IsProne ) return 0f;
                   if ( us.MechDef.Chassis.PunchesWithLeftArm ) {
-                     if ( us.IsLocationDestroyed( ChassisLocations.LeftArm ) ) return;
-                  } else if ( us.IsLocationDestroyed( ChassisLocations.RightArm ) ) return;
-                  AddToolTipDetail( "PUNCHING ARM", (int) Constants.ToHit.ToHitSelfArmMountedWeapon );
+                     if ( us.IsLocationDestroyed( ChassisLocations.LeftArm ) ) return 0f;
+                  } else if ( us.IsLocationDestroyed( ChassisLocations.RightArm ) ) return 0f;
+                  return Constants.ToHit.ToHitSelfArmMountedWeapon;
                } ); break;
 
             case "dfa":
-               tooltips.Add( () => AddToolTipDetail( "DEATH FROM ABOVE", (int) Hit.GetDFAModifier( attackType ) ) ); break;
+               Modifiers.Add( "DEATH FROM ABOVE", () => Hit.GetDFAModifier( attackType ) ); break;
 
             case "height":
-               tooltips.Add( () => {
-                  int mod; float diff = 0;
+               Modifiers.Add( "HEIGHT DIFF", () => {
                   if ( attackType == MeleeAttackType.DFA ) {
-                     mod = (int) Hit.GetHeightModifier( us.CurrentPosition.y, they.TargetPosition.y );
+                     return Hit.GetHeightModifier( us.CurrentPosition.y, they.TargetPosition.y );
                   } else {
-                     diff = HUD.SelectionHandler.ActiveState.PreviewPos.y - they.CurrentPosition.y;
-                     if ( Math.Abs( diff ) < HalfMaxMeleeVerticalOffset || ( diff < 0 && ! Constants.ToHit.ToHitElevationApplyPenalties ) ) return;
-                     mod = (int) Constants.ToHit.ToHitElevationModifierPerLevel;
+                     float diff = HUD.SelectionHandler.ActiveState.PreviewPos.y - they.CurrentPosition.y;
+                     if ( Math.Abs( diff ) < HalfMaxMeleeVerticalOffset || ( diff < 0 && ! Constants.ToHit.ToHitElevationApplyPenalties ) ) return 0;
+                     float mod = Constants.ToHit.ToHitElevationModifierPerLevel;
+                     return diff <= 0 ? mod : -mod;
                   }
-                  AddToolTipDetail( "HEIGHT DIFF", diff <= 0 ? mod : -mod );
                } ); break;
 
             case "inspired":
-               tooltips.Add( () => AddToolTipDetail( "INSPIRED", Math.Max( 0, (int) Hit.GetAttackerAccuracyModifier( us ) ) ) ); break;
+               Modifiers.Add( "INSPIRED", () => Math.Max( 0f, Hit.GetAttackerAccuracyModifier( us ) ) ); break;
 
             case "obsruction" :
-               tooltips.Add( () => AddToolTipDetail( "OBSTRUCTED", (int) Hit.GetCoverModifier( us, they, HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( they ).LOFLevel ) ) ); break;
+               Modifiers.Add( "OBSTRUCTED", () => Hit.GetCoverModifier( us, they, HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( they ).LOFLevel ) ); break;
 
             case "refire":
-               tooltips.Add( () => AddToolTipDetail( "RE-ATTACK", (int) Hit.GetRefireModifier( slot.DisplayedWeapon ) ) ); break;
+               Modifiers.Add( "RE-ATTACK", () => Hit.GetRefireModifier( slot.DisplayedWeapon ) ); break;
 
             case "selfchassis" :
-               tooltips.Add( () => {
-                  int mod = (int) Hit.GetMeleeChassisToHitModifier( us, attackType );
-                  AddToolTipDetail( mod < 0 ? "CHASSIS BONUS" : "CHASSIS PENALTY", mod );
-               } ); break;
+               Modifiers.Add( "CHASSIS PENALTY\nCHASSIS BONUS", () => Hit.GetMeleeChassisToHitModifier( us, attackType ) ); break;
 
             case "selfheat" :
-               tooltips.Add( () => AddToolTipDetail( "OVERHEAT", (int) Hit.GetHeatModifier( us ) ) ); break;
+               Modifiers.Add( "OVERHEAT", () => Hit.GetHeatModifier( us ) ); break;
 
             case "selfstoodup" :
-               tooltips.Add( () => AddToolTipDetail( "STOOD UP", (int) Hit.GetStoodUpModifier( us ) ) ); break;
+               Modifiers.Add( "STOOD UP", () => Hit.GetStoodUpModifier( us ) ); break;
 
             case "selfterrain" :
-               tooltips.Add( () => AddToolTipDetail( "TERRAIN", (int) Hit.GetSelfTerrainModifier( HUD.SelectionHandler.ActiveState.PreviewPos, false ) ) ); break;
+               Modifiers.Add( "TERRAIN", () => Hit.GetSelfTerrainModifier( HUD.SelectionHandler.ActiveState.PreviewPos, false ) ); break;
 
             case "selfwalked" :
-               tooltips.Add( () => AddToolTipDetail( "MOVED SELF", (int) Hit.GetSelfSpeedModifier( us ) ) ); break;
+               Modifiers.Add( "ATTACK AFTER MOVE", () => Hit.GetSelfSpeedModifier( us ) ); break;
 
             case "sensorimpaired":
-               tooltips.Add( () => AddToolTipDetail( "SENSOR IMPAIRED", Math.Min( 0, (int) Hit.GetAttackerAccuracyModifier( us ) ) ) ); break;
+               Modifiers.Add( "SENSOR IMPAIRED", () => Math.Min( 0f, Hit.GetAttackerAccuracyModifier( us ) ) ); break;
 
             case "sprint" :
-               tooltips.Add( () => AddToolTipDetail( "SPRINTED", (int) Hit.GetSelfSprintedModifier( us ) ) ); break;
+               Modifiers.Add( "SPRINTED", () => Hit.GetSelfSprintedModifier( us ) ); break;
 
             case "targeteffect" :
-               tooltips.Add( () => AddToolTipDetail( "TARGET EFFECTS", (int) Hit.GetEnemyEffectModifier( they ) ) ); break;
+               Modifiers.Add( "TARGET EFFECTS", () => Hit.GetEnemyEffectModifier( they ) ); break;
 
             case "targetevasion" :
-               tooltips.Add( () => {
-                  if ( ! ( they is AbstractActor ) ) return;
-                  AddToolTipDetail( "TARGET MOVED", (int) Hit.GetEvasivePipsModifier( ((AbstractActor)they).EvasivePipsCurrent, slot.DisplayedWeapon ) );
+               Modifiers.Add( "TARGET MOVED", () => {
+                  if ( ! ( they is AbstractActor ) ) return 0f;
+                  return Hit.GetEvasivePipsModifier( ((AbstractActor)they).EvasivePipsCurrent, slot.DisplayedWeapon );
                } ); break;
 
             case "targetprone" :
-               tooltips.Add( () => AddToolTipDetail( "TARGET PRONE", (int) Hit.GetTargetProneModifier( they, true ) ) ); break;
+               Modifiers.Add( "TARGET PRONE", () => Hit.GetTargetProneModifier( they, true ) ); break;
 
             case "targetshutdown" :
-               tooltips.Add( () => AddToolTipDetail( "TARGET SHUTDOWN", (int) Hit.GetTargetShutdownModifier( they, true ) ) ); break;
+               Modifiers.Add( "TARGET SHUTDOWN", () => Hit.GetTargetShutdownModifier( they, true ) ); break;
 
             case "targetsize" :
-               tooltips.Add( () => AddToolTipDetail( "TARGET SIZE", (int) Hit.GetTargetSizeModifier( they ) ) ); break;
+               Modifiers.Add( "TARGET SIZE", () => (int) Hit.GetTargetSizeModifier( they ) ); break;
 
             case "targetterrain" :
-               tooltips.Add( () => AddToolTipDetail( "TARGET TERRAIN", (int) Hit.GetTargetTerrainModifier( they, they.CurrentPosition, false ) ) ); break;
+               Modifiers.Add( "TARGET TERRAIN", () => Hit.GetTargetTerrainModifier( they, they.CurrentPosition, false ) ); break;
 
-            case "targetterrainmelee" :
-               tooltips.Add( () => AddToolTipDetail( "TARGET TERRAIN", (int) Hit.GetTargetTerrainModifier( they, they.CurrentPosition, true ) ) ); break;
+            case "targetterrainmelee" : // Need to be different (an extra space) to avoid key collision
+               Modifiers.Add( "TARGET TERRAIN ", () => Hit.GetTargetTerrainModifier( they, they.CurrentPosition, true ) ); break;
 
             case "weaponaccuracy" :
-               tooltips.Add( () => AddToolTipDetail( "WEAPON ACCURACY", (int) Hit.GetWeaponAccuracyModifier( us, slot.DisplayedWeapon ) ) ); break;
+               Modifiers.Add( "WEAPON ACCURACY", () => Hit.GetWeaponAccuracyModifier( us, slot.DisplayedWeapon ) ); break;
 
             default :
                Warn( "Ignoring unknown accuracy component \"{0}\"", e ); break;
             }
          }
-         if ( tooltips.Count > 0 ) {
-            ToolTips = tooltips.ToArray();
+         if ( Modifiers.Count > 0 ) {
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "OverrideMeleeToolTips", null );
          }
 
@@ -199,23 +194,29 @@ namespace Sheepy.AttackImprovementMod {
 
       public static bool OverrideMeleeToolTips ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          slot = __instance;
+         tip = slot.ToolTipHoverElement;
          they = target;
          us = HUD.SelectedActor as Mech;
          bool isDFA = (bool) contemplatingDFA.Invoke( slot, new object[]{ they } );
          attackType = isDFA ? MeleeAttackType.DFA : MeleeAttackType.Punch;
-         slot.ToolTipHoverElement.BasicModifierInt = (int) Combat.ToHit.GetAllMeleeModifiers( us, they, they.CurrentPosition, attackType );
-         foreach ( var func in ToolTips )
-            func();
+         tip.BasicModifierInt = (int) Combat.ToHit.GetAllMeleeModifiers( us, they, they.CurrentPosition, attackType );
+         foreach ( var factors in Modifiers )
+            AddToolTipDetail( factors.Key, (int) factors.Value() );
          return false;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
+      } catch ( Exception ex ) {
+         // Reset before handing over control
+         tip.DebuffStrings.Clear();
+         tip.BuffStrings.Clear();
+         return Error( ex ); 
+      } }
 
-      private static void AddToolTipDetail( string description, int modifier )
-      {
-         if ( modifier == 0 ) {}
-         else if ( modifier > 0 )
-            slot.ToolTipHoverElement.DebuffStrings.Add( description + " +" + modifier );
+      private static void AddToolTipDetail( string desc, int modifier ) {
+         if ( modifier == 0 ) return;
+         if ( desc.Contains( "\n" ) ) desc = desc.Split( '\n' )[ modifier < 0 ? 1 : 0 ];
+         if ( modifier > 0 )
+            tip.DebuffStrings.Add( desc + " +" + modifier );
          else // if ( modifier < 0 )
-            slot.ToolTipHoverElement.BuffStrings.Add( description + " " + modifier );
+            tip.BuffStrings.Add( desc + " " + modifier );
       }
    }
 }
