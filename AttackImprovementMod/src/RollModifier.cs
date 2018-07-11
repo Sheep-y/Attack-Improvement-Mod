@@ -10,19 +10,22 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void InitPatch () {
          ModSettings Settings = Mod.Settings;
+         Type ToHitType = typeof( ToHit );
          if ( Settings.AllowNetBonusModifier )
-            Patch( typeof( ToHit ), "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );
+            Patch( ToHitType, "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );
          if ( Settings.BaseHitChanceModifier != 0f )
-            Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "ModifyBaseHitChance", null );
+            Patch( ToHitType, "GetBaseToHitChance", new Type[]{ typeof( AbstractActor ) }, null, "ModifyBaseHitChance" );
+         if ( Settings.MeleeHitChanceModifier != 0f )
+            Patch( ToHitType, "GetBaseMeleeToHitChance", new Type[]{ typeof( Mech ) }, null, "ModifyBaseMeleeHitChance" );
 
          RangeCheck( "MaxFinalHitChance", ref Settings.HitChanceStep, 0f, 0.2f );
          RangeCheck( "MaxFinalHitChance", ref Settings.MaxFinalHitChance, 0.1f, 1f );
          RangeCheck( "MinFinalHitChance", ref Settings.MinFinalHitChance, 0f, 1f );
          if ( Settings.HitChanceStep != 0.05f || Settings.MaxFinalHitChance != 0.95f || Settings.MinFinalHitChance != 0.05f || Settings.DiminishingHitChanceModifier ) {
             if ( ! Settings.DiminishingHitChanceModifier )
-               Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceStepNClamp", null );
+               Patch( ToHitType, "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceStepNClamp", null );
             else {
-               Patch( typeof( ToHit ), "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceDiminishing", null );
+               Patch( ToHitType, "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceDiminishing", null );
                diminishingBonus = new float[ Settings.DiminishingBonusMax ];
                diminishingPenalty = new float[ Settings.DiminishingPenaltyMax ];
                FillDiminishingModifiers();
@@ -84,8 +87,12 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Fixes ============
 
-      public static void ModifyBaseHitChance ( ref float baseChance ) {
-         baseChance += Settings.BaseHitChanceModifier;
+      public static void ModifyBaseHitChance ( ref float __result ) {
+         __result += Settings.BaseHitChanceModifier;
+      }
+
+      public static void ModifyBaseMeleeHitChance ( ref float __result ) {
+         __result += Settings.MeleeHitChanceModifier;
       }
 
       public static bool ProcessNetBonusModifier ( ref float __result, float originalHitChance, float modifier ) {

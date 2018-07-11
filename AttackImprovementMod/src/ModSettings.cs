@@ -92,8 +92,11 @@
        * Default 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
       public float HitChanceStep = 0;
 
-      /* Modify base hit chance. -0.05 to make all base accuracy -5%, 0.1 to make all base accuracy +10% etc. Default 0. */
+      /* Modify base weapon hit chance. -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc. Default 0. */
       public float BaseHitChanceModifier = 0f;
+
+      /* Modify base melee hit chance. -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc. Default 0. */
+      public float MeleeHitChanceModifier = 0f;
 
       /* Max hit chance after all modifiers but before roll correction. Default 0.95, same as game default.
        * Note that 100% hit chance (max) may still miss if roll correction is enabled. */
@@ -162,6 +165,12 @@
 
       /* Allow DFA called shot on vehicles *
       public bool AllowDFACalledShotVehicle = true;
+
+      /* Override melee and DFA bonus calculation by having more or less factors in the calculation. Leave empty to keep it unchanged.
+       * Game default is "DFA,Heat,SelfChassis,SelfWalked,TargetEffect,TargetProne,TargetShutdown,TargetSize,TargetTerrain,WeaponAccuracy".
+       * Other options are "Cover,Sprint,Morale,ArmMounted,SelfStoodUp,Height,SelfTerrain,TargetEvasion,Refire,SelfAccuracy".
+       * Order and case does not matter. Some options, like Refire, may need modifying melee/dfa weapon json to work. */
+      public string MeleeAccuracyComponent = "";
 
       ///
       /// Logging
