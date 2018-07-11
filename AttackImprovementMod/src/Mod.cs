@@ -17,7 +17,8 @@ namespace Sheepy.AttackImprovementMod {
     */
    public class Mod {
 
-      public const string VERSION = "2.0 preview 20180709";
+      public const string MODNAME = "AttackImprovementMod";
+      public const string VERSION = "2.0 preview 20180711";
       public static ModSettings Settings = new ModSettings();
 
       internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
@@ -189,7 +190,7 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ LOGS ============
 
-      internal static void DeleteLog( string file ) {
+      internal static void DeleteLog ( string file ) {
          try {
             File.Delete( LogDir + file );
          } catch ( Exception ) { }
@@ -198,15 +199,19 @@ namespace Sheepy.AttackImprovementMod {
          } catch ( Exception ) { }
       }
 
-      internal static void Log( object message ) { Log( message.ToString() ); }
-      internal static void Log( string message, params object[] args ) {
+      internal static string Format ( string message, params object[] args ) {
          try {
             if ( args != null && args.Length > 0 )
-               message = string.Format( message, args );
+               return string.Format( message, args );
          } catch ( Exception ) {}
-         Log( message );
+         return message;
       }
-      internal static void Log( string message = "" ) {
+
+      internal static void Log ( object message ) { Log( message.ToString() ); }
+      internal static void Log ( string message, params object[] args ) {
+         Log( Format( message, args ) );
+      }
+      internal static void Log ( string message = "" ) {
          string logName = LogDir + LOG_NAME;
          try {
             if ( ! File.Exists( logName ) ) 
@@ -215,13 +220,34 @@ namespace Sheepy.AttackImprovementMod {
          WriteLog( LOG_NAME, message + "\r\n" );
       }
 
-      internal static void Warn( object message ) { Warn( message.ToString() ); }
-      internal static void Warn( string message ) { Log( "Warning: " + message ); }
-      internal static void Warn( string message, params object[] args ) { Log( "Warning: " + message, args ); }
+      internal static void Warn ( object message ) { Warn( message.ToString() ); }
+      internal static void Warn ( string message ) { Log( "Warning: " + message ); }
+      internal static void Warn ( string message, params object[] args ) {
+         message = Format( message, args );
+         HBS.Logging.Logger.GetLogger( "Mods" ).LogWarning( "[AttackImprovementMod] " + message );
+         Log( "Warning: " + message );
+      }
 
-      internal static bool Error( object message ) { Error( message.ToString() ); return true; }
-      internal static void Error( string message ) { Log( "Error: " + message ); }
-      internal static void Error( string message, params object[] args ) { Log( "Error: " + message, args ); }
+      internal static bool Error ( object message ) { 
+         string txt = message.ToString();
+         if ( message is Exception ) {
+            if ( exceptions.ContainsKey( txt ) ) { // Increase count and don't log
+               exceptions[ txt ]++;
+               return true;
+            } else
+               exceptions.Add( txt, 1 );
+         }
+         Error( txt );
+         return true; 
+      }
+      internal static void Error ( string message ) { Log( "Error: " + message ); }
+      internal static void Error ( string message, params object[] args ) {
+         message = Format( message, args );
+         HBS.Logging.Logger.GetLogger( "Mods" ).LogError( "[AttackImprovementMod] " + message );
+         Log( "Error: " + message ); 
+      }
+
+      private static Dictionary<string, int> exceptions = new Dictionary<string, int>();
 
       internal static void WriteLog( string filename, string message ) {
          string logName = LogDir + filename;
