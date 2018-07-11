@@ -41,9 +41,13 @@ namespace Sheepy.AttackImprovementMod {
             }
          }
 
-         if ( Settings.ShowDecimalHitChance )
-            WeaponHitChanceFormat = "{0:0.0}%";
-         if ( Settings.ShowDecimalHitChance || Settings.ShowCorrectedHitChance || Settings.MinFinalHitChance < 0.05f || Settings.MaxFinalHitChance > 0.95f )
+         bool HitChanceFormatChanged = Settings.HitChanceFormat != "" || ( Settings.HitChanceStep == 0f && Settings.HitChanceFormat != "{0:0}%" );
+         if ( Settings.HitChanceFormat != "" )
+            WeaponHitChanceFormat = Settings.HitChanceFormat;
+         else if ( Settings.HitChanceStep == 0f )
+            WeaponHitChanceFormat = "{0:0.#}%";
+
+         if ( HitChanceFormatChanged || Settings.ShowCorrectedHitChance || Settings.MinFinalHitChance < 0.05f || Settings.MaxFinalHitChance > 0.95f )
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideDisplayedHitChance", null );
       }
 

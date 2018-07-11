@@ -78,8 +78,9 @@
       /* Override called shot percentage display of vehicle locations to show modded shot distribution. Default true. */
       public bool ShowRealVehicleCalledShotChance = true;
 
-      /* Display chance to one decimal. Default false. If true, will also enables ShowRealMechCalledShotChance and ShowRealVehicleCalledShotChance. */
-      public bool ShowDecimalCalledChance = false;
+      /* Format of called shot location percentages, in C# String.Format syntax.
+       * Use "{0:0.0}%" to *always* show one decimal, or "{0:0.#}%" for *up to* one decimal. Default is "" to leave alone. */
+      public string CalledChanceFormat = "";
 
       ///
       /// To Hit Bonus and Penalty
@@ -143,8 +144,10 @@
       /* Show corrected hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker. Default false. */
       public bool ShowCorrectedHitChance = false;
 
-      /* Show hit chance to one decimal in weapon panel. Default false. */
-      public bool ShowDecimalHitChance = false;
+      /* Format of called shot location percentages, in C# String.Format syntax.
+       * Game default is "{0:0}%". Use "{0:0.0}%" to *always* show one decimal, or "{0:0.#}%" for *up to* one decimal.
+       * Default is "", which will use "{0:0.#}%" if HitChanceStep is 0, otherwise leave alone. */
+      public string HitChanceFormat = "";
 
       ///
       /// Melee and DFA

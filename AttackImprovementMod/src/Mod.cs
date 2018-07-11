@@ -50,7 +50,7 @@ namespace Sheepy.AttackImprovementMod {
             patchClass = mod.Value.GetType();
             mod.Value.InitPatch();
          }                 catch ( Exception ex ) { Error( ex ); }
-         Log();
+         Log( "=== All Mod Modules Initialised ===\n" );
       }
 
       public static void LogSettings ( string directory, string settingsJSON ) {
