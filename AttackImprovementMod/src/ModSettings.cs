@@ -89,6 +89,9 @@
       /* Allow bonus total modifier to increase hit chance. Defaul true. */
       public bool AllowNetBonusModifier = true;
 
+      /* Allow attacks from low ground to high ground to incur accuracy penalty. */
+      public bool AllowLowElevationPenalty = true;
+
       /* Step of hit chance, range 0 to 0.2.  Game default is 0.05, or 5%.  Hit chance is always rounded down.
        * Default 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
       public float HitChanceStep = 0;
@@ -169,10 +172,9 @@
       /* Allow DFA called shot on vehicles *
       public bool AllowDFACalledShotVehicle = true;
 
-      /* Override melee and DFA bonus calculation by having more or less factors in the calculation. Leave empty to keep it unchanged.
-       * Game default is "DFA,Heat,SelfChassis,SelfWalked,TargetEffect,TargetProne,TargetShutdown,TargetSize,TargetTerrain,WeaponAccuracy".
-       * Other options are "Cover,Sprint,Morale,ArmMounted,SelfStoodUp,Height,SelfTerrain,TargetEvasion,Refire,SelfAccuracy".
-       * Order and case does not matter. Some options, like Refire, may need modifying melee/dfa weapon json to work. */
+      /* Add to or remove hit modifiers from melee and DFA. Leave empty to keep it unchanged. Order and letter case does not matter.
+       * Default "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy".
+       * Potential options are "ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain,TargetEvasion". */
       public string MeleeAccuracyComponent = "";
 
       ///

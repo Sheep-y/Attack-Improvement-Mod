@@ -39,6 +39,11 @@ namespace Sheepy.AttackImprovementMod {
             con.AllowTotalNegativeModifier = true;
             typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" ).SetValue( Constants, con, null );
          }
+         if ( Settings.AllowLowElevationPenalty ) {
+            ToHitConstantsDef con = Constants.ToHit;
+            con.ToHitElevationApplyPenalties = true;
+            typeof( CombatGameConstants ).GetProperty( "ToHit" ).SetValue( Constants, con, null );
+         }
          if ( Settings.AllowNetBonusModifier && steppingModifier == null && ! Settings.DiminishingHitChanceModifier )
             FillSteppedModifiers(); // Use Combat Constants and must be lazily loaded 
       }
