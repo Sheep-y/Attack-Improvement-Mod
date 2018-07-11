@@ -116,13 +116,12 @@ namespace Sheepy.AttackImprovementMod {
 
       private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", Instance | NonPublic );
       private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", Instance | NonPublic );
-      private static readonly object[] empty = new object[]{};
 
       // Override the original code to remove accuracy cap on display, since correction or other settings can push it above 95%.
       public static bool OverrideDisplayedHitChance ( CombatHUDWeaponSlot __instance, float chance ) { try {
          HitChance.Invoke( __instance, new object[]{ chance } );
          __instance.HitChanceText.text = string.Format( WeaponHitChanceFormat, Mathf.Clamp( chance * 100f, 0f, 100f ) );
-         Refresh.Invoke( __instance, empty );
+         Refresh.Invoke( __instance, null );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
    }
