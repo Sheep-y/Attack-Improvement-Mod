@@ -26,8 +26,8 @@ namespace Sheepy.AttackImprovementMod {
 
          bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
               prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot;
-         MethodInfo MechGetHit    = GetHitLocation( typeof( ArmorLocation ) ),
-                    VehicleGetHit = GetHitLocation( typeof( VehicleChassisLocations ) );
+         MethodInfo MechGetHit    = AttackLog.GetHitLocation( typeof( ArmorLocation ) ),
+                    VehicleGetHit = AttackLog.GetHitLocation( typeof( VehicleChassisLocations ) );
          if ( prefixMech )
             Patch( MechGetHit, "PrefixMechCalledShot", null );
          if ( prefixVehicle )
@@ -63,10 +63,6 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       // ============ UTILS ============
-
-      internal static MethodInfo GetHitLocation ( Type generic ) {
-         return typeof( HitLocation ).GetMethod( "GetHitLocation", Static | Public ).MakeGenericMethod( generic );
-      }
 
       internal static float FixMultiplier ( ArmorLocation location, float multiplier ) {
          if ( location == ArmorLocation.None ) return 0;
