@@ -126,14 +126,12 @@ namespace Sheepy.AttackImprovementMod {
 
             case "height":
                Modifiers.Add( "HEIGHT DIFF", () => {
-                  if ( attackType == MeleeAttackType.DFA ) {
-                     return Hit.GetHeightModifier( us.CurrentPosition.y, they.TargetPosition.y );
-                  } else {
-                     float diff = attackPos.y - they.CurrentPosition.y;
-                     if ( Math.Abs( diff ) < HalfMaxMeleeVerticalOffset || ( diff < 0 && ! Constants.ToHit.ToHitElevationApplyPenalties ) ) return 0;
-                     float mod = Constants.ToHit.ToHitElevationModifierPerLevel;
-                     return diff <= 0 ? mod : -mod;
-                  }
+                  if ( attackType == MeleeAttackType.DFA )
+                     return Hit.GetHeightModifier( us.CurrentPosition.y, they.CurrentPosition.y );
+                  float diff = attackPos.y - they.CurrentPosition.y;
+                  if ( Math.Abs( diff ) < HalfMaxMeleeVerticalOffset || ( diff < 0 && ! Constants.ToHit.ToHitElevationApplyPenalties ) ) return 0;
+                  float mod = Constants.ToHit.ToHitElevationModifierPerLevel;
+                  return diff <= 0 ? mod : -mod;
                } ); break;
 
             case "inspired":
