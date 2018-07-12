@@ -51,7 +51,7 @@ namespace Sheepy.AttackImprovementMod {
       public static void initLog () {
          if ( ! Mod.Settings.PersistentLog ) DeleteLog( ROLL_LOG );
          if ( ! File.Exists( LogDir + ROLL_LOG ) ) {
-            logBuffer.Append( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit" } ) );
+            logBuffer.Append( String.Join( "\t", new string[]{ "Team", "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit" } ) );
             if ( LogLocation )
                logBuffer.Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "LL", "Called Part", "Called Bonus" } ) );
             logBuffer.Append( "\tHit Location" );
@@ -78,13 +78,26 @@ namespace Sheepy.AttackImprovementMod {
       // ============ Attack Log ============
 
       // Get attacker, weapon and hitchance before logging
-      internal static string thisAttacker = "(unknown)";
-      internal static string thisWeapon = "(unknown)";
+      internal static string thisAttack = "";
       internal static float thisHitChance;
       public static void RecordAttacker ( AttackDirector.AttackSequence __instance, Weapon weapon, float toHitChance ) {
-         thisAttacker = __instance.attacker.GetPilot()?.Callsign ?? __instance.attacker.Nickname;
-         thisWeapon = weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId;
          thisHitChance = toHitChance;
+         AbstractActor attacker = __instance.attacker;
+         Team team = attacker?.team;
+         if ( team == null ) {
+            thisAttack = "--\t--\t--";
+            return;
+         }
+         if ( team.IsLocalPlayer )
+            thisAttack = "Player";
+         else if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
+            thisAttack = "OpFor";
+         else if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
+            thisAttack = "Allies";
+         else
+            thisAttack = "NPC";
+         thisAttack += "\t" + ( attacker.GetPilot()?.Callsign ?? attacker.Nickname );
+         thisAttack += "\t" + ( weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId );
       }
 
       internal static float thisRoll;
@@ -95,7 +108,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static string GetHitLog () {
-         return thisAttacker + "\t" + thisWeapon + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance + "\t";
+         return thisAttack + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance + "\t";
       }
 
       internal static float thisCorrectedRoll;
