@@ -219,7 +219,7 @@ namespace Sheepy.AttackImprovementMod {
          // Reset before handing over control
          tip.DebuffStrings.Clear();
          tip.BuffStrings.Clear();
-         return Error( new ApplicationException( "Melee modifier '" + thisModifier + "' error", ex ) ); 
+         return Error( new ApplicationException( "Melee modifier '" + thisModifier + "' error", ex ) );
       } }
 
       public static void RecordAttackPosition ( Vector3 attackPosition ) {

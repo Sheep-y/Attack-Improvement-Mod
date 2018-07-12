@@ -25,7 +25,37 @@ namespace Sheepy.AttackImprovementMod {
             Patch( AttackType, "OnAttackSequenceFire", null, "WriteRollLog" );
             if ( ! File.Exists( LogDir + ROLL_LOG ) )
                logBuffer.Append( String.Join( "\t", new string[]{ "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "To Hit", "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Bonus", "Hit Location" } ) ).Append( "\r\n" );
+            Patch( typeof( Mech ), "GetComponentInSlot", null, "RecordCritComp" );
+            Patch( typeof( Mech ), "CheckForCrit", NonPublic, "LogCritComp", "LogCrit" );
          }
+      }
+
+      private static MechComponent thisCritComp = null;
+      private static string thisCritLog = "";
+      private static bool ammoExploded = false;
+
+      public static void RecordCritComp( MechComponent __result, ChassisLocations location, int index ) {
+         if ( thisCritComp == null ) {
+            thisCritComp = __result;
+            thisCritLog = index + "\t";
+            if ( __result != null ) {
+               AmmunitionBox box = __result as AmmunitionBox;
+               if ( box != null )
+                  ammoExploded = ( (float) box.CurrentAmmo / (float) box.ammunitionBoxDef.Capacity ) >= 0.5f;
+               thisCritLog +=  __result.Name + "\t" + __result.DamageLevel;
+            } else
+               thisCritLog +=  "--\t--";
+         }
+      }
+
+      public static void LogCritComp ( ChassisLocations location, Weapon weapon ) {
+         thisCritComp = null;
+         thisCritLog = "";
+         ammoExploded = false;
+      }
+
+      public static void LogCrit( ChassisLocations location, Weapon weapon ) {
+         Log( "{0}\t{1}\t{2}\t{3}", weapon.Name, location, thisCritLog, ammoExploded ? "Explosion" : thisCritComp?.DamageLevel.ToString() );
       }
 
       // ============ UTILS ============
