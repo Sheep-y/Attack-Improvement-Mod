@@ -18,6 +18,9 @@ namespace Sheepy.AttackImprovementMod {
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
 
       public override void InitPatch () {
+         if ( Settings.FixNonIntegerDamage )
+            Patch( typeof( AbstractActor ), "GetAdjustedDamage", null, "FixDamageToInteger" );
+
          scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering || Mod.GameUseClusteredCallShot;
 
@@ -82,7 +85,11 @@ namespace Sheepy.AttackImprovementMod {
          return multiplier;
       }
 
-      // ============ Prefix (fix things) ============
+      // ============ Fixes ============
+
+      public static void FixDamageToInteger ( ref float __result ) {
+         __result = Mathf.Round( __result );
+      }
 
       public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
