@@ -36,6 +36,7 @@ namespace Sheepy.AttackImprovementMod {
          patchClass = typeof( Mod );
          Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
 
+         modules.Add( "Logger", new AttackLog() ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
          modules.Add( "Heat and Stability", new HeatAndStab() );
          modules.Add( "Line of Fire", new LineOfSight() );
          modules.Add( "Attack Action", new AttackAction() );
@@ -44,7 +45,6 @@ namespace Sheepy.AttackImprovementMod {
          modules.Add( "Roll Modifier", new RollModifier() );
          modules.Add( "Roll Corrections", new RollCorrection() );
          modules.Add( "Hit Distribution", new FixHitLocation() );
-         modules.Add( "Logger", new AttackLog() );
 
          foreach ( var mod in modules )  try {
             Log( "=== Patching " + mod.Key + " ===" );

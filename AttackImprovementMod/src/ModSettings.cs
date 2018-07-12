@@ -184,9 +184,9 @@
       /// Logging
       ///
 
-      /* Log attacker, weapon, hit roll, correction, location roll, location weights etc. to "BATTLETECH\Mods\FixHitLocation\Log_AttackRoll.txt", for copy and paste to Excel.
-       * Default disabled. */
-      public bool LogHitRolls = false;
+      /* Log various attack info to "Log_AttackRoll.txt", for copy and paste to Excel.
+       * In order of info and performance penalty it can be "None", "Attack", "Location", "Critical", or "All" (Curently same as Critical). */
+      public string AttackLog = "None";
 
       /* If true, don't clear log on mod load (game launch). */
       public bool PersistentLog = false;
