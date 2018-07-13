@@ -170,9 +170,9 @@
       ///
 
       /* Log attack info to "Log_AttackRoll.txt", for copy and paste to Excel to make it human readable.
-       * Setting can be "None", "Attack", "Location", "Critical", or "All", from simplest and quickest to heaviest and slowest.
-       * "All" is currently same as "Critical". Letter case does not matter. Default "None". */
-      "AttackLog" : "None",
+       * Setting can be "None", "Attack", "Location", "Critical", or "All", from simplest to heaviest. Default "None".
+       * "All" is currently same as "Critical", but more levels may be added in future. Letter case does not matter. */
+      "AttackLogLevel" : "None",
 
       /* If true, don't clear log on mod load (game launch). */
       "PersistentLog" : false,

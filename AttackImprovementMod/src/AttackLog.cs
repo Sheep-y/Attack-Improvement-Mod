@@ -19,14 +19,13 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void InitPatch () {
          PersistentLog = Mod.Settings.PersistentLog;
-         switch ( Mod.Settings.AttackLog?.Trim().ToLower() ) {
+         switch ( Mod.Settings.AttackLogLevel?.Trim().ToLower() ) {
             case "all":
             case "critical":
                LogCritical = true;
                Type MechType = typeof( Mech );
                Type CritRulesType = typeof( CritChanceRules );
                Patch( typeof( AttackDirector ), "GetRandomFromCache", new Type[]{ typeof( WeaponHitInfo ), typeof( int ) }, null, "RecordCritRolls" );
-               Patch( CritRulesType, "GetBaseCritChance", new Type[]{ typeof( Vehicle ), typeof( VehicleChassisLocations ) }, null, "RecordBaseCritChance" );
                Patch( CritRulesType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "RecordBaseCritChance" );
                Patch( CritRulesType, "GetCritMultiplier", null, "RecordCritMultiplier" );
                Patch( CritRulesType, "GetCritChance", null, "RecordCritChance" );
@@ -45,12 +44,12 @@ namespace Sheepy.AttackImprovementMod {
                Patch( AttackType, "GetIndividualHits", NonPublic, "RecordAttacker", null );
                Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordAttacker", null );
                Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", "LogMissedAttack" );
-               Patch( AttackType, "Cleanup", null, "WriteRollLog" );
+               Patch( typeof( AttackDirector ), "OnAttackComplete", null, "WriteRollLog" );
                initLog();
                break;
 
             default:
-               Warn( "Unknown AttackLog level " + Mod.Settings.AttackLog );
+               Warn( "Unknown AttackLogLevel " + Mod.Settings.AttackLogLevel );
                goto case "none";
             case null:
             case "none":
@@ -65,12 +64,12 @@ namespace Sheepy.AttackImprovementMod {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( String.Join( "\t", new string[]{ "Team", "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
             if ( LogLocation || PersistentLog )
-               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "LL", "Called Part", "Called Bonus" } ) );
+               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
             logBuffer.Append( "\tHit Location" );
             if ( LogCritical || PersistentLog )
-               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Max HP", "HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Slot", "In Slot", "From", "To" } ) );
+               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "HP", "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
             log.Add( logBuffer.ToString() );
-            WriteRollLog();
+            WriteRollLog( null );
          }
 
          if ( LogCritical )
@@ -82,7 +81,9 @@ namespace Sheepy.AttackImprovementMod {
       private static Dictionary<string, int> hitMap; // Used to assign critical hit information
       private static List<string> log = new List<string>( 64 );
 
-      public static void WriteRollLog () {
+      public static void WriteRollLog ( AttackDirector __instance ) {
+         if ( __instance != null && __instance.IsAnyAttackSequenceActive )
+            return; // Defer if Multi-Target is not finished
          StringBuilder logBuffer = new StringBuilder();
          foreach ( string line in log )
             logBuffer.Append( line ).Append( "\r\n" );
@@ -152,12 +153,11 @@ namespace Sheepy.AttackImprovementMod {
                logBuffer.Append( "--" + // Location Roll
                                  "\t--\t--\t--\t--" +  // Head & Torsos
                                  "\t--\t--\t--\t--" + // Limbs
-                                 "\t--\t--\tMiss" );   // Called shot and result
+                                 "\t--\t--\t(Miss)" );   // Called shot and result
                if ( LogCritical || PersistentLog )
                   logBuffer.Append( CritDummy );
-            } else {
-               logBuffer.Append( miss ? "Miss" : "Hit" );
-            }
+            } else
+               logBuffer.Append( miss ? "(Miss)" : "(Hit)" );
             log.Add( logBuffer.ToString() );
          }
       }
@@ -181,7 +181,6 @@ namespace Sheepy.AttackImprovementMod {
             __result;
          if ( LogCritical ) {
             string key = thisWeapon + "@" + MechStructureRules.GetChassisLocationFromArmorLocation( __result );
-            Log( $"Setting {key} to {log.Count}" );
             hitMap[ key ] = log.Count;
          }
          if ( LogCritical || PersistentLog )
@@ -220,13 +219,15 @@ namespace Sheepy.AttackImprovementMod {
       public static void RecordCritRolls ( float[] __result, int amount ) {
          if ( amount == 2 ) {
             thisCritRoll = __result[0];
-            thisCritSlotRoll = __result[0];
+            thisCritSlotRoll = __result[1];
          }
       }
 
-      private static float thisBaseCritChance, thisCritMultiplier, thisCritChance;
-      public static void RecordBaseCritChance ( float __result ) {
+      private static float thisBaseCritChance, thisCritMultiplier, thisCritChance, thisLocationHP, thisLocationMaxHP;
+      public static void RecordBaseCritChance ( float __result, Mech target, ChassisLocations hitLocation ) {
          thisBaseCritChance = __result;
+         thisLocationHP = target.GetCurrentStructure( hitLocation );
+         thisLocationMaxHP = target.GetMaxStructure( hitLocation );
       }
       public static void RecordCritMultiplier ( float __result ) {
          thisCritMultiplier = __result;
@@ -245,9 +246,8 @@ namespace Sheepy.AttackImprovementMod {
             thisCritSlot = index;
             thisCritComp = __result;
             if ( __result != null ) {
-               AmmunitionBox box = __result as AmmunitionBox;
-               if ( box != null )
-                  halfFullAmmo = ( (float) box.CurrentAmmo / (float) box.ammunitionBoxDef.Capacity ) >= 0.5f;
+               if ( __result is AmmunitionBox box )
+                  halfFullAmmo = ( (float)box.CurrentAmmo / (float)box.ammunitionBoxDef.Capacity ) >= 0.5f;
                thisCompBefore = __result.DamageLevel;
             }
          }
@@ -269,21 +269,28 @@ namespace Sheepy.AttackImprovementMod {
          if ( ! line.EndsWith( "\t--" ) )
             Warn( "Critical Hit Log found duplicate crit: " + key );
          string critLine = 
-               "--\t" +  // Max HP
-               "--\t" +  // New HP
+               thisLocationHP + "\t" +
+               thisLocationMaxHP + "\t" +
                thisCritRoll + "\t" +
                thisBaseCritChance + "\t" +
                thisCritMultiplier + "\t" +
-               thisCritChance + "\t" +
-               thisCritSlotRoll + "\t" +
-               thisCritSlot + "\t";
-         if ( thisCritComp == null )
-            critLine += "(Empty)\t--\t--";
-         else
-            critLine +=
-               thisCritComp.Name + "\t" +
-               thisCompBefore + "\t" +
-               thisCritComp.DamageLevel;
+               thisCritChance + "\t";
+         if ( thisCritSlot < 0 )
+            critLine += "--\t--\t(No Crit)\t--\t--";
+         else {
+            critLine += 
+               thisCritSlotRoll + "\t" + 
+               ( thisCritSlot + 1 ) + "\t";
+            if ( thisCritComp == null )
+               critLine += "(Empty)\t--\t--";
+            else {
+               string thisCompAfter = thisCritComp is AmmunitionBox && halfFullAmmo ? "Explosion" : thisCritComp.DamageLevel.ToString();
+               critLine +=
+                  thisCritComp.Name + "\t" +
+                  thisCompBefore + "\t" +
+                  thisCompAfter;
+            }
+         }
          line = line.Substring( 0, line.Length - CritDummy.Length + 1 ) + critLine;
          log[ lineIndex ] = line;
       }
