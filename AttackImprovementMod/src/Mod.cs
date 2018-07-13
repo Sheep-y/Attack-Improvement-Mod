@@ -37,7 +37,6 @@ namespace Sheepy.AttackImprovementMod {
          Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
 
          modules.Add( "Logger", new AttackLog() ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
-         modules.Add( "Heat and Stability", new HeatAndStab() );
          modules.Add( "Line of Fire", new LineOfSight() );
          modules.Add( "User Interface", new UserInterface() );
          modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
