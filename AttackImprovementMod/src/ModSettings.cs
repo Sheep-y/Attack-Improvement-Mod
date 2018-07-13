@@ -16,6 +16,9 @@
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       public bool ShowHeatAndStab = true;
 
+      /* Fix the bug that walk / sprint may not accurately project correct line of sight / fire, due to a prediction point too close to the ground. */
+      public bool FixNonJumpLosPreview = true;
+
       /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
       public bool FixHeatPrediction = true;
 

@@ -2,7 +2,7 @@
    "Name" : "AIM: Attack Improvement Mod",
    "Enabled" : true,
 
-   "Version" : "2.0 preview 20180712",
+   "Version" : "2.0 preview 20180714",
    "Description" : "Fix, enhance, and upgrade various aspects of attacking, from Line of Sight to Hit Distribution. Each features can be configured individually.",
    "Author" : "Sheepy",
    "Website" : "https://github.com/Sheep-y/BattleTech_Mods",
@@ -17,6 +17,9 @@
       /// User Interfaces
       ///
 
+      /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
+      "ShowHeatAndStab" : true,
+
       /* Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode. Default true.
          You can still quickly switch out of Multi-Target by pressing another action. */
       "FixMultiTargetBackout" : true,
@@ -24,8 +27,8 @@
       /* Fix the bug that rear ragdoll is incorrectly showing front structure. */
       "FixRearReadout" : true,
 
-      /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
-      "ShowHeatAndStab" : true,
+      /* Fix the bug that walk / sprint may not accurately project correct line of sight / fire, due to a prediction point too close to the ground. */
+      "FixNonJumpLosPreview" : true,
 
       ///
       /// Line of Sight

@@ -12,13 +12,10 @@ using UnityEngine;
 namespace Sheepy.AttackImprovementMod {
    using static System.Reflection.BindingFlags;
 
-   /*
-    * Fix hit location distribution and called shot bugs, with options to improve attack HUD such as better called shot precision. Each fix and features can be configurated individually by editing mod.json.
-    */
    public class Mod {
 
       public const string MODNAME = "AttackImprovementMod";
-      public const string VERSION = "2.0 preview 20180712";
+      public const string VERSION = "2.0 preview 20180714";
       public static ModSettings Settings = new ModSettings();
 
       internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1

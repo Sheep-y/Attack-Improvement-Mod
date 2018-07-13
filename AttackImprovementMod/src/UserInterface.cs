@@ -38,8 +38,10 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", "ShowHeatAndStab", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
-            Patch( typeof( CombatHUDMechTray ), "Update", BindingFlags.NonPublic, null, "RefreshHeatAndStab" );
+            Patch( typeof( CombatHUDMechTray ), "Update", NonPublic, null, "RefreshHeatAndStab" );
          }
+         if ( Settings.FixNonJumpLosPreview )
+            Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
       }
 
       // ============ Rear Readout ============
@@ -192,6 +194,12 @@ namespace Sheepy.AttackImprovementMod {
          if ( !needRefresh ) return;
          __instance?.ActorInfo?.DetailsDisplay?.RefreshInfo();
          needRefresh = false;
+      }
+
+      // ============ Pathing ============
+
+      public static void FixMoveDestinationHeight ( Pathing __instance ) {
+         __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
       }
    }
 }
