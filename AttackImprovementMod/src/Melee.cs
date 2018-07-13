@@ -70,7 +70,7 @@ namespace Sheepy.AttackImprovementMod {
                pathNodesForPoints.RemoveAt( i );
          }
 
-         if ( ! Mod.Settings.IncreaseMeleePositionChoice && pathNodesForPoints.Count > 1 ) {
+         if ( pathNodesForPoints.Count > 1 ) {
             MovementConstants moves = Constants.MoveConstants;
             if ( moves.SortMeleeHexesByPathingCost )
                pathNodesForPoints.Sort( (a, b) => a.CostToThisNode.CompareTo( b.CostToThisNode ) );
