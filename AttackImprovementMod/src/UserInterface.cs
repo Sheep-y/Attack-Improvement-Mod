@@ -8,7 +8,7 @@ namespace Sheepy.AttackImprovementMod {
    using System.Collections.Generic;
    using BattleTech;
 
-   public class AttackAction : ModModule {
+   public class UserInterface : ModModule {
 
       public override void InitPatch () {
          ModSettings Settings = Mod.Settings;

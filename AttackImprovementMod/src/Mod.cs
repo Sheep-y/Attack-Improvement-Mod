@@ -39,7 +39,7 @@ namespace Sheepy.AttackImprovementMod {
          modules.Add( "Logger", new AttackLog() ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
          modules.Add( "Heat and Stability", new HeatAndStab() );
          modules.Add( "Line of Fire", new LineOfSight() );
-         modules.Add( "Attack Action", new AttackAction() );
+         modules.Add( "User Interface", new UserInterface() );
          modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
          modules.Add( "Melee", new Melee() );
          modules.Add( "Roll Modifier", new RollModifier() );
