@@ -62,7 +62,7 @@ namespace Sheepy.AttackImprovementMod {
 
          if ( ! File.Exists( LogDir + ROLL_LOG ) ) {
             StringBuilder logBuffer = new StringBuilder();
-            logBuffer.Append( String.Join( "\t", new string[]{ "Team", "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
+            logBuffer.Append( String.Join( "\t", new string[]{ "Team", "Attacker", "Target Team", "Target", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
             if ( LogLocation || PersistentLog )
                logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
             logBuffer.Append( "\tHit Location" );
@@ -96,16 +96,26 @@ namespace Sheepy.AttackImprovementMod {
          return typeof( HitLocation ).GetMethod( "GetHitLocation", Public | Static ).MakeGenericMethod( generic );
       }
 
-      public static string TeamName ( Team team ) {
-         if ( team == null ) 
-            return "null";
-         if ( team.IsLocalPlayer )
-            return "Player";
-         if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
-            return "OpFor";
-         if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
-            return "Allies";
-         return "NPC";
+      public static string TeamAndCallsign ( ICombatant who ) {
+         if ( who == null ) return "null\tnull";
+         Team team = who.team;
+         string teamName;
+         if ( team == null )
+            teamName = "null";
+         else if ( team.IsLocalPlayer )
+            teamName = "Player";
+         else if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
+            teamName = "OpFor";
+         else if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
+            teamName = "Allies";
+         else
+            teamName = "NPC";
+         teamName += '\t';
+         if ( who.GetPilot() != null ) 
+            return teamName + who.GetPilot().Callsign;
+         if ( who is AbstractActor actor )
+            return teamName + actor.Nickname;
+         return teamName + who.uid;
       }
 
       // ============ Attack Log ============
@@ -118,15 +128,8 @@ namespace Sheepy.AttackImprovementMod {
       public static void RecordAttacker ( AttackDirector.AttackSequence __instance, Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
          thisWeapon = weapon.GUID;
-         AbstractActor attacker = __instance.attacker;
-         Team team = attacker?.team;
-         if ( team == null ) {
-            thisAttack = "--\t--\t--";
-            return;
-         }
-         thisAttack = TeamName( team );
-         thisAttack += "\t" + ( attacker.GetPilot()?.Callsign ?? attacker.Nickname );
-         thisAttack += "\t" + ( weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId );
+         thisAttack = TeamAndCallsign( __instance.attacker ) + '\t' + TeamAndCallsign( __instance.target ) + '\t'
+                    + ( weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId );
       }
 
       internal static float thisRoll;
