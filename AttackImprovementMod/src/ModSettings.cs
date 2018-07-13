@@ -2,12 +2,16 @@
 
    public class ModSettings {
 
+      ///
+      /// User Interfaces
+      ///
+
       /* Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode. Default true.
-         You can still quickly switch out of it by pressing another action. */
+         You can still quickly switch out of Multi-Target by pressing another action. */
       public bool FixMultiTargetBackout = true;
       
-      /* Try to fix the bug that damage is not in integer, which cause various other bugs. */
-      public bool FixNonIntegerDamage = true;
+      /* Fix the bug that rear ragdoll is incorrectly showing front structure. */
+      public bool FixRearReadout = true;
 
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       public bool ShowHeatAndStab = true;
@@ -179,6 +183,13 @@
        * Default "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy".
        * Other options are "ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain". */
       public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
+
+      ///
+      /// Damage
+      ///
+
+      /* Fix the bug that damage is not in integer, which cause various other bugs. Does not retroactively fix in-battle saves with partial damage. */
+      public bool FixNonIntegerDamage = true;
 
       ///
       /// Logging

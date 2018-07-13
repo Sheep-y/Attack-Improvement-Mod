@@ -11,7 +11,14 @@ namespace Sheepy.AttackImprovementMod {
    public class AttackAction : ModModule {
 
       public override void InitPatch () {
-         if ( Mod.Settings.FixMultiTargetBackout ) {
+         ModSettings Settings = Mod.Settings;
+         if ( Settings.FixRearReadout ) {
+            if ( structureRearCachedProp == null || timeSinceStructureDamagedProp == null )
+               Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, rear readout structure not fixed." );
+            else
+               Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, "FixRearStructureDisplay" );
+         }
+         if ( Settings.FixMultiTargetBackout ) {
             if ( targetedCombatant == null )
                Warn( "Cannot find SelectionState.targetedCombatant. MultiTarget backup may triggers target lock sound effect." );
             if ( ClearTargetedActor == null )
@@ -29,7 +36,40 @@ namespace Sheepy.AttackImprovementMod {
          }
       }
 
-      // ============ Fixes ============
+      // ============ Rear Readout ============
+
+      private static PropertyInfo structureRearCachedProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
+      private static PropertyInfo timeSinceStructureDamagedProp = typeof( HUDMechArmorReadout ).GetProperty( "timeSinceStructureDamaged", NonPublic | Instance );
+
+      public static void FixRearStructureDisplay ( HUDMechArmorReadout __instance, AttackDirection shownAttackDirection ) {
+         HUDMechArmorReadout me = __instance;
+         float[] timeSinceStructureDamaged = (float[]) timeSinceStructureDamagedProp.GetValue( me, null );
+         UnityEngine.Color[] structureRearCached = (UnityEngine.Color[]) structureRearCachedProp.GetValue( me, null );
+
+         float flashPeriod = 1f;
+         UnityEngine.Color flashColour = UnityEngine.Color.white;
+         if ( HUD != null ) {
+            flashPeriod = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.FlashArmorTime;
+            flashColour = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ArmorFlash.color;
+         }
+         Dictionary<ArmorLocation, int> dictionary = null;
+         if ( shownAttackDirection != AttackDirection.None && me.UseForCalledShots )
+            dictionary = HUD.Combat.HitLocation.GetMechHitTable( shownAttackDirection, false );
+
+         for ( int i = 1 ; i < 8 ; i++ ) { // Skip head
+            if ( i == 3 ) continue; // Skip torso
+            float structureFlash = UnityEngine.Mathf.Clamp01( 1f - timeSinceStructureDamaged[i] / flashPeriod );
+            ArmorLocation rearLocation = HUDMechArmorReadout.GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
+            bool isValid = ! me.UseForCalledShots || ( dictionary != null && dictionary.ContainsKey( rearLocation ) && dictionary[ rearLocation ] != 0 );
+            bool isHidden = me.UseForCalledShots && ! isValid;
+            UnityEngine.Color structureColor = structureRearCached[ i ]; // The first line that has typo in original code
+            if ( isHidden )                                             // And the second line
+               structureColor = UnityEngine.Color.Lerp( structureColor, UnityEngine.Color.black, me.hiddenColorLerp );
+            UIHelpers.SetImageColor( me.StructureRear[ i ], UnityEngine.Color.Lerp( structureColor, flashColour, structureFlash ) );
+         }
+      }
+
+      // ============ Multi-Target ============
 
       private static bool ReAddStateData = false;
 
