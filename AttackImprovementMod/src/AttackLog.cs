@@ -15,9 +15,11 @@ namespace Sheepy.AttackImprovementMod {
 
       private static bool LogLocation = false;
       private static bool LogCritical = false;
+      private static bool PersistentLog = false;
 
       public override void InitPatch () {
-         switch ( Mod.Settings.AttackLog.ToLower() ) {
+         PersistentLog = Mod.Settings.PersistentLog;
+         switch ( Mod.Settings.AttackLog?.Trim().ToLower() ) {
             case "all":
             case "critical":
                LogCritical = true;
@@ -43,30 +45,30 @@ namespace Sheepy.AttackImprovementMod {
                Patch( AttackType, "GetIndividualHits", NonPublic, "RecordAttacker", null );
                Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordAttacker", null );
                Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", "LogMissedAttack" );
-               Patch( AttackType, "OnAttackSequenceFire", null, "WriteRollLog" );
+               Patch( AttackType, "Cleanup", null, "WriteRollLog" );
                initLog();
                break;
 
             default:
                Warn( "Unknown AttackLog level " + Mod.Settings.AttackLog );
                goto case "none";
+            case null:
             case "none":
                break;
          }
       }
 
       public static void initLog () {
-         bool PersistentLog = Mod.Settings.PersistentLog;
          if ( ! PersistentLog ) DeleteLog( ROLL_LOG );
 
          if ( ! File.Exists( LogDir + ROLL_LOG ) ) {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( String.Join( "\t", new string[]{ "Team", "Attacker", "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
             if ( LogLocation || PersistentLog )
-               logBuffer.Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "LL", "Called Part", "Called Bonus" } ) );
+               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "LL", "Called Part", "Called Bonus" } ) );
             logBuffer.Append( "\tHit Location" );
             if ( LogCritical || PersistentLog )
-               logBuffer.Append( String.Join( "\t", new string[]{ "Crit Roll", "HP", "Max HP", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Slot", "In Slot", "From", "To" } ) );
+               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Max HP", "HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Slot", "In Slot", "From", "To" } ) );
             log.Add( logBuffer.ToString() );
             WriteRollLog();
          }
@@ -93,12 +95,25 @@ namespace Sheepy.AttackImprovementMod {
          return typeof( HitLocation ).GetMethod( "GetHitLocation", Public | Static ).MakeGenericMethod( generic );
       }
 
+      public static string TeamName ( Team team ) {
+         if ( team == null ) 
+            return "null";
+         if ( team.IsLocalPlayer )
+            return "Player";
+         if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
+            return "OpFor";
+         if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
+            return "Allies";
+         return "NPC";
+      }
+
       // ============ Attack Log ============
 
       // Get attacker, weapon and hitchance before logging
       internal static string thisAttack = "";
       internal static string thisWeapon = "";
       internal static float thisHitChance;
+
       public static void RecordAttacker ( AttackDirector.AttackSequence __instance, Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
          thisWeapon = weapon.GUID;
@@ -108,20 +123,14 @@ namespace Sheepy.AttackImprovementMod {
             thisAttack = "--\t--\t--";
             return;
          }
-         if ( team.IsLocalPlayer )
-            thisAttack = "Player";
-         else if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
-            thisAttack = "OpFor";
-         else if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
-            thisAttack = "Allies";
-         else
-            thisAttack = "NPC";
+         thisAttack = TeamName( team );
          thisAttack += "\t" + ( attacker.GetPilot()?.Callsign ?? attacker.Nickname );
          thisAttack += "\t" + ( weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId );
       }
 
       internal static float thisRoll;
       internal static float thisStreak;
+
       public static void RecordAttackRoll ( float roll, Team team ) {
          thisRoll = roll;
          thisStreak = team?.StreakBreakingValue ?? 0;
@@ -132,18 +141,19 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static float thisCorrectedRoll;
+
       public static void LogMissedAttack ( float __result, float roll, Team team ) {
          thisCorrectedRoll = __result;
          bool miss = __result > thisHitChance;
          if ( miss || ! LogLocation ) { // If miss, log now because hit location won't be rolled
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( GetHitLog() );
-            if ( LogLocation ) {
+            if ( LogLocation || PersistentLog ) {
                logBuffer.Append( "--" + // Location Roll
                                  "\t--\t--\t--\t--" +  // Head & Torsos
                                  "\t--\t--\t--\t--" + // Limbs
                                  "\t--\t--\tMiss" );   // Called shot and result
-               if ( LogCritical )
+               if ( LogCritical || PersistentLog )
                   logBuffer.Append( CritDummy );
             } else {
                logBuffer.Append( miss ? "Miss" : "Hit" );
@@ -169,7 +179,14 @@ namespace Sheepy.AttackImprovementMod {
             bonusLocation + "\t" +
             bonusLocationMultiplier + "\t" +
             __result;
-         SetupCritLog( line, __result.ToString() );
+         if ( LogCritical ) {
+            string key = thisWeapon + "@" + MechStructureRules.GetChassisLocationFromArmorLocation( __result );
+            Log( $"Setting {key} to {log.Count}" );
+            hitMap[ key ] = log.Count;
+         }
+         if ( LogCritical || PersistentLog )
+            line += CritDummy;
+         log.Add( line );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void LogVehicleHit ( VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
@@ -187,22 +204,15 @@ namespace Sheepy.AttackImprovementMod {
             bonusLocation + "\t" +
             bonusLocationMultiplier + "\t" +
             __result;
-         SetupCritLog( line, __result.ToString() );
-      }                 catch ( Exception ex ) { Error( ex ); } }
-
-      public static void SetupCritLog ( string line, string location ) {
-         if ( hitMap != null ) {
-            hitMap[ thisWeapon + "@" + location ] = log.Count;
+         if ( LogCritical || PersistentLog )
             line += CritDummy;
-         }
          log.Add( line );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Crit Log ============
 
-      private const string CritDummy = "\t--" +             // Crit Roll
-                                       "\t--\t--" +         // Location HP
-                                       "\t--\t--\t--" +     // Crit Chances
+      private const string CritDummy = "\t--\t--" +         // Location HP
+                                       "\t--\t--\t--\t--" + // Crit Roll and %
                                        "\t--\t--\t--" +     // Slot info
                                        "\t--\t--";          // Crit Result
 
@@ -225,32 +235,57 @@ namespace Sheepy.AttackImprovementMod {
          thisCritChance = __result;
       }
 
+      private static int thisCritSlot;
       private static MechComponent thisCritComp = null;
-      private static string thisCritSlot = "";
-      private static bool ammoExploded = false;
+      private static ComponentDamageLevel thisCompBefore;
+      private static bool halfFullAmmo = false;
 
-      public static void RecordCritComp( MechComponent __result, ChassisLocations location, int index ) {
+      public static void RecordCritComp ( MechComponent __result, ChassisLocations location, int index ) {
          if ( thisCritComp == null ) {
+            thisCritSlot = index;
             thisCritComp = __result;
-            thisCritSlot = index + "\t";
             if ( __result != null ) {
                AmmunitionBox box = __result as AmmunitionBox;
                if ( box != null )
-                  ammoExploded = ( (float) box.CurrentAmmo / (float) box.ammunitionBoxDef.Capacity ) >= 0.5f;
-               thisCritSlot +=  __result.Name + "\t" + __result.DamageLevel;
-            } else
-               thisCritSlot +=  "--\t--";
+                  halfFullAmmo = ( (float) box.CurrentAmmo / (float) box.ammunitionBoxDef.Capacity ) >= 0.5f;
+               thisCompBefore = __result.DamageLevel;
+            }
          }
       }
 
       public static void LogCritComp ( ChassisLocations location, Weapon weapon ) {
+         thisCritSlot = -1;
          thisCritComp = null;
-         thisCritSlot = "";
-         ammoExploded = false;
+         halfFullAmmo = false;
       }
 
-      public static void LogCrit( ChassisLocations location, Weapon weapon ) {
-         Log( "{0}\t{1}\t{2}\t{3}", weapon.Name, location, thisCritSlot, ammoExploded ? "Explosion" : thisCritComp?.DamageLevel.ToString() );
+      public static void LogCrit ( ChassisLocations location, Weapon weapon ) {
+         string key = weapon.GUID + "@" + location;
+         if ( ( ! hitMap.TryGetValue( key, out int lineIndex ) ) || lineIndex >= log.Count ) {
+            Warn( "Critical Hit Log cannot find matching hit record: " + key );
+            return;
+         }
+         string line = log[ lineIndex ];
+         if ( ! line.EndsWith( "\t--" ) )
+            Warn( "Critical Hit Log found duplicate crit: " + key );
+         string critLine = 
+               "--\t" +  // Max HP
+               "--\t" +  // New HP
+               thisCritRoll + "\t" +
+               thisBaseCritChance + "\t" +
+               thisCritMultiplier + "\t" +
+               thisCritChance + "\t" +
+               thisCritSlotRoll + "\t" +
+               thisCritSlot + "\t";
+         if ( thisCritComp == null )
+            critLine += "(Empty)\t--\t--";
+         else
+            critLine +=
+               thisCritComp.Name + "\t" +
+               thisCompBefore + "\t" +
+               thisCritComp.DamageLevel;
+         line = line.Substring( 0, line.Length - CritDummy.Length + 1 ) + critLine;
+         log[ lineIndex ] = line;
       }
    }
 }

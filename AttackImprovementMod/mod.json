@@ -169,8 +169,9 @@
       /// Logging
       ///
 
-      /* Log various attack info to "Log_AttackRoll.txt", for copy and paste to Excel.
-       * In order of info and performance penalty it can be "None", "Attack", "Location", "Critical", or "All" (Curently same as Critical). */
+      /* Log attack info to "Log_AttackRoll.txt", for copy and paste to Excel to make it human readable.
+       * Setting can be "None", "Attack", "Location", "Critical", or "All", from simplest and quickest to heaviest and slowest.
+       * "All" is currently same as "Critical". Letter case does not matter. Default "None". */
       "AttackLog" : "None",
 
       /* If true, don't clear log on mod load (game launch). */
