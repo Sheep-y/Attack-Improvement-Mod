@@ -338,14 +338,14 @@ namespace Sheepy.AttackImprovementMod {
             critLine += "--\t--\t(No Crit)\t--\t--";
          else {
             critLine += 
-               thisCritSlotRoll + '\t' + 
+               thisCritSlotRoll + "\t" + 
                ( thisCritSlot + 1 ) + '\t';
             if ( thisCritComp == null )
                critLine += "(Empty)\t--\t--";
             else {
                string thisCompAfter = thisCritComp is AmmunitionBox && halfFullAmmo ? "Explosion" : thisCritComp.DamageLevel.ToString();
                critLine +=
-                  thisCritComp.Name + '\t' +
+                  thisCritComp.UIName + '\t' +
                   thisCompBefore + '\t' +
                   thisCompAfter;
             }

@@ -86,8 +86,8 @@ namespace Sheepy.AttackImprovementMod {
             diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( Settings.DiminishingBonusPowerBase, (double) i / Settings.DiminishingBonusPowerDivisor ) );
          for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
             diminishingPenalty[ i-1 ] = (float) Math.Pow( Settings.DiminishingPenaltyPowerBase, (double) i / Settings.DiminishingPenaltyPowerDivisor );
-         Log( "Bonus ToHit Multipliers\t" + Join( "\t", diminishingBonus ) );
-         Log( "Penalty ToHit Multipliers\t" + Join( "\t", diminishingPenalty ) );
+         Log( "Diminishing hit% multipliers (bonus)\t" + Join( "\t", diminishingBonus ) );
+         Log( "Diminishing hit% multipliers (penalty)\t" + Join( "\t", diminishingPenalty ) );
       }
 
       // ============ Fixes ============
