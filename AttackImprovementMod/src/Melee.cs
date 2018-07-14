@@ -21,7 +21,7 @@ namespace Sheepy.AttackImprovementMod {
          }
          */
          if ( NullIfEmpty( ref Settings.MeleeAccuracyFactors ) != null ) {
-            initMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
+            InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
             if ( Modifiers.Count > 0 ) {
                Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );
                Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
@@ -106,7 +106,7 @@ namespace Sheepy.AttackImprovementMod {
          thisModifier = "(init)";
       }
 
-      internal static void initMeleeModifiers ( string[] factors ) {
+      internal static void InitMeleeModifiers ( string[] factors ) {
          HashSet<string> Factors = new HashSet<string>();
          foreach ( string e in factors ) Factors.Add( e.Trim().ToLower() );
 

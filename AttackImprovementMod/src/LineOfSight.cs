@@ -113,10 +113,8 @@ namespace Sheepy.AttackImprovementMod {
                NewMat( line );
 
             // Make sure post mat is applied even if pre mat was not modified
-            if ( Mats[ BlockedPost ] != null && Mats[ BlockedPre ] == null ) {
-               Mats[ BlockedPre ] = new Material( OrigInRangeMat );
-               Mats[ BlockedPre ].name = "BlockedPreLOS";
-            }
+            if ( Mats[ BlockedPost ] != null && Mats[ BlockedPre ] == null )
+               Mats[ BlockedPre ] = new Material( OrigInRangeMat ) { name = "BlockedPreLOS" };
             OverwriteNonMeleeLine = Mats[ Indirect ] != null || Mats[ Clear ] != null || Mats[ BlockedPre ] != null;
          }
          if ( Mats[ NoAttack ] != null ) {
@@ -237,7 +235,7 @@ namespace Sheepy.AttackImprovementMod {
       // ============ ARCS ============
 
       private static float thisArcHeight;
-      private static Vector3[] linePoints = new Vector3[18];
+      private static readonly Vector3[] linePoints = new Vector3[18];
 
       public static bool OverrideGetPointsForArc ( ref Vector3[] __result, int numPoints, float minArcHeight, Vector3 begin, Vector3 end ) {
          if ( numPoints == 2 || numPoints == 18 ) {

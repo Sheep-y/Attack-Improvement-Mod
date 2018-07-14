@@ -41,7 +41,7 @@ namespace Sheepy.AttackImprovementMod {
             case "attack":
                Patch( typeof( AttackDirector.AttackSequence ), "GenerateToHitInfo", NonPublic, "RecordAttack", null );
                Patch( typeof( AttackDirector ), "OnAttackComplete", null, "WriteRollLog" );
-               initLog();
+               InitLog();
                break;
 
             default:
@@ -53,7 +53,7 @@ namespace Sheepy.AttackImprovementMod {
          }
       }
 
-      public static void initLog () {
+      public static void InitLog () {
          if ( ! PersistentLog ) {
             DeleteLog( ROLL_LOG );
             DeleteOldLog();

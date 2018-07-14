@@ -198,7 +198,7 @@ namespace Sheepy.AttackImprovementMod {
       private static PropertyInfo weaponTargetIndices = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
       private static MethodInfo RemoveTargetedCombatant = typeof( SelectionStateFireMulti ).GetMethod( "RemoveTargetedCombatant", NonPublic | Instance );
       private static MethodInfo ClearTargetedActor = typeof( SelectionStateFireMulti ).GetMethod( "ClearTargetedActor", NonPublic | Instance | FlattenHierarchy );
-      private static object[] RemoveTargetParams = new object[]{ null, false };
+      private static readonly object[] RemoveTargetParams = new object[]{ null, false };
 
       public static bool OverrideMultiTargetBackout ( SelectionStateFireMulti __instance ) { try {
          var me = __instance;
