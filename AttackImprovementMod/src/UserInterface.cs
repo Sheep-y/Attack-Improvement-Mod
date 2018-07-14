@@ -13,7 +13,7 @@ namespace Sheepy.AttackImprovementMod {
       public override void InitPatch () {
          ModSettings Settings = Mod.Settings;
          if ( Settings.FixRearReadout ) {
-            if ( structureRearCachedProp == null || timeSinceStructureDamagedProp == null )
+            if ( structureRearProp == null || timeSinceStructureDamagedProp == null )
                Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, rear readout structure not fixed." );
             else
                Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, "FixRearStructureDisplay" );
@@ -45,21 +45,31 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
       }
 
-      // ============ Rear Readout ============
+      private static UILookAndColorConstants LookAndColor = null;
 
-      private static PropertyInfo structureRearCachedProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
+      public override void CombatStarts () {
+         if ( HUD != null )
+            LookAndColor = null;
+         else
+            LookAndColor = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
+      }
+
+      // ============ Paper Doll ============
+
+      private static PropertyInfo armorRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorRearCached", NonPublic | Instance );
+      private static PropertyInfo structureRearProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
       private static PropertyInfo timeSinceStructureDamagedProp = typeof( HUDMechArmorReadout ).GetProperty( "timeSinceStructureDamaged", NonPublic | Instance );
 
       public static void FixRearStructureDisplay ( HUDMechArmorReadout __instance, AttackDirection shownAttackDirection ) { try {
          HUDMechArmorReadout me = __instance;
          float[] timeSinceStructureDamaged = (float[]) timeSinceStructureDamagedProp.GetValue( me, null );
-         UnityEngine.Color[] structureRearCached = (UnityEngine.Color[]) structureRearCachedProp.GetValue( me, null );
+         UnityEngine.Color[] structureRear = (UnityEngine.Color[]) structureRearProp.GetValue( me, null );
 
          float flashPeriod = 1f;
          UnityEngine.Color flashColour = UnityEngine.Color.white;
-         if ( HUD != null ) {
-            flashPeriod = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.FlashArmorTime;
-            flashColour = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ArmorFlash.color;
+         if ( LookAndColor != null ) {
+            flashPeriod = LookAndColor.FlashArmorTime;
+            flashColour = LookAndColor.ArmorFlash.color;
          }
          Dictionary<ArmorLocation, int> dictionary = null;
          bool mayDisableParts = shownAttackDirection != AttackDirection.None && me.UseForCalledShots;
@@ -68,7 +78,7 @@ namespace Sheepy.AttackImprovementMod {
 
          for ( int i = 0 ; i < 8 ; i++ ) {
             float structureFlash = UnityEngine.Mathf.Clamp01( 1f - timeSinceStructureDamaged[i] / flashPeriod );
-            UnityEngine.Color structureColor = structureRearCached[ i ]; // The first line that has typo in original code
+            UnityEngine.Color structureColor = structureRear[ i ]; // The first line that has typo in original code
             if ( mayDisableParts ) {
                ArmorLocation rearLocation = HUDMechArmorReadout.GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
                bool isIntact = dictionary.ContainsKey( rearLocation ) && dictionary[ rearLocation ] != 0;
