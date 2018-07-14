@@ -153,9 +153,20 @@ namespace Sheepy.AttackImprovementMod {
          return result.ToString();
       }
 
-      internal static int TryGet<T> ( Dictionary<T, int> table, T key ) {
-         table.TryGetValue( key, out int result );
-         return result;
+      internal static T TryGet<T> ( T[] array, int index, T fallback = default(T), string errorArrayName = null ) {
+         if ( array == null || array.Length <= index ) {
+            if ( errorArrayName != null ) Warn( $"{errorArrayName}[{index}] not found, using default {fallback}." );
+            return fallback;
+         }
+         return array[ index ];
+      }
+
+      internal static V TryGet<T,V> ( Dictionary<T, V> map, T key, V fallback = default(V), string errorDictName = null ) {
+         if ( map == null || ! map.ContainsKey( key ) ) {
+            if ( errorDictName != null ) Warn( $"{errorDictName}[{key}] not found, using default {fallback}." );
+            return fallback;
+         }
+         return map[ key ];
       }
 
       internal static void RangeCheck ( string name, ref int val, int min, int max ) {

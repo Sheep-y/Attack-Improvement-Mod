@@ -112,11 +112,9 @@
       /* Modify base melee hit chance. -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc. Default 0. */
       public float MeleeHitChanceModifier = 0f;
 
-      /* Max hit chance after all modifiers but before roll correction. Default 0.95, same as game default.
+      /* Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.
        * Note that 100% hit chance (max) may still miss if roll correction is enabled. */
       public float MaxFinalHitChance = 0.95f;
-
-      /* Min hit chance after all modifiers but before roll correction. Default 0.05, same as game default. */
       public float MinFinalHitChance = 0.05f;
 
       /* Make hit chance modifier has diminishing return rather than simple add and subtract. Default false. */
