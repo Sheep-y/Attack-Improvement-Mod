@@ -61,18 +61,19 @@ namespace Sheepy.AttackImprovementMod {
             flashColour = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.ArmorFlash.color;
          }
          Dictionary<ArmorLocation, int> dictionary = null;
-         if ( shownAttackDirection != AttackDirection.None && me.UseForCalledShots )
+         bool mayDisableParts = shownAttackDirection != AttackDirection.None && me.UseForCalledShots;
+         if ( mayDisableParts )
             dictionary = HUD.Combat.HitLocation.GetMechHitTable( shownAttackDirection, false );
 
-         for ( int i = 1 ; i < 8 ; i++ ) { // Skip head
-            if ( i == 3 ) continue; // Skip torso
+         for ( int i = 0 ; i < 8 ; i++ ) {
             float structureFlash = UnityEngine.Mathf.Clamp01( 1f - timeSinceStructureDamaged[i] / flashPeriod );
-            ArmorLocation rearLocation = HUDMechArmorReadout.GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
-            bool isValid = ! me.UseForCalledShots || ( dictionary != null && dictionary.ContainsKey( rearLocation ) && dictionary[ rearLocation ] != 0 );
-            bool isHidden = me.UseForCalledShots && ! isValid;
             UnityEngine.Color structureColor = structureRearCached[ i ]; // The first line that has typo in original code
-            if ( isHidden )                                             // And the second line
-               structureColor = UnityEngine.Color.Lerp( structureColor, UnityEngine.Color.black, me.hiddenColorLerp );
+            if ( mayDisableParts ) {
+               ArmorLocation rearLocation = HUDMechArmorReadout.GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
+               bool isIntact = dictionary.ContainsKey( rearLocation ) && dictionary[ rearLocation ] != 0;
+               if ( ! isIntact )                                         // And the second typo line
+                  structureColor = UnityEngine.Color.Lerp( structureColor, UnityEngine.Color.black, me.hiddenColorLerp );
+            }
             UIHelpers.SetImageColor( me.StructureRear[ i ], UnityEngine.Color.Lerp( structureColor, flashColour, structureFlash ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
