@@ -144,11 +144,11 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ UTILS ============
 
-      internal static string Join<T> ( string separator, T[] array ) {
+      internal static string Join<T> ( string separator, T[] array, Func<T,string> formatter = null ) {
          StringBuilder result = new StringBuilder();
          for ( int i = 0, len = array.Length ; i < len ; i++ ) {
             if ( i > 0 ) result.Append( separator );
-            result.Append( array[i]?.ToString() );
+            result.Append( formatter == null ? array[i]?.ToString() : formatter( array[i] ) );
          }
          return result.ToString();
       }

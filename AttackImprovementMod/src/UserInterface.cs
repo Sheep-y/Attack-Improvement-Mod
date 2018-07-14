@@ -3,20 +3,33 @@ using System.Reflection;
 
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
+   using static BattleTech.ChassisLocations;
+   using static BattleTech.UI.HUDMechArmorReadout;
    using static System.Reflection.BindingFlags;
+   using BattleTech;
    using BattleTech.UI;
    using System.Collections.Generic;
-   using BattleTech;
+   using UnityEngine;
+   using HBS;
 
    public class UserInterface : ModModule {
 
       public override void InitPatch () {
          ModSettings Settings = Mod.Settings;
-         if ( Settings.FixRearReadout ) {
+         if ( Settings.FixPaperDollRearStructure ) {
             if ( structureRearProp == null || timeSinceStructureDamagedProp == null )
-               Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, rear readout structure not fixed." );
+               Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, paper doll rear structures not fixed." );
             else
                Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, "FixRearStructureDisplay" );
+         }
+         if ( Settings.PaperDollDivulgeUnderskinDamage ) {
+            if ( outlineProp == null || armorProp == null || structureProp == null || outlineRearProp == null || armorRearProp == null || structureRearProp == null )
+               Error( "Cannot find outline, armour, and/or structure colour cache of HUDMechArmorReadout.  Cannot make paper dolls divulge under skin damage." );
+            else {
+               if ( ! Settings.FixPaperDollRearStructure )
+                  Warn( "PaperDollDivulgeUnderskinDamage does not imply FixPaperDollRearStructure. Readout may still be bugged." );
+               Patch( typeof( HUDMechArmorReadout ), "RefreshMechStructureAndArmor", null, "ShowStructureDamageThroughArmour" );
+            }
          }
          if ( Settings.FixMultiTargetBackout ) {
             if ( targetedCombatant == null )
@@ -35,7 +48,7 @@ namespace Sheepy.AttackImprovementMod {
                Patch( MultiTargetType, "RemoveTargetedCombatant", NonPublic, "OverrideRemoveTargetedCombatant", null );
             }
          }
-         if ( Settings.ShowHeatAndStab ) {
+         if ( Settings.ShowHeatAndStabInfo ) {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", "ShowHeatAndStab", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
@@ -45,7 +58,7 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
       }
 
-      private static UILookAndColorConstants LookAndColor = null;
+      private static UILookAndColorConstants LookAndColor;
 
       public override void CombatStarts () {
          if ( HUD != null )
@@ -56,6 +69,81 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Paper Doll ============
 
+      private static readonly ChassisLocations[] Normal  = new ChassisLocations[]{ Head, LeftArm , LeftTorso , CenterTorso, RightTorso, RightArm, LeftLeg , RightLeg };
+      private static readonly ChassisLocations[] Flipped = new ChassisLocations[]{ Head, RightArm, RightTorso, CenterTorso, LeftTorso , LeftArm , RightLeg, LeftLeg  };
+
+      private static bool IsStructureDamaged ( ref float percent, Mech mech, ChassisLocations location ) {
+         if ( float.IsNaN( percent ) ) {
+            float hp = mech.GetCurrentStructure( location );
+            float max = mech.MechDef.GetChassisLocationDef( location ).InternalStructure;
+            percent = hp / max;
+         }
+         return percent < 1f;
+      }
+
+      public static void ShowStructureDamageThroughArmour ( HUDMechArmorReadout __instance ) { try {
+         HUDMechArmorReadout me = __instance;
+         Mech mech = me.DisplayedMech;
+         if ( mech == null ) return;
+         ChassisLocations[] location = me.flipFrontDisplay ? Flipped : Normal;
+         int[] back = me.flipFrontDisplay != me.flipRearDisplay ? new int[] { 0, 0, 4, 3, 2 } : new int[] { 0, 0, 2, 3, 4 };
+         Color clear = Color.clear;
+         Color[] armor = (Color[]) armorProp.GetValue( me, null );
+         Color[] armorRear = (Color[]) armorRearProp.GetValue( me, null );
+         Color[] outline = null, outlineRear = null, structure = null, structureRear = null;
+
+         for ( int i = 0 ; i < 8 ; i++ ) {
+            float percent = float.NaN;
+            // Front
+            if ( armor[i] != clear ) { // Skip check on armour-less locations
+               if ( IsStructureDamaged( ref percent, mech, location[ i ] ) ) {
+                  if ( structure == null ) { // Lazy reflection access
+                     structure = (Color[]) structureProp.GetValue( me, null );
+                     outline = (Color[]) outlineProp.GetValue( me, null );
+                  }
+                  outline[ i ] = structure[ i ] = armor[ i ];
+                  if ( me.UseForCalledShots )
+                     armor[ i ] = clear;
+                  else
+                     armor[ i ].a *= 0.5f; // Front has structure over armor, but structure has more blank to fill.
+               }
+            }
+            // Back
+            if ( i < 2 || i > 4 ) continue;
+            int j = back[ i ];
+            if ( armorRear[ j ] != clear ) {
+               if ( IsStructureDamaged( ref percent, mech, location[ i ] ) ) { // i is not typo. We want to check same chassis location as front.
+                  if ( structureRear == null ) {
+                     structureRear = (Color[]) structureRearProp.GetValue( me, null );
+                     outlineRear = (Color[]) outlineRearProp.GetValue( me, null );
+                  }
+                  outlineRear[ j ] = structureRear[ j ] = armorRear[ j ];
+                  armorRear[ j ] = clear;
+                  /*
+                  outlineRear[ j ] = armorRear[ j ];
+                  structureRear[ j ] = UIHelpers.getLerpedColorFromArray(  // Get proper structure colour
+                     LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.StructureColors, 1f - percent, 
+                     LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.StructureUseStairSteps,
+                     LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.StructureNumStairSteps );
+                  armorRear[ j ].a *= 0.4f; // But can't get a consistent result on both front and rear and called shot
+                  */
+               }
+            }
+         }
+         /*
+         if ( structure == null ) structure = (Color[]) structureProp.GetValue( me, null );
+         if ( structureRear == null ) structureRear = (Color[]) structureRearProp.GetValue( me, null );
+         Log( Join( ", ", armor, ColorUtility.ToHtmlStringRGBA ) );
+         Log( Join( ", ", structure, ColorUtility.ToHtmlStringRGBA ) );
+         Log( Join( ", ", armorRear, ColorUtility.ToHtmlStringRGBA ) );
+         Log( Join( ", ", structureRear, ColorUtility.ToHtmlStringRGBA ) );
+         */
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static PropertyInfo outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
+      private static PropertyInfo armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
+      private static PropertyInfo structureProp = typeof( HUDMechArmorReadout ).GetProperty( "structureCached", NonPublic | Instance );
+      private static PropertyInfo outlineRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineRearCached", NonPublic | Instance );
       private static PropertyInfo armorRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorRearCached", NonPublic | Instance );
       private static PropertyInfo structureRearProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
       private static PropertyInfo timeSinceStructureDamagedProp = typeof( HUDMechArmorReadout ).GetProperty( "timeSinceStructureDamaged", NonPublic | Instance );
@@ -63,10 +151,10 @@ namespace Sheepy.AttackImprovementMod {
       public static void FixRearStructureDisplay ( HUDMechArmorReadout __instance, AttackDirection shownAttackDirection ) { try {
          HUDMechArmorReadout me = __instance;
          float[] timeSinceStructureDamaged = (float[]) timeSinceStructureDamagedProp.GetValue( me, null );
-         UnityEngine.Color[] structureRear = (UnityEngine.Color[]) structureRearProp.GetValue( me, null );
+         Color[] structureRear = (Color[]) structureRearProp.GetValue( me, null );
 
          float flashPeriod = 1f;
-         UnityEngine.Color flashColour = UnityEngine.Color.white;
+         Color flashColour = Color.white;
          if ( LookAndColor != null ) {
             flashPeriod = LookAndColor.FlashArmorTime;
             flashColour = LookAndColor.ArmorFlash.color;
@@ -77,15 +165,15 @@ namespace Sheepy.AttackImprovementMod {
             dictionary = HUD.Combat.HitLocation.GetMechHitTable( shownAttackDirection, false );
 
          for ( int i = 0 ; i < 8 ; i++ ) {
-            float structureFlash = UnityEngine.Mathf.Clamp01( 1f - timeSinceStructureDamaged[i] / flashPeriod );
-            UnityEngine.Color structureColor = structureRear[ i ]; // The first line that has typo in original code
+            float structureFlash = Mathf.Clamp01( 1f - timeSinceStructureDamaged[i] / flashPeriod );
+            Color structureColor = structureRear[ i ]; // The first line that has typo in original code
             if ( mayDisableParts ) {
-               ArmorLocation rearLocation = HUDMechArmorReadout.GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
+               ArmorLocation rearLocation = GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
                bool isIntact = dictionary.ContainsKey( rearLocation ) && dictionary[ rearLocation ] != 0;
-               if ( ! isIntact )                                         // And the second typo line
-                  structureColor = UnityEngine.Color.Lerp( structureColor, UnityEngine.Color.black, me.hiddenColorLerp );
+               if ( ! isIntact )                       // And the second typo line
+                  structureColor = Color.Lerp( structureColor, Color.black, me.hiddenColorLerp );
             }
-            UIHelpers.SetImageColor( me.StructureRear[ i ], UnityEngine.Color.Lerp( structureColor, flashColour, structureFlash ) );
+            UIHelpers.SetImageColor( me.StructureRear[ i ], Color.Lerp( structureColor, flashColour, structureFlash ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 

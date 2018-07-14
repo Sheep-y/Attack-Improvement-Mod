@@ -9,12 +9,15 @@
       /* Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode. Default true.
          You can still quickly switch out of Multi-Target by pressing another action. */
       public bool FixMultiTargetBackout = true;
-      
-      /* Fix the bug that rear ragdoll is incorrectly showing front structure. */
-      public bool FixRearReadout = true;
+
+      /* Fix the bug that rear paper doll is incorrectly showing front structure.  Default true. */
+      public bool FixPaperDollRearStructure = true;
+
+      /* Show structural damage through armour. i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true. */
+      public bool PaperDollDivulgeUnderskinDamage = true;
 
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
-      public bool ShowHeatAndStab = true;
+      public bool ShowHeatAndStabInfo = true;
 
       /* Fix the bug that walk / sprint may not accurately project correct line of sight / fire, due to a prediction point too close to the ground. */
       public bool FixNonJumpLosPreview = true;
