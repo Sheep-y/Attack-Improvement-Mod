@@ -70,12 +70,12 @@ namespace Sheepy.AttackImprovementMod {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Actor Team", "Actor Pilot", "Actor Unit", "Target Team", "Target Pilot", "Target Unit", "Direction" } ) );
             if ( LogShot || PersistentLog ) {
-               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
+               logBuffer.Append( '\t' ).Append( String.Join( "\t", new string[]{ "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
                if ( LogLocation || PersistentLog )
-                  logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
+                  logBuffer.Append( '\t' ).Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
                logBuffer.Append( "\tHit Location" );
                if ( LogCritical || PersistentLog )
-                  logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "HP", "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
+                  logBuffer.Append( '\t' ).Append( String.Join( "\t", new string[]{ "HP", "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
             }
             log.Add( logBuffer.ToString() );
             WriteRollLog( null );
@@ -164,7 +164,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static string GetShotLog () {
-         return thisAttack + "\t" + thisWeaponName + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance + "\t";
+         return thisAttack + '\t' + thisWeaponName + '\t' + thisRoll + '\t' + ( thisCorrectedRoll + thisStreak ) + '\t' + thisStreak + '\t' + thisCorrectedRoll + '\t' + thisHitChance + '\t';
       }
 
       internal static float thisCorrectedRoll;
@@ -193,17 +193,17 @@ namespace Sheepy.AttackImprovementMod {
       public static void LogMechHit ( ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
          string line = 
             GetShotLog() +
-            randomRoll + "\t" +
-            TryGet( hitTable, ArmorLocation.Head ) + "\t" +
-            ( TryGet( hitTable, ArmorLocation.CenterTorso ) + TryGet( hitTable, ArmorLocation.CenterTorsoRear ) ) + "\t" +
-            ( TryGet( hitTable, ArmorLocation.LeftTorso   ) + TryGet( hitTable, ArmorLocation.LeftTorsoRear   ) ) + "\t" +
-            ( TryGet( hitTable, ArmorLocation.RightTorso  ) + TryGet( hitTable, ArmorLocation.RightTorsoRear  ) ) + "\t" +
-            TryGet( hitTable, ArmorLocation.LeftArm  ) + "\t" +
-            TryGet( hitTable, ArmorLocation.RightArm ) + "\t" +
-            TryGet( hitTable, ArmorLocation.LeftLeg  ) + "\t" +
-            TryGet( hitTable, ArmorLocation.RightLeg ) + "\t" +
-            bonusLocation + "\t" +
-            bonusLocationMultiplier + "\t" +
+            randomRoll + '\t' +
+            TryGet( hitTable, ArmorLocation.Head ) + '\t' +
+            ( TryGet( hitTable, ArmorLocation.CenterTorso ) + TryGet( hitTable, ArmorLocation.CenterTorsoRear ) ) + '\t' +
+            ( TryGet( hitTable, ArmorLocation.LeftTorso   ) + TryGet( hitTable, ArmorLocation.LeftTorsoRear   ) ) + '\t' +
+            ( TryGet( hitTable, ArmorLocation.RightTorso  ) + TryGet( hitTable, ArmorLocation.RightTorsoRear  ) ) + '\t' +
+            TryGet( hitTable, ArmorLocation.LeftArm  ) + '\t' +
+            TryGet( hitTable, ArmorLocation.RightArm ) + '\t' +
+            TryGet( hitTable, ArmorLocation.LeftLeg  ) + '\t' +
+            TryGet( hitTable, ArmorLocation.RightLeg ) + '\t' +
+            bonusLocation + '\t' +
+            bonusLocationMultiplier + '\t' +
             __result;
          if ( LogCritical ) {
             string key = thisWeapon + "@" + MechStructureRules.GetChassisLocationFromArmorLocation( __result );
@@ -217,17 +217,17 @@ namespace Sheepy.AttackImprovementMod {
       public static void LogVehicleHit ( VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
          string line = 
             GetShotLog() +
-            randomRoll + "\t" +
-            TryGet( hitTable, VehicleChassisLocations.Turret ) + "\t" +
-            TryGet( hitTable, VehicleChassisLocations.Front  ) + "\t" +
-            TryGet( hitTable, VehicleChassisLocations.Left   ) + "\t" +
-            TryGet( hitTable, VehicleChassisLocations.Right  ) + "\t" +
-            TryGet( hitTable, VehicleChassisLocations.Rear   ) + "\t" +
+            randomRoll + '\t' +
+            TryGet( hitTable, VehicleChassisLocations.Turret ) + '\t' +
+            TryGet( hitTable, VehicleChassisLocations.Front  ) + '\t' +
+            TryGet( hitTable, VehicleChassisLocations.Left   ) + '\t' +
+            TryGet( hitTable, VehicleChassisLocations.Right  ) + '\t' +
+            TryGet( hitTable, VehicleChassisLocations.Rear   ) + '\t' +
             "--\t" +
             "--\t" +
             "--\t" +
-            bonusLocation + "\t" +
-            bonusLocationMultiplier + "\t" +
+            bonusLocation + '\t' +
+            bonusLocationMultiplier + '\t' +
             __result;
          if ( LogCritical )
             line += CritDummy;
@@ -296,24 +296,24 @@ namespace Sheepy.AttackImprovementMod {
             Warn( "Critical Hit Log found duplicate crit: " + key );
          string critLine = 
                thisLocationHP + "\t" +
-               thisLocationMaxHP + "\t" +
-               thisCritRoll + "\t" +
-               thisBaseCritChance + "\t" +
-               thisCritMultiplier + "\t" +
-               thisCritChance + "\t";
+               thisLocationMaxHP + '\t' +
+               thisCritRoll + '\t' +
+               thisBaseCritChance + '\t' +
+               thisCritMultiplier + '\t' +
+               thisCritChance + '\t';
          if ( thisCritSlot < 0 )
             critLine += "--\t--\t(No Crit)\t--\t--";
          else {
             critLine += 
-               thisCritSlotRoll + "\t" + 
-               ( thisCritSlot + 1 ) + "\t";
+               thisCritSlotRoll + '\t' + 
+               ( thisCritSlot + 1 ) + '\t';
             if ( thisCritComp == null )
                critLine += "(Empty)\t--\t--";
             else {
                string thisCompAfter = thisCritComp is AmmunitionBox && halfFullAmmo ? "Explosion" : thisCritComp.DamageLevel.ToString();
                critLine +=
-                  thisCritComp.Name + "\t" +
-                  thisCompBefore + "\t" +
+                  thisCritComp.Name + '\t' +
+                  thisCompBefore + '\t' +
                   thisCompAfter;
             }
          }
