@@ -36,11 +36,11 @@ namespace Sheepy.AttackImprovementMod {
          modules.Add( "Logger", new AttackLog() ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
          modules.Add( "User Interface", new UserInterface() );
          modules.Add( "Line of Fire", new LineOfSight() );
-         modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
+         modules.Add( "Called Shot HUD", new CalledShotPopUp() );
          modules.Add( "Melee", new Melee() );
          modules.Add( "Roll Modifier", new RollModifier() );
          modules.Add( "Roll Corrections", new RollCorrection() );
-         modules.Add( "Hit Distribution", new FixHitLocation() );
+         modules.Add( "Hit Distribution", new HitLocation() );
 
          foreach ( var mod in modules )  try {
             Log( "=== Patching " + mod.Key + " ===" );

@@ -10,7 +10,7 @@ namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using static System.Reflection.BindingFlags;
 
-   public class FixHitLocation : ModModule {
+   public class HitLocation : ModModule {
 
       private const int SCALE = 1024; // Increase precisions of float to int conversions. Set it too high may cause overflow.
       internal static int scale = SCALE; // Actual scale. Determined by FixHitDistribution.

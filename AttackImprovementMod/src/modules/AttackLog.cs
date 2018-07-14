@@ -135,7 +135,7 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
-         return typeof( HitLocation ).GetMethod( "GetHitLocation", Public | Static ).MakeGenericMethod( generic );
+         return typeof( BattleTech.HitLocation ).GetMethod( "GetHitLocation", Public | Static ).MakeGenericMethod( generic );
       }
 
       public static string TeamAndCallsign ( ICombatant who ) {

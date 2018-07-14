@@ -63,21 +63,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\AttackLog.cs" />
-    <Compile Include="src\Melee.cs" />
-    <Compile Include="src\LineOfSight.cs" />
-    <Compile Include="src\UserInterface.cs" />
-    <Compile Include="src\RollModifier.cs" />
-    <Compile Include="src\RollCorrection.cs" />
-    <Compile Include="src\FixCalledShotPopUp.cs" />
-    <Compile Include="src\FixHitLocation.cs" />
     <Compile Include="src\Mod.cs" />
     <Compile Include="src\ModSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\modules\AttackLog.cs" />
+    <Compile Include="src\modules\CalledShotPopUp.cs" />
+    <Compile Include="src\modules\HitLocation.cs" />
+    <Compile Include="src\modules\LineOfSight.cs" />
+    <Compile Include="src\modules\Melee.cs" />
+    <Compile Include="src\modules\RollCorrection.cs" />
+    <Compile Include="src\modules\RollModifier.cs" />
+    <Compile Include="src\modules\UserInterface.cs" />
     <Compile Include="src\Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mod.json" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
