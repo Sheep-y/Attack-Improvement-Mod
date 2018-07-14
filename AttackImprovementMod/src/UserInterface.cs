@@ -28,10 +28,11 @@ namespace Sheepy.AttackImprovementMod {
             else if ( weaponTargetIndices == null )
                Error( "Cannot find weaponTargetIndices, SelectionStateFireMulti not patched" );
             else {
+               Type MultiTargetType = typeof( SelectionStateFireMulti );
                Patch( typeof( CombatSelectionHandler ), "BackOutOneStep", NonPublic, null, "PreventMultiTargetBackout" );
-               Patch( typeof( SelectionStateFireMulti ), "get_CanBackOut", "OverrideMultiTargetCanBackout", null );
-               Patch( typeof( SelectionStateFireMulti ), "BackOut", "OverrideMultiTargetBackout", null );
-               Patch( typeof( SelectionStateFireMulti ), "RemoveTargetedCombatant", NonPublic, "OverrideRemoveTargetedCombatant", null );
+               Patch( MultiTargetType, "get_CanBackOut", "OverrideMultiTargetCanBackout", null );
+               Patch( MultiTargetType, "BackOut", "OverrideMultiTargetBackout", null );
+               Patch( MultiTargetType, "RemoveTargetedCombatant", NonPublic, "OverrideRemoveTargetedCombatant", null );
             }
          }
          if ( Settings.ShowHeatAndStab ) {

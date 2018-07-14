@@ -13,31 +13,21 @@ namespace Sheepy.AttackImprovementMod {
 
       internal const string ROLL_LOG = "Log_AttackRoll.txt";
 
-      private static bool LogShot = false;
-      private static bool LogLocation = false;
-      private static bool LogCritical = false;
+      private static bool LogShot, LogLocation, LogCritical;
       private static bool PersistentLog = false;
 
       public override void InitPatch () {
          PersistentLog = Mod.Settings.PersistentLog;
+         // Patch prefix early to increase chance of successful capture in face of other mods
          switch ( Mod.Settings.AttackLogLevel?.Trim().ToLower() ) {
             case "all":
             case "critical":
                LogCritical = true;
-               Type MechType = typeof( Mech );
-               Type CritRulesType = typeof( CritChanceRules );
-               Patch( typeof( AttackDirector ), "GetRandomFromCache", new Type[]{ typeof( WeaponHitInfo ), typeof( int ) }, null, "RecordCritRolls" );
-               Patch( CritRulesType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "RecordBaseCritChance" );
-               Patch( CritRulesType, "GetCritMultiplier", null, "RecordCritMultiplier" );
-               Patch( CritRulesType, "GetCritChance", null, "RecordCritChance" );
-               Patch( MechType, "GetComponentInSlot", null, "RecordCritComp" );
-               Patch( MechType, "CheckForCrit", NonPublic, "LogCritComp", "LogCrit" );
+               Patch( typeof( Mech ), "CheckForCrit", NonPublic, "LogCritComp", null );
                goto case "location";
 
             case "location":
                LogLocation = true;
-               Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
-               Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
                goto case "shot";
 
             case "shot":
@@ -45,7 +35,7 @@ namespace Sheepy.AttackImprovementMod {
                Type AttackType = typeof( AttackDirector.AttackSequence );
                Patch( AttackType, "GetIndividualHits", NonPublic, "RecordWeapon", null );
                Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordWeapon", null );
-               Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", "LogMissedAttack" );
+               Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", null );
                goto case "attack";
 
             case "attack":
@@ -83,6 +73,32 @@ namespace Sheepy.AttackImprovementMod {
 
          if ( LogCritical )
             hitMap = new Dictionary<string, int>( 16 );
+      }
+
+      private bool LoggerPatched = false;
+
+      public override void CombatStarts () {
+         if ( LoggerPatched ) return;
+         LoggerPatched = true;
+
+         // Patch Postfix late to increase odds of capturing modded values
+         if ( LogShot ) {
+            Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll" , NonPublic, null, "LogMissedAttack" );
+            if ( LogLocation ) {
+               Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
+               Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
+               if ( LogCritical ) {
+                  Type MechType = typeof( Mech );
+                  Type CritRulesType = typeof( CritChanceRules );
+                  Patch( typeof( AttackDirector ), "GetRandomFromCache", new Type[]{ typeof( WeaponHitInfo ), typeof( int ) }, null, "RecordCritRolls" );
+                  Patch( CritRulesType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "RecordBaseCritChance" );
+                  Patch( CritRulesType, "GetCritMultiplier", null, "RecordCritMultiplier" );
+                  Patch( CritRulesType, "GetCritChance", null, "RecordCritChance" );
+                  Patch( MechType, "GetComponentInSlot", null, "RecordCritComp" );
+                  Patch( MechType, "CheckForCrit", NonPublic, null, "LogCrit" );
+               }
+            }
+         }
       }
 
       // ============ UTILS ============
