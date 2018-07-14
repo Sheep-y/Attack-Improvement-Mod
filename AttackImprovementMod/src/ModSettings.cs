@@ -198,7 +198,7 @@
       /// Logging
       ///
 
-      /* Log attack info to "Log_AttackRoll.txt", for copy and paste to Excel to make it human readable.
+      /* Log attack info to "Log_Attack.txt", for copy and paste to Excel to make it human readable.
        * Setting can be "None", "Attack", "Shot", "Location", "Critical", or "All", from simplest to heaviest. Default "None".
        * "All" is currently same as "Critical", but more levels may be added in future. Letter case does not matter. */
       public string AttackLogLevel = "None";

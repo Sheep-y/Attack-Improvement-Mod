@@ -11,7 +11,7 @@ namespace Sheepy.AttackImprovementMod {
 
    public class AttackLog : ModModule {
 
-      internal const string ROLL_LOG = "Log_AttackRoll.txt";
+      internal const string ROLL_LOG = "Log_Attack.txt";
 
       private static bool LogShot, LogLocation, LogCritical;
       private static bool PersistentLog = false;
@@ -54,9 +54,12 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static void initLog () {
-         if ( ! PersistentLog ) DeleteLog( ROLL_LOG );
-
-         if ( ! File.Exists( LogDir + ROLL_LOG ) ) {
+         if ( ! PersistentLog ) {
+            DeleteLog( ROLL_LOG );
+            DeleteOldLog();
+         }
+         
+         if ( ! LogExists( ROLL_LOG ) ) {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Actor Team", "Actor Pilot", "Actor Unit", "Target Team", "Target Pilot", "Target Unit", "Direction" } ) );
             if ( LogShot || PersistentLog ) {
@@ -82,6 +85,7 @@ namespace Sheepy.AttackImprovementMod {
          LoggerPatched = true;
 
          // Patch Postfix late to increase odds of capturing modded values
+         Mod.patchClass = typeof( AttackLog );
          if ( LogShot ) {
             Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll" , NonPublic, null, "LogMissedAttack" );
             if ( LogLocation ) {
@@ -105,6 +109,19 @@ namespace Sheepy.AttackImprovementMod {
 
       private static Dictionary<string, int> hitMap; // Used to assign critical hit information
       private static List<string> log = new List<string>( 64 );
+
+      public static void DeleteOldLog () {
+         // In version 1.0, the idea is that maybe we need to keep two logs, one for attack and location rolls, one for critical rolls.
+         // Now that the two are merged, the old log can be removed.
+         string oldName = "Log_AttackRoll.txt";
+         if ( ! LogExists( oldName ) ) return;
+         using ( StreamReader file = new StreamReader( Mod.LogDir + oldName ) ) {
+            string firstLine = file.ReadLine();
+            if ( firstLine == null || ! firstLine.Contains( "\tWeapon\tHit Roll\tCorrected\tStreak\t" ) ) return;
+            file.Close(); // Close before delete, stupid =_=
+            DeleteLog( oldName );
+         }
+      }
 
       public static void WriteRollLog ( AttackDirector __instance ) {
          if ( __instance != null && __instance.IsAnyAttackSequenceActive )

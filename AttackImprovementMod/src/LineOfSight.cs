@@ -74,7 +74,7 @@ namespace Sheepy.AttackImprovementMod {
             // Scale Out of Range line width, when line is solid
             me.LineTemplate.startWidth *= scale;
             me.LineTemplate.endWidth *= scale;
-            // Scale dotted line, when line is solid
+            // Scale all dotted lines
             Vector2 s = me.MaterialOutOfRange.mainTextureScale;
             s.x /= scale;
             me.MaterialOutOfRange.mainTextureScale = s;

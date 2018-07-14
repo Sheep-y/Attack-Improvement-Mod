@@ -54,13 +54,14 @@ namespace Sheepy.AttackImprovementMod {
       FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", Static | NonPublic );
 
       public override void CombatStarts () {
-         if ( correctionCache != null )
-            Log( "Combat starts with {0} reverse roll correction cached from previous battles.", correctionCache.Count );
-         if ( rollCorrection != null ) {
-            if ( NoRollCorrection )
+         if ( NoRollCorrection ) {
+            if ( rollCorrection != null ) {
                rollCorrection.SetValue( null, false );
-         } else
-            Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers." );
+            }  else {
+               Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers. Roll correction not disabled." );
+            }
+         } else if ( correctionCache != null )
+            Log( "Combat starts with {0} reverse roll correction cached from previous battles.", correctionCache.Count );
       }
 
       // ============ UTILS ============

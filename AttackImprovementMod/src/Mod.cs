@@ -34,8 +34,8 @@ namespace Sheepy.AttackImprovementMod {
          Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
 
          modules.Add( "Logger", new AttackLog() ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
-         modules.Add( "Line of Fire", new LineOfSight() );
          modules.Add( "User Interface", new UserInterface() );
+         modules.Add( "Line of Fire", new LineOfSight() );
          modules.Add( "Called Shot HUD", new FixCalledShotPopUp() );
          modules.Add( "Melee", new Melee() );
          modules.Add( "Roll Modifier", new RollModifier() );
@@ -51,11 +51,12 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static void LogSettings ( string directory, string settingsJSON ) {
-         // Get log settings
-         StringBuilder logCache = new StringBuilder().AppendFormat( "AIM Version: {0}\nMod Folder: {1}\n", VERSION, directory );
+         // Cache log lines until after we determined folder and deleted old log
+         StringBuilder logCache = new StringBuilder()
+            .AppendFormat( "========== {0} {1} ==========\r\nTime: {2}\r\nMod Folder: {3}\r\n", MODNAME, VERSION, DateTime.Now.ToString( "o" ), directory );
          try {
             Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
-            logCache.AppendFormat( "Mod Settings: {0}\n", JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
+            logCache.AppendFormat( "Mod Settings: {0}\r\n", JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
          } catch ( Exception ) {
             logCache.Append( "Error: Cannot parse mod settings, using default." );
          }
@@ -83,12 +84,15 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Harmony ============
 
-      private static Type patchClass;
+      public static Type patchClass;
       /* Find and create a HarmonyMethod from current patchClass. method must be public and has unique name. */
       internal static HarmonyMethod MakePatch ( string method ) {
          if ( method == null ) return null;
          MethodInfo mi = patchClass.GetMethod( method );
-         if ( mi == null ) Error( "Cannot find patch method " + method );
+         if ( mi == null ) {
+            Error( "Cannot find patch method " + method );
+            return null;
+         }
          return new HarmonyMethod( mi );
       }
 
@@ -186,13 +190,19 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ LOGS ============
 
-      internal static void DeleteLog ( string file ) {
+      internal static bool LogExists ( string file ) {
+         return File.Exists( LogDir + file );
+      }
+
+      internal static Exception DeleteLog ( string file ) {
+         Exception result = null;
          try {
             File.Delete( LogDir + file );
-         } catch ( Exception ) { }
+         } catch ( Exception e ) { result = e; }
          try {
             File.Delete( FALLBACK_LOG_DIR + file );
-         } catch ( Exception ) { }
+         } catch ( Exception e ) { result = e; }
+         return result; // Example: Log( DeleteLog( name )?.ToString() ?? $"{name} deleted or not exist" );
       }
 
       internal static string Format ( string message, params object[] args ) {
@@ -204,17 +214,8 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static void Log ( object message ) { Log( message.ToString() ); }
-      internal static void Log ( string message, params object[] args ) {
-         Log( Format( message, args ) );
-      }
-      internal static void Log ( string message = "" ) {
-         string logName = LogDir + LOG_NAME;
-         try {
-            if ( ! File.Exists( logName ) ) 
-               message = DateTime.Now.ToString( "o" ) + "\r\n\r\n" + message;
-         } catch ( Exception ) {}
-         WriteLog( LOG_NAME, message + "\r\n" );
-      }
+      internal static void Log ( string message, params object[] args ) { Log( Format( message, args ) ); }
+      internal static void Log ( string message = "" ) { WriteLog( LOG_NAME, message + "\r\n" ); }
 
       internal static void Warn ( object message ) { Warn( message.ToString() ); }
       internal static void Warn ( string message ) { Log( "Warning: " + message ); }
@@ -245,7 +246,7 @@ namespace Sheepy.AttackImprovementMod {
 
       private static Dictionary<string, int> exceptions = new Dictionary<string, int>();
 
-      internal static void WriteLog( string filename, string message ) {
+      internal static void WriteLog ( string filename, string message ) {
          string logName = LogDir + filename;
          try {
             File.AppendAllText( logName, message );
