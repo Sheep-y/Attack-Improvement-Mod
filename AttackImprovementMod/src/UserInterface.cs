@@ -267,13 +267,14 @@ namespace Sheepy.AttackImprovementMod {
                if ( ! mech.HasMovedThisRound )
                   newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
                if ( ! mech.HasAppliedHeatSinks )
-                  newHeat = Math.Min( Math.Max( 0, newHeat - mech.AdjustedHeatsinkCapacity ), mech.MaxHeat );
+                  newHeat -= mech.AdjustedHeatsinkCapacity;
+               newHeat = Math.Min( newHeat, mech.MaxHeat );
                newStab = (int) selection.ProjectedStabilityForState;
             }
          }
 
          line2 = "Heat " + baseHeat;
-         if ( baseHeat == newHeat ) line2 += "/" + mech.MaxHeat; else line2 += " >> " + newHeat;
+         if ( baseHeat == newHeat ) line2 += "/" + mech.MaxHeat; else line2 += " >> " + ( newHeat < 0 ? $"({-newHeat})" : newHeat.ToString() );
          line2 += "\nStab " + baseStab;
          if ( baseStab == newStab ) line2 += "/" + mech.MaxStability; else line2 += " >> " + newStab;
 
