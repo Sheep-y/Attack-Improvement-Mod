@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 
 namespace Sheepy.AttackImprovementMod {
-   using System.Reflection;
    using static Mod;
    using static FixHitLocation;
    using static System.Reflection.BindingFlags;
@@ -14,17 +13,17 @@ namespace Sheepy.AttackImprovementMod {
       private static string CalledShotHitChanceFormat = "{0:0}%";
 
       public override void InitPatch () {
-         if ( Settings.CalledChanceFormat != "" )
+         if ( NullIfEmpty( ref Settings.CalledChanceFormat ) != null )
             CalledShotHitChanceFormat = Settings.CalledChanceFormat;
 
-         if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.CalledChanceFormat != "" ) {
+         if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.CalledChanceFormat != null ) {
             Type CalledShot = typeof( CombatHUDCalledShotPopUp );
             Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
-            if ( Settings.ShowRealMechCalledShotChance || Settings.CalledChanceFormat != "" )
+            if ( Settings.ShowRealMechCalledShotChance || Settings.CalledChanceFormat != null )
                Patch( CalledShot, "GetHitPercent", NonPublic, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
 
-            if ( Settings.ShowRealVehicleCalledShotChance || Settings.CalledChanceFormat != "" )
+            if ( Settings.ShowRealVehicleCalledShotChance || Settings.CalledChanceFormat != null )
                Patch( CalledShot, "GetHitPercent", NonPublic, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
          }
       }

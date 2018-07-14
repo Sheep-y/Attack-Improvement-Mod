@@ -62,7 +62,7 @@ namespace Sheepy.AttackImprovementMod {
          }
          try {
             LogDir = Settings.LogFolder;
-            if ( LogDir.Length <= 0 )
+            if ( LogDir == null || LogDir.Length <= 0 )
                LogDir = directory + "/";
             logCache.AppendFormat( "Log folder set to {0}. If that fails, fallback to {1}.", LogDir, FALLBACK_LOG_DIR );
             DeleteLog( LOG_NAME );
@@ -151,6 +151,18 @@ namespace Sheepy.AttackImprovementMod {
             result.Append( array[i]?.ToString() );
          }
          return result.ToString();
+      }
+
+      internal static string NullIfEmpty ( ref string value ) {
+         if ( value == null ) return null;
+         if ( value.Trim().Length <= 0 ) return value = null;
+         return value;
+      }
+
+      internal static T TryGet<T> ( ref T value, T fallback, Func<T,bool> validate = null ) {
+         if ( value == null ) value = fallback;
+         else if ( validate != null && ! validate( value ) ) value = fallback;
+         return value;
       }
 
       internal static T TryGet<T> ( T[] array, int index, T fallback = default(T), string errorArrayName = null ) {

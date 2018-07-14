@@ -28,18 +28,18 @@ namespace Sheepy.AttackImprovementMod {
          Parse( ref Settings.LOSIndirectColor );
          Parse( ref Settings.LOSNoAttackColor );
 
-         bool SolidLinesChanged = Settings.LOSIndirectDotted || Settings.LOSIndirectColor != "" ||
-                                   ! Settings.LOSMeleeDotted || Settings.LOSMeleeColor != "" ||
-                                   ! Settings.LOSClearDotted || Settings.LOSClearColor != "" ||
-                              ! Settings.LOSBlockedPreDotted || Settings.LOSBlockedPreColor != "" ||
-                             ! Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != "" ; 
+         bool SolidLinesChanged = Settings.LOSIndirectDotted || Settings.LOSIndirectColor != null ||
+                                   ! Settings.LOSMeleeDotted || Settings.LOSMeleeColor != null ||
+                                   ! Settings.LOSClearDotted || Settings.LOSClearColor != null ||
+                              ! Settings.LOSBlockedPreDotted || Settings.LOSBlockedPreColor != null ||
+                             ! Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != null ; 
                                   // NoAttackLine is overriden once and leave alone.
 
          bool TwoSectionsLOS = Settings.LOSBlockedPreDotted != Settings.LOSBlockedPostDotted || Settings.LOSBlockedPreColor != Settings.LOSBlockedPostColor;
 
          if ( Settings.LOSWidthMultiplier != 1f || Settings.LOSWidthBlockedMultiplier != 1f || Settings.LOSMarkerBlockedMultiplier != 1f )
             Patch( Indicator, "Init", null, "ResizeLOS" );
-         if ( SolidLinesChanged || Settings.LOSNoAttackColor != "" || ! Settings.LOSNoAttackDotted )
+         if ( SolidLinesChanged || Settings.LOSNoAttackColor != null || ! Settings.LOSNoAttackDotted )
             Patch( Indicator, "Init", null, "CreateLOSTexture" );
          if ( Settings.ArcLinePoints != 18 || TwoSectionsLOS )
             Patch( Indicator, "getLine" , NonPublic, null, "RecordLOS" );
@@ -181,11 +181,12 @@ namespace Sheepy.AttackImprovementMod {
       // ============ UTILS ============
 
       public static Color Parse ( ref string htmlColour ) {
-         if ( htmlColour == "" ) return new Color();
+         if ( htmlColour == "" ) htmlColour = null;
+         if ( htmlColour == null ) return new Color();
          if ( ColorUtility.TryParseHtmlString( htmlColour, out Color result ) )
             return result;
          Error( "Cannot parse " + htmlColour + " as colour." );
-         htmlColour = "";
+         htmlColour = null;
          return new Color();
       }
 
@@ -199,7 +200,7 @@ namespace Sheepy.AttackImprovementMod {
       private static Material NewMat ( string name, bool origInRange, string color, bool dotted ) {
          Material mat = new Material( dotted ? Dotted : Solid );
          Color newColour;
-         if ( color != "" )
+         if ( color != null )
             newColour = Parse( ref color );
          else
             newColour = origInRange ? OrigInRangeMat.color : OrigOutOfRangeMat.color; // Restore original colour if dotted/solid is reversed

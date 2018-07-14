@@ -20,7 +20,7 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( SelectionStateJump ), "SetMeleeDest", BindingFlags.NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
          }
          */
-         if ( Settings.MeleeAccuracyFactors.Trim() != "" ) {
+         if ( NullIfEmpty( ref Settings.MeleeAccuracyFactors ) != null ) {
             initMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
             if ( Modifiers.Count > 0 ) {
                Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );

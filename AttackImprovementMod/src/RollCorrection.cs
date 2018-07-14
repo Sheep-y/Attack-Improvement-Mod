@@ -41,8 +41,9 @@ namespace Sheepy.AttackImprovementMod {
             }
          }
 
-         bool HitChanceFormatChanged = Settings.HitChanceFormat != "" || ( Settings.HitChanceStep == 0f && Settings.HitChanceFormat != "{0:0}%" );
-         if ( Settings.HitChanceFormat != "" )
+         NullIfEmpty( ref Settings.HitChanceFormat );
+         bool HitChanceFormatChanged = Settings.HitChanceFormat != null || ( Settings.HitChanceStep == 0f && Settings.HitChanceFormat != "{0:0}%" );
+         if ( Settings.HitChanceFormat != null )
             WeaponHitChanceFormat = Settings.HitChanceFormat;
          else if ( Settings.HitChanceStep == 0f )
             WeaponHitChanceFormat = "{0:0.#}%";
