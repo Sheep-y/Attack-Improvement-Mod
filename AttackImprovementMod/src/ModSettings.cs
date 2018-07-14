@@ -16,8 +16,11 @@
       /* Show structural damage through armour. i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true. */
       public bool PaperDollDivulgeUnderskinDamage = true;
 
+      /* Show tonnage in selection panel (bottom left) and target panel (top). Mech class will be shortened.  Default false. */
+      public bool ShowUnitTonnage = false;
+
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
-      public bool ShowHeatAndStabInfo = true;
+      public bool ShowHeatAndStab = true;
 
       /* Fix the bug that walk / sprint may not accurately project correct line of sight / fire, due to a prediction point too close to the ground. */
       public bool FixNonJumpLosPreview = true;
@@ -210,5 +213,4 @@
       /* Location of mod log and roll log. Default is "" to put them in mod folder. Relative path would be relative to BATTLETECH exe. */
       public string LogFolder = "";
    }
-
 }

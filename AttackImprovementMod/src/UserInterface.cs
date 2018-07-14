@@ -10,7 +10,6 @@ namespace Sheepy.AttackImprovementMod {
    using BattleTech.UI;
    using System.Collections.Generic;
    using UnityEngine;
-   using HBS;
 
    public class UserInterface : ModModule {
 
@@ -48,12 +47,14 @@ namespace Sheepy.AttackImprovementMod {
                Patch( MultiTargetType, "RemoveTargetedCombatant", NonPublic, "OverrideRemoveTargetedCombatant", null );
             }
          }
-         if ( Settings.ShowHeatAndStabInfo ) {
-            Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", "ShowHeatAndStab", null );
+         if ( Settings.ShowHeatAndStab ) {
+            Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowHeatAndStab" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDMechTray ), "Update", NonPublic, null, "RefreshHeatAndStab" );
          }
+         if ( Settings.ShowUnitTonnage )
+            Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
          if ( Settings.FixNonJumpLosPreview )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
       }
@@ -247,11 +248,9 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Heat and Stability ============
 
-      public static bool ShowHeatAndStab ( CombatHUDActorDetailsDisplay __instance ) { try {
+      public static void ShowHeatAndStab ( CombatHUDActorDetailsDisplay __instance ) { try {
          // Only override mechs. Other actors are unimportant to us.
-         Mech mech = __instance.DisplayedActor as Mech;
-         if ( __instance.DisplayedActor == null || mech == null )
-            return true;
+         if ( !( __instance.DisplayedActor is Mech mech ) ) return;
 
          int jets = mech.WorkingJumpjets;
          string line1 = mech.weightClass.ToString(), line2 = null;
@@ -259,7 +258,7 @@ namespace Sheepy.AttackImprovementMod {
 
          int baseHeat = mech.CurrentHeat, newHeat = baseHeat,
             baseStab = (int) mech.CurrentStability, newStab = baseStab;
-         if ( __instance.DisplayedActor.team.IsLocalPlayer ) { // Two lines in selection panel
+         if ( mech == HUD.SelectedActor ) { // Two lines in selection panel
             line1 = "·\n" + line1;
             CombatSelectionHandler selection = HUD?.SelectionHandler;
             newHeat += mech.TempHeat;
@@ -280,8 +279,29 @@ namespace Sheepy.AttackImprovementMod {
 
          __instance.ActorWeightText.text = line1 + "\n" + line2;
          __instance.JumpJetsHolder.SetActive( false );
-         return false;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ShowUnitTonnage ( CombatHUDActorDetailsDisplay __instance ) { try {
+         string from = null, to = null;
+
+         if ( __instance.DisplayedActor is Mech mech ) {
+            from = mech.weightClass.ToString();
+            to = mech.tonnage.ToString();
+         } else if ( __instance.DisplayedActor is Vehicle vehicle ) {
+            from = vehicle.weightClass.ToString();
+            to = vehicle.tonnage.ToString();
+         } else
+            return;
+
+         switch ( from ) {
+         case "LIGHT"   : to += "t LT"; break;
+         case "MEDIUM"  : to += "t MED"; break;
+         case "HEAVY"   : to += "t HVY"; break;
+         case "ASSAULT" : to += "t AST"; break;
+         }
+
+         __instance.ActorWeightText.text = __instance.ActorWeightText.text.Replace( from, to );
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static bool needRefresh = false;
       public static void RecordRefresh () {

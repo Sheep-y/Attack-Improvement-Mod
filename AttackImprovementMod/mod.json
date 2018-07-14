@@ -27,6 +27,9 @@
       /* Show structural damage through armour. i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true. */
       "PaperDollDivulgeUnderskinDamage" : true,
 
+      /* Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense. */
+      "ShowUnitTonnage" : false,
+
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
       "ShowHeatAndStabInfo" : true,
 
