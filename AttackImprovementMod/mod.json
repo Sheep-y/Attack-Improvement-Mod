@@ -20,7 +20,7 @@
       /* Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode. Default true.
          You can still quickly switch out of Multi-Target by pressing another action. */
       "FixMultiTargetBackout" : true,
-      
+
       /* Fix the bug that rear paper doll is incorrectly showing front structure.  Default true. */
       "FixPaperDollRearStructure" : true,
 
@@ -31,7 +31,7 @@
       "ShowUnitTonnage" : false,
 
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
-      "ShowHeatAndStabInfo" : true,
+      "ShowHeatAndStab" : true,
 
       /* Fix the bug that walk / sprint may not accurately project correct line of sight / fire, due to a prediction point too close to the ground. */
       "FixNonJumpLosPreview" : true,
@@ -51,14 +51,14 @@
       /* Controls whether other attack lines are dotted. Default all false. */
       "LOSMeleeDotted" : false,
       "LOSClearDotted" : false,
-      "LOSBlockedPreDotted" : false,
+      "LOSBlockedPreDotted " : false,
       "LOSBlockedPostDotted" : false,
-      
+
       /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Set to empty to leave alone.
          Default #D0F for blocked pre, #C8E for blocked post, and empty for the rest. */
       "LOSMeleeColor" : "",
       "LOSClearColor" : "",
-      "LOSBlockedPreColor" : "#D0F",
+      "LOSBlockedPreColor " : "#D0F",
       "LOSBlockedPostColor" : "#C8E",
       "LOSIndirectColor" : "",
       "LOSNoAttackColor" : "",
@@ -97,7 +97,7 @@
       ///
       /// To Hit Bonus and Penalty
       ///
-      
+
       /* Allow bonus total modifier to increase hit chance. Defaul true. */
       "AllowNetBonusModifier" : true,
 
@@ -123,8 +123,7 @@
       "DiminishingHitChanceModifier" : false,
 
       /* Diminishing Bonus: 2-Base^(Bonus/Divisor), Default 2-0.75^(Bonus/6) and caps at +16.
-         Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit
-          */
+         Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit */
       "DiminishingBonusPowerBase" : 0.8,
       "DiminishingBonusPowerDivisor" : 6,
       "DiminishingBonusMax" : 16,
@@ -178,7 +177,7 @@
        * Default "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy".
        * Other options are "ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain". */
       "MeleeAccuracyFactors" : "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy",
-      
+
       ///
       /// Damage
       ///

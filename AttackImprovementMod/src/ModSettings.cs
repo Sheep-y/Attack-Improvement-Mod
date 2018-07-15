@@ -16,7 +16,7 @@
       /* Show structural damage through armour. i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true. */
       public bool PaperDollDivulgeUnderskinDamage = true;
 
-      /* Show tonnage in selection panel (bottom left) and target panel (top). Mech class will be shortened.  Default false. */
+      /* Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense. */
       public bool ShowUnitTonnage = false;
 
       /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
@@ -139,7 +139,7 @@
       public int DiminishingPenaltyMax = 32;
 
       ///
-      /// To Hit Rolls Correction
+      /// To Hit Rolls
       ///
 
       /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
@@ -195,7 +195,8 @@
       /// Damage
       ///
 
-      /* Fix the bug that damage is not in integer, which cause various other bugs. Does not retroactively fix in-battle saves with partial damage. */
+      /* Fix the bug that damage is not in integer, which cause various other bugs. Default true.
+       * Does not retroactively fix in-battle saves with partial damage, but will not break them or be broken by them either. */
       public bool FixNonIntegerDamage = true;
 
       ///

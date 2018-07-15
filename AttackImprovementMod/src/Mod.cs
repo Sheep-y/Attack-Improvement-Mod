@@ -55,7 +55,7 @@ namespace Sheepy.AttackImprovementMod {
          StringBuilder logCache = new StringBuilder()
             .AppendFormat( "========== {0} {1} ==========\r\nTime: {2}\r\nMod Folder: {3}\r\n", MODNAME, VERSION, DateTime.Now.ToString( "o" ), directory );
          try {
-            Settings = JsonConvert.DeserializeObject<ModSettings>( settingsJSON );
+            Settings = JsonConvert.DeserializeObject<OldSettings>( settingsJSON );
             logCache.AppendFormat( "Mod Settings: {0}\r\n", JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
          } catch ( Exception ) {
             logCache.Append( "Error: Cannot parse mod settings, using default." );
@@ -68,6 +68,7 @@ namespace Sheepy.AttackImprovementMod {
             DeleteLog( LOG_NAME );
             Log( logCache.ToString() );
          }                 catch ( Exception ex ) { Error( ex ); }
+         UpgradeSettings( Settings );
 
          // Detect game features. Need a proper version parsing routine. Next time.
          if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
@@ -80,6 +81,17 @@ namespace Sheepy.AttackImprovementMod {
             Log( "Game is 1.1.1 or up (Non-Clustered Called Shot, Hit Location fixed)" );
          }
          Log();
+      }
+
+      private static void UpgradeSettings ( ModSettings settings ) {
+         OldSettings old = settings as OldSettings;
+         if ( old.ShowRealWeaponHitChance == true )
+            settings.ShowCorrectedHitChance = true;
+         if ( old.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )
+            settings.CalledChanceFormat = "{0:0.0}%"; // Keep digits consistent
+         // if ( old.ShowDecimalHitChance == true ); // Same as new default, don't change
+         if ( old.LogHitRolls == true && ( settings.AttackLogLevel == null || settings.AttackLogLevel.Trim().ToLower() == "none" ) )
+            settings.AttackLogLevel = "All";
       }
 
       // ============ Harmony ============
@@ -159,7 +171,7 @@ namespace Sheepy.AttackImprovementMod {
          return value;
       }
 
-      internal static T TryGet<T> ( ref T value, T fallback, Func<T,bool> validate = null ) {
+      internal static T TryGet<T> ( ref T value, T fallback = default(T), Func<T,bool> validate = null ) {
          if ( value == null ) value = fallback;
          else if ( validate != null && ! validate( value ) ) value = fallback;
          return value;
