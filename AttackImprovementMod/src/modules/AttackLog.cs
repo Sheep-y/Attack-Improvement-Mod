@@ -1,6 +1,7 @@
 ﻿using System;
 
 namespace Sheepy.AttackImprovementMod {
+   using Sheepy.BattleTechMod;
    using static Mod;
    using static System.Reflection.BindingFlags;
    using System.IO;
@@ -11,12 +12,12 @@ namespace Sheepy.AttackImprovementMod {
 
    public class AttackLog : ModModule {
 
-      internal const string ROLL_LOG = "Log_Attack.txt";
+      internal static Logger ROLL_LOG = new Logger( "Log_Attack.txt" );
 
       private static bool LogShot, LogLocation, LogCritical;
       private static bool PersistentLog = false;
 
-      public override void InitPatch () {
+      public override void Startup () {
          PersistentLog = Mod.Settings.PersistentLog;
          // Patch prefix early to increase chance of successful capture in face of other mods
          switch ( Mod.Settings.AttackLogLevel?.Trim().ToLower() ) {
@@ -55,11 +56,11 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void InitLog () {
          if ( ! PersistentLog ) {
-            DeleteLog( ROLL_LOG );
+            ROLL_LOG.Delete();
             DeleteOldLog();
          }
          
-         if ( ! LogExists( ROLL_LOG ) ) {
+         if ( ! ROLL_LOG.Exists() ) {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Actor Team", "Actor Pilot", "Actor Unit", "Target Team", "Target Pilot", "Target Unit", "Direction" } ) );
             if ( LogShot || PersistentLog ) {
@@ -85,7 +86,6 @@ namespace Sheepy.AttackImprovementMod {
          LoggerPatched = true;
 
          // Patch Postfix late to increase odds of capturing modded values
-         Mod.patchClass = typeof( AttackLog );
          if ( LogShot ) {
             Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll" , NonPublic, null, "LogMissedAttack" );
             if ( LogLocation ) {
@@ -113,13 +113,13 @@ namespace Sheepy.AttackImprovementMod {
       public static void DeleteOldLog () {
          // In version 1.0, the idea is that maybe we need to keep two logs, one for attack and location rolls, one for critical rolls.
          // Now that the two are merged, the old log can be removed.
-         string oldName = "Log_AttackRoll.txt";
-         if ( ! LogExists( oldName ) ) return;
-         using ( StreamReader file = new StreamReader( Mod.LogDir + oldName ) ) {
+         Logger oldLog = new Logger( "Log_AttackRoll.txt" );
+         if ( ! oldLog.Exists() ) return;
+         using ( StreamReader file = new StreamReader( oldLog.LogFile ) ) {
             string firstLine = file.ReadLine();
             if ( firstLine == null || ! firstLine.Contains( "\tWeapon\tHit Roll\tCorrected\tStreak\t" ) ) return;
             file.Close(); // Close before delete, stupid =_=
-            DeleteLog( oldName );
+            oldLog.Delete();
          }
       }
 
@@ -129,7 +129,7 @@ namespace Sheepy.AttackImprovementMod {
          StringBuilder logBuffer = new StringBuilder();
          foreach ( string line in log )
             logBuffer.Append( line ).Append( "\r\n" );
-         WriteLog( ROLL_LOG, logBuffer.ToString() );
+         ROLL_LOG.Log( logBuffer.ToString() );
          log.Clear();
          hitMap?.Clear();
       }

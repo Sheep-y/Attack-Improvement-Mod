@@ -1,18 +1,18 @@
 ﻿using System;
 
 namespace Sheepy.AttackImprovementMod {
-   using System.Collections.Generic;
    using BattleTech;
    using BattleTech.UI;
+   using Sheepy.BattleTechMod;
    using UnityEngine;
-   using static System.Reflection.BindingFlags;
    using static Mod;
+   using static System.Reflection.BindingFlags;
 
    public class LineOfSight : ModModule {
 
       static ModSettings Settings;
 
-      public override void InitPatch () {
+      public override void Startup () {
          Settings = Mod.Settings;
          Type Indicator = typeof( WeaponRangeIndicators );
 

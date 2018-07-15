@@ -3,6 +3,7 @@
 namespace Sheepy.AttackImprovementMod {
    using BattleTech;
    using BattleTech.UI;
+   using Sheepy.BattleTechMod;
    using System.Collections.Generic;
    using System.Reflection;
    using UnityEngine;
@@ -11,7 +12,7 @@ namespace Sheepy.AttackImprovementMod {
 
    public class Melee : ModModule {
 
-      public override void InitPatch () {
+      public override void Startup () {
          ModSettings Settings = Mod.Settings;
          if ( Settings.UnlockMeleePositioning )
             Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), "OverrideMeleeDestinations", null );

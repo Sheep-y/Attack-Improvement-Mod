@@ -5,11 +5,11 @@ namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using UnityEngine;
    using System.Collections.Generic;
+   using Sheepy.BattleTechMod;
 
    public class RollModifier : ModModule {
 
-      public override void InitPatch () {
-         ModSettings Settings = Mod.Settings;
+      public override void Startup () {
          Type ToHitType = typeof( ToHit );
          if ( Settings.AllowNetBonusModifier )
             Patch( ToHitType, "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );

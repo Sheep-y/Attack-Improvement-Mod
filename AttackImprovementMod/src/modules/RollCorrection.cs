@@ -1,13 +1,14 @@
 using BattleTech;
 using BattleTech.UI;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEngine;
 
 namespace Sheepy.AttackImprovementMod {
+   using Sheepy.BattleTechMod;
    using static Mod;
    using static System.Reflection.BindingFlags;
-   using System.Reflection;
-   using UnityEngine;
-   using System.Collections.Generic;
 
    public class RollCorrection : ModModule {
       
@@ -15,7 +16,7 @@ namespace Sheepy.AttackImprovementMod {
       private static Dictionary<float, float> correctionCache;
       private static string WeaponHitChanceFormat = "{0:0}%";
 
-      public override void InitPatch () {
+      public override void Startup () {
          RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
          NoRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 

@@ -1,20 +1,20 @@
 using System;
 using System.Reflection;
+using BattleTech;
+using BattleTech.UI;
 
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using static BattleTech.ChassisLocations;
    using static BattleTech.UI.HUDMechArmorReadout;
    using static System.Reflection.BindingFlags;
-   using BattleTech;
-   using BattleTech.UI;
    using System.Collections.Generic;
    using UnityEngine;
+   using Sheepy.BattleTechMod;
 
    public class UserInterface : ModModule {
 
-      public override void InitPatch () {
-         ModSettings Settings = Mod.Settings;
+      public override void Startup () {
          if ( Settings.FixPaperDollRearStructure ) {
             if ( structureRearProp == null || timeSinceStructureDamagedProp == null )
                Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, paper doll rear structures not fixed." );

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Sheepy.AttackImprovementMod {
+   using Sheepy.BattleTechMod;
    using static Mod;
    using static HitLocation;
    using static System.Reflection.BindingFlags;
@@ -12,7 +13,7 @@ namespace Sheepy.AttackImprovementMod {
 
       private static string CalledShotHitChanceFormat = "{0:0}%";
 
-      public override void InitPatch () {
+      public override void Startup () {
          if ( NullIfEmpty( ref Settings.CalledChanceFormat ) != null )
             CalledShotHitChanceFormat = Settings.CalledChanceFormat;
 

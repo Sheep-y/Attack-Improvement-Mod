@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 
 namespace Sheepy.AttackImprovementMod {
+   using BattleTech.Rendering;
+   using Harmony;
+   using Sheepy.BattleTechMod;
    using System.Reflection;
    using UnityEngine;
    using UnityEngine.EventSystems;
@@ -17,7 +20,7 @@ namespace Sheepy.AttackImprovementMod {
 
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
 
-      public override void InitPatch () {
+      public override void Startup () {
          if ( Settings.FixNonIntegerDamage )
             Patch( typeof( AbstractActor ), "GetAdjustedDamage", null, "FixDamageToInteger" );
 
