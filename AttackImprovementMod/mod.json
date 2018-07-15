@@ -3,7 +3,7 @@
    "Enabled" : true,
 
    "Version" : "2.0 preview 20180714",
-   "Description" : "Fix, enhance, and upgrade various aspects of attacking, from Line of Sight to Hit Distribution. Each features can be configured individually.",
+   "Description" : "Fix, enhance, and upgrade various aspects of attacking, from Line of Sight to Hit Distribution. Each feature can be configured individually.",
    "Author" : "Sheepy",
    "Website" : "https://github.com/Sheep-y/BattleTech_Mods",
    "Contact" : "your.sheepy@gmail.com",
@@ -12,6 +12,6 @@
    "DLLEntryPoint" : "Sheepy.AttackImprovementMod.Mod.Init",
 
    "Settings" : {
-      "Settings.json" : "The mod now use settings.json to read and write settings.  If the file does not exist, it will be created on game launch.",
+      "settings.json" : "The mod use settings.json to read and write settings.  If the file does not exist, it will be created when the mod is loaded on game launch.",
    }
 }

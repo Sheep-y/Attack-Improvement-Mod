@@ -1,5 +1,6 @@
 ﻿using Harmony;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,7 +39,15 @@ namespace Sheepy.BattleTechMod {
       public string Version { get; protected set; } = "Unknown";
 
       protected string BaseDir;
-      protected string LogDir;
+
+      private string _LogDir;
+      protected string LogDir { 
+         get { return _LogDir; }
+         set {
+            _LogDir = value;
+            Logger = new Logger( GetLogFile() );
+         }
+      }
       internal HarmonyInstance harmony;
 
       // ============ Setup ============
@@ -53,7 +62,7 @@ namespace Sheepy.BattleTechMod {
          Assembly file = GetType().Assembly;
          Id = GetType().Namespace;
          Name = file.GetName().Name;
-         BaseDir = LogDir = Path.GetDirectoryName( file.Location ) + "/"; 
+         BaseDir = Path.GetDirectoryName( file.Location ) + "/"; 
          string mod_info_file = BaseDir + "mod.json";
          if ( File.Exists( mod_info_file ) ) TryRun( Logger, () => {
             ModInfo info = JsonConvert.DeserializeObject<ModInfo>( File.ReadAllText( mod_info_file ) );
@@ -62,17 +71,50 @@ namespace Sheepy.BattleTechMod {
             if ( ! string.IsNullOrEmpty( info.Version ) )
                Version = info.Version;
          } );
+         LogDir = BaseDir; // Create Logger after Name is read from mod.json
       } ); }
 
       // Override this method to override Namd and Id
       protected virtual void Setup () {
-         Logger = new Logger( LogDir + "Log_" + Join( string.Empty, new Regex( "\\W" ).Split( Name ), UppercaseFirst ) + ".txt" );
          Logger.Delete();
+         Logger.Log( "{2} Loading {0} Version {1} In {3}\r\n", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
          harmony = HarmonyInstance.Create( Id );
       }
 
-      protected Settings LoadSettings<Settings> ( Settings settings_object ) {
-         return settings_object;
+      protected virtual string GetLogFile () {
+         return LogDir + "Log_" + Join( string.Empty, new Regex( "\\W+" ).Split( Name ), UppercaseFirst ) + ".txt";
+      }
+
+      // Load settings from settings.json, call SanitizeSettings, and create/overwrite it if the content is different.
+      protected void LoadSettings <Settings> ( ref Settings settings, Func<Settings,Settings> sanitise = null ) {
+         string file = BaseDir + "settings.json", fileText = "";
+         Settings config = settings;
+         if ( File.Exists( file ) ) TryRun( () => {
+            fileText = File.ReadAllText( file );
+            if ( fileText.Contains( "\"Name\"" ) && fileText.Contains( "\"DLL\"" ) && fileText.Contains( "\"Settings\"" ) ) TryRun( Logger, () => {
+               JObject modInfo = JObject.Parse( fileText );
+               if ( modInfo.TryGetValue( "Settings", out JToken embedded ) )
+                  fileText = embedded.ToString( Formatting.None );
+            } );
+            config = JsonConvert.DeserializeObject<Settings>( fileText );
+         } );
+         if ( sanitise != null )
+            TryRun( () => config = sanitise( config ) );
+         string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented );
+         Logger.Log( "Loaded Settings: " + sanitised );
+         if ( sanitised != fileText ) { // Can be triggered by comment or field update, not necessary sanitisation
+            Logger.Log( "Updating " + file );
+            SaveSettings( sanitised );
+         }
+         settings = config;
+      }
+
+      protected void SaveSettings ( Settings settings_object ) {
+         SaveSettings( JsonConvert.SerializeObject( settings_object, Formatting.Indented ) );
+      }
+
+      private void SaveSettings ( string settings ) {
+         TryRun( Logger, () => File.WriteAllText( BaseDir + "settings.json", settings ) );
       }
    }
 

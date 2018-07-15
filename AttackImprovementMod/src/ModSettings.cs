@@ -213,5 +213,21 @@
 
       /* Location of mod log and roll log. Default is "" to put them in mod folder. Relative path would be relative to BATTLETECH exe. */
       public string LogFolder = "";
+
+      ///
+      /// Deprecated
+      ///
+
+      // bool, default false. Renamed to ShowCorrectedHitChance.
+      public bool? ShowRealWeaponHitChance = null;
+
+      // bool, default false. Upgraded to CalledChanceFormat.
+      public bool? ShowDecimalCalledChance = null;
+
+      // bool, default false. Upgraded to HitChanceFormat.
+      public bool? ShowDecimalHitChance = null;
+
+      // bool, default false. Upgraded to AttackLogLevel.
+      public bool? LogHitRolls = null;
    }
 }

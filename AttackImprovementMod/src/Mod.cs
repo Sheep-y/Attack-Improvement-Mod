@@ -8,10 +8,6 @@ namespace Sheepy.AttackImprovementMod {
 
    public class Mod : ModBase {
 
-      public Mod () {
-         Version = "2.0 preview 20180716";
-      }
-
       public static ModSettings Settings = new ModSettings();
 
       internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
@@ -23,7 +19,8 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public override void Startup () {
-         LogSettings();
+         LoadSettings<ModSettings>( ref Settings, SanitizeSettings );
+         new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
 
          // Hook to combat starts
          Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
@@ -47,8 +44,6 @@ namespace Sheepy.AttackImprovementMod {
       public void LogSettings () {
          // Cache log lines until after we determined folder and deleted old log
          /*
-         StringBuilder logCache = new StringBuilder()
-            .AppendFormat( "========== {0} {1} ==========\r\nTime: {2}\r\nMod Folder: {3}\r\n", MODNAME, VERSION, DateTime.Now.ToString( "o" ), directory );
          try {
             Settings = JsonConvert.DeserializeObject<OldSettings>( settingsJSON );
             logCache.AppendFormat( "Mod Settings: {0}\r\n", JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
@@ -79,17 +74,32 @@ namespace Sheepy.AttackImprovementMod {
          */
       }
 
-      private static void UpgradeSettings ( ModSettings settings ) {
-         OldSettings old = settings as OldSettings;
-         if ( old.ShowRealWeaponHitChance == true )
+      private ModSettings SanitizeSettings ( ModSettings settings ) {
+         // Switch log folder if specified
+         if ( ! String.IsNullOrEmpty( settings.LogFolder ) && settings.LogFolder != LogDir ) {
+            Logger.Delete();
+            if ( ! settings.LogFolder.EndsWith( "/" ) && ! settings.LogFolder.EndsWith( "\\" ) )
+               settings.LogFolder += "/";
+            LogDir = settings.LogFolder;
+            Logger.Log( "{2} {0} Version {1} In {3}\r\n", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
+         }
+
+         if ( settings.ShowRealWeaponHitChance == true )
             settings.ShowCorrectedHitChance = true;
-         if ( old.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )
+         if ( settings.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )
             settings.CalledChanceFormat = "{0:0.0}%"; // Keep digits consistent
          // if ( old.ShowDecimalHitChance == true ); // Same as new default, don't change
-         if ( old.LogHitRolls == true && ( settings.AttackLogLevel == null || settings.AttackLogLevel.Trim().ToLower() == "none" ) )
+         if ( settings.LogHitRolls == true && ( settings.AttackLogLevel == null || settings.AttackLogLevel.Trim().ToLower() == "none" ) )
             settings.AttackLogLevel = "All";
+
+         if ( ! settings.PersistentLog ) {
+            // In version 1.0, I thought we may need to keep two logs: attack/location rolls and critical rolls. They are now merged, and the old log may be removed.
+            new Logger( LogDir + "Log_AttackRoll.txt" ).Delete();
+         }
+
+         return settings;
       }
-      
+
       // ============ Logging ============
 
       private static Logger modLog = Logger.BTML_LOG;

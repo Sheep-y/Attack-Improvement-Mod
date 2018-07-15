@@ -55,10 +55,8 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       public static void InitLog () {
-         if ( ! PersistentLog ) {
+         if ( ! PersistentLog )
             ROLL_LOG.Delete();
-            DeleteOldLog();
-         }
          
          if ( ! ROLL_LOG.Exists() ) {
             StringBuilder logBuffer = new StringBuilder();
@@ -109,19 +107,6 @@ namespace Sheepy.AttackImprovementMod {
 
       private static Dictionary<string, int> hitMap; // Used to assign critical hit information
       private static List<string> log = new List<string>( 64 );
-
-      public static void DeleteOldLog () {
-         // In version 1.0, the idea is that maybe we need to keep two logs, one for attack and location rolls, one for critical rolls.
-         // Now that the two are merged, the old log can be removed.
-         Logger oldLog = new Logger( "Log_AttackRoll.txt" );
-         if ( ! oldLog.Exists() ) return;
-         using ( StreamReader file = new StreamReader( oldLog.LogFile ) ) {
-            string firstLine = file.ReadLine();
-            if ( firstLine == null || ! firstLine.Contains( "\tWeapon\tHit Roll\tCorrected\tStreak\t" ) ) return;
-            file.Close(); // Close before delete, stupid =_=
-            oldLog.Delete();
-         }
-      }
 
       public static void WriteRollLog ( AttackDirector __instance ) {
          if ( __instance != null && __instance.IsAnyAttackSequenceActive )
