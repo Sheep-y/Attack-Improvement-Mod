@@ -1,4 +1,7 @@
-﻿namespace Sheepy.AttackImprovementMod {
+﻿using Sheepy.BattleTechMod;
+using System;
+
+namespace Sheepy.AttackImprovementMod {
 
    public class ModSettings {
 
@@ -191,43 +194,44 @@
        * Other options are "ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain". */
       public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
 
-      ///
-      /// Damage
-      ///
 
-      /* Fix the bug that damage is not in integer, which cause various other bugs. Default true.
-       * Does not retroactively fix in-battle saves with partial damage, but will not break them or be broken by them either. */
+
+
+      [ Setting( "Damage",
+
+       "Fix the bug that damage may not be in integer, which causes other bugs.  Default true.  "+
+       "Does not retroactively fix in-battle saves with partial damage, but will not break them or be broken by them either." ) ]
       public bool FixNonIntegerDamage = true;
 
-      ///
-      /// Logging
-      ///
 
-      /* Log attack info to "Log_Attack.txt", for copy and paste to Excel to make it human readable.
-       * Setting can be "None", "Attack", "Shot", "Location", "Critical", or "All", from simplest to heaviest. Default "None".
-       * "All" is currently same as "Critical", but more levels may be added in future. Letter case does not matter. */
+
+
+      [ Setting( "Logging",
+
+       "Log attack info to \"Log_Attack.txt\", for copy and paste to Excel to make it human readable.  "+
+       "Setting can be \"None\", \"Attack\", \"Shot\", \"Location\", \"Critical\", or \"All\", from simplest to heaviest.  Default \"None\".  "+
+       "\"All\" is currently same as \"Critical\", but more levels may be added in future.  Letter case does not matter." ) ]
       public string AttackLogLevel = "None";
 
-      /* If true, don't clear log on mod load (game launch). */
+      [ Setting( "If true, don't clear attack log when the game launches." ) ]
       public bool PersistentLog = false;
 
-      /* Location of mod log and roll log. Default is "" to put them in mod folder. Relative path would be relative to BATTLETECH exe. */
+      [ Setting( "Location of mod log and roll log.  Default is \"\" to put them in mod folder.  Relative path would be relative to BATTLETECH exe." ) ]
       public string LogFolder = "";
 
-      ///
-      /// Deprecated
-      ///
 
-      // bool, default false. Renamed to ShowCorrectedHitChance.
+
+
+      [ Obsolete( "Default false.  Renamed to ShowCorrectedHitChance." ) ]
       public bool? ShowRealWeaponHitChance = null;
 
-      // bool, default false. Upgraded to CalledChanceFormat.
+      [ Obsolete( "Default false.  Upgraded to CalledChanceFormat." ) ]
       public bool? ShowDecimalCalledChance = null;
 
-      // bool, default false. Upgraded to HitChanceFormat.
+      [ Obsolete( "Default false.  Upgraded to HitChanceFormat." ) ]
       public bool? ShowDecimalHitChance = null;
 
-      // bool, default false. Upgraded to AttackLogLevel.
+      [ Obsolete( "Default false.  Upgraded to AttackLogLevel." ) ]
       public bool? LogHitRolls = null;
    }
 }

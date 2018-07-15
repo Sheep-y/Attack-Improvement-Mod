@@ -74,6 +74,7 @@ namespace Sheepy.AttackImprovementMod {
          */
       }
 
+      #pragma warning disable CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
       private ModSettings SanitizeSettings ( ModSettings settings ) {
          // Switch log folder if specified
          if ( ! String.IsNullOrEmpty( settings.LogFolder ) && settings.LogFolder != LogDir ) {

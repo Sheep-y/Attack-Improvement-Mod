@@ -54,7 +54,7 @@ namespace Sheepy.BattleTechMod {
 
       internal static ModBase currentMod;
 
-      #pragma warning disable CS0649
+      #pragma warning disable CS0649 // Disable "field never set" warnings since they are set by JsonConvert.
       private class ModInfo { public string Name;  public string Version; }
 
       // Fill in blanks with Assembly values
