@@ -5,9 +5,9 @@ namespace Sheepy.AttackImprovementMod {
 
    public class ModSettings {
 
-      ///
-      /// User Interfaces
-      ///
+      //
+       [ JsonSection( "User Interfaces" ) ]
+      //
 
       /* Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode. Default true.
          You can still quickly switch out of Multi-Target by pressing another action. */
@@ -42,10 +42,11 @@ namespace Sheepy.AttackImprovementMod {
       /* Float self stability number after DFA attack or end of turn. *
       public bool FloatStabilityAfterDFA  = true;
       public bool FloatStabilityAtTurnEnd = true;
+      /**/
 
-      ///
-      /// Line of Sight
-      ///
+      //
+       [ JsonSection( "Line of Sight" ) ]
+      //
 
       /* Make lines wider or thinner.  Default 2 times, 3 times, and 1.5 times. */
       public float LOSWidthMultiplier = 2f;
@@ -73,9 +74,9 @@ namespace Sheepy.AttackImprovementMod {
       /* Number of points of indirect attack lines and jump lines. Game uses 18. Default 48 for a smoother curve. */
       public int ArcLinePoints = 48;
 
-      ///
-      /// Called Shots
-      ///
+      //
+       [ JsonSection( "Called Shots" ) ]
+      //
 
       /* Enable Vehicle Called Shot, which the game did not implement fully. Default true. */
       public bool FixVehicleCalledShot = true;
@@ -101,9 +102,9 @@ namespace Sheepy.AttackImprovementMod {
        * Use "{0:0.0}%" to *always* show one decimal, or "{0:0.#}%" for *up to* one decimal. Default is "" to leave alone. */
       public string CalledChanceFormat = "";
 
-      ///
-      /// To Hit Bonus and Penalty
-      ///
+      //
+       [ JsonSection( "To Hit Modifiers" ) ]
+      //
 
       /* Allow bonus total modifier to increase hit chance. Defaul true. */
       public bool AllowNetBonusModifier = true;
@@ -141,9 +142,9 @@ namespace Sheepy.AttackImprovementMod {
       public double DiminishingPenaltyPowerDivisor = 3.3f;
       public int DiminishingPenaltyMax = 32;
 
-      ///
-      /// To Hit Rolls
-      ///
+      //
+       [ JsonSection( "To Hit Rolls" ) ]
+      //
 
       /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
       public bool FixHitDistribution = true;
@@ -169,54 +170,56 @@ namespace Sheepy.AttackImprovementMod {
        * Default is "", which will use "{0:0.#}%" if HitChanceStep is 0, otherwise leave alone. */
       public string HitChanceFormat = "";
 
-      ///
-      /// Melee and DFA
-      ///
+      //
+       [ JsonSection( "Melee and DFA" ) ]
+      //
 
-      /* Allow all possible melee / DFA attack positions. */
+      [ JsonComment( "Allow all possible melee / DFA attack positions." ) ]
       public bool IncreaseMeleePositionChoice = true;
       public bool IncreaseDFAPositionChoice = true;
 
-      /* Break the restriction that one must stay still to melee adjacent mech. */
+      [ JsonComment( "Break the restriction that one must stay still to melee adjacent mech." ) ]
       public bool UnlockMeleePositioning = true;
 
-      /* Allow melee attack on sprint. Default false. */
+      [ JsonComment( "Allow melee attack on sprint. Default false." ) ]
       public bool AllowChargeAttack = false;
 
-      /* Fire support weapon after sprint.  Default false. */
+      [ JsonComment( "Fire support weapon after sprint.  Default false." ) ]
       public bool FireSupportWeaponOnCharge = false;
 
-      /* Allow DFA called shot on vehicles *
+      /* [ JsonComment( "Allow DFA called shot on vehicles." ) ]
       public bool AllowDFACalledShotVehicle = true;
+      /**/
 
-      /* Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged. Order and letter case does not matter.
-       * Default "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy".
-       * Other options are "ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain". */
+      [ JsonComment( new String[]{
+        "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged. Order and letter case does not matter.",
+        "Default \"DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy\".",
+        "Other options are \"ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain\"." } ) ]
       public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
 
+      //
+       [ JsonSection( "Damage" ) ]
+      //
 
-
-
-      [ Setting( "Damage",
-
-       "Fix the bug that damage may not be in integer, which causes other bugs.  Default true.  "+
-       "Does not retroactively fix in-battle saves with partial damage, but will not break them or be broken by them either." ) ]
+      [ JsonComment( new String[]{
+        "Fix the bug that damage may not be in integer, which causes other bugs.  Default true.",
+        "Does not retroactively fix in-battle saves with partial damage, but will not break them or be broken by them either." } ) ]
       public bool FixNonIntegerDamage = true;
 
+      //
+       [ JsonSection( "Logging" ) ]
+      //
 
-
-
-      [ Setting( "Logging",
-
-       "Log attack info to \"Log_Attack.txt\", for copy and paste to Excel to make it human readable.  "+
-       "Setting can be \"None\", \"Attack\", \"Shot\", \"Location\", \"Critical\", or \"All\", from simplest to heaviest.  Default \"None\".  "+
-       "\"All\" is currently same as \"Critical\", but more levels may be added in future.  Letter case does not matter." ) ]
+      [ JsonComment( new String[]{
+        "Log attack info to \"Log_Attack.txt\", for copy and paste to Excel to make it human readable.",
+        "Setting can be \"None\", \"Attack\", \"Shot\", \"Location\", \"Critical\", or \"All\", from simplest to heaviest.  Default \"None\".",
+        "\"All\" is currently same as \"Critical\", but more levels may be added in future.  Letter case does not matter." } ) ]
       public string AttackLogLevel = "None";
 
-      [ Setting( "If true, don't clear attack log when the game launches." ) ]
+      [ JsonComment( "If true, don't clear attack log when the game launches." ) ]
       public bool PersistentLog = false;
 
-      [ Setting( "Location of mod log and roll log.  Default is \"\" to put them in mod folder.  Relative path would be relative to BATTLETECH exe." ) ]
+      [ JsonComment( "Location of mod log and roll log.  Default is \"\" to put them in mod folder.  Relative path would be relative to BATTLETECH exe." ) ]
       public string LogFolder = "";
 
 

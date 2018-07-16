@@ -74,7 +74,6 @@ namespace Sheepy.AttackImprovementMod {
          */
       }
 
-      #pragma warning disable CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
       private ModSettings SanitizeSettings ( ModSettings settings ) {
          // Switch log folder if specified
          if ( ! String.IsNullOrEmpty( settings.LogFolder ) && settings.LogFolder != LogDir ) {
@@ -85,6 +84,7 @@ namespace Sheepy.AttackImprovementMod {
             Logger.Log( "{2} {0} Version {1} In {3}\r\n", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
          }
 
+#pragma warning disable CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
          if ( settings.ShowRealWeaponHitChance == true )
             settings.ShowCorrectedHitChance = true;
          if ( settings.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )
@@ -92,6 +92,7 @@ namespace Sheepy.AttackImprovementMod {
          // if ( old.ShowDecimalHitChance == true ); // Same as new default, don't change
          if ( settings.LogHitRolls == true && ( settings.AttackLogLevel == null || settings.AttackLogLevel.Trim().ToLower() == "none" ) )
             settings.AttackLogLevel = "All";
+#pragma warning restore CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
 
          if ( ! settings.PersistentLog ) {
             // In version 1.0, I thought we may need to keep two logs: attack/location rolls and critical rolls. They are now merged, and the old log may be removed.

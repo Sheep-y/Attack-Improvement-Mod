@@ -56,8 +56,9 @@ namespace Sheepy.BattleTechMod {
 
       internal static ModBase currentMod;
 
-      #pragma warning disable CS0649 // Disable "field never set" warnings since they are set by JsonConvert.
+#pragma warning disable CS0649 // Disable "field never set" warnings since they are set by JsonConvert.
       private class ModInfo { public string Name;  public string Version; }
+#pragma warning restore CS0649
 
       // Fill in blanks with Assembly values
       private void SetupDefault () { TryRun( Logger, () => {
@@ -79,7 +80,7 @@ namespace Sheepy.BattleTechMod {
       // Override this method to override Namd and Id
       protected virtual void Setup () {
          Logger.Delete();
-         Logger.Log( "{2} Loading {0} Version {1} In {3}\r\n", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
+         Logger.Log( "{2} Loading {0} Version {1} In {3}" + Environment.NewLine, Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
          harmony = HarmonyInstance.Create( Id );
       }
 
@@ -89,7 +90,7 @@ namespace Sheepy.BattleTechMod {
 
       // Load settings from settings.json, call SanitizeSettings, and create/overwrite it if the content is different.
       protected void LoadSettings <Settings> ( ref Settings settings, Func<Settings,Settings> sanitise = null ) {
-         string file = BaseDir + "settings.json", fileText = "";
+         string file = BaseDir + "settings.json", fileText = String.Empty;
          Settings config = settings;
          if ( File.Exists( file ) ) TryRun( () => {
             fileText = File.ReadAllText( file );
@@ -102,11 +103,12 @@ namespace Sheepy.BattleTechMod {
          } );
          if ( sanitise != null )
             TryRun( () => config = sanitise( config ) );
-         string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new SkipObsoleteContractResolver() } );
+         string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new SettingsJsContract() } );
          Logger.Log( "Loaded Settings: " + sanitised );
-         if ( sanitised != fileText ) { // Can be triggered by comment or field update, not necessary sanitisation
+         string commented = SettingsJsContract.FormatSettingJsonText( settings.GetType(), sanitised );
+         if ( commented != fileText ) { // Can be triggered by comment or field update, not necessary sanitisation
             Logger.Log( "Updating " + file );
-            SaveSettings( sanitised );
+            SaveSettings( commented );
          }
          settings = config;
       }
@@ -211,6 +213,15 @@ namespace Sheepy.BattleTechMod {
       public static string UppercaseFirst ( string s ) {
          if ( string.IsNullOrEmpty( s ) ) return string.Empty;
          return char.ToUpper( s[ 0 ] ) + s.Substring( 1 );
+      }
+
+      public static string ReplaceFirst ( string text, string search, string replace ) {
+         int pos = text.IndexOf( search );
+         if ( pos < 0 ) return text;
+         int tLen = , sLen = search.Length, sEnd = pos + sLen;
+         return new StringBuilder( tLen - sLen + replace.Length )
+            .Append( text, 0, pos ).Append( replace ).Append( text, sEnd, tLen - sEnd )
+            .ToString();
       }
 
       public static string Join<T> ( string separator, T[] array, Func<T,string> formatter = null ) {
@@ -328,7 +339,8 @@ namespace Sheepy.BattleTechMod {
          Log( txt ); 
       }
       public void Log ( string message, params object[] args ) { Log( Format( message, args ) ); }
-      public void Log ( string message ) { WriteLog( message + "\r\n" ); }
+      public void Log ( string message ) { WriteLog( message + NewLine ); }
+      private static string NewLine = Environment.NewLine;
 
       public void Warn ( object message ) { Warn( message.ToString() ); }
       public void Warn ( string message ) { Log( "Warning: " + message ); }
@@ -369,25 +381,58 @@ namespace Sheepy.BattleTechMod {
       }
    }
 
-   public class Setting : Attribute {
+   [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
+   public class JsonSection : Attribute {
       public string Section;
-      public string Comment;
-
-      public Setting() { /* An empty setting */ }
-      public Setting( string comment ) {
-         Comment = comment;
-      }
-      public Setting( string section, string comment ) {
-         Section = section;
-         Comment = comment;
-      }
+      public JsonSetting( string section ) { Section = section ?? String.Empty; }
    }
 
-   public class SkipObsoleteContractResolver : DefaultContractResolver {
+   [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
+   public class JsonComment : Attribute {
+      public string[] Comments;
+      public JsonComment( string comment ) { Comments = new string[]{ comment ?? String.Empty }; }
+      public JsonComment( string[] comments ) { Comments = comments ?? new string[]{} ); }
+   }
+
+   public class SettingsJsContract : DefaultContractResolver {
       protected override List<MemberInfo> GetSerializableMembers( Type type ) {
          return base.GetSerializableMembers( type ).Where( ( member ) =>
             member.GetCustomAttributes( typeof( ObsoleteAttribute ), true ).Length <= 0
          ).ToList();
+      }
+
+      private static string Indent = "   ";
+      private static string NewLine = Environment.NewLine;
+      public static string FormatSettingJsonText ( Type type, string text ) {
+         foreach ( MemberInfo member in type.GetMembers() ) {
+            if ( member.MemberType | MemberTypes.Field |  MemberTypesProperty == 0 ) continue;
+            object[] sections = member.GetCustomAttributes( typeof( JsonSection ), true );
+            object[] comments = member.GetCustomAttributes( typeof( JsonComment ), true );
+            if ( sections.Length <= 0 && comments.Length <= 0 ) return;
+            string propName = NewLine + Indent + JsonConvert.ToString( Member.Name );
+            string injection = "";
+            if ( sections.Length > 0 )
+               injection += NewLine +
+                            Indent + "//" + NewLine +
+                            Indent + "// " + ( sections[0] as JsonSection )?.Section + NewLine +
+                            Indent + "//" + NewLine +
+                            NewLine;
+            if ( comments.Length > 0 ) {
+               string[] lines = ( comments[0] as JsonComment )?.Comments;
+               // Insert blank line if not new section
+               if ( sections.Length <= 0 )
+                  injection += NewLine;
+               // Actual property comment
+               if ( lines.Length > 1 ) {
+                  injection += Indent + "/* " + lines[0];
+                  for ( int i = 1, len = lines.Length ; i < len ; i++ )
+                     injection += NewLine + Indent + " * " + lines[i];
+                  injection += " */" + NewLine;
+               } else if ( lines.Length > 0 )
+                  injection += Indent + "/* " + lines[0] + " */" + NewLine;
+            }
+            text = ModModule.ReplaceFirst( text, propName, injection + propName );
+         }
       }
    }
 }
