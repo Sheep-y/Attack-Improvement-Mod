@@ -1,7 +1,9 @@
 ﻿using Harmony;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -100,7 +102,7 @@ namespace Sheepy.BattleTechMod {
          } );
          if ( sanitise != null )
             TryRun( () => config = sanitise( config ) );
-         string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented );
+         string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new SkipObsoleteContractResolver() } );
          Logger.Log( "Loaded Settings: " + sanitised );
          if ( sanitised != fileText ) { // Can be triggered by comment or field update, not necessary sanitisation
             Logger.Log( "Updating " + file );
@@ -381,4 +383,11 @@ namespace Sheepy.BattleTechMod {
       }
    }
 
+   public class SkipObsoleteContractResolver : DefaultContractResolver {
+      protected override List<MemberInfo> GetSerializableMembers( Type type ) {
+         return base.GetSerializableMembers( type ).Where( ( member ) =>
+            member.GetCustomAttributes( typeof( ObsoleteAttribute ), true ).Length <= 0
+         ).ToList();
+      }
+   }
 }
