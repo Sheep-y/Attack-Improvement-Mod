@@ -1,16 +1,16 @@
-using System;
-using System.Reflection;
-using BattleTech;
 using BattleTech.UI;
+using BattleTech;
+using Sheepy.BattleTechMod;
+using System.Collections.Generic;
+using System.Reflection;
+using System;
+using UnityEngine;
+using static BattleTech.ChassisLocations;
+using static BattleTech.UI.HUDMechArmorReadout;
+using static System.Reflection.BindingFlags;
 
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
-   using static BattleTech.ChassisLocations;
-   using static BattleTech.UI.HUDMechArmorReadout;
-   using static System.Reflection.BindingFlags;
-   using System.Collections.Generic;
-   using UnityEngine;
-   using Sheepy.BattleTechMod;
 
    public class UserInterface : ModModule {
 

@@ -196,7 +196,7 @@ namespace Sheepy.BattleTechMod {
          Patch( patched, prefix, postfix );
       }
 
-      protected void Patch ( MethodInfo patched, string prefix, string postfix ) {
+      protected void Patch ( MethodBase patched, string prefix, string postfix ) {
          if ( patched == null ) {
             Logger.Error( "Method not found. Cannot patch [ {0} : {1} ]", prefix, postfix );
             return;

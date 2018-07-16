@@ -1,13 +1,13 @@
-using BattleTech;
 using BattleTech.UI;
-using System;
+using BattleTech;
+using Sheepy.BattleTechMod;
 using System.Collections.Generic;
+using System;
+using static System.Reflection.BindingFlags;
 
 namespace Sheepy.AttackImprovementMod {
-   using Sheepy.BattleTechMod;
-   using static Mod;
    using static HitLocation;
-   using static System.Reflection.BindingFlags;
+   using static Mod;
 
    public class CalledShotPopUp : ModModule {
 

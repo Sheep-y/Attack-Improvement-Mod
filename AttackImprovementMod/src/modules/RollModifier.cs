@@ -1,11 +1,11 @@
 using BattleTech;
+using Sheepy.BattleTechMod;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
-   using UnityEngine;
-   using System.Collections.Generic;
-   using Sheepy.BattleTechMod;
 
    public class RollModifier : ModModule {
 

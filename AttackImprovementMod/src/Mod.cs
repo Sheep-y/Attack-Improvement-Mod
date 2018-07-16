@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 
 namespace Sheepy.AttackImprovementMod {
+   using Harmony;
    using Sheepy.BattleTechMod;
 
    public class Mod : ModBase {
@@ -22,8 +23,20 @@ namespace Sheepy.AttackImprovementMod {
          LoadSettings<ModSettings>( ref Settings, SanitizeSettings );
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
 
+         if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
+            GameUseClusteredCallShot = GameHitLocationBugged = true;
+            Log( "Game is 1.0.x (Clustered Called Shot, Hit Location bugged)" );
+         } else if ( ( VersionInfo.ProductVersion + ".0.0." ).Substring( 0, 6 ) == "1.1.0" ) {
+            GameHitLocationBugged = true;
+            Log( "Game is 1.1.0 (Non-Clustered Called Shot, Hit Location bugged)" );
+         } else {
+            Log( "Game is 1.1.1 or up (Non-Clustered Called Shot, Hit Location fixed)" );
+         }
+         Log();
+
          // Hook to combat starts
          Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
+         Patch( typeof( MessageCenter ).GetConstructor( new Type[]{ } ), null, "GameInit" );
 
          modules.Add( "Logger", new AttackLog() ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
          modules.Add( "User Interface", new UserInterface() );
@@ -39,39 +52,6 @@ namespace Sheepy.AttackImprovementMod {
             mod.Value.Startup();
          }                 catch ( Exception ex ) { Error( ex ); }
          Log( "=== All Mod Modules Initialised ===\n" );
-      }
-
-      public void LogSettings () {
-         // Cache log lines until after we determined folder and deleted old log
-         /*
-         try {
-            Settings = JsonConvert.DeserializeObject<OldSettings>( settingsJSON );
-            logCache.AppendFormat( "Mod Settings: {0}\r\n", JsonConvert.SerializeObject( Settings, Formatting.Indented ) );
-         } catch ( Exception ) {
-            logCache.Append( "Error: Cannot parse mod settings, using default." );
-         }
-         try {
-            LogDir = Settings.LogFolder;
-            if ( LogDir == null || LogDir.Length <= 0 )
-               LogDir = directory + "/";
-            logCache.AppendFormat( "Log folder set to {0}.", LogDir );
-            DeleteLog( LogName );
-            Log( logCache.ToString() );
-         }                 catch ( Exception ex ) { Error( ex ); }
-         UpgradeSettings( Settings );
-
-         // Detect game features. Need a proper version parsing routine. Next time.
-         if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
-            GameUseClusteredCallShot = GameHitLocationBugged = true;
-            Log( "Game is 1.0.x (Clustered Called Shot, Hit Location bugged)" );
-         } else if ( ( VersionInfo.ProductVersion + ".0.0." ).Substring( 0, 6 ) == "1.1.0" ) {
-            GameHitLocationBugged = true;
-            Log( "Game is 1.1.0 (Non-Clustered Called Shot, Hit Location bugged)" );
-         } else {
-            Log( "Game is 1.1.1 or up (Non-Clustered Called Shot, Hit Location fixed)" );
-         }
-         Log();
-         */
       }
 
       private ModSettings SanitizeSettings ( ModSettings settings ) {
@@ -123,6 +103,14 @@ namespace Sheepy.AttackImprovementMod {
       internal static CombatHUD HUD;
       internal static CombatGameState Combat;
       internal static CombatGameConstants Constants;
+
+      public static void GameInit ( GameInstance __instance ) {
+         HashSet<string> owners = new HashSet<string>();
+         foreach ( var method in PatchProcessor.AllPatchedMethods() )
+            owners.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
+         foreach ( string owner in owners )
+            Log( owner );
+      }
 
       public static void CombatInit ( CombatHUD __instance ) {
          CacheCombatState();
