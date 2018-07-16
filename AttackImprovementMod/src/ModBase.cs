@@ -1,14 +1,14 @@
 ﻿using Harmony;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using System;
-using System.Linq;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
+using System.Text;
+using System;
 using UnityEngine;
 using static System.Reflection.BindingFlags;
 
@@ -127,18 +127,18 @@ namespace Sheepy.BattleTechMod {
       public abstract void Startup();
       public virtual void CombatStarts () { }
 
-      protected ModBase mod { get; private set; }
+      protected ModBase Mod { get; private set; }
 
       // ============ Harmony ============
 
       public ModModule () {
          if ( this is ModBase modbase )
-            mod = modbase;
+            Mod = modbase;
          else {
-            mod = ModBase.currentMod;
-            if ( mod == null )
+            Mod = ModBase.currentMod;
+            if ( Mod == null )
                throw new ApplicationException( "ModModule must be created in ModBase.Setup()" );
-            Logger = mod.Logger;
+            Logger = Mod.Logger;
          }
       }
       
@@ -203,8 +203,8 @@ namespace Sheepy.BattleTechMod {
          }
          HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
          if ( pre == null && post == null ) return; // MakePatch would have reported method not found
-         if ( mod.harmony == null ) mod.Init();
-         mod.harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
+         if ( Mod.harmony == null ) Mod.Init();
+         Mod.harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
          Logger.Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, prefix, postfix );
       }
 
@@ -218,7 +218,7 @@ namespace Sheepy.BattleTechMod {
       public static string ReplaceFirst ( string text, string search, string replace ) {
          int pos = text.IndexOf( search );
          if ( pos < 0 ) return text;
-         int tLen = , sLen = search.Length, sEnd = pos + sLen;
+         int tLen = text.Length, sLen = search.Length, sEnd = pos + sLen;
          return new StringBuilder( tLen - sLen + replace.Length )
             .Append( text, 0, pos ).Append( replace ).Append( text, sEnd, tLen - sEnd )
             .ToString();
@@ -303,6 +303,7 @@ namespace Sheepy.BattleTechMod {
    public class Logger {
 
       public static readonly Logger BTML_LOG = new Logger( "Mods/BTModLoader.log" );
+      public static readonly Logger BT_LOG = new Logger( "BattleTech_Data/output_log.txt" );
 
       public Logger ( string file ) {
          if ( String.IsNullOrEmpty( file ) ) throw new NullReferenceException();
@@ -340,7 +341,7 @@ namespace Sheepy.BattleTechMod {
       }
       public void Log ( string message, params object[] args ) { Log( Format( message, args ) ); }
       public void Log ( string message ) { WriteLog( message + NewLine ); }
-      private static string NewLine = Environment.NewLine;
+      private static readonly string NewLine = Environment.NewLine;
 
       public void Warn ( object message ) { Warn( message.ToString() ); }
       public void Warn ( string message ) { Log( "Warning: " + message ); }
@@ -384,55 +385,58 @@ namespace Sheepy.BattleTechMod {
    [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonSection : Attribute {
       public string Section;
-      public JsonSetting( string section ) { Section = section ?? String.Empty; }
+      public JsonSection ( string section ) { Section = section ?? String.Empty; }
    }
 
    [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonComment : Attribute {
       public string[] Comments;
-      public JsonComment( string comment ) { Comments = new string[]{ comment ?? String.Empty }; }
-      public JsonComment( string[] comments ) { Comments = comments ?? new string[]{} ); }
+      public JsonComment ( string comment ) { Comments = new string[]{ comment ?? String.Empty }; }
+      public JsonComment ( string[] comments ) { Comments = comments ?? new string[]{}; }
    }
 
    public class SettingsJsContract : DefaultContractResolver {
-      protected override List<MemberInfo> GetSerializableMembers( Type type ) {
+      protected override List<MemberInfo> GetSerializableMembers ( Type type ) {
          return base.GetSerializableMembers( type ).Where( ( member ) =>
             member.GetCustomAttributes( typeof( ObsoleteAttribute ), true ).Length <= 0
          ).ToList();
       }
 
-      private static string Indent = "   ";
-      private static string NewLine = Environment.NewLine;
+      private static readonly string Indent = "  ";
       public static string FormatSettingJsonText ( Type type, string text ) {
+         string NewLine = text.Contains( "\r\n" ) ? "\r\n" : "\n";
+         string NewIndent = NewLine + Indent;
          foreach ( MemberInfo member in type.GetMembers() ) {
-            if ( member.MemberType | MemberTypes.Field |  MemberTypesProperty == 0 ) continue;
+            if ( ( member.MemberType | MemberTypes.Field | MemberTypes.Property ) == 0 ) continue;
             object[] sections = member.GetCustomAttributes( typeof( JsonSection ), true );
             object[] comments = member.GetCustomAttributes( typeof( JsonComment ), true );
-            if ( sections.Length <= 0 && comments.Length <= 0 ) return;
-            string propName = NewLine + Indent + JsonConvert.ToString( Member.Name );
+            if ( sections.Length <= 0 && comments.Length <= 0 ) continue;
+            string propName = NewLine + Indent + JsonConvert.ToString( member.Name );
             string injection = "";
             if ( sections.Length > 0 )
                injection += NewLine +
-                            Indent + "//" + NewLine +
-                            Indent + "// " + ( sections[0] as JsonSection )?.Section + NewLine +
-                            Indent + "//" + NewLine +
+                            NewIndent + "//" +
+                            NewIndent + "// " + ( sections[0] as JsonSection )?.Section +
+                            NewIndent + "//" + NewLine +
                             NewLine;
             if ( comments.Length > 0 ) {
                string[] lines = ( comments[0] as JsonComment )?.Comments;
                // Insert blank line if not new section
                if ( sections.Length <= 0 )
-                  injection += NewLine;
+                  injection += NewLine + NewLine;
                // Actual property comment
                if ( lines.Length > 1 ) {
                   injection += Indent + "/* " + lines[0];
                   for ( int i = 1, len = lines.Length ; i < len ; i++ )
-                     injection += NewLine + Indent + " * " + lines[i];
-                  injection += " */" + NewLine;
+                     injection += NewIndent + " * " + lines[i];
+                  injection += " */";
                } else if ( lines.Length > 0 )
-                  injection += Indent + "/* " + lines[0] + " */" + NewLine;
+                  injection += Indent + "/* " + lines[0] + " */";
+               injection += NewLine;
             }
             text = ModModule.ReplaceFirst( text, propName, injection + propName );
          }
+         return text;
       }
    }
 }

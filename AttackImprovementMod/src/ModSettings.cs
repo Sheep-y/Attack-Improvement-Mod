@@ -6,26 +6,27 @@ namespace Sheepy.AttackImprovementMod {
    public class ModSettings {
 
       //
-       [ JsonSection( "User Interfaces" ) ]
+      [ JsonSection( "User Interfaces" ) ]
       //
 
-      /* Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode. Default true.
-         You can still quickly switch out of Multi-Target by pressing another action. */
+      [ JsonComment( new String[]{
+        "Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode.  Default true.",
+        "You can still quickly switch out of Multi-Target by pressing another action." } ) ]
       public bool FixMultiTargetBackout = true;
 
-      /* Fix the bug that rear paper doll is incorrectly showing front structure.  Default true. */
+      [ JsonComment( "Fix the bug that rear paper doll is incorrectly showing front structure.  Default true." ) ]
       public bool FixPaperDollRearStructure = true;
 
-      /* Show structural damage through armour. i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true. */
+      [ JsonComment( "Show structural damage through armour.  i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true." ) ]
       public bool PaperDollDivulgeUnderskinDamage = true;
 
-      /* Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense. */
+      [ JsonComment( "Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense." ) ]
       public bool ShowUnitTonnage = false;
 
-      /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
+      [ JsonComment( "Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true." ) ]
       public bool ShowHeatAndStab = true;
 
-      /* Fix the bug that walk / sprint may not accurately project correct line of sight / fire, due to a prediction point too close to the ground. */
+      [ JsonComment( "Fix the bug that walk / sprint may not accurately project correct line of sight / fire, due to a prediction point too close to the ground." ) ]
       public bool FixNonJumpLosPreview = true;
 
       /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
@@ -45,25 +46,27 @@ namespace Sheepy.AttackImprovementMod {
       /**/
 
       //
-       [ JsonSection( "Line of Sight" ) ]
+      [ JsonSection( "Line of Sight" ) ]
       //
 
-      /* Make lines wider or thinner.  Default 2 times, 3 times, and 1.5 times. */
+      [ JsonComment( "Make lines wider or thinner.  Default 2 times, 3 times, and 1.5 times." ) ]
       public float LOSWidthMultiplier = 2f;
       public float LOSWidthBlockedMultiplier = 3f;
       public float LOSMarkerBlockedMultiplier = 1.5f;
 
-      /* Controls whether indirect attack lines / can't attack lines are dotted. Default both true. */
+      [ JsonComment( "Controls whether indirect attack lines / can't attack lines are dotted. Default both true." ) ]
       public bool LOSIndirectDotted = true;
       public bool LOSNoAttackDotted = true;
-      /* Controls whether other attack lines are dotted. Default all false. */
+
+      [ JsonComment( "Controls whether other attack lines are dotted. Default all false." ) ]
       public bool LOSMeleeDotted = false;
       public bool LOSClearDotted = false;
       public bool LOSBlockedPreDotted  = false;
       public bool LOSBlockedPostDotted = false;
 
-      /* Change fire line colour (html syntax). "#FF0000FF" is red, "#00FF00FF" is green etc.  Set to empty to leave alone.
-         Default #D0F for blocked pre, #C8E for blocked post, and empty for the rest. */
+      [ JsonComment( new String[]{
+        "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to empty to leave alone.",
+        "Default \"#D0F\" for blocked pre, \"#C8E\" for blocked post, and empty for the rest.  Supports RGB and RGBA." } ) ]
       public string LOSMeleeColor = "";
       public string LOSClearColor = "";
       public string LOSBlockedPreColor  = "#D0F";
@@ -71,107 +74,118 @@ namespace Sheepy.AttackImprovementMod {
       public string LOSIndirectColor = "";
       public string LOSNoAttackColor = "";
 
-      /* Number of points of indirect attack lines and jump lines. Game uses 18. Default 48 for a smoother curve. */
+      [ JsonComment( "Number of points of indirect attack lines and jump lines. Game uses 18. Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
 
       //
        [ JsonSection( "Called Shots" ) ]
       //
 
-      /* Enable Vehicle Called Shot, which the game did not implement fully. Default true. */
+      [ JsonComment( "Enable Vehicle Called Shot, which the game did not implement fully. Default true." ) ]
       public bool FixVehicleCalledShot = true;
 
-      /* Enable clustering effect for called shots against mechs. Default true. */
+      [ JsonComment( "Enable clustering effect for called shots against mechs. Default true." ) ]
       public bool CalledShotUseClustering = true;
 
-      /* Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.
-       * Default is 0.33 to counter the effect of CalledShotClusterStrength. */
+      [ JsonComment( new String[]{
+        "Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.",
+        "Default is 0.33 to counter the effect of CalledShotClusterStrength." } ) ]
       public float MechCalledShotMultiplier = 0.33f;
 
-      /* Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.
-       * Default is 0.75 to balance vehicle's lower number of locations. */
+      [ JsonComment( new String[]{
+        "Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.",
+        "Default is 0.75 to balance vehicle's lower number of locations." } ) ]
       public float VehicleCalledShotMultiplier = 0.75f;
 
-      /* Override called shot percentage display of mech locations to show modded shot distribution. Default true. */
+      [ JsonComment( "Override called shot percentage display of mech locations to show modded shot distribution. Default true." ) ]
       public bool ShowRealMechCalledShotChance = true;
 
-      /* Override called shot percentage display of vehicle locations to show modded shot distribution. Default true. */
+      [ JsonComment( "Override called shot percentage display of vehicle locations to show modded shot distribution. Default true." ) ]
       public bool ShowRealVehicleCalledShotChance = true;
 
-      /* Format of called shot location percentages, in C# String.Format syntax.
-       * Use "{0:0.0}%" to *always* show one decimal, or "{0:0.#}%" for *up to* one decimal. Default is "" to leave alone. */
+      [ JsonComment( new String[]{
+        "Format of called shot location percentages, in C# String.Format syntax.",
+        "Use \"{0:0.0}%\" to *always* show one decimal, or \"{0:0.#}%\" for *up to* one decimal. Default is \"\" to leave alone." } ) ]
       public string CalledChanceFormat = "";
 
       //
        [ JsonSection( "To Hit Modifiers" ) ]
       //
 
-      /* Allow bonus total modifier to increase hit chance. Defaul true. */
+      [ JsonComment( "Allow bonus total modifier to increase hit chance.  Defaul true." ) ]
       public bool AllowNetBonusModifier = true;
 
-      /* Allow attacks from low ground to high ground to incur accuracy penalty. */
+      [ JsonComment( "Allow attacks from low ground to high ground to incur accuracy penalty." ) ]
       public bool AllowLowElevationPenalty = true;
 
-      /* Step of hit chance, range 0 to 0.2.  Game default is 0.05, or 5%.  Hit chance is always rounded down.
-       * Default 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance. */
+      [ JsonComment( new String[]{
+        "Step of hit chance, range 0 to 0.2.  Game default is 0.05, or 5%.  Hit chance is always rounded down.",
+        "Default 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance." } ) ]
       public float HitChanceStep = 0;
 
-      /* Modify base weapon hit chance. -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc. Default 0. */
+      [ JsonComment( "Modify base weapon hit chance.  -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
       public float BaseHitChanceModifier = 0f;
 
-      /* Modify base melee hit chance. -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc. Default 0. */
+      [ JsonComment( "Modify base melee hit chance.  -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
       public float MeleeHitChanceModifier = 0f;
 
-      /* Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.
-       * Note that 100% hit chance (max) may still miss if roll correction is enabled. */
+      [ JsonComment( new String[]{
+        "Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.",
+        "Note that 100% hit chance (max) may still miss if roll correction is enabled." } ) ]
       public float MaxFinalHitChance = 0.95f;
       public float MinFinalHitChance = 0.05f;
 
-      /* Make hit chance modifier has diminishing return rather than simple add and subtract. Default false. */
+      [ JsonComment( "Make hit chance modifier has diminishing return rather than simple add and subtract.  Default false." ) ]
       public bool DiminishingHitChanceModifier = false;
 
-      /* Diminishing Bonus: 2-Base^(Bonus/Divisor), Default 2-0.75^(Bonus/6) and caps at +16.
-         Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit */
+      [ JsonComment( new String[]{
+        "Diminishing Bonus: 2-Base^(Bonus/Divisor).  Default 2-0.75^(Bonus/6) and caps at +16.",
+        "Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit" } ) ]
       public double DiminishingBonusPowerBase = 0.8f;
       public double DiminishingBonusPowerDivisor = 6f;
       public int DiminishingBonusMax = 16;
 
-      /* Diminishing Penalty: Base^(Penalty/Divisor), Default 0.8^(Penalty/3.3) and caps at +32.
-         Example: +6 Penalty @ 80% Base ToHit == 67% x 0.8 == 53% Hit */
+      [ JsonComment( new String[]{
+        "Diminishing Penalty: Base^(Penalty/Divisor).  Default 0.8^(Penalty/3.3) and caps at +32.",
+        "Example: +6 Penalty @ 80% Base ToHit == 67% x 0.8 == 53% Hit" } ) ]
       public double DiminishingPenaltyPowerBase = 0.8f;
       public double DiminishingPenaltyPowerDivisor = 3.3f;
       public int DiminishingPenaltyMax = 32;
 
       //
-       [ JsonSection( "To Hit Rolls" ) ]
+      [ JsonSection( "To Hit Rolls" ) ]
       //
 
-      /* Increase hit distribution precision for degrading called shots. Default true. Fix hit distribution bug on game ver 1.1.0 and below. */
+      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below." ) ]
       public bool FixHitDistribution = true;
 
-      /* Increase or decrease roll correction strength. 0 to disable roll correction, 1 is original strength, max is 2 for double strength.
-       * Default is 0.5 for less correction. */
+      [ JsonComment( new String[]{
+        "Increase or decrease roll correction strength.  0 to disable roll correction, 1 is original strength, max is 2 for double strength.",
+        "Default is 0.5 for less correction." } ) ]
       public float RollCorrectionStrength = 0.5f;
 
-      /* Set miss streak breaker threshold. Only attacks with hit rate above the threshold will add to streak breaker.
-       * Default is 0.5, same as game default. Set to 1 to disable miss streak breaker. */
+      [ JsonComment( new String[]{
+        "Set miss streak breaker threshold.  Only attacks with hit rate above the threshold will add to streak breaker.",
+        "Default is 0.5, same as game default.  Set to 1 to disable miss streak breaker." } ) ]
       public float MissStreakBreakerThreshold = 0.5f;
 
-      /* Set miss streak breaker divider. Set to negative integer or zero to make it a (positive) constant %.
-       * Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.
-       * Default is 5, same as game default. */
+      [ JsonComment( new String[]{
+        "Set miss streak breaker divider. Set to negative integer or zero to make it a (positive) constant %.",
+        "Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.",
+        "Default is 5, same as game default." } ) ]
       public float MissStreakBreakerDivider = 5f;
 
-      /* Show corrected hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker. Default false. */
+      [ JsonComment( "Show corrected hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker.  Default false." ) ]
       public bool ShowCorrectedHitChance = false;
 
-      /* Format of called shot location percentages, in C# String.Format syntax.
-       * Game default is "{0:0}%". Use "{0:0.0}%" to *always* show one decimal, or "{0:0.#}%" for *up to* one decimal.
-       * Default is "", which will use "{0:0.#}%" if HitChanceStep is 0, otherwise leave alone. */
+      [ JsonComment( new String[]{
+        "Format of called shot location percentages, in C# String.Format syntax.",
+        "Game default is \"{0:0}%\". Use \"{0:0.0}%\" to *always* show one decimal, or \"{0:0.#}%\" for *up to* one decimal.",
+        "Default is \"\", which will use \"{0:0.#}%\" if HitChanceStep is 0, otherwise leave alone." } ) ]
       public string HitChanceFormat = "";
 
       //
-       [ JsonSection( "Melee and DFA" ) ]
+      [ JsonSection( "Melee and DFA" ) ]
       //
 
       [ JsonComment( "Allow all possible melee / DFA attack positions." ) ]
@@ -181,7 +195,7 @@ namespace Sheepy.AttackImprovementMod {
       [ JsonComment( "Break the restriction that one must stay still to melee adjacent mech." ) ]
       public bool UnlockMeleePositioning = true;
 
-      [ JsonComment( "Allow melee attack on sprint. Default false." ) ]
+      [ JsonComment( "Allow melee attack on sprint.  Default false." ) ]
       public bool AllowChargeAttack = false;
 
       [ JsonComment( "Fire support weapon after sprint.  Default false." ) ]
@@ -192,13 +206,13 @@ namespace Sheepy.AttackImprovementMod {
       /**/
 
       [ JsonComment( new String[]{
-        "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged. Order and letter case does not matter.",
+        "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
         "Default \"DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy\".",
         "Other options are \"ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain\"." } ) ]
       public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
 
       //
-       [ JsonSection( "Damage" ) ]
+      [ JsonSection( "Damage" ) ]
       //
 
       [ JsonComment( new String[]{
@@ -207,7 +221,7 @@ namespace Sheepy.AttackImprovementMod {
       public bool FixNonIntegerDamage = true;
 
       //
-       [ JsonSection( "Logging" ) ]
+      [ JsonSection( "Logging" ) ]
       //
 
       [ JsonComment( new String[]{

@@ -1,17 +1,15 @@
-using BattleTech;
 using BattleTech.UI;
-using System;
+using BattleTech;
+using Sheepy.BattleTechMod;
 using System.Collections.Generic;
+using System.Reflection;
+using System;
+using UnityEngine.EventSystems;
+using UnityEngine;
+using static System.Reflection.BindingFlags;
 
 namespace Sheepy.AttackImprovementMod {
-   using BattleTech.Rendering;
-   using Harmony;
-   using Sheepy.BattleTechMod;
-   using System.Reflection;
-   using UnityEngine;
-   using UnityEngine.EventSystems;
    using static Mod;
-   using static System.Reflection.BindingFlags;
 
    public class HitLocation : ModModule {
 
@@ -25,7 +23,7 @@ namespace Sheepy.AttackImprovementMod {
             Patch( typeof( AbstractActor ), "GetAdjustedDamage", null, "FixDamageToInteger" );
 
          scale = Settings.FixHitDistribution ? SCALE : 1;
-         CallShotClustered = Settings.CalledShotUseClustering || Mod.GameUseClusteredCallShot;
+         CallShotClustered = Settings.CalledShotUseClustering || GameUseClusteredCallShot;
 
          bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
               prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot;
@@ -51,7 +49,7 @@ namespace Sheepy.AttackImprovementMod {
             else
                Error( "Can't find CombatHUDVehicleArmorHover.Readout. OnPointerClick not patched. Vehicle called shot may not work." );
 
-            if ( Mod.GameUseClusteredCallShot ) // 1.0.x
+            if ( GameUseClusteredCallShot ) // 1.0.x
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "RestoreVehicleCalledShotLocation_1_0", null );
             else // 1.1.x
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, "RestoreVehicleCalledShotLocation_1_1", null );

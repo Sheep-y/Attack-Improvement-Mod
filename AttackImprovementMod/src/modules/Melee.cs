@@ -1,19 +1,18 @@
-﻿using System;
+﻿using BattleTech.UI;
+using BattleTech;
+using Sheepy.BattleTechMod;
+using System.Collections.Generic;
+using System.Reflection;
+using System;
+using UnityEngine;
+using static System.Reflection.BindingFlags;
 
 namespace Sheepy.AttackImprovementMod {
-   using BattleTech;
-   using BattleTech.UI;
-   using Sheepy.BattleTechMod;
-   using System.Collections.Generic;
-   using System.Reflection;
-   using UnityEngine;
    using static Mod;
-   using static System.Reflection.BindingFlags;
 
    public class Melee : ModModule {
 
       public override void Startup () {
-         ModSettings Settings = Mod.Settings;
          if ( Settings.UnlockMeleePositioning )
             Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), "OverrideMeleeDestinations", null );
          /*
@@ -46,9 +45,9 @@ namespace Sheepy.AttackImprovementMod {
          MovementConstants con = Constants.MoveConstants;
          MaxMeleeVerticalOffset = con.MaxMeleeVerticalOffset;
          HalfMaxMeleeVerticalOffset = MaxMeleeVerticalOffset / 2;
-         if ( Mod.Settings.IncreaseMeleePositionChoice )
+         if ( Settings.IncreaseMeleePositionChoice )
             con.NumMeleeDestinationChoices = 6;
-         if ( Mod.Settings.IncreaseDFAPositionChoice )
+         if ( Settings.IncreaseDFAPositionChoice )
             con.NumDFADestinationChoices = 6;
          typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( Constants, con, null );
       }

@@ -1,14 +1,13 @@
-﻿using System;
+﻿using BattleTech;
+using Sheepy.BattleTechMod;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
+using System;
+using static System.Reflection.BindingFlags;
 
 namespace Sheepy.AttackImprovementMod {
-   using Sheepy.BattleTechMod;
    using static Mod;
-   using static System.Reflection.BindingFlags;
-   using System.IO;
-   using BattleTech;
-   using System.Collections.Generic;
-   using System.Text;
-   using System.Reflection;
 
    public class AttackLog : ModModule {
 
@@ -18,9 +17,9 @@ namespace Sheepy.AttackImprovementMod {
       private static bool PersistentLog = false;
 
       public override void Startup () {
-         PersistentLog = Mod.Settings.PersistentLog;
+         PersistentLog = Settings.PersistentLog;
          // Patch prefix early to increase chance of successful capture in face of other mods
-         switch ( Mod.Settings.AttackLogLevel?.Trim().ToLower() ) {
+         switch ( Settings.AttackLogLevel?.Trim().ToLower() ) {
             case "all":
             case "critical":
                LogCritical = true;
@@ -46,7 +45,7 @@ namespace Sheepy.AttackImprovementMod {
                break;
 
             default:
-               Warn( "Unknown AttackLogLevel " + Mod.Settings.AttackLogLevel );
+               Warn( "Unknown AttackLogLevel " + Settings.AttackLogLevel );
                goto case "none";
             case null:
             case "none":

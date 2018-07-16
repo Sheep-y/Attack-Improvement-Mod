@@ -126,7 +126,7 @@ namespace Sheepy.AttackImprovementMod {
 
       public static void CombatInit ( CombatHUD __instance ) {
          CacheCombatState();
-         Mod.HUD = __instance;
+         HUD = __instance;
          foreach ( var mod in modules ) try {
             mod.Value.CombatStarts();
          }                 catch ( Exception ex ) { Error( ex ); }
