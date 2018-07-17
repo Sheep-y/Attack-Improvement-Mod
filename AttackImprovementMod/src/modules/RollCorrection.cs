@@ -10,13 +10,13 @@ namespace Sheepy.AttackImprovementMod {
    using static Mod;
    using static System.Reflection.BindingFlags;
 
-   public class RollCorrection : ModModule {
+   public class RollCorrection : BattleModModule {
       
       private static bool NoRollCorrection = false;
       private static Dictionary<float, float> correctionCache;
       private static string WeaponHitChanceFormat = "{0:0}%";
 
-      public override void Startup () {
+      public override void ModStarts () {
          RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
          NoRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 

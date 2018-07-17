@@ -11,14 +11,14 @@ using static System.Reflection.BindingFlags;
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
 
-   public class HitLocation : ModModule {
+   public class HitLocation : BattleModModule {
 
       private const int SCALE = 1024; // Increase precisions of float to int conversions. Set it too high may cause overflow.
       internal static int scale = SCALE; // Actual scale. Determined by FixHitDistribution.
 
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
 
-      public override void Startup () {
+      public override void ModStarts () {
          if ( Settings.FixNonIntegerDamage )
             Patch( typeof( AbstractActor ), "GetAdjustedDamage", null, "FixDamageToInteger" );
 
@@ -59,8 +59,8 @@ namespace Sheepy.AttackImprovementMod {
       private static bool ClusterChanceNeverMultiplyHead = true;
       private static float ClusterChanceOriginalLocationMultiplier = 1f;
       public override void CombatStarts () {
-         ClusterChanceNeverMultiplyHead = Constants.ToHit.ClusterChanceNeverMultiplyHead;
-         ClusterChanceOriginalLocationMultiplier = Constants.ToHit.ClusterChanceOriginalLocationMultiplier;
+         ClusterChanceNeverMultiplyHead = CombatConstants.ToHit.ClusterChanceNeverMultiplyHead;
+         ClusterChanceOriginalLocationMultiplier = CombatConstants.ToHit.ClusterChanceOriginalLocationMultiplier;
       }
 
       // ============ UTILS ============
@@ -91,7 +91,7 @@ namespace Sheepy.AttackImprovementMod {
       public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
          if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None ) {
-            HitTableConstantsDef hitTables = Constants.HitTables;
+            HitTableConstantsDef hitTables = CombatConstants.HitTables;
             AttackDirection dir = AttackDirection.None;
             if      ( hitTable == hitTables.HitMechLocationFromFront ) dir = AttackDirection.FromFront;
             else if ( hitTable == hitTables.HitMechLocationFromLeft  ) dir = AttackDirection.FromLeft;
@@ -100,7 +100,7 @@ namespace Sheepy.AttackImprovementMod {
             else if ( hitTable == hitTables.HitMechLocationProne     ) dir = AttackDirection.ToProne;
             else if ( hitTable == hitTables.HitMechLocationFromTop   ) dir = AttackDirection.FromTop;
             if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
-               hitTable = Constants.GetMechClusterTable( bonusLocation, dir );
+               hitTable = CombatConstants.GetMechClusterTable( bonusLocation, dir );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 

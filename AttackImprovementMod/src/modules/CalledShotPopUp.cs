@@ -9,11 +9,11 @@ namespace Sheepy.AttackImprovementMod {
    using static HitLocation;
    using static Mod;
 
-   public class CalledShotPopUp : ModModule {
+   public class CalledShotPopUp : BattleModModule {
 
       private static string CalledShotHitChanceFormat = "{0:0}%";
 
-      public override void Startup () {
+      public override void ModStarts () {
          if ( NullIfEmpty( ref Settings.CalledChanceFormat ) != null )
             CalledShotHitChanceFormat = Settings.CalledChanceFormat;
 
@@ -56,7 +56,7 @@ namespace Sheepy.AttackImprovementMod {
       public static bool OverrideHUDMechCalledShotPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) { try {
          Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! HitLocation.CallShotClustered || ! Settings.ShowRealMechCalledShotChance )
                                                    ? Combat.HitLocation.GetMechHitTable( AttackDirection )
-                                                   : Constants.GetMechClusterTable( targetedLocation, AttackDirection );
+                                                   : CombatConstants.GetMechClusterTable( targetedLocation, AttackDirection );
          if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
             HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );
 

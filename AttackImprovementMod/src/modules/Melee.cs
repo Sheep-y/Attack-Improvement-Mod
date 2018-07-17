@@ -10,9 +10,9 @@ using static System.Reflection.BindingFlags;
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
 
-   public class Melee : ModModule {
+   public class Melee : BattleModModule {
 
-      public override void Startup () {
+      public override void ModStarts () {
          if ( Settings.UnlockMeleePositioning )
             Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), "OverrideMeleeDestinations", null );
          /*
@@ -42,14 +42,14 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void CombatStarts () {
          Hit = Combat.ToHit;
-         MovementConstants con = Constants.MoveConstants;
+         MovementConstants con = CombatConstants.MoveConstants;
          MaxMeleeVerticalOffset = con.MaxMeleeVerticalOffset;
          HalfMaxMeleeVerticalOffset = MaxMeleeVerticalOffset / 2;
          if ( Settings.IncreaseMeleePositionChoice )
             con.NumMeleeDestinationChoices = 6;
          if ( Settings.IncreaseDFAPositionChoice )
             con.NumDFADestinationChoices = 6;
-         typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( Constants, con, null );
+         typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( CombatConstants, con, null );
       }
 
       // Almost a direct copy of the original, only to remove melee position locking code
@@ -71,7 +71,7 @@ namespace Sheepy.AttackImprovementMod {
          }
 
          if ( pathNodesForPoints.Count > 1 ) {
-            MovementConstants moves = Constants.MoveConstants;
+            MovementConstants moves = CombatConstants.MoveConstants;
             if ( moves.SortMeleeHexesByPathingCost )
                pathNodesForPoints.Sort( (a, b) => a.CostToThisNode.CompareTo( b.CostToThisNode ) );
             else
@@ -118,7 +118,7 @@ namespace Sheepy.AttackImprovementMod {
                   if ( us.MechDef.Chassis.PunchesWithLeftArm ) {
                      if ( us.IsLocationDestroyed( ChassisLocations.LeftArm ) ) return 0f;
                   } else if ( us.IsLocationDestroyed( ChassisLocations.RightArm ) ) return 0f;
-                  return Constants.ToHit.ToHitSelfArmMountedWeapon;
+                  return CombatConstants.ToHit.ToHitSelfArmMountedWeapon;
                } ); break;
 
             case "dfa":
@@ -129,8 +129,8 @@ namespace Sheepy.AttackImprovementMod {
                   if ( attackType == MeleeAttackType.DFA )
                      return Hit.GetHeightModifier( us.CurrentPosition.y, they.CurrentPosition.y );
                   float diff = attackPos.y - they.CurrentPosition.y;
-                  if ( Math.Abs( diff ) < HalfMaxMeleeVerticalOffset || ( diff < 0 && ! Constants.ToHit.ToHitElevationApplyPenalties ) ) return 0;
-                  float mod = Constants.ToHit.ToHitElevationModifierPerLevel;
+                  if ( Math.Abs( diff ) < HalfMaxMeleeVerticalOffset || ( diff < 0 && ! CombatConstants.ToHit.ToHitElevationApplyPenalties ) ) return 0;
+                  float mod = CombatConstants.ToHit.ToHitElevationModifierPerLevel;
                   return diff <= 0 ? mod : -mod;
                } ); break;
 
@@ -234,7 +234,7 @@ namespace Sheepy.AttackImprovementMod {
             thisModifier = factors.Key;
             modifiers += (int) factors.Value();
          }
-         if ( modifiers < 0 && ! Constants.ResolutionConstants.AllowTotalNegativeModifier )
+         if ( modifiers < 0 && ! CombatConstants.ResolutionConstants.AllowTotalNegativeModifier )
             modifiers = 0;
          __result = modifiers;
          return false;

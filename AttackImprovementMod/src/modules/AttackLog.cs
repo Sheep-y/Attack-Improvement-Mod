@@ -9,14 +9,14 @@ using static System.Reflection.BindingFlags;
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
 
-   public class AttackLog : ModModule {
+   public class AttackLog : BattleModModule {
 
       internal static Logger ROLL_LOG = new Logger( "Log_Attack.txt" );
 
       private static bool LogShot, LogLocation, LogCritical;
       private static bool PersistentLog = false;
 
-      public override void Startup () {
+      public override void ModStarts () {
          PersistentLog = Settings.PersistentLog;
          // Patch prefix early to increase chance of successful capture in face of other mods
          switch ( Settings.AttackLogLevel?.Trim().ToLower() ) {

@@ -1,4 +1,6 @@
-﻿using Harmony;
+﻿using BattleTech.UI;
+using BattleTech;
+using Harmony;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
@@ -14,34 +16,32 @@ using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod {
 
-   public abstract class ModBase : ModModule {
+   public abstract class BattleMod : BattleModModule {
 
-      protected ModBase ( ) {
-         SetupDefault();
-      }
-
-      public void Init ( ref Logger log ) {
-         currentMod = this;
-         TryRun( Setup );
-         log = Logger;
-         TryRun( log, Startup );
-         currentMod = null;
-      }
-
-      public void Init () {
-         currentMod = this;
-         TryRun( Setup );
-         TryRun( Startup );
-         currentMod = null;
-      }
-
-      // Basic mod info for public access
-      public string Id { get; protected set; } = "org.example";
-      public string Name { get; protected set; } = "Nameless";
+      // Basic mod info for public access, will auto load from assembly then mod.json (if exists)
       public string Version { get; protected set; } = "Unknown";
 
-      protected string BaseDir;
+      protected BattleMod ( ) {
+         SetupDefault();
+         PatchBattleMods();
+      }
 
+      public void Start ( ref Logger log ) {
+         CurrentMod = this;
+         TryRun( Setup );
+         log = Logger;
+         Add( this );
+         CurrentMod = null;
+      }
+
+      public void Start () {
+         CurrentMod = this;
+         TryRun( Setup );
+         Add( this );
+         CurrentMod = null;
+      }
+
+      public string BaseDir { get; protected set; }
       private string _LogDir;
       protected string LogDir { 
          get { return _LogDir; }
@@ -54,7 +54,13 @@ namespace Sheepy.BattleTechMod {
 
       // ============ Setup ============
 
-      internal static ModBase currentMod;
+      /*
+      private static List<BattleMod> modScopes = new List<BattleMod>();
+      private void PushScope () { modScopes.Add( this ); }
+      private void PopScope () { modScopes.RemoveAt( modScopes.Count - 1 ); }
+      internal static BattleMod CurrentMod { get { return modScopes.LastOrDefault(); } }
+      */
+      internal static BattleMod CurrentMod;
 
 #pragma warning disable CS0649 // Disable "field never set" warnings since they are set by JsonConvert.
       private class ModInfo { public string Name;  public string Version; }
@@ -89,7 +95,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       // Load settings from settings.json, call SanitizeSettings, and create/overwrite it if the content is different.
-      protected void LoadSettings <Settings> ( ref Settings settings, Func<Settings,Settings> sanitise = null ) {
+      protected virtual void LoadSettings <Settings> ( ref Settings settings, Func<Settings,Settings> sanitise = null ) {
          string file = BaseDir + "settings.json", fileText = String.Empty;
          Settings config = settings;
          if ( File.Exists( file ) ) TryRun( () => {
@@ -103,9 +109,9 @@ namespace Sheepy.BattleTechMod {
          } );
          if ( sanitise != null )
             TryRun( () => config = sanitise( config ) );
-         string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new SettingsJsContract() } );
+         string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
          Logger.Log( "Loaded Settings: " + sanitised );
-         string commented = SettingsJsContract.FormatSettingJsonText( settings.GetType(), sanitised );
+         string commented = BattleJsonContract.FormatSettingJsonText( settings.GetType(), sanitised );
          if ( commented != fileText ) { // Can be triggered by comment or field update, not necessary sanitisation
             Logger.Log( "Updating " + file );
             SaveSettings( commented );
@@ -120,32 +126,119 @@ namespace Sheepy.BattleTechMod {
       private void SaveSettings ( string settings ) {
          TryRun( Logger, () => File.WriteAllText( BaseDir + "settings.json", settings ) );
       }
+
+      // ============ Execution ============
+
+      private static Dictionary<BattleMod, List<BattleModModule>> modules = new Dictionary<BattleMod, List<BattleModModule>>();
+
+      public BattleMod Add ( BattleModModule module ) {
+         if ( ! modules.TryGetValue( this, out List<BattleModModule> list ) )
+            modules.Add( this, list = new List<BattleModModule>() );
+         if ( ! list.Contains( module ) ) {
+            if ( module.Id == this.Id ) module.Id += "." + module.Name;
+            Logger.Log( $"Adding module {module.Name} ({module.Id})" );
+            list.Add( module );
+            TryRun( Logger, module.ModStarts );
+         }
+         return this;
+      }
+
+      private static bool BattleModsPatched = false;
+
+      public void PatchBattleMods () {
+         if ( BattleModsPatched ) return;
+         Logger old = Logger;
+         Logger = Logger.BTML_LOG;
+         Patch( typeof( MessageCenter ).GetConstructor( new Type[]{ } ), null, "RunGameStarts" );
+         Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RunCombatStarts" );
+         BattleModsPatched = true;
+         Logger = old;
+      }
+
+      private static bool CalledGameStartsOnce = false;
+      private static void RunGameStarts () {
+         if ( ! CalledGameStartsOnce ) {
+            CallAllModules( module => module.GameStartsOnce() );
+            CalledGameStartsOnce = true;
+         }
+         CallAllModules( module => module.GameStarts() );
+      }
+
+      private static bool CalledCampaignStartsOnce = false;
+      private static void RunCampaignStarts () {
+         Simulation = UnityGameInstance.BattleTechGame?.Simulation;
+         SimulationConstants = Simulation.Constants;
+         if ( ! CalledCampaignStartsOnce ) {
+            CallAllModules( module => module.CampaignStartsOnce() );
+            CalledCampaignStartsOnce = true;
+         }
+         CallAllModules( module => module.CampaignStarts() );
+      }
+      
+      private static bool CalledCombatStartsOnce = false;
+      private static void RunCombatStarts ( CombatHUD __instance ) {      
+         HUD = __instance;
+         Combat = UnityGameInstance.BattleTechGame?.Combat;
+         CombatConstants = Combat?.Constants;
+         if ( ! CalledCombatStartsOnce ) {
+            CallAllModules( module => module.CombatStartsOnce() );
+            CalledCombatStartsOnce = true;
+         }
+         CallAllModules( module => module.CombatStarts() );
+      }
+      
+      private static void CallAllModules ( Action<BattleModModule> task ) {
+         foreach ( var mod in modules ) {
+            foreach ( BattleModModule module in mod.Value ) try {
+               task( module );
+            } catch ( Exception ex ) { 
+               mod.Key.Logger.Error( ex ); 
+            }
+         }
+      }
    }
 
-   public abstract class ModModule {
+   public abstract class BattleModModule {
 
-      public abstract void Startup();
-      public virtual void CombatStarts () { }
+      // Set on CampaignStarts
+      public static SimGameState Simulation { get; internal set; }
+      public static SimGameConstants SimulationConstants { get; internal set; }
+      // Set on CombatStarts
+      public static CombatGameState Combat { get; internal set; }
+      public static CombatGameConstants CombatConstants { get; internal set; }
+      public static CombatHUD HUD { get; internal set; }
 
-      protected ModBase Mod { get; private set; }
+      public virtual void ModStarts () { }
+      public virtual void GameStartsOnce () { }
+      public virtual void GameStarts () { }
+      public virtual void CampaignStartsOnce () { }
+      public virtual void CampaignStarts () {}
+      public virtual void CombatStartsOnce () {}
+      public virtual void CombatStarts () {}
 
-      // ============ Harmony ============
+      protected BattleMod Mod { get; private set; }
 
-      public ModModule () {
-         if ( this is ModBase modbase )
+      // ============ Basic ============
+
+      public BattleModModule () {
+         if ( this is BattleMod modbase )
             Mod = modbase;
          else {
-            Mod = ModBase.currentMod;
+            Mod = BattleMod.CurrentMod;
             if ( Mod == null )
-               throw new ApplicationException( "ModModule must be created in ModBase.Setup()" );
+               throw new ApplicationException( "Mod module should be created in BattleMod.ModStart()." );
+            Id = Mod.Id;
             Logger = Mod.Logger;
          }
       }
+
+      public string Id { get; protected internal set; } = "org.example.mod.module";
+      public string Name { get; protected internal set; } = "Module";
       
-      private Logger logger;
+      private Logger _Logger;
       protected Logger Logger {
-         get { return logger ?? Logger.BTML_LOG; }
-         set { logger = value; }
+         get { return _Logger ?? Logger.BTML_LOG; }
+         set { _Logger = value; }
       }
 
       // ============ Harmony ============
@@ -203,7 +296,7 @@ namespace Sheepy.BattleTechMod {
          }
          HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
          if ( pre == null && post == null ) return; // MakePatch would have reported method not found
-         if ( Mod.harmony == null ) Mod.Init();
+         if ( Mod.harmony == null ) Mod.Start();
          Mod.harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
          Logger.Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, prefix, postfix );
       }
@@ -300,6 +393,10 @@ namespace Sheepy.BattleTechMod {
       }
    }
 
+   //
+   // Logging
+   //
+
    public class Logger {
 
       public static readonly Logger BTML_LOG = new Logger( "Mods/BTModLoader.log" );
@@ -382,6 +479,10 @@ namespace Sheepy.BattleTechMod {
       }
    }
 
+   //
+   // JSON serialisation
+   //
+
    [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonSection : Attribute {
       public string Section;
@@ -395,7 +496,7 @@ namespace Sheepy.BattleTechMod {
       public JsonComment ( string[] comments ) { Comments = comments ?? new string[]{}; }
    }
 
-   public class SettingsJsContract : DefaultContractResolver {
+   public class BattleJsonContract : DefaultContractResolver {
       protected override List<MemberInfo> GetSerializableMembers ( Type type ) {
          return base.GetSerializableMembers( type ).Where( ( member ) =>
             member.GetCustomAttributes( typeof( ObsoleteAttribute ), true ).Length <= 0
@@ -434,7 +535,7 @@ namespace Sheepy.BattleTechMod {
                   injection += Indent + "/* " + lines[0] + " */";
                injection += NewLine;
             }
-            text = ModModule.ReplaceFirst( text, propName, injection + propName );
+            text = BattleModModule.ReplaceFirst( text, propName, injection + propName );
          }
          return text;
       }

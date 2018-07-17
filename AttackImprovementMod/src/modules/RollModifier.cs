@@ -7,9 +7,9 @@ using UnityEngine;
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
 
-   public class RollModifier : ModModule {
+   public class RollModifier : BattleModModule {
 
-      public override void Startup () {
+      public override void ModStarts () {
          Type ToHitType = typeof( ToHit );
          if ( Settings.AllowNetBonusModifier )
             Patch( ToHitType, "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );
@@ -35,14 +35,14 @@ namespace Sheepy.AttackImprovementMod {
 
       public override void CombatStarts () {
          if ( Settings.AllowNetBonusModifier ) {
-            CombatResolutionConstantsDef con = Constants.ResolutionConstants;
+            CombatResolutionConstantsDef con = CombatConstants.ResolutionConstants;
             con.AllowTotalNegativeModifier = true;
-            typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" ).SetValue( Constants, con, null );
+            typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" ).SetValue( CombatConstants, con, null );
          }
          if ( Settings.AllowLowElevationPenalty ) {
-            ToHitConstantsDef con = Constants.ToHit;
+            ToHitConstantsDef con = CombatConstants.ToHit;
             con.ToHitElevationApplyPenalties = true;
-            typeof( CombatGameConstants ).GetProperty( "ToHit" ).SetValue( Constants, con, null );
+            typeof( CombatGameConstants ).GetProperty( "ToHit" ).SetValue( CombatConstants, con, null );
          }
          if ( Settings.AllowNetBonusModifier && steppingModifier == null && ! Settings.DiminishingHitChanceModifier )
             FillSteppedModifiers(); // Use Combat Constants and must be lazily loaded 
@@ -67,8 +67,8 @@ namespace Sheepy.AttackImprovementMod {
       }
 
       internal static float GetSteppedValue ( float modifier ) {
-         int[] Levels = Constants.ToHit.ToHitStepThresholds;
-         float[] values = Constants.ToHit.ToHitStepValues;
+         int[] Levels = CombatConstants.ToHit.ToHitStepThresholds;
+         float[] values = CombatConstants.ToHit.ToHitStepValues;
          int mod = Mathf.RoundToInt( modifier ), lastLevel = int.MaxValue;
          float result = 0;
          for ( int i = Levels.Length - 1 ; i >= 0 ; i-- ) {

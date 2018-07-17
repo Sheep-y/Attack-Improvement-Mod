@@ -12,9 +12,9 @@ using static System.Reflection.BindingFlags;
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
 
-   public class UserInterface : ModModule {
+   public class UserInterface : BattleModModule {
 
-      public override void Startup () {
+      public override void ModStarts () {
          if ( Settings.FixPaperDollRearStructure ) {
             if ( structureRearProp == null || timeSinceStructureDamagedProp == null )
                Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, paper doll rear structures not fixed." );
@@ -201,8 +201,8 @@ namespace Sheepy.AttackImprovementMod {
       private static readonly object[] RemoveTargetParams = new object[]{ null, false };
 
       public static bool OverrideMultiTargetBackout ( SelectionStateFireMulti __instance ) { try {
-         var me = __instance;
-         var allTargets = me.AllTargetedCombatants;
+         SelectionStateFireMulti me = __instance;
+         List<ICombatant> allTargets = me.AllTargetedCombatants;
          int count = allTargets.Count;
          if ( count > 0 ) {
             // Change target to second newest to reset keyboard focus and thus dim cancelled target's LOS

@@ -8,9 +8,9 @@ using static System.Reflection.BindingFlags;
 namespace Sheepy.AttackImprovementMod {
    using static Mod;
 
-   public class LineOfSight : ModModule {
+   public class LineOfSight : BattleModModule {
 
-      public override void Startup () {
+      public override void ModStarts () {
          Type Indicator = typeof( WeaponRangeIndicators );
 
          // Colours that fail to parse will be changed to empty string

@@ -1,25 +1,27 @@
 ﻿using BattleTech;
 using BattleTech.UI;
+using Sheepy.BattleTechMod;
 using System;
 using System.Collections.Generic;
+using System.Reflection;     
 
 namespace Sheepy.AttackImprovementMod {
    using Harmony;
-   using Sheepy.BattleTechMod;
 
-   public class Mod : ModBase {
+
+   public class Mod : BattleMod {
 
       public static ModSettings Settings = new ModSettings();
 
       internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
       internal static bool GameHitLocationBugged = false; // True if game version is less than 1.1.1
-      internal static readonly Dictionary<string, ModModule> modules = new Dictionary<string, ModModule>();
+      internal static readonly Dictionary<string, BattleModModule> modules = new Dictionary<string, BattleModModule>();
 
       public static void Init ( string directory, string settingsJSON ) {
-         new Mod().Init( ref modLog );
+         new Mod().Start( ref modLog );
       }
 
-      public override void Startup () {
+      public override void ModStarts () {
          LoadSettings<ModSettings>( ref Settings, SanitizeSettings );
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
 
@@ -34,24 +36,14 @@ namespace Sheepy.AttackImprovementMod {
          }
          Log();
 
-         // Hook to combat starts
-         Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "CombatInit" );
-         Patch( typeof( MessageCenter ).GetConstructor( new Type[]{ } ), null, "GameInit" );
-
-         modules.Add( "Logger", new AttackLog() ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
-         modules.Add( "User Interface", new UserInterface() );
-         modules.Add( "Line of Fire", new LineOfSight() );
-         modules.Add( "Called Shot HUD", new CalledShotPopUp() );
-         modules.Add( "Melee", new Melee() );
-         modules.Add( "Roll Modifier", new RollModifier() );
-         modules.Add( "Roll Corrections", new RollCorrection() );
-         modules.Add( "Hit Distribution", new HitLocation() );
-
-         foreach ( var mod in modules )  try {
-            Log( "=== Patching " + mod.Key + " ===" );
-            mod.Value.Startup();
-         }                 catch ( Exception ex ) { Error( ex ); }
-         Log( "=== All Mod Modules Initialised ===\n" );
+         Add( new AttackLog(){ Name = "Logger" } ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
+         Add( new UserInterface(){ Name = "User Interface" } );
+         Add( new LineOfSight(){ Name = "Line of Fire" } );
+         Add( new CalledShotPopUp(){ Name = "Called Shot HUD" } );
+         Add( new Melee(){ Name = "Melee" } );
+         Add( new RollModifier(){ Name = "Roll Modifier" } );
+         Add( new RollCorrection(){ Name = "Roll Corrections" } );
+         Add( new HitLocation(){ Name = "Hit Distribution" } );
       }
 
       private ModSettings SanitizeSettings ( ModSettings settings ) {
@@ -100,29 +92,12 @@ namespace Sheepy.AttackImprovementMod {
 
       // ============ Game States ============
 
-      internal static CombatHUD HUD;
-      internal static CombatGameState Combat;
-      internal static CombatGameConstants Constants;
-
       public static void GameInit ( GameInstance __instance ) {
          HashSet<string> owners = new HashSet<string>();
-         foreach ( var method in PatchProcessor.AllPatchedMethods() )
+         foreach ( MethodBase method in PatchProcessor.AllPatchedMethods() )
             owners.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
          foreach ( string owner in owners )
             Log( owner );
-      }
-
-      public static void CombatInit ( CombatHUD __instance ) {
-         CacheCombatState();
-         HUD = __instance;
-         foreach ( var mod in modules ) try {
-            mod.Value.CombatStarts();
-         }                 catch ( Exception ex ) { Error( ex ); }
-      }
-
-      public static void CacheCombatState () {
-         Combat = UnityGameInstance.BattleTechGame?.Combat;
-         Constants = Combat?.Constants;
       }
    }
 }
