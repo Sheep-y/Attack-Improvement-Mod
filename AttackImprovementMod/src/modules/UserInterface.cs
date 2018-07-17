@@ -1,15 +1,15 @@
 using BattleTech.UI;
 using BattleTech;
-using Sheepy.BattleTechMod;
+using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
-using System;
 using UnityEngine;
 using static BattleTech.ChassisLocations;
 using static BattleTech.UI.HUDMechArmorReadout;
 using static System.Reflection.BindingFlags;
 
-namespace Sheepy.AttackImprovementMod {
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
 
    public class UserInterface : BattleModModule {
@@ -231,9 +231,7 @@ namespace Sheepy.AttackImprovementMod {
 
          // Fix weaponTargetIndices
          var indice = (Dictionary<Weapon, int>) weaponTargetIndices.GetValue( __instance, null );
-         Weapon[] weapons = new Weapon[ indice.Count ];
-         indice.Keys.CopyTo( weapons, 0 );
-         foreach ( var weapon in weapons ) {
+         foreach ( var weapon in indice.Keys.ToArray() ) {
             if ( indice[ weapon ] > index ) 
                indice[ weapon ] -= - 1;
             else if ( indice[ weapon ] == index )

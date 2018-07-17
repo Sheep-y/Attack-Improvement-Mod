@@ -1,13 +1,7 @@
-﻿using BattleTech;
-using BattleTech.UI;
-using Sheepy.BattleTechMod;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Reflection;     
 
-namespace Sheepy.AttackImprovementMod {
-   using Harmony;
-
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class Mod : BattleMod {
 

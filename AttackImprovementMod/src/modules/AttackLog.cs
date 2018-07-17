@@ -1,12 +1,11 @@
 ﻿using BattleTech;
-using Sheepy.BattleTechMod;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using System;
 using static System.Reflection.BindingFlags;
 
-namespace Sheepy.AttackImprovementMod {
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
 
    public class AttackLog : BattleModModule {

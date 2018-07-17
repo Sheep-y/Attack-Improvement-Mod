@@ -1,6 +1,5 @@
 using BattleTech.UI;
 using BattleTech;
-using Sheepy.BattleTechMod;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
@@ -8,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine;
 using static System.Reflection.BindingFlags;
 
-namespace Sheepy.AttackImprovementMod {
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
 
    public class HitLocation : BattleModModule {

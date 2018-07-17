@@ -9,7 +9,7 @@
    "Contact" : "your.sheepy@gmail.com",
 
    "DLL" : "AttackImprovementMod.dll",
-   "DLLEntryPoint" : "Sheepy.AttackImprovementMod.Mod.Init",
+   "DLLEntryPoint" : "Sheepy.BattleTechMod.AttackImprovementMod.Mod.Init",
 
    "Settings" : {
       "settings.json" : "The mod use settings.json to read and write settings.  If the file does not exist, it will be created when the mod is loaded on game launch.",

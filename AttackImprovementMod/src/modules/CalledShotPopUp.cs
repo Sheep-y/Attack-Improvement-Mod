@@ -1,11 +1,10 @@
 using BattleTech.UI;
 using BattleTech;
-using Sheepy.BattleTechMod;
 using System.Collections.Generic;
 using System;
 using static System.Reflection.BindingFlags;
 
-namespace Sheepy.AttackImprovementMod {
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static HitLocation;
    using static Mod;
 

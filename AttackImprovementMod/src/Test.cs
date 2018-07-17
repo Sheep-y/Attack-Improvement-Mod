@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 
-namespace Sheepy.AttackImprovementMod {
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static System.Reflection.BindingFlags;
 
    /* Colllection of test code that I don't want to cluster the main code */

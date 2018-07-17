@@ -1,7 +1,6 @@
-﻿using Sheepy.BattleTechMod;
-using System;
+﻿using System;
 
-namespace Sheepy.AttackImprovementMod {
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class ModSettings {
 

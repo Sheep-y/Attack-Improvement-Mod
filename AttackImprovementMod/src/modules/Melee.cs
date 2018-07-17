@@ -1,13 +1,13 @@
 ﻿using BattleTech.UI;
 using BattleTech;
-using Sheepy.BattleTechMod;
-using System.Collections.Generic;
-using System.Reflection;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 using static System.Reflection.BindingFlags;
 
-namespace Sheepy.AttackImprovementMod {
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
 
    public class Melee : BattleModModule {
@@ -196,9 +196,7 @@ namespace Sheepy.AttackImprovementMod {
             }
          }
 
-         string[] array = new string[ Factors.Count ];
-         Factors.CopyTo( array );
-         Log( "Melee and DFA modifiers: " + Join( ",", array ) );
+         Log( "Melee and DFA modifiers: " + Join( ",", Factors.ToArray() ) );
       }
 
       private static MethodInfo contemplatingDFA = typeof( CombatHUDWeaponSlot ).GetMethod( "contemplatingDFA", NonPublic | Instance );

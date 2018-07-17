@@ -5,8 +5,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 
-namespace Sheepy.AttackImprovementMod {
-   using Sheepy.BattleTechMod;
+namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
    using static System.Reflection.BindingFlags;
 
