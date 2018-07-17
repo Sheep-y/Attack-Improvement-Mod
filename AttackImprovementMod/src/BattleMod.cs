@@ -47,7 +47,7 @@ namespace Sheepy.BattleTechMod {
          get { return _LogDir; }
          set {
             _LogDir = value;
-            Logger = new Logger( GetLogFile() );
+            Logger.LogFile = GetLogFile();
          }
       }
       internal HarmonyInstance harmony;
@@ -85,13 +85,15 @@ namespace Sheepy.BattleTechMod {
 
       // Override this method to override Namd and Id
       protected virtual void Setup () {
-         Logger.Delete();
+         if ( Logger.LogFile != Logger.BTML_LOG.LogFile )
+            Logger.Delete();
          Logger.Log( "{2} Loading {0} Version {1} In {3}" + Environment.NewLine, Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
-         harmony = HarmonyInstance.Create( Id );
       }
 
+      public static string Idify ( string text ) { return Join( string.Empty, new Regex( "\\W+" ).Split( text ), UppercaseFirst ); }
+
       protected virtual string GetLogFile () {
-         return LogDir + "Log_" + Join( string.Empty, new Regex( "\\W+" ).Split( Name ), UppercaseFirst ) + ".txt";
+         return LogDir + "Log_" + Idify( Name ) + ".txt";
       }
 
       // Load settings from settings.json, call SanitizeSettings, and create/overwrite it if the content is different.
@@ -135,8 +137,8 @@ namespace Sheepy.BattleTechMod {
          if ( ! modules.TryGetValue( this, out List<BattleModModule> list ) )
             modules.Add( this, list = new List<BattleModModule>() );
          if ( ! list.Contains( module ) ) {
-            if ( module.Id == this.Id ) module.Id += "." + module.Name;
-            Logger.Log( $"Adding module {module.Name} ({module.Id})" );
+            if ( module != CurrentMod )
+               if ( module.Id == this.Id ) module.Id += "." + Idify( module.Name );
             list.Add( module );
             TryRun( Logger, module.ModStarts );
          }
@@ -147,12 +149,13 @@ namespace Sheepy.BattleTechMod {
 
       public void PatchBattleMods () {
          if ( BattleModsPatched ) return;
-         Logger old = Logger;
-         Logger = Logger.BTML_LOG;
-         Patch( typeof( MessageCenter ).GetConstructor( new Type[]{ } ), null, "RunGameStarts" );
-         Patch( typeof( CombatHUD ), "Init", typeof( CombatGameState ), null, "RunCombatStarts" );
+         string oldLog = Logger.LogFile;
+         Logger.LogFile = Logger.BTML_LOG.LogFile;
+         Patch( typeof( MessageCenter ).GetConstructor( new Type[]{ } ), null, typeof( BattleMod ).GetMethod( "RunGameStarts", Static | NonPublic ) );
+         Patch( typeof( SimGameState ).GetMethod( "Init" ), null, typeof( BattleMod ).GetMethod( "RunCampaignStarts", Static | NonPublic ) );
+         Patch( typeof( CombatHUD ).GetMethod( "Init", new Type[]{ typeof( CombatGameState ) } ), null, typeof( BattleMod ).GetMethod( "RunCombatStarts", Static | NonPublic ) );
          BattleModsPatched = true;
-         Logger = old;
+         Logger.LogFile = oldLog;
       }
 
       private static bool CalledGameStartsOnce = false;
@@ -208,13 +211,13 @@ namespace Sheepy.BattleTechMod {
       public static CombatGameConstants CombatConstants { get; internal set; }
       public static CombatHUD HUD { get; internal set; }
 
-      public virtual void ModStarts () { }
+      public virtual void ModStarts () { Logger.Log( "Mod Starts" ); }
       public virtual void GameStartsOnce () { }
-      public virtual void GameStarts () { }
+      public virtual void GameStarts () { Logger.Log( "Game Starts" ); }
       public virtual void CampaignStartsOnce () { }
-      public virtual void CampaignStarts () {}
+      public virtual void CampaignStarts () { Logger.Log( $"Campaign Starts {Simulation}" ); }
       public virtual void CombatStartsOnce () {}
-      public virtual void CombatStarts () {}
+      public virtual void CombatStarts () { Logger.Log( $"Combat Starts {Combat}" ); }
 
       protected BattleMod Mod { get; private set; }
 
@@ -246,7 +249,7 @@ namespace Sheepy.BattleTechMod {
       /* Find and create a HarmonyMethod from this class. method must be public and has unique name. */
       protected HarmonyMethod MakePatch ( string method ) {
          if ( method == null ) return null;
-         MethodInfo mi = GetType().GetMethod( method );
+         MethodInfo mi = GetType().GetMethod( method, Static | Public | NonPublic );
          if ( mi == null ) {
             Logger.Error( "Cannot find patch method " + method );
             return null;
@@ -296,8 +299,17 @@ namespace Sheepy.BattleTechMod {
          }
          HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
          if ( pre == null && post == null ) return; // MakePatch would have reported method not found
-         if ( Mod.harmony == null ) Mod.Start();
-         Mod.harmony.Patch( patched, MakePatch( prefix ), MakePatch( postfix ) );
+         Patch( patched, pre, post );
+      }
+
+      protected void Patch ( MethodBase patched, MethodInfo prefix, MethodInfo postfix ) {
+         Patch( patched, new HarmonyMethod( prefix ), new HarmonyMethod( postfix ) );
+      }
+
+      protected void Patch ( MethodBase patched, HarmonyMethod prefix, HarmonyMethod postfix ) {
+         if ( Mod.harmony == null )
+            Mod.harmony = HarmonyInstance.Create( Id );
+         Mod.harmony.Patch( patched, prefix, postfix );
          Logger.Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, prefix, postfix );
       }
 
@@ -407,7 +419,7 @@ namespace Sheepy.BattleTechMod {
          LogFile = file;
       }
 
-      public string LogFile { get; protected set; }
+      public string LogFile { get; set; }
 
       public bool IgnoreDuplicateExceptions = true;
       public Dictionary<string, int> exceptions = new Dictionary<string, int>();
