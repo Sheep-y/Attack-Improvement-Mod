@@ -48,9 +48,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Line of Sight" ) ]
       //
 
-      [ JsonComment( "Make lines wider or thinner.  Default 2 times, 3 times, and 1.5 times." ) ]
-      public float LOSWidthMultiplier = 2f;
-      public float LOSWidthBlockedMultiplier = 3f;
+      [ JsonComment( "Make lines wider or thinner.  Default 3, 2, and 1.5 times.  Set to 0 to use game default." ) ]
+      public float LOSWidth = 2f;
+      public float LOSWidthBlocked = 1.5f;
+
+      [ JsonComment( new String[]{
+        "Make obstruction marker bigger or smaller by multiplying its height and width.  Default 1.5.",
+        "Set to 1 to use game default, or 0 to hide the marker." } ) ]
       public float LOSMarkerBlockedMultiplier = 1.5f;
 
       [ JsonComment( "Controls whether indirect attack lines / can't attack lines are dotted. Default both true." ) ]

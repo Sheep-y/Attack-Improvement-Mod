@@ -1,6 +1,7 @@
 ﻿using BattleTech.UI;
 using BattleTech;
 using System;
+using System.Linq;
 using UnityEngine;
 using static System.Reflection.BindingFlags;
 
@@ -13,8 +14,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Type Indicator = typeof( WeaponRangeIndicators );
 
          // Colours that fail to parse will be changed to empty string
-         RangeCheck( "LOSWidthMultiplier", ref Settings.LOSWidthMultiplier, 0.1f, 10f );
-         RangeCheck( "LOSWidthBlockedMultiplier", ref Settings.LOSWidthBlockedMultiplier, 0.1f, 20f );
+         RangeCheck( "LOSWidthMultiplier", ref Settings.LOSWidth, 0f, 10f );
+         RangeCheck( "LOSWidthBlockedMultiplier", ref Settings.LOSWidthBlocked, 0f, 10f );
          RangeCheck( "LOSMarkerBlockedMultiplier", ref Settings.LOSMarkerBlockedMultiplier, 0f, 10f );
          RangeCheck( "ArcLineSegments", ref Settings.ArcLinePoints, 1, 1000 );
          Parse( ref Settings.LOSMeleeColor );
@@ -33,7 +34,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          bool TwoSectionsLOS = Settings.LOSBlockedPreDotted != Settings.LOSBlockedPostDotted || Settings.LOSBlockedPreColor != Settings.LOSBlockedPostColor;
 
-         if ( Settings.LOSWidthMultiplier != 1f || Settings.LOSWidthBlockedMultiplier != 1f || Settings.LOSMarkerBlockedMultiplier != 1f )
+         if ( Settings.LOSWidth != 0f || Settings.LOSWidthBlocked != 0f || Settings.LOSMarkerBlockedMultiplier != 1f )
             Patch( Indicator, "Init", null, "ResizeLOS" );
          if ( SolidLinesChanged || Settings.LOSNoAttackColor != null || ! Settings.LOSNoAttackDotted )
             Patch( Indicator, "Init", null, "CreateLOSTexture" );
@@ -59,32 +60,31 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ResizeLOS ( WeaponRangeIndicators __instance ) {
          WeaponRangeIndicators me = __instance;
          if ( me.LOSWidthBegin == newScale ) return;
-         Log( "Scaling LOS width by {0} and {1}", Settings.LOSWidthMultiplier, Settings.LOSWidthBlockedMultiplier );
+         Log( "Setting LOS width to {0} and {1}", Settings.LOSWidth, Settings.LOSWidthBlocked );
 
-         float scale = Settings.LOSWidthMultiplier;
-         if ( scale != 1f ) {
+         float width = Settings.LOSWidth;
+         if ( width > 0f ) {
             // Scale solid line width
-            me.LOSWidthBegin *= scale;
-            me.LOSWidthEnd *= scale;
+            me.LOSWidthBegin = width;
+            me.LOSWidthEnd = width;
             newScale = me.LOSWidthBegin;
             // Scale Out of Range line width, when line is solid
-            me.LineTemplate.startWidth *= scale;
-            me.LineTemplate.endWidth *= scale;
+            me.LineTemplate.startWidth = width;
+            me.LineTemplate.endWidth = width;
             // Scale all dotted lines
             Vector2 s = me.MaterialOutOfRange.mainTextureScale;
-            s.x /= scale;
+            s.x /= width;
             me.MaterialOutOfRange.mainTextureScale = s;
          }
 
-         scale = Settings.LOSWidthBlockedMultiplier;
-         if ( scale != 1f )
-            me.LOSWidthBlocked *= scale;
+         if ( Settings.LOSWidthBlocked > 0f )
+            __instance.LOSWidthBlocked = Settings.LOSWidthBlocked;
 
-         scale = Settings.LOSMarkerBlockedMultiplier;
-         if ( scale != 1f ) {
+         width = Settings.LOSMarkerBlockedMultiplier;
+         if ( width != 1f ) {
             Vector3 zoom = me.CoverTemplate.transform.localScale;
-            zoom.x *= scale;
-            zoom.y *= scale;
+            zoom.x *= width;
+            zoom.y *= width;
             me.CoverTemplate.transform.localScale = zoom;
          }
       }
@@ -203,9 +203,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          mat.color = newColour;
          // Blocked Post scale need to be override if normal width is not same as blocked width
-         if ( name == "BlockedPost" && dotted && Settings.LOSWidthMultiplier != Settings.LOSWidthBlockedMultiplier ) {
+         if ( name == "BlockedPost" && dotted && Settings.LOSWidth != Settings.LOSWidthBlocked ) {
             Vector2 s = mat.mainTextureScale;
-            s.x *= Settings.LOSWidthMultiplier / Settings.LOSWidthBlockedMultiplier;
+            s.x *= Settings.LOSWidth / Settings.LOSWidthBlocked;
             mat.mainTextureScale = s;
          }
          mat.name = name + "LOS";
@@ -223,7 +223,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = lineColor;
                me.LOSUnlockedTarget.a *= 0.8f;
             }
-            //Log( "Swapped to " + matIndex + " " + newMat.name );
+            Log( "Swapped to " + matIndex + " " + newMat.name );
             RestoreMat = true;
          }
       }
@@ -231,7 +231,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ ARCS ============
 
       private static float thisArcHeight;
-      private static readonly Vector3[] linePoints = new Vector3[18];
+      private static readonly Vector3[] linePoints = new Vector3[18]; // Must be at least 18 for game to copy points, which we will override
 
       public static bool OverrideGetPointsForArc ( ref Vector3[] __result, int numPoints, float minArcHeight, Vector3 begin, Vector3 end ) {
          if ( numPoints == 2 || numPoints == 18 ) {
