@@ -89,15 +89,5 @@ namespace Sheepy.AttackImprovementMod {
       public static bool Error ( object message ) { return modLog.Error( message ); }
       public static void Error ( string message ) { modLog.Error( message ); }
       public static void Error ( string message, params object[] args ) { modLog.Error( message, args ); }
-
-      // ============ Game States ============
-
-      public static void GameInit ( GameInstance __instance ) {
-         HashSet<string> owners = new HashSet<string>();
-         foreach ( MethodBase method in PatchProcessor.AllPatchedMethods() )
-            owners.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
-         foreach ( string owner in owners )
-            Log( owner );
-      }
    }
 }

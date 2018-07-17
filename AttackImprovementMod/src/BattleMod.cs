@@ -85,8 +85,7 @@ namespace Sheepy.BattleTechMod {
 
       // Override this method to override Namd and Id
       protected virtual void Setup () {
-         if ( Logger.LogFile != Logger.BTML_LOG.LogFile )
-            Logger.Delete();
+         Logger.Delete();
          Logger.Log( "{2} Loading {0} Version {1} In {3}" + Environment.NewLine, Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
       }
 
@@ -151,7 +150,7 @@ namespace Sheepy.BattleTechMod {
          if ( BattleModsPatched ) return;
          string oldLog = Logger.LogFile;
          Logger.LogFile = Logger.BTML_LOG.LogFile;
-         Patch( typeof( MessageCenter ).GetConstructor( new Type[]{ } ), null, typeof( BattleMod ).GetMethod( "RunGameStarts", Static | NonPublic ) );
+         Patch( typeof( UnityGameInstance ).GetMethod( "InitUserSettings", Instance | NonPublic ), null, typeof( BattleMod ).GetMethod( "RunGameStarts", Static | NonPublic ) );
          Patch( typeof( SimGameState ).GetMethod( "Init" ), null, typeof( BattleMod ).GetMethod( "RunCampaignStarts", Static | NonPublic ) );
          Patch( typeof( CombatHUD ).GetMethod( "Init", new Type[]{ typeof( CombatGameState ) } ), null, typeof( BattleMod ).GetMethod( "RunCombatStarts", Static | NonPublic ) );
          BattleModsPatched = true;
@@ -160,6 +159,7 @@ namespace Sheepy.BattleTechMod {
 
       private static bool CalledGameStartsOnce = false;
       private static void RunGameStarts () {
+         BattleTechGame = UnityGameInstance.BattleTechGame;
          if ( ! CalledGameStartsOnce ) {
             CallAllModules( module => module.GameStartsOnce() );
             CalledGameStartsOnce = true;
@@ -169,8 +169,8 @@ namespace Sheepy.BattleTechMod {
 
       private static bool CalledCampaignStartsOnce = false;
       private static void RunCampaignStarts () {
-         Simulation = UnityGameInstance.BattleTechGame?.Simulation;
-         SimulationConstants = Simulation.Constants;
+         Simulation = BattleTechGame?.Simulation;
+         SimulationConstants = Simulation?.Constants;
          if ( ! CalledCampaignStartsOnce ) {
             CallAllModules( module => module.CampaignStartsOnce() );
             CalledCampaignStartsOnce = true;
@@ -179,9 +179,9 @@ namespace Sheepy.BattleTechMod {
       }
       
       private static bool CalledCombatStartsOnce = false;
-      private static void RunCombatStarts ( CombatHUD __instance ) {      
+      private static void RunCombatStarts ( CombatHUD __instance ) {
          HUD = __instance;
-         Combat = UnityGameInstance.BattleTechGame?.Combat;
+         Combat = BattleTechGame?.Combat;
          CombatConstants = Combat?.Constants;
          if ( ! CalledCombatStartsOnce ) {
             CallAllModules( module => module.CombatStartsOnce() );
@@ -199,10 +199,24 @@ namespace Sheepy.BattleTechMod {
             }
          }
       }
+
+      private static HashSet<string> owners;
+      public static string[] GetModList() {
+         if ( owners == null ) {
+            if ( BattleTechGame == null ) 
+               throw new InvalidOperationException( "Mod List is not known until GameStartsOnce." );
+            owners = new HashSet<string>();
+            foreach ( MethodBase method in PatchProcessor.AllPatchedMethods() )
+               owners.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
+         }
+         return owners.ToArray();
+      }
    }
 
    public abstract class BattleModModule {
-
+      
+      // Set on GameStarts
+      public static GameInstance BattleTechGame { get; internal set; }
       // Set on CampaignStarts
       public static SimGameState Simulation { get; internal set; }
       public static SimGameConstants SimulationConstants { get; internal set; }
@@ -211,13 +225,13 @@ namespace Sheepy.BattleTechMod {
       public static CombatGameConstants CombatConstants { get; internal set; }
       public static CombatHUD HUD { get; internal set; }
 
-      public virtual void ModStarts () { Logger.Log( "Mod Starts" ); }
+      public virtual void ModStarts () {}
       public virtual void GameStartsOnce () { }
-      public virtual void GameStarts () { Logger.Log( "Game Starts" ); }
+      public virtual void GameStarts () {}
       public virtual void CampaignStartsOnce () { }
-      public virtual void CampaignStarts () { Logger.Log( $"Campaign Starts {Simulation}" ); }
+      public virtual void CampaignStarts () {}
       public virtual void CombatStartsOnce () {}
-      public virtual void CombatStarts () { Logger.Log( $"Combat Starts {Combat}" ); }
+      public virtual void CombatStarts () {}
 
       protected BattleMod Mod { get; private set; }
 
@@ -429,6 +443,9 @@ namespace Sheepy.BattleTechMod {
       }
 
       public Exception Delete () {
+         if ( LogFile == "Mods/BTModLoader.log" || LogFile == "BattleTech_Data/output_log.txt" )
+            return new ApplicationException( "Cannot delete BTModLoader.log or BattleTech game log." );
+
          Exception result = null;
          try {
             File.Delete( LogFile );
