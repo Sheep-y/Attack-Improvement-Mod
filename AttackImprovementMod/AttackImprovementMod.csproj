@@ -64,7 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\Mod.cs" />
-    <Compile Include="src\ModBase.cs" />
+    <Compile Include="src\BattleMod.cs" />
     <Compile Include="src\ModSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\modules\AttackLog.cs" />
