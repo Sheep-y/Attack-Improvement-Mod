@@ -5,9 +5,10 @@ using System.Reflection;
 using System;
 using UnityEngine.EventSystems;
 using UnityEngine;
-using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using static ArmorLocation;
+   using static BindingFlags;
    using static Mod;
 
    public class HitLocation : BattleModModule {
@@ -38,6 +39,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechGetHit, "OverrideMechCalledShot", null );
             Patch( VehicleGetHit, "OverrideVehicleCalledShot", null );
          }
+         if ( Settings.FixGreyHeadDisease )
+            Patch( MechGetHit, null, "FixGreyHeadDisease" );
 
          if ( Settings.FixVehicleCalledShot ) {
             // Store popup location
@@ -57,18 +60,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static bool ClusterChanceNeverMultiplyHead = true;
       private static float ClusterChanceOriginalLocationMultiplier = 1f;
+      private static Dictionary< Dictionary<ArmorLocation, int>, int > HeadHitWeights;
+
       public override void CombatStarts () {
          ClusterChanceNeverMultiplyHead = CombatConstants.ToHit.ClusterChanceNeverMultiplyHead;
          ClusterChanceOriginalLocationMultiplier = CombatConstants.ToHit.ClusterChanceOriginalLocationMultiplier;
+         if ( HeadHitWeights == null ) {
+            HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
+            foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
+               if ( direction == AttackDirection.None ) continue;
+               Dictionary<ArmorLocation, int> hitTable = Combat.HitLocation.GetMechHitTable( direction );
+               if ( ! hitTable.TryGetValue( Head, out int head ) || head == 0 ) continue;
+               HeadHitWeights.Add( hitTable, head );
+            }
+         }
       }
 
       // ============ UTILS ============
 
       internal static float FixMultiplier ( ArmorLocation location, float multiplier ) {
-         if ( location == ArmorLocation.None ) return 0;
+         if ( location == None ) return 0;
          if ( Settings.MechCalledShotMultiplier != 1.0f )
             multiplier *= Settings.MechCalledShotMultiplier;
-         if ( location == ArmorLocation.Head && CallShotClustered && ClusterChanceNeverMultiplyHead )
+         if ( location == Head && CallShotClustered && ClusterChanceNeverMultiplyHead )
             return multiplier * ClusterChanceOriginalLocationMultiplier;
          return multiplier;
       }
@@ -141,6 +155,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                return location.Key;
          }
          throw new ApplicationException( "No valid hit location. Enable logging to see hitTable." );
+      }
+
+      // ============ Haed Shot immunity ============
+
+      // Not the most efficient fix since it is called per shot - same as the bugged head removal code - but this is dead simple
+      public static void FixGreyHeadDisease ( Dictionary<ArmorLocation, int> hitTable ) {
+         // Re-attach missing head after hit location is rolled 
+         if ( ! hitTable.ContainsKey( Head ) && HeadHitWeights.ContainsKey( hitTable ) )
+            hitTable.Add( Head, HeadHitWeights[ hitTable ] );
       }
 
       // ============ Vehicle Called Shot ============
