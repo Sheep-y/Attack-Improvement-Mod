@@ -5,6 +5,7 @@ using System;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using System.Reflection;
    using static HitLocation;
    using static Mod;
 
@@ -16,8 +17,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( NullIfEmpty( ref Settings.CalledChanceFormat ) != null )
             CalledShotHitChanceFormat = Settings.CalledChanceFormat;
 
+         Type CalledShot = typeof( CombatHUDCalledShotPopUp );
+         if ( Settings.FixBossHeadCalledShotDisplay ) {
+            if ( currentHitTableProp == null )
+               Error( "Cannot find CombatHUDCalledShotPopUp.currentHitTable, boss head called shot display not fixed. Boss should still be immune from headshot." );
+            else
+               Patch( CalledShot, "UpdateMechDisplay", NonPublic, "FixBossHead", "CleanupBossHead" );
+         }
+
          if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.CalledChanceFormat != null ) {
-            Type CalledShot = typeof( CombatHUDCalledShotPopUp );
             Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
             if ( Settings.ShowRealMechCalledShotChance || Settings.CalledChanceFormat != null )
@@ -35,6 +43,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static AttackDirection AttackDirection;
       public static void RecordAttackDirection ( AttackDirection value ) {
          AttackDirection = value;
+      }
+
+      // ============ Boss heads ============
+   
+      private static PropertyInfo currentHitTableProp = typeof( CombatHUDCalledShotPopUp ).GetProperty( "currentHitTable", NonPublic | Instance );
+      private static int? head = null;
+
+      public static void FixBossHead ( CombatHUDCalledShotPopUp __instance ) {
+         if ( __instance.DisplayedActor.CanBeHeadShot ) return;
+         Dictionary<ArmorLocation, int> currentHitTable = (Dictionary<ArmorLocation, int>) currentHitTableProp.GetValue( __instance, null );
+         if ( ! ( currentHitTable?.ContainsKey( ArmorLocation.Head ) ?? false ) ) return;
+         head = currentHitTable[ ArmorLocation.Head ];
+         currentHitTable[ ArmorLocation.Head ] = 0;
+      }
+
+      public static void CleanupBossHead ( CombatHUDCalledShotPopUp __instance ) {
+         if ( head == null ) return;
+         Dictionary<ArmorLocation, int> currentHitTable = (Dictionary<ArmorLocation, int>) currentHitTableProp.GetValue( __instance, null );
+         currentHitTable[ ArmorLocation.Head ] = head.GetValueOrDefault( 1 );
       }
 
       // ============ HUD Override ============

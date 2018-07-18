@@ -522,7 +522,7 @@ namespace Sheepy.BattleTechMod {
    [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonComment : Attribute {
       public string[] Comments;
-      public JsonComment ( string comment ) { Comments = new string[]{ comment ?? String.Empty }; }
+      public JsonComment ( string comment ) { Comments = comment?.Split( '\n' ) ?? new string[]{ String.Empty }; }
       public JsonComment ( string[] comments ) { Comments = comments ?? new string[]{}; }
    }
 

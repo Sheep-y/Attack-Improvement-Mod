@@ -157,8 +157,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          throw new ApplicationException( "No valid hit location. Enable logging to see hitTable." );
       }
 
-      // ============ Haed Shot immunity ============
-
       // Not the most efficient fix since it is called per shot - same as the bugged head removal code - but this is dead simple
       public static void FixGreyHeadDisease ( Dictionary<ArmorLocation, int> hitTable ) {
          // Re-attach missing head after hit location is rolled 
