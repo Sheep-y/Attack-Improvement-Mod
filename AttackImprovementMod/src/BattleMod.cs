@@ -307,10 +307,6 @@ namespace Sheepy.BattleTechMod {
       }
 
       protected void Patch ( MethodBase patched, string prefix, string postfix ) {
-         if ( patched == null ) {
-            Logger.Error( "Method not found. Cannot patch [ {0} : {1} ]", prefix, postfix );
-            return;
-         }
          HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
          if ( pre == null && post == null ) return; // MakePatch would have reported method not found
          Patch( patched, pre, post );
@@ -321,10 +317,15 @@ namespace Sheepy.BattleTechMod {
       }
 
       protected void Patch ( MethodBase patched, HarmonyMethod prefix, HarmonyMethod postfix ) {
+         string pre = prefix?.method?.Name, post = postfix?.method?.Name;
+         if ( patched == null ) {
+            Logger.Error( "Method not found. Cannot patch [ {0} : {1} ]", pre, post );
+            return;
+         }
          if ( Mod.harmony == null )
             Mod.harmony = HarmonyInstance.Create( Id );
          Mod.harmony.Patch( patched, prefix, postfix );
-         Logger.Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, prefix, postfix );
+         Logger.Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
       }
 
       // ============ UTILS ============

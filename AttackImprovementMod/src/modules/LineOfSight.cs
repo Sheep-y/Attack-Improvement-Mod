@@ -223,7 +223,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = lineColor;
                me.LOSUnlockedTarget.a *= 0.8f;
             }
-            Log( "Swapped to " + matIndex + " " + newMat.name );
+            //Log( "Swapped to " + matIndex + " " + newMat.name );
             RestoreMat = true;
          }
       }

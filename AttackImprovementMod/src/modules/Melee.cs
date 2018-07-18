@@ -137,7 +137,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             case "inspired":
                Modifiers.Add( "INSPIRED", () => Math.Max( 0f, Hit.GetAttackerAccuracyModifier( us ) ) ); break;
 
-            case "obsruction" :
+            case "obstruction" :
                Modifiers.Add( "OBSTRUCTED", () => Hit.GetCoverModifier( us, they, HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( they ).LOFLevel ) ); break;
 
             case "refire":

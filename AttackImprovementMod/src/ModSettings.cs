@@ -87,6 +87,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Enable Vehicle Called Shot, which the game did not implement fully. Default true." ) ]
       public bool FixVehicleCalledShot = true;
 
+      [ JsonComment( "Did you know you can called shot the head of headshot immune boss?  It last until it is really attacked.  And, surprise, it won't have any effect!" ) ]
+      public bool FixBossHeadCalledShot = true;
+
       [ JsonComment( "Enable clustering effect for called shots against mechs. Default true." ) ]
       public bool CalledShotUseClustering = true;
 
@@ -115,7 +118,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
        [ JsonSection( "To Hit Modifiers" ) ]
       //
 
-      [ JsonComment( "Allow bonus total modifier to increase hit chance.  Defaul true." ) ]
+      [ JsonComment( "Allow bonus total modifier to increase hit chance.  Default true." ) ]
       public bool AllowNetBonusModifier = true;
 
       [ JsonComment( "Allow attacks from low ground to high ground to incur accuracy penalty." ) ]
@@ -159,9 +162,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "To Hit Rolls" ) ]
       //
 
-      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below." ) ]
-      public bool FixHitDistribution = true;
-
       [ JsonComment( new String[]{
         "Increase or decrease roll correction strength.  0 to disable roll correction, 1 is original strength, max is 2 for double strength.",
         "Default is 0.5 for less correction." } ) ]
@@ -188,6 +188,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string HitChanceFormat = "";
 
       //
+      [ JsonSection( "Hit Locations" ) ]
+      //
+
+      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below." ) ]
+      public bool FixHitDistribution = true;
+
+      [ JsonComment( "Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game." ) ]
+      public bool FixGreyHeadDisease = true;
+
+      //
       [ JsonSection( "Melee and DFA" ) ]
       //
 
@@ -211,7 +221,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( new String[]{
         "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
         "Default \"DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy\".",
-        "Other options are \"ArmMounted,Obsruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain\"." } ) ]
+        "Other options are \"ArmMounted,Obstruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain\"." } ) ]
       public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
 
       //
