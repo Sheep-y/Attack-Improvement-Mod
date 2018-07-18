@@ -43,9 +43,9 @@ namespace Sheepy.BattleTechMod {
 
       public string BaseDir { get; protected set; }
       private string _LogDir;
-      protected string LogDir { 
+      public string LogDir { 
          get { return _LogDir; }
-         set {
+         protected set {
             _LogDir = value;
             Logger.LogFile = GetLogFile();
          }

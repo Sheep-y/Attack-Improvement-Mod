@@ -12,10 +12,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static readonly Dictionary<string, BattleModModule> modules = new Dictionary<string, BattleModModule>();
 
       public static void Init ( string directory, string settingsJSON ) {
-         new Mod().Start( ref modLog );
+         new Mod().Start( ref ModLog );
       }
 
       public override void ModStarts () {
+         ModLogDir = LogDir;
          LoadSettings<ModSettings>( ref Settings, SanitizeSettings );
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
 
@@ -70,18 +71,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Logging ============
 
-      private static Logger modLog = Logger.BTML_LOG;
+      internal static string ModLogDir = "";
+      internal static Logger ModLog = Logger.BTML_LOG;
 
-      public static void Log ( object message ) { modLog.Log( message ); }
-      public static void Log ( string message = "" ) { modLog.Log( message ); }
-      public static void Log ( string message, params object[] args ) { modLog.Log( message, args ); }
+      public static void Log ( object message ) { ModLog.Log( message ); }
+      public static void Log ( string message = "" ) { ModLog.Log( message ); }
+      public static void Log ( string message, params object[] args ) { ModLog.Log( message, args ); }
       
-      public static void Warn ( object message ) { modLog.Warn( message ); }
-      public static void Warn ( string message ) { modLog.Warn( message ); }
-      public static void Warn ( string message, params object[] args ) { modLog.Warn( message, args ); }
+      public static void Warn ( object message ) { ModLog.Warn( message ); }
+      public static void Warn ( string message ) { ModLog.Warn( message ); }
+      public static void Warn ( string message, params object[] args ) { ModLog.Warn( message, args ); }
 
-      public static bool Error ( object message ) { return modLog.Error( message ); }
-      public static void Error ( string message ) { modLog.Error( message ); }
-      public static void Error ( string message, params object[] args ) { modLog.Error( message, args ); }
+      public static bool Error ( object message ) { return ModLog.Error( message ); }
+      public static void Error ( string message ) { ModLog.Error( message ); }
+      public static void Error ( string message, params object[] args ) { ModLog.Error( message, args ); }
    }
 }

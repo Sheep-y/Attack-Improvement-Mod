@@ -10,7 +10,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class AttackLog : BattleModModule {
 
-      internal static Logger ROLL_LOG = new Logger( "Log_Attack.txt" );
+      internal static Logger ROLL_LOG;
 
       private static bool LogShot, LogLocation, LogCritical;
       private static bool PersistentLog = false;
@@ -53,12 +53,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void InitLog () {
+         ROLL_LOG = new Logger( ModLogDir + "Log_Attack.txt" );
+         attackIdGenerator = new Random();
+
          if ( ! PersistentLog )
             ROLL_LOG.Delete();
          
          if ( ! ROLL_LOG.Exists() ) {
             StringBuilder logBuffer = new StringBuilder();
-            logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Actor Team", "Actor Pilot", "Actor Unit", "Target Team", "Target Pilot", "Target Unit", "Direction" } ) );
+            logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Actor Team", "Actor Pilot", "Actor Unit", "Target Team", "Target Pilot", "Target Unit", "Combat Id", "Attack Id", "Direction", "Range" } ) );
             if ( LogShot || PersistentLog ) {
                logBuffer.Append( '\t' ).Append( String.Join( "\t", new string[]{ "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
                if ( LogLocation || PersistentLog )
@@ -149,12 +152,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Attack Log ============
 
       internal static string thisAttack = "";
+      internal static Random attackIdGenerator; // Use an independent generator to Make sure we don't affect the game's own RNG in any way.
 
       public static void RecordAttack ( AttackDirector.AttackSequence __instance ) {
          AttackDirector.AttackSequence me = __instance;
          string time = DateTime.Now.ToString( "s" );
          AttackDirection direction = Combat.HitLocation.GetAttackDirection( me.attackPosition, me.target );
-         thisAttack = time + '\t' + TeamAndCallsign( me.attacker ) + TeamAndCallsign( me.target ) + direction;
+         byte[] buffer = new byte[64];
+         float range = ( me.attacker.CurrentPosition - me.target.CurrentPosition ).magnitude;
+         attackIdGenerator.NextBytes( buffer );
+
+         thisAttack = 
+            time + '\t' + 
+            TeamAndCallsign( me.attacker ) +         // Attacker team, pilot, mech
+            TeamAndCallsign( me.target ) +           // Target team, pilot, mech
+            Combat.GUID + '\t' +                     // Combat Id
+            BitConverter.ToString( buffer ) + '\t' + // Attack Id
+            direction + '\t' +
+            range;
          if ( ! LogShot )
             log.Add( thisAttack );
       }
