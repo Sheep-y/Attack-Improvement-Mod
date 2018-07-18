@@ -54,7 +54,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void InitLog () {
          ROLL_LOG = new Logger( ModLogDir + "Log_Attack.txt" );
-         attackIdGenerator = new Random();
+         idGenerator = new Random();
 
          if ( ! PersistentLog )
             ROLL_LOG.Delete();
@@ -78,9 +78,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             hitMap = new Dictionary<string, int>( 16 );
       }
 
+      private static string thisCombatId = String.Empty;
       private bool LoggerPatched = false;
 
       public override void CombatStarts () {
+         thisCombatId = GetNewId();
+
          if ( LoggerPatched ) return;
          LoggerPatched = true;
 
@@ -107,21 +110,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ UTILS ============
 
       private static Dictionary<string, int> hitMap; // Used to assign critical hit information
-      private static List<string> log = new List<string>( 64 );
+      private static List<string> log = new List<string>( 32 );
 
       public static void WriteRollLog ( AttackDirector __instance ) {
          if ( __instance != null && __instance.IsAnyAttackSequenceActive )
             return; // Defer if Multi-Target is not finished
-         StringBuilder logBuffer = new StringBuilder();
-         foreach ( string line in log )
-            logBuffer.Append( line ).Append( "\r\n" );
-         ROLL_LOG.Log( logBuffer.ToString() );
+         ROLL_LOG.Log( String.Join( Environment.NewLine, log.ToArray() ) );
          log.Clear();
          hitMap?.Clear();
       }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
          return typeof( BattleTech.HitLocation ).GetMethod( "GetHitLocation", Public | Static ).MakeGenericMethod( generic );
+      }
+      
+      internal static Random idGenerator; // Use an independent generator to Make sure we don't affect the game's own RNG in any way.
+
+      public static string GetNewId () {
+         byte[] buffer = new byte[32];
+         idGenerator.NextBytes( buffer );
+         return BitConverter.ToString( buffer ).Replace( "-", "" );
       }
 
       public static string TeamAndCallsign ( ICombatant who ) {
@@ -152,22 +160,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Attack Log ============
 
       internal static string thisAttack = "";
-      internal static Random attackIdGenerator; // Use an independent generator to Make sure we don't affect the game's own RNG in any way.
 
       public static void RecordAttack ( AttackDirector.AttackSequence __instance ) {
          AttackDirector.AttackSequence me = __instance;
          string time = DateTime.Now.ToString( "s" );
          AttackDirection direction = Combat.HitLocation.GetAttackDirection( me.attackPosition, me.target );
-         byte[] buffer = new byte[64];
-         float range = ( me.attacker.CurrentPosition - me.target.CurrentPosition ).magnitude;
-         attackIdGenerator.NextBytes( buffer );
+         float range = ( me.attackPosition - me.target.CurrentPosition ).magnitude;
 
          thisAttack = 
             time + '\t' + 
             TeamAndCallsign( me.attacker ) +         // Attacker team, pilot, mech
             TeamAndCallsign( me.target ) +           // Target team, pilot, mech
-            Combat.GUID + '\t' +                     // Combat Id
-            BitConverter.ToString( buffer ) + '\t' + // Attack Id
+            thisCombatId + '\t' +                    // Combat Id
+            GetNewId() + '\t' +                      // Attack Id
             direction + '\t' +
             range;
          if ( ! LogShot )
