@@ -15,6 +15,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool LogShot, LogLocation, LogDamage, LogCritical;
       private static bool PersistentLog = false;
 
+      private static readonly Type MechType = typeof( Mech );
+      private static readonly Type VehiType = typeof( Vehicle );
+      private static readonly Type TurtType = typeof( Turret );
+      private static readonly Type BuldType = typeof( BattleTech.Building );
+
       public override void ModStarts () {
          PersistentLog = Settings.PersistentLog;
          // Patch prefix early to increase chance of successful capture in face of other mods
@@ -22,11 +27,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             case "all":
             case "critical":
                LogCritical = true;
-               Patch( typeof( Mech ), "CheckForCrit", NonPublic, "LogCritComp", null );
+               Patch( MechType, "CheckForCrit", NonPublic, "LogCritComp", null );
                goto case "damage";
 
             case "damage":
-               Patch( typeof( Mech ), "DamageLocation", NonPublic, "RecordMechDamage", null );
+               Patch( MechType, "DamageLocation", NonPublic, "RecordMechDamage", null );
+               Patch( VehiType, "DamageLocation", NonPublic, "RecordVehicleDamage", null );
+               Patch( TurtType, "DamageLocation", NonPublic, "RecordTurretDamage", null );
+               Patch( BuldType, "DamageBuilding", NonPublic, "RecordBuildingDamage", null );
                LogDamage = true;
                goto case "location";
 
@@ -74,7 +82,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                logBuffer.Append( "\tHit Location" );
             }
             if ( LogDamage || PersistentLog )
-               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Damage", "Last Damage At", "Armor Before", "Armor After", "HP Before", "HP After" } ) );
+               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Damage", "Stops At", "From Armor", "To Armor", "From HP", "To HP" } ) );
             if ( LogCritical || PersistentLog )
                logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
             log.Add( logBuffer.ToString() );
@@ -103,12 +111,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( LogLocation ) {
             Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
             Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
-            Patch( GetHitLocation( typeof( BuildingLocation ) ), null, "LogTurretHit" );
+            Patch( TurtType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogTurretHit" );
+            Patch( BuldType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogTurretHit" );
          }
 
-         Type MechType = typeof( Mech );
          if ( LogDamage ) {
             Patch( MechType, "DamageLocation", NonPublic, null, "LogMechDamage" );
+            Patch( VehiType, "DamageLocation", NonPublic, null, "LogVehicleDamage" );
+            Patch( TurtType, "DamageLocation", NonPublic, null, "LogTurretDamage" );
+            Patch( BuldType, "DamageBuilding", NonPublic, null, "LogBuildingDamage" );
          }
 
          if ( LogCritical ) {
@@ -235,7 +246,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( GetShotLog() );
             if ( LogLocation ) {
-               Log( "MISS" );
+               // Log( "MISS" );
                logBuffer.Append( "\t--" + // Location Roll
                                  "\t--\t--\t--\t--" +  // Head & Torsos
                                  "\t--\t--\t--\t--" + // Limbs
@@ -273,15 +284,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             TryGet( hitTable, VehicleChassisLocations.Rear   ) + "\t--\t--\t--" );
       }
 
-      public static void LogTurretHit ( BuildingLocation __result, Dictionary<BuildingLocation, int> hitTable, float randomRoll, BuildingLocation bonusLocation, float bonusLocationMultiplier ) {
-         LogHitSequence( __result, randomRoll, bonusLocation, bonusLocationMultiplier,
-            TryGet( hitTable, BuildingLocation.Structure ) + "\t--\t--\t--\t--\t--\t--\t--\t" );
+      public static void LogTurretHit ( int __result, float hitLocationRoll, BuildingLocation calledShotLocation, float bonusMultiplier ) {
+         LogHitSequence( BuildingLocation.Structure, hitLocationRoll, calledShotLocation, bonusMultiplier, "1\t--\t--\t--\t--\t--\t--\t--\t" );
       }
 
       private static void LogHitSequence<T> ( T hitLocation, float randomRoll, T bonusLocation, float bonusLocationMultiplier, string line ) { try {
          line = GetShotLog() + "\t" + randomRoll + "\t" + line + "\t" + bonusLocation + "\t" + bonusLocationMultiplier + "\t" + hitLocation;
          if ( LogDamage ) {
-            Log( "HIT " + GetShotLog() + " >>> " + log.Count );
+            // Log( "HIT " + GetShotLog() + " >>> " + log.Count );
             hitList.Add( log.Count );
             if ( hitMap != null ) {
                string key = GetHitKey( thisWeapon, hitLocation, thisSequenceTargetId );
@@ -307,54 +317,80 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool damageResolved;
 
       public static void RecordMechDamage ( Mech __instance, ArmorLocation aLoc, float totalDamage ) {
-         if ( aLoc == ArmorLocation.None ) return;
-         lastLocation = aLoc.ToString();
-         if ( thisDamage == null ) {
-            Log( "DAMAGE " + aLoc + " with " + totalDamage );
-            thisDamage = totalDamage;
-         } else {
-            Log( "DAMAGE " + aLoc );
-         }
-         beforeArmour = __instance.GetCurrentArmor( aLoc );
-         beforeStruct = __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) );
+         if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
+         RecordUnitDamage( aLoc.ToString(), totalDamage,
+            __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
+      }
+
+      public static void RecordVehicleDamage ( Vehicle __instance, VehicleChassisLocations vLoc, float totalDamage ) {
+         if ( vLoc == VehicleChassisLocations.None || vLoc == VehicleChassisLocations.Invalid ) return;
+         RecordUnitDamage( vLoc.ToString(), totalDamage, __instance.GetCurrentArmor( vLoc ), __instance.GetCurrentStructure( vLoc ) );
+      }
+
+      public static void RecordTurretDamage ( Turret __instance, BuildingLocation bLoc, float totalDamage ) {
+         if ( bLoc == BuildingLocation.None || bLoc == BuildingLocation.Invalid ) return;
+         RecordUnitDamage( bLoc.ToString(), totalDamage, __instance.GetCurrentArmor( bLoc ), __instance.GetCurrentStructure( bLoc ) );
+      }
+
+      public static void RecordBuildingDamage ( BattleTech.Building __instance, float totalDamage ) {
+         RecordUnitDamage( "Structure", totalDamage, 0, __instance.CurrentStructure );
+      }
+
+      private static void RecordUnitDamage ( string loc, float totalDamage, float armour, float structure ) {
+         lastLocation = loc;
+         if ( thisDamage == null ) thisDamage = totalDamage;
+         beforeArmour = armour;
+         beforeStruct = structure;
          damageResolved = false;
       }
 
-      public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc, Weapon weapon ) { try {
-         if ( aLoc == ArmorLocation.None || damageResolved ) return;
-         Log( "DONE DAMAGE " + aLoc + " of " + thisDamage );
+      public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc ) {
+         if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
+         LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
+      }
+
+      public static void LogVehicleDamage ( Vehicle __instance, VehicleChassisLocations vLoc ) {
+         if ( vLoc == VehicleChassisLocations.None || vLoc == VehicleChassisLocations.Invalid ) return;
+         LogActorDamage( __instance.GetCurrentArmor( vLoc ), __instance.GetCurrentStructure( vLoc ) );
+      }
+
+      public static void LogTurretDamage ( Turret __instance, BuildingLocation bLoc ) {
+         if ( bLoc == BuildingLocation.None || bLoc == BuildingLocation.Invalid ) return;
+         LogActorDamage( __instance.GetCurrentArmor( bLoc ), __instance.GetCurrentStructure( bLoc ) );
+      }
+
+      public static void LogBuildingDamage ( BattleTech.Building __instance ) {
+         LogActorDamage( 0, __instance.CurrentStructure );
+      }
+
+      private static void LogActorDamage ( float afterArmour, float afterStruct ) { try {
+         if ( damageResolved ) return;
          damageResolved = true;
-         //string key = GetHitKey( weapon.GUID, aLoc, __instance.GUID );
-         float afterArmour = __instance.GetCurrentArmor( aLoc );
-         float afterStruct = __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) );
          if ( hitList.Count <= 0 ) {
             Warn( "Damage Log cannot find matching hit record." );
             return;
          }
          string line = log[ hitList[0] ];
-
          if ( LogCritical )
             line = line.Substring( 0, line.Length - CritDummy.Length + 1 );
+
          line = line.Substring( 0, line.Length - DamageDummy.Length + 1 ) +
-               thisDamage + "\t" +
-               lastLocation + "\t" +
-               beforeArmour + "\t" +
-               afterArmour + "\t" +
-               beforeStruct + "\t" +
-               afterStruct + "\t";
+               thisDamage   + "\t" + lastLocation + "\t" +
+               beforeArmour + "\t" + afterArmour  + "\t" +
+               beforeStruct + "\t" + afterStruct  + "\t";
+
          if ( LogCritical )
             line += CritDummy.Length;
-
-         thisDamage = null;
          log[ hitList[0] ] = line;
          hitList.RemoveAt( 0 );
+         thisDamage = null;
       }                 catch ( Exception ex ) { Error( ex ); } }
       
 
       // ============ Crit Log ============
 
       private const string CritDummy = 
-         "\t--" +               // Max HP
+         "\t--" +             // Max HP
          "\t--\t--\t--\t--" + // Crit Roll and %
          "\t--\t--\t--" +     // Slot info
          "\t--\t--";          // Crit Result
