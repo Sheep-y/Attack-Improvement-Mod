@@ -69,10 +69,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void InitLog () {
          ROLL_LOG = new Logger( ModLogDir + "Log_Attack.txt" );
          idGenerator = new Random();
+         thisSequenceId = GetNewId();
 
          if ( ! PersistentLog )
             ROLL_LOG.Delete();
-         
+
          if ( ! ROLL_LOG.Exists() ) {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Actor Team", "Actor Pilot", "Actor Unit", "Target Team", "Target Pilot", "Target Unit", "Combat Id", "Attack Id", "Direction", "Range" } ) );
@@ -114,6 +115,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
             Patch( TurtType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
             Patch( BuldType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
+            Patch( TurtType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
             Patch( BuldType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
          }
 
@@ -148,6 +150,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          log.Clear();
          hitList?.Clear();
          hitMap?.Clear();
+         thisSequenceId = GetNewId();
       }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
@@ -194,6 +197,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Attack Log ============
 
       internal static string thisSequence = "";
+      internal static string thisSequenceId = "";
       internal static string thisSequenceTargetId = "";
 
       public static void RecordAttack ( AttackDirector.AttackSequence __instance ) {
@@ -208,7 +212,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             TeamAndCallsign( me.attacker ) +         // Attacker team, pilot, mech
             TeamAndCallsign( me.target ) +           // Target team, pilot, mech
             thisCombatId + "\t" +                    // Combat Id
-            GetNewId() + "\t" +                      // Attack Id
+            thisSequenceId + "\t" +                  // Attack Id
             direction + "\t" +
             range;
          if ( ! LogShot )
@@ -231,7 +235,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static float thisStreak;
 
       public static void RecordAttackRoll ( float roll, Team team ) {
-         Log( "Roll = " + roll );
+         //Log( "Roll = " + roll );
          thisRoll = roll;
          thisStreak = team?.StreakBreakingValue ?? 0;
       }
@@ -249,7 +253,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( GetShotLog() );
             if ( LogLocation ) {
-               Log( "MISS" );
+               //Log( "MISS" );
                logBuffer.Append( "\t--" + // Location Roll
                                  "\t--\t--\t--\t--" +  // Head & Torsos
                                  "\t--\t--\t--\t--" + // Limbs
@@ -292,14 +296,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void LogBuildingClusterHit ( int __result, float randomRoll ) {
-         LogHitSequence( BuildingLocation.Structure.ToString(), randomRoll, "(Cluster)", 0, "1\t--\t--\t--\t--\t--\t--\t--" );
+         LogHitSequence( BuildingLocation.Structure.ToString(), randomRoll, "None", 0, "1\t--\t--\t--\t--\t--\t--\t--" );
       }
-      
 
       private static void LogHitSequence<T> ( T hitLocation, float randomRoll, T bonusLocation, float bonusLocationMultiplier, string line ) { try {
          line = GetShotLog() + "\t" + randomRoll + "\t" + line + "\t" + bonusLocation + "\t" + bonusLocationMultiplier + "\t" + hitLocation;
          if ( LogDamage ) {
-            Log( "HIT " + GetShotLog() + " >>> " + log.Count );
+            //Log( "HIT " + GetShotLog() + " >>> " + log.Count );
             hitList.Add( log.Count );
             if ( hitMap != null ) {
                string key = GetHitKey( thisWeapon, hitLocation, thisSequenceTargetId );
