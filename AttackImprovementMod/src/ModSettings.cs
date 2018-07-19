@@ -211,7 +211,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Break the restriction that one must stay still to melee adjacent mech." ) ]
       public bool UnlockMeleePositioning = true;
 
-      [ JsonComment( "Allow melee attack on sprint.  Default false." ) ]
+      /* [ JsonComment( "Allow melee attack on sprint.  Default false." ) ]
       public bool AllowChargeAttack = false;
 
       [ JsonComment( "Fire support weapon after sprint.  Default false." ) ]
@@ -222,7 +222,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       /**/
 
       [ JsonComment( new String[]{
-        "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
+        "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order will be followed, and letter case does not matter.",
         "Default \"DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy\".",
         "Other options are \"ArmMounted,Obstruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain\"." } ) ]
       public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
