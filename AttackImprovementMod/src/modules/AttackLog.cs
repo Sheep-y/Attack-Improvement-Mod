@@ -48,6 +48,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( AttackType, "GetIndividualHits", NonPublic, "RecordSequenceWeapon", null );
                Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordSequenceWeapon", null );
                Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", null );
+               Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", null );
                goto case "attack";
 
             case "attack":
@@ -111,8 +112,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( LogLocation ) {
             Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
             Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
-            Patch( TurtType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogTurretHit" );
-            Patch( BuldType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogTurretHit" );
+            Patch( TurtType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
+            Patch( BuldType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
+            Patch( BuldType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
          }
 
          if ( LogDamage ) {
@@ -229,6 +231,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static float thisStreak;
 
       public static void RecordAttackRoll ( float roll, Team team ) {
+         Log( "Roll = " + roll );
          thisRoll = roll;
          thisStreak = team?.StreakBreakingValue ?? 0;
       }
@@ -246,7 +249,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( GetShotLog() );
             if ( LogLocation ) {
-               // Log( "MISS" );
+               Log( "MISS" );
                logBuffer.Append( "\t--" + // Location Roll
                                  "\t--\t--\t--\t--" +  // Head & Torsos
                                  "\t--\t--\t--\t--" + // Limbs
@@ -284,14 +287,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             TryGet( hitTable, VehicleChassisLocations.Rear   ) + "\t--\t--\t--" );
       }
 
-      public static void LogTurretHit ( int __result, float hitLocationRoll, BuildingLocation calledShotLocation, float bonusMultiplier ) {
-         LogHitSequence( BuildingLocation.Structure, hitLocationRoll, calledShotLocation, bonusMultiplier, "1\t--\t--\t--\t--\t--\t--\t--\t" );
+      public static void LogBuildingHit ( int __result, float hitLocationRoll, BuildingLocation calledShotLocation, float bonusMultiplier ) {
+         LogHitSequence( BuildingLocation.Structure, hitLocationRoll, calledShotLocation, bonusMultiplier, "1\t--\t--\t--\t--\t--\t--\t--" );
       }
+
+      public static void LogBuildingClusterHit ( int __result, float randomRoll ) {
+         LogHitSequence( BuildingLocation.Structure.ToString(), randomRoll, "(Cluster)", 0, "1\t--\t--\t--\t--\t--\t--\t--" );
+      }
+      
 
       private static void LogHitSequence<T> ( T hitLocation, float randomRoll, T bonusLocation, float bonusLocationMultiplier, string line ) { try {
          line = GetShotLog() + "\t" + randomRoll + "\t" + line + "\t" + bonusLocation + "\t" + bonusLocationMultiplier + "\t" + hitLocation;
          if ( LogDamage ) {
-            // Log( "HIT " + GetShotLog() + " >>> " + log.Count );
+            Log( "HIT " + GetShotLog() + " >>> " + log.Count );
             hitList.Add( log.Count );
             if ( hitMap != null ) {
                string key = GetHitKey( thisWeapon, hitLocation, thisSequenceTargetId );
