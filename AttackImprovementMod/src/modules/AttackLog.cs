@@ -318,8 +318,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Damage Log ============
 
       private const string DamageDummy = 
-               "\t--\t--" +         // Damage and Last Location
-               "\t--\t--\t--\t--";  // Location Armour and HP
+                              "\t--\t--" +         // Damage and Last Location
+                              "\t--\t--\t--\t--";  // Location Armour and HP
 
       private static float? thisDamage = null;
       private static string lastLocation;
@@ -344,7 +344,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void RecordBuildingDamage ( BattleTech.Building __instance, float totalDamage ) {
-         RecordUnitDamage( "Structure", totalDamage, 0, __instance.CurrentStructure );
+         RecordUnitDamage( BuildingLocation.Structure.ToString(), totalDamage, 0, __instance.CurrentStructure );
       }
 
       private static void RecordUnitDamage ( string loc, float totalDamage, float armour, float structure ) {
@@ -388,10 +388,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          line = line.Substring( 0, line.Length - DamageDummy.Length + 1 ) +
                thisDamage   + "\t" + lastLocation + "\t" +
                beforeArmour + "\t" + afterArmour  + "\t" +
-               beforeStruct + "\t" + afterStruct  + "\t";
+               beforeStruct + "\t" + afterStruct;
 
          if ( LogCritical )
-            line += CritDummy.Length;
+            line += CritDummy;
          log[ hitList[0] ] = line;
          hitList.RemoveAt( 0 );
          thisDamage = null;
@@ -414,10 +414,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
-      private static float thisBaseCritChance, thisCritMultiplier, thisCritChance, thisLocationHP, thisLocationMaxHP;
+      private static float thisBaseCritChance, thisCritMultiplier, thisCritChance, thisLocationMaxHP;
       public static void RecordBaseCritChance ( float __result, Mech target, ChassisLocations hitLocation ) {
          thisBaseCritChance = __result;
-         thisLocationHP = target.GetCurrentStructure( hitLocation );
+         //thisLocationHP = target.GetCurrentStructure( hitLocation );
          thisLocationMaxHP = target.GetMaxStructure( hitLocation );
       }
       public static void RecordCritMultiplier ( float __result ) {
@@ -444,12 +444,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
-      public static void LogCritComp ( ChassisLocations location, Weapon weapon ) {
-         thisCritSlot = -1;
-         thisCritComp = null;
-         halfFullAmmo = false;
-      }
-
       public static void LogCritResult ( ChassisLocations location, Weapon weapon ) { try {
          string key = ""; // GetHitKey( location );
          if ( ( ! hitMap.TryGetValue( key, out int lineIndex ) ) ) {
@@ -461,31 +455,30 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Warn( "Critical Hit Log found duplicate crit: " + key );
             return;
          }
-         string critLine = 
-               thisLocationHP + "\t" +
-               thisLocationMaxHP + "\t" +
-               thisCritRoll + "\t" +
-               thisBaseCritChance + "\t" +
-               thisCritMultiplier + "\t" +
-               thisCritChance + "\t";
+         string critLine = "\t" + thisLocationMaxHP +
+                           "\t" + thisCritRoll +
+                           "\t" + thisBaseCritChance +
+                           "\t" + thisCritMultiplier +
+                           "\t" + thisCritChance;
          if ( thisCritSlot < 0 )
-            critLine += "--\t--\t(No Crit)\t--\t--";
+            critLine += "\t--\t--\t(No Crit)\t--\t--";
          else {
-            critLine += 
-               thisCritSlotRoll + "\t" + 
-               ( thisCritSlot + 1 ) + "\t";
+            critLine += "\t" + thisCritSlotRoll +
+                        "\t" + ( thisCritSlot + 1 );
             if ( thisCritComp == null )
-               critLine += "(Empty)\t--\t--";
+               critLine += "\t(Empty)\t--\t--";
             else {
                string thisCompAfter = thisCritComp is AmmunitionBox && halfFullAmmo ? "Explosion" : thisCritComp.DamageLevel.ToString();
-               critLine +=
-                  thisCritComp.UIName + "\t" +
-                  thisCompBefore + "\t" +
-                  thisCompAfter;
+               critLine += "\t" + thisCritComp.UIName +
+                           "\t" + thisCompBefore +
+                           "\t" + thisCompAfter;
             }
          }
          line = line.Substring( 0, line.Length - CritDummy.Length + 1 ) + critLine;
          log[ lineIndex ] = line;
+         thisCritSlot = -1;
+         thisCritComp = null;
+         halfFullAmmo = false;
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
