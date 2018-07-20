@@ -20,6 +20,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( SelectionStateJump ), "SetMeleeDest", BindingFlags.NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
          }
          */
+         if ( Settings.ShowBaseHitchance ) {
+            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", NonPublic, typeof( ICombatant ), "ShowBaseHitChance", null );
+            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "ShowBaseMeleeChance", null );
+         }
          if ( NullIfEmpty( ref Settings.MeleeAccuracyFactors ) != null ) {
             InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
             if ( Modifiers.Count > 0 ) {
@@ -84,6 +88,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result = pathNodesForPoints;
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      // ============ Base Chances ============
+
+      public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+         float baseChance = RollModifier.StepHitChance( Hit.GetBaseToHitChance( HUD.SelectedActor ) ) * 100;
+         __instance.ToolTipHoverElement.BuffStrings.Add( "Base Hit Chance +" + string.Format( "{0:0.#}%", baseChance ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ShowBaseMeleeChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+         if ( HUD.SelectedActor is Mech ) {
+            float baseChance = RollModifier.StepHitChance( Hit.GetBaseMeleeToHitChance( HUD.SelectedActor as Mech ) ) * 100;
+            __instance.ToolTipHoverElement.BuffStrings.Add( "Base Hit Chance +" + string.Format( "{0:0.#}%", baseChance ) );
+         }
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
 
       // ============ Melee Accuracy ============
 
@@ -224,10 +243,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          AttackPos = HUD.SelectionHandler.ActiveState.PreviewPos;
          bool isDFA = (bool) contemplatingDFA.Invoke( slot, new object[]{ target } );
          SaveStates( HUD.SelectedActor as Mech, target, slot.DisplayedWeapon, isDFA ? MeleeAttackType.DFA : MeleeAttackType.Punch );
-         if ( Settings.ShowBaseHitchance && HUD.SelectedActor is Mech ) {
-            float baseChance = RollModifier.StepHitChance( Hit.GetBaseMeleeToHitChance( HUD.SelectedActor as Mech ) ) * 100;
-            tip.BuffStrings.Add( "Base Hit Chance +" + string.Format( "{0:0.#}%", baseChance ) );
-         }
          int TotalModifiers = 0;
          foreach ( var modifier in Modifiers ) {
             AttackModifier mod = modifier();
