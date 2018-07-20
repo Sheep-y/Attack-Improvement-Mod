@@ -181,6 +181,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default is 5, same as game default." } ) ]
       public float MissStreakBreakerDivider = 5f;
 
+      [ JsonComment( "Display base hit chance in weapon mouseover hint.  Default true." ) ]
+      public bool ShowBaseHitchance = true;
+
       [ JsonComment( "Show corrected hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker.  Default false." ) ]
       public bool ShowCorrectedHitChance = false;
 

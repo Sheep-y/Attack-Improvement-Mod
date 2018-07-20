@@ -132,12 +132,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      private static float ClampHitChance( float chance ) {
+      public static float StepHitChance( float chance ) {
          float step = Settings.HitChanceStep;
          if ( step > 0f ) {
             chance += step/2f;
             chance -= chance % step;
          }
+         return chance;
+      }
+
+      public static float ClampHitChance( float chance ) {
+         chance = StepHitChance( chance );
          if      ( chance >= Settings.MaxFinalHitChance ) return Settings.MaxFinalHitChance;
          else if ( chance <= Settings.MinFinalHitChance ) return Settings.MinFinalHitChance;
          return chance;
