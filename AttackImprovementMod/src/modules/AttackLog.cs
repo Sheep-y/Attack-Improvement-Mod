@@ -15,6 +15,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool LogShot, LogLocation, LogDamage, LogCritical;
       private static bool PersistentLog = false;
 
+      private static readonly Type AttackType = typeof( AttackDirector.AttackSequence );
+      private static readonly Type ArtilleyAttackType = typeof( ArtillerySequence );
+
       private static readonly Type MechType = typeof( Mech );
       private static readonly Type VehiType = typeof( Vehicle );
       private static readonly Type TurtType = typeof( Turret );
@@ -43,14 +46,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
             case "shot":
                LogShot = true;
-               Type AttackType = typeof( AttackDirector.AttackSequence );
                Patch( AttackType, "GetIndividualHits", NonPublic, "RecordSequenceWeapon", null );
                Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordSequenceWeapon", null );
                Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", null );
                goto case "attack";
 
             case "attack":
-               Patch( typeof( AttackDirector.AttackSequence ), "GenerateToHitInfo", NonPublic, "RecordAttack", null );
+               Patch( ArtilleyAttackType, "PerformAttack", NonPublic, "RecordArtilleryAttack", null );
+               Patch( AttackType, "GenerateToHitInfo", NonPublic, "RecordAttack", null );
                Patch( typeof( AttackDirector ), "OnAttackComplete", null, "WriteRollLog" );
                InitLog();
                break;
@@ -106,7 +109,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          // Patch Postfix late to increase odds of capturing modded values
          if ( LogShot )
-            Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll" , NonPublic, null, "LogMissedAttack" );
+            Patch( AttackType, "GetCorrectedRoll" , NonPublic, null, "LogMissedAttack" );
 
          if ( LogLocation ) {
             Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
@@ -199,17 +202,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static string thisSequenceId = "";
       internal static string thisSequenceTargetId = "";
 
+      public static void RecordArtilleryAttack ( ArtillerySequence __instance, ICombatant target ) {
+         ArtillerySequence me = __instance;
+         Weapon weapon = me.ArtilleryWeapon;
+         float range = ( me.TargetPos - target.CurrentPosition ).magnitude;
+         BuildSequenceLine( weapon.parent, target, AttackDirection.FromArtillery, range );
+         RecordSequenceWeapon( me.ArtilleryWeapon, 1f );
+         RecordAttackRoll( 0f, null );
+      }
+
       public static void RecordAttack ( AttackDirector.AttackSequence __instance ) {
          AttackDirector.AttackSequence me = __instance;
-         string time = DateTime.Now.ToString( "s" );
          AttackDirection direction = Combat.HitLocation.GetAttackDirection( me.attackPosition, me.target );
          float range = ( me.attackPosition - me.target.CurrentPosition ).magnitude;
-         thisSequenceTargetId = me.target.GUID;
+         BuildSequenceLine( me.attacker, me.target, direction, range );
+      }
 
+      private static void BuildSequenceLine ( ICombatant attacker, ICombatant target, AttackDirection direction, float range ) {
+         string time = DateTime.Now.ToString( "s" );
+         thisSequenceTargetId = target.GUID;
          thisSequence = 
             time + "\t" + 
-            TeamAndCallsign( me.attacker ) +         // Attacker team, pilot, mech
-            TeamAndCallsign( me.target ) +           // Target team, pilot, mech
+            TeamAndCallsign( attacker ) +         // Attacker team, pilot, mech
+            TeamAndCallsign( target ) +           // Target team, pilot, mech
             thisCombatId + "\t" +                    // Combat Id
             thisSequenceId + "\t" +                  // Attack Id
             direction + "\t" +
@@ -224,11 +239,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static string thisWeaponName = "";
       internal static float thisHitChance;
 
-      public static void RecordSequenceWeapon ( AttackDirector.AttackSequence __instance, Weapon weapon, float toHitChance ) {
+      public static void RecordSequenceWeapon ( Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
          thisWeapon = weapon.GUID;
-         thisWeaponName = ( weapon.defId.StartsWith( "Weapon_" ) ? weapon.defId.Substring( 7 ) : weapon.defId );
-         //Log( $"GetIndividualHits & GetClusteredHits = {thisWeaponName} {thisWeapon}" );
+         string weaponDef = weapon?.defId ?? weapon?.UIName;
+         if ( weaponDef != null && weaponDef.StartsWith( "Weapon_" ) ) weaponDef = weaponDef.Substring( 7 );
+         thisWeaponName = weaponDef;
+         //Log( $"GetIndividualHits / GetClusteredHits / ArtillerySequence = {thisWeaponName} {thisWeapon}" );
       }
 
       internal static float thisRoll;
