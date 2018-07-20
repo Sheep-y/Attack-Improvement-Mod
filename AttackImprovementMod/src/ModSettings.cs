@@ -25,8 +25,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true." ) ]
       public bool ShowHeatAndStab = true;
 
-      [ JsonComment( "Fix the bug that walk / sprint may not accurately project correct line of sight / fire, due to a prediction point too close to the ground." ) ]
-      public bool FixNonJumpLosPreview = true;
+      [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
+      public bool FixLosPreviewHeight = true;
 
       /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
       public bool FixHeatPrediction = true;
@@ -148,7 +148,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool DiminishingHitChanceModifier = false;
 
       [ JsonComment( new String[]{
-        "Diminishing Bonus: 2-Base^(Bonus/Divisor).  Default 2-0.75^(Bonus/6) and caps at +16.",
+        "Diminishing Bonus: 2-Base^(Bonus/Divisor).  Default 2-0.8^(Bonus/6) and caps at +16.",
         "Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit" } ) ]
       public double DiminishingBonusPowerBase = 0.8f;
       public double DiminishingBonusPowerDivisor = 6f;
@@ -176,7 +176,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public float MissStreakBreakerThreshold = 0.5f;
 
       [ JsonComment( new String[]{
-        "Set miss streak breaker divider. Set to negative integer or zero to make it a (positive) constant %.",
+        "Set miss streak breaker divider.  Set to negative integer or zero to make it a constant bonus, e.g. -5 = 5% bonus per miss.",
         "Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.",
         "Default is 5, same as game default." } ) ]
       public float MissStreakBreakerDivider = 5f;

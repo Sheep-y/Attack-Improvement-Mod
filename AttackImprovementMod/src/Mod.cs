@@ -18,6 +18,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void ModStarts () {
          ModLogDir = LogDir;
          LoadSettings<ModSettings>( ref Settings, SanitizeSettings );
+         Log( "Do NOT change settings here. This is just a log." );
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
 
          if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
@@ -71,7 +72,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Logging ============
 
-      internal static string ModLogDir = "";
+      internal static string ModLogDir = ""; // A static variable for roll log
       internal static Logger ModLog = Logger.BTML_LOG;
 
       public static void Log ( object message ) { ModLog.Log( message ); }

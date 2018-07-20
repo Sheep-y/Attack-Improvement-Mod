@@ -55,7 +55,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
-         if ( Settings.FixNonJumpLosPreview )
+         if ( Settings.FixLosPreviewHeight )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
       }
 

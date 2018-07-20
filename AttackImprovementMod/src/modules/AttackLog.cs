@@ -149,7 +149,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          hitList?.Clear();
          hitMap?.Clear();
          thisSequenceId = GetNewId();
-         Log( "Log written and HitMap Cleared" );
+         //Log( "Log written and HitMap Cleared" );
       }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
@@ -414,7 +414,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float thisCritRoll, thisCritSlotRoll;
       public static void RecordCritRolls ( float[] __result, int amount ) {
          if ( amount == 2 ) {
-            Log( $"Crit Roll = {__result[0]}" );
+            //Log( $"Crit Roll = {__result[0]}" );
             thisCritRoll = __result[0];
             thisCritSlotRoll = __result[1];
          }
@@ -425,7 +425,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisBaseCritChance = __result;
          //thisLocationHP = target.GetCurrentStructure( hitLocation );
          thisLocationMaxHP = target.GetMaxStructure( hitLocation );
-         Log( $"Location HP = {thisLocationMaxHP}" );
+         //Log( $"Location Max HP = {thisLocationMaxHP}" );
       }
       public static void RecordCritMultiplier ( float __result ) {
          thisCritMultiplier = __result;
