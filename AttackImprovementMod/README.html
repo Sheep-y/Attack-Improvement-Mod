@@ -448,7 +448,7 @@
 <details>
    <summary><h2>Modding this mod</h2></summary>
    <p>
-      The <a href="https://github.com/Sheep-y/BattleTech_Mods">source code</a> of this mod is open and free. <br>
+      The <a href="https://github.com/Sheep-y/Attack-Improvement-Mod/">source code</a> of this mod is open and free. <br>
       You can take it and modify it, provided that you include <i>your</i> code when you distribute your work, and don't claim my work as yours.
       License: AGPL v3 - <a href="LICENSE.html">local</a> / <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">online</a>.
    </p>
@@ -456,21 +456,16 @@
       If you know programming, you can follow these steps to see game code and learn how BATTLETECH mod works:
    </p>
    <ol>
-      <li> Install <a href="https://www.visualstudio.com/downloads/
-      ">Visual Studio</a>, or VS. This mod is developed with VS 2017 Community Edition. You'll need the ".NET desktop development" workload.
+      <li> Install <a href="https://www.visualstudio.com/downloads/">Visual Studio</a>, or VS. This mod is developed with VS 2017 Community Edition. You'll need the ".NET desktop development" workload.
       <li> Down and Run <a href="https://github.com/0xd4d/dnSpy/releases">DnSpy</a>
-      <li> Download DnSpy's Unity x64 debugging zip, extract 5.6.5/mono.dll, and replace the game's one.
-      <li> Create an Environment Variable "DNSPY_UNITY_DBG" with the value "--debugger-agent=transport=dt_socket,server=y,address=127.0.0.1:55555,defer=y" (both without the quotes). This will instruct the modified game to connect to DnSpy.
-      <li> Run the game. If you want you can <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/tcpview">check that</a> its port 55555 is opened.
-      <li> Launch the modified BATTLETECH game.
-      <li> In DnSpy, click the Start button on toolbar, or the "Start Debugging" menu item. This will popup a dialogue. Select "Unity (Connect)" and leave other settings at default.
-      <li> DnSpy should now be connected to the game and the stats says "Running...".
-      <li> Go to Debug > Windows > Modules, double click "Assembly-CSharp.dll".  This will load the assembly.  It contains most BATTLETECH code.
-      <li> You may now search and browse the assembly!  For example in the search tab you can type "GetCorrectedRoll" to find the method. Clicking on it will show you the roll correction code.
+      <li> Select File &gt; Open, to open BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll.  This will load the assembly.  It contains most BATTLETECH code.
+      <li> You may now search and browse the assembly!  For example in Edit &gt; Search you can type "GetCorrectedRoll" to find the method. Clicking on it will show you the roll correction code.
       <li> Right click on method name (or any identifier) and click "Analyse".  It'll help you find where and how the method is called, or its override hierarchy.
+      <li> Analyse is very fast because it works with compiled code.  It is not 100% accurate, though, sometimes you'll want to exported code and search there instead.
       <li> Left click the assembly, then File > Export to Project. This will decompile all code which you can browse with other editor or IDE.
       <li> Head to the <a href="https://github.com/Mpstark/ModTek/wiki">ModTek wiki</a> to learn how to make a mod.  For a code mode like this one, you need to produce a <a href="https://github.com/Mpstark/ModTek/wiki/Writing-ModTek-DLL-mods">dll</a> and perhaps a <a href="https://github.com/Mpstark/ModTek/wiki/The-mod.json-Format">"mod.json"</a>.
-      <li> You may notice that this patch manually calls Harmony to patch things, instead of using annotations. This gives me much better control such as timing of patch and reusing patch methods. You may read <a href="https://github.com/pardeike/Harmony/wiki">Harmony wiki</a> to learn how it works.
+      <li> The code of this mod is available on GitHub: <a href="https://github.com/Sheep-y/Attack-Improvement-Mod/">https://github.com/Sheep-y/Attack-Improvement-Mod/</a>.
+      <li> You may notice that this patch manually calls Harmony to patch things, instead of using annotations. This gives me much better control. Read <a href="https://github.com/pardeike/Harmony/wiki">Harmony wiki</a> to learn how it works.
    </ol>
 </details>
 
