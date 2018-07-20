@@ -20,10 +20,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( SelectionStateJump ), "SetMeleeDest", BindingFlags.NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
          }
          */
-         if ( Settings.ShowBaseHitchance ) {
-            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", NonPublic, typeof( ICombatant ), "ShowBaseHitChance", null );
-            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "ShowBaseMeleeChance", null );
-         }
          if ( NullIfEmpty( ref Settings.MeleeAccuracyFactors ) != null ) {
             InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
             if ( Modifiers.Count > 0 ) {
@@ -89,20 +85,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      // ============ Base Chances ============
-
-      public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
-         float baseChance = RollModifier.StepHitChance( Hit.GetBaseToHitChance( HUD.SelectedActor ) ) * 100;
-         __instance.ToolTipHoverElement.BuffStrings.Add( "Base Hit Chance +" + string.Format( "{0:0.#}%", baseChance ) );
-      }                 catch ( Exception ex ) { Error( ex ); } }
-
-      public static void ShowBaseMeleeChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
-         if ( HUD.SelectedActor is Mech ) {
-            float baseChance = RollModifier.StepHitChance( Hit.GetBaseMeleeToHitChance( HUD.SelectedActor as Mech ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( "Base Hit Chance +" + string.Format( "{0:0.#}%", baseChance ) );
-         }
-      }                 catch ( Exception ex ) { Error( ex ); } }
-
 
       // ============ Melee Accuracy ============
 
@@ -165,7 +147,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return () => new AttackModifier( "INSPIRED", Math.Min( 0f, Hit.GetAttackerAccuracyModifier( Us ) ) );
 
          case "obstruction" :
-            return () => new AttackModifier( "OBSTRUCTED", Hit.GetCoverModifier( Us, They, HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( They ).LOFLevel ) );
+            return () => new AttackModifier( "OBSTRUCTED", Hit.GetCoverModifier( Us, They, Combat.LOS.GetLineOfFire( Us, AttackPos, They, They.CurrentPosition, They.CurrentRotation, out Vector3 collision ) ) );
 
          case "refire":
             return () => new AttackModifier( "RE-ATTACK", Hit.GetRefireModifier( AttackWeapon ) );
@@ -256,14 +238,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          // Reset before handing over control
          tip?.DebuffStrings.Clear();
          tip?.BuffStrings.Clear();
-         return Error( new ApplicationException( "Melee modifier '" + thisModifier + "' error", ex ) );
+         return Error( new ApplicationException( "Error in the melee modifier *after* '" + thisModifier + "'", ex ) );
       } }
 
       public static void RecordAttackPosition ( Vector3 attackPosition ) {
          AttackPos = attackPosition;
       }
 
-      public static bool OverrideMeleeModifiers ( ref float __result, Mech attacker, ICombatant target, Vector3 targetPosition, MeleeAttackType meleeAttackType) { try {
+      public static bool OverrideMeleeModifiers ( ref float __result, Mech attacker, ICombatant target, Vector3 targetPosition, MeleeAttackType meleeAttackType ) { try {
          Weapon weapon = ( meleeAttackType == MeleeAttackType.DFA ) ? attacker.DFAWeapon : attacker.MeleeWeapon;
          thisModifier = "(Init)";
          SaveStates( attacker, target, weapon, meleeAttackType );
@@ -278,7 +260,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result = modifiers;
          return false;
       } catch ( Exception ex ) {
-         return Error( new ApplicationException( "Melee modifier '" + thisModifier + "' error", ex ) );
+         return Error( new ApplicationException( "Error in the melee modifier *after* '" + thisModifier + "'", ex ) );
       } }
 
       private static void AddToolTipDetail( AttackModifier tooltip ) {

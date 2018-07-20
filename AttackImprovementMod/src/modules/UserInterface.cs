@@ -14,7 +14,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class UserInterface : BattleModModule {
 
-      public override void ModStarts () {
+      public override void CombatStartsOnce () {
          if ( Settings.FixPaperDollRearStructure ) {
             if ( structureRearProp == null || timeSinceStructureDamagedProp == null )
                Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, paper doll rear structures not fixed." );
@@ -57,6 +57,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
          if ( Settings.FixLosPreviewHeight )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
+         if ( Settings.ShowBaseHitchance ) {
+            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", NonPublic, typeof( ICombatant ), "ShowBaseHitChance", null );
+            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "ShowBaseMeleeChance", null );
+         }
       }
 
       private static UILookAndColorConstants LookAndColor;
@@ -318,5 +322,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void FixMoveDestinationHeight ( Pathing __instance ) {
          __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
       }
+
+      // ============ Weapon Slots ============
+
+      public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+         float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseToHitChance( HUD.SelectedActor ) ) * 100;
+         __instance.ToolTipHoverElement.BuffStrings.Add( "Base Hit Chance +" + string.Format( "{0:0.#}%", baseChance ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ShowBaseMeleeChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+         if ( HUD.SelectedActor is Mech ) {
+            float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseMeleeToHitChance( HUD.SelectedActor as Mech ) ) * 100;
+            __instance.ToolTipHoverElement.BuffStrings.Add( "Base Hit Chance +" + string.Format( "{0:0.#}%", baseChance ) );
+         }
+      }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
