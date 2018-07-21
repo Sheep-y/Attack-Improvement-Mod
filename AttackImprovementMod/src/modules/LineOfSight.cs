@@ -56,6 +56,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Line change ============
 
       private static float newScale = float.NaN;
+      private static bool dotTextureScaled = false;
 
       public static void ResizeLOS ( WeaponRangeIndicators __instance ) {
          WeaponRangeIndicators me = __instance;
@@ -72,9 +73,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             me.LineTemplate.startWidth = width;
             me.LineTemplate.endWidth = width;
             // Scale all dotted lines
-            Vector2 s = me.MaterialOutOfRange.mainTextureScale;
-            s.x /= width;
-            me.MaterialOutOfRange.mainTextureScale = s;
+            if ( ! dotTextureScaled ) {
+               Vector2 s = me.MaterialOutOfRange.mainTextureScale;
+               s.x /= width;
+               me.MaterialOutOfRange.mainTextureScale = s;
+               dotTextureScaled = true;
+            }
          }
 
          if ( Settings.LOSWidthBlocked > 0f )
