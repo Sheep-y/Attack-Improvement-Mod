@@ -43,6 +43,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Add( new AttackLog(){ Name = "Logger" } ); // Must be after all other modules if we want to log modded data
       }
 
+      public override void GameStarts () {
+         Log( "Detected Mod List: ", Join( ", ", BattleMod.GetHarmonyIdList() ) );
+      }
+
       private ModSettings SanitizeSettings ( ModSettings settings ) {
          // Switch log folder if specified
          if ( ! String.IsNullOrEmpty( settings.LogFolder ) && settings.LogFolder != LogDir ) {
