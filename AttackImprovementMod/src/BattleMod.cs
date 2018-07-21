@@ -200,16 +200,16 @@ namespace Sheepy.BattleTechMod {
          }
       }
 
-      private static HashSet<string> owners;
-      public static string[] GetModList() {
-         if ( owners == null ) {
+      private static HashSet<string> harmonyIds;
+      public static string[] GetHarmonyIdList() {
+         if ( harmonyIds == null ) {
             if ( BattleTechGame == null ) 
                throw new InvalidOperationException( "Mod List is not known until GameStartsOnce." );
-            owners = new HashSet<string>();
+            harmonyIds = new HashSet<string>();
             foreach ( MethodBase method in PatchProcessor.AllPatchedMethods() )
-               owners.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
+               harmonyIds.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
          }
-         return owners.ToArray();
+         return harmonyIds.ToArray();
       }
    }
 

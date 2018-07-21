@@ -2,6 +2,7 @@ using BattleTech;
 using BattleTech.UI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -15,7 +16,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<float, float> correctionCache;
       private static string WeaponHitChanceFormat = "{0:0}%";
 
-      public override void ModStarts () {
+      public override void CombatStarts () {
+         if ( BattleMod.GetHarmonyIdList().Contains( "Battletech.realitymachina.NoCorrections" ) ) {
+            Warn( "realitymachina's True RNG (NoCorrections) mod detected. Roll Correction disabled." );
+            Settings.RollCorrectionStrength = 0;
+         }
+         //if ( BattleMod.GetHarmonyIdList().Contains( "aa.battletech.realhitchance" ) )
+         //   Warn( "casualmods's Real Hit Chance mod detected. Please remove it since it does not support this mod's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display." );
+
          RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
          NoRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 

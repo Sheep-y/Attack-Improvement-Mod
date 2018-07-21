@@ -8,7 +8,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class RollModifier : BattleModModule {
 
-      public override void ModStarts () {
+      public override void CombatStartsOnce () {
          Type ToHitType = typeof( ToHit );
          if ( Settings.AllowNetBonusModifier )
             Patch( ToHitType, "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );

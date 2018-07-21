@@ -10,7 +10,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class LineOfSight : BattleModModule {
 
-      public override void ModStarts () {
+      public override void GameStarts () {
+         if ( BattleMod.GetHarmonyIdList().Contains( "com.joelmeador.BTMLColorLOSMod" ) ) {
+            Warn( "joelmeador's BTMLColorLOSMod detected. LOS styling disabled." );
+            return;
+         }
          Type Indicator = typeof( WeaponRangeIndicators );
 
          // Colours that fail to parse will be changed to empty string

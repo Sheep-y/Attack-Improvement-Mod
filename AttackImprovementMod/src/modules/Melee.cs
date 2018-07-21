@@ -13,6 +13,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class Melee : BattleModModule {
 
       public override void CombatStartsOnce () {
+         if ( BattleMod.GetHarmonyIdList().Contains( "com.joelmeador.BTMLColorLOSMod" ) ) {
+            Warn( "de.morphyum.MeleeMover detected. Melee position unlock disabled." );
+            Settings.UnlockMeleePositioning = false;
+         }
          if ( Settings.UnlockMeleePositioning )
             Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), "OverrideMeleeDestinations", null );
          /*

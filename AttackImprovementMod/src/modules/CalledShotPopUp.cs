@@ -13,7 +13,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static string CalledShotHitChanceFormat = "{0:0}%";
 
-      public override void ModStarts () {
+      public override void CombatStartsOnce () {
          if ( NullIfEmpty( ref Settings.CalledChanceFormat ) != null )
             CalledShotHitChanceFormat = Settings.CalledChanceFormat;
 
