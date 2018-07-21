@@ -16,15 +16,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<float, float> correctionCache;
       private static string WeaponHitChanceFormat = "{0:0}%";
 
-      public override void CombatStarts () {
+      public override void CombatStartsOnce () {
          if ( BattleMod.GetHarmonyIdList().Contains( "Battletech.realitymachina.NoCorrections" ) ) {
             Warn( "realitymachina's True RNG (NoCorrections) mod detected. Roll Correction disabled." );
             Settings.RollCorrectionStrength = 0;
          }
-         //if ( BattleMod.GetHarmonyIdList().Contains( "aa.battletech.realhitchance" ) )
-         //   Warn( "casualmods's Real Hit Chance mod detected. Please remove it since it does not support this mod's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display." );
+         if ( BattleMod.GetHarmonyIdList().Contains( "aa.battletech.realhitchance" ) ) {
+            Warn( "casualmods's Real Hit Chance mod detected. Please remove it since it does not support this mod's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display." );
+            Settings.ShowCorrectedHitChance = false;
+         }
 
-         RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
          NoRollCorrection = Settings.RollCorrectionStrength == 0.0f;
 
          if ( ! NoRollCorrection ) {
@@ -35,7 +36,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowCorrectedHitChance", null );
             }
          } else if ( Settings.ShowCorrectedHitChance )
-            Log( "ShowCorrectedHitChance auto-disabled because roll Corection is disabled." );
+            Log( "ShowCorrectedHitChance auto-disabled because roll Correction is disabled." );
 
          if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
             if ( Settings.MissStreakBreakerThreshold == 1f || Settings.MissStreakBreakerDivider == 0f )
@@ -49,26 +50,27 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
 
-         NullIfEmpty( ref Settings.HitChanceFormat );
-         bool HitChanceFormatChanged = Settings.HitChanceFormat != null || ( Settings.HitChanceStep == 0f && Settings.HitChanceFormat != "{0:0}%" );
          if ( Settings.HitChanceFormat != null )
             WeaponHitChanceFormat = Settings.HitChanceFormat;
          else if ( Settings.HitChanceStep == 0f )
             WeaponHitChanceFormat = "{0:0.#}%";
 
+         bool HitChanceFormatChanged = Settings.HitChanceFormat != null || ( Settings.HitChanceStep == 0f && Settings.HitChanceFormat != "{0:0}%" );
          if ( HitChanceFormatChanged || Settings.ShowCorrectedHitChance || Settings.MinFinalHitChance < 0.05f || Settings.MaxFinalHitChance > 0.95f )
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideDisplayedHitChance", null );
+
+         if ( NoRollCorrection )
+            UseWeightedHitNumbersProp = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", Static | NonPublic );
       }
 
-      FieldInfo rollCorrection = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", Static | NonPublic );
+      FieldInfo UseWeightedHitNumbersProp;
 
       public override void CombatStarts () {
          if ( NoRollCorrection ) {
-            if ( rollCorrection != null ) {
-               rollCorrection.SetValue( null, false );
-            }  else {
+            if ( UseWeightedHitNumbersProp != null )
+               UseWeightedHitNumbersProp.SetValue( null, false );
+            else
                Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers. Roll correction not disabled." );
-            }
          } else if ( correctionCache != null )
             Log( "Combat starts with {0} reverse roll correction cached from previous battles.", correctionCache.Count );
       }

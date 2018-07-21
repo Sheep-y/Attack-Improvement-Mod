@@ -17,9 +17,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.MeleeHitChanceModifier != 0f )
             Patch( ToHitType, "GetBaseMeleeToHitChance", new Type[]{ typeof( Mech ) }, null, "ModifyBaseMeleeHitChance" );
 
-         RangeCheck( "MaxFinalHitChance", ref Settings.HitChanceStep, 0f, 0.2f );
-         RangeCheck( "MaxFinalHitChance", ref Settings.MaxFinalHitChance, 0.1f, 1f );
-         RangeCheck( "MinFinalHitChance", ref Settings.MinFinalHitChance, 0f, 1f );
          if ( Settings.HitChanceStep != 0.05f || Settings.MaxFinalHitChance != 0.95f || Settings.MinFinalHitChance != 0.05f || Settings.DiminishingHitChanceModifier ) {
             if ( ! Settings.DiminishingHitChanceModifier )
                Patch( ToHitType, "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceStepNClamp", null );

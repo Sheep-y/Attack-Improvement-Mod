@@ -10,24 +10,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class LineOfSight : BattleModModule {
 
-      public override void GameStarts () {
+      public override void CombatStartsOnce () {
          if ( BattleMod.GetHarmonyIdList().Contains( "com.joelmeador.BTMLColorLOSMod" ) ) {
             Warn( "joelmeador's BTMLColorLOSMod detected. LOS styling disabled." );
             return;
          }
          Type Indicator = typeof( WeaponRangeIndicators );
-
-         // Colours that fail to parse will be changed to empty string
-         RangeCheck( "LOSWidthMultiplier", ref Settings.LOSWidth, 0f, 10f );
-         RangeCheck( "LOSWidthBlockedMultiplier", ref Settings.LOSWidthBlocked, 0f, 10f );
-         RangeCheck( "LOSMarkerBlockedMultiplier", ref Settings.LOSMarkerBlockedMultiplier, 0f, 10f );
-         RangeCheck( "ArcLineSegments", ref Settings.ArcLinePoints, 1, 1000 );
-         Parse( ref Settings.LOSMeleeColor );
-         Parse( ref Settings.LOSClearColor );
-         Parse( ref Settings.LOSBlockedPreColor );
-         Parse( ref Settings.LOSBlockedPostColor );
-         Parse( ref Settings.LOSIndirectColor );
-         Parse( ref Settings.LOSNoAttackColor );
 
          bool SolidLinesChanged = Settings.LOSIndirectDotted || Settings.LOSIndirectColor != null ||
                                    ! Settings.LOSMeleeDotted || Settings.LOSMeleeColor != null ||
@@ -187,7 +175,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( htmlColour == null ) return new Color();
          if ( ColorUtility.TryParseHtmlString( htmlColour, out Color result ) )
             return result;
-         Error( "Cannot parse " + htmlColour + " as colour." );
+         Error( "Cannot parse \"" + htmlColour + "\" as colour." );
          htmlColour = null;
          return new Color();
       }

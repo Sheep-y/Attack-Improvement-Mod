@@ -24,7 +24,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( SelectionStateJump ), "SetMeleeDest", BindingFlags.NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
          }
          */
-         if ( NullIfEmpty( ref Settings.MeleeAccuracyFactors ) != null ) {
+         if ( Settings.MeleeAccuracyFactors != null ) {
             InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
             if ( Modifiers.Count > 0 ) {
                Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );
@@ -33,13 +33,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
       }
-
-      /*
-      public static void ShowDFACalledShotPopup ( SelectionStateJump __instance ) { try {
-         if ( __instance.TargetedCombatant is Vehicle )
-            HUD.ShowCalledShotPopUp( __instance.SelectedActor, __instance.TargetedCombatant as AbstractActor );
-      }                 catch ( Exception ex ) { Error( ex ); } }
-      */
 
       private static float MaxMeleeVerticalOffset = 8f;
       private static float HalfMaxMeleeVerticalOffset = 4f;
@@ -89,6 +82,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
+      /*
+      public static void ShowDFACalledShotPopup ( SelectionStateJump __instance ) { try {
+         if ( __instance.TargetedCombatant is Vehicle )
+            HUD.ShowCalledShotPopUp( __instance.SelectedActor, __instance.TargetedCombatant as AbstractActor );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+      */
 
       // ============ Melee Accuracy ============
 

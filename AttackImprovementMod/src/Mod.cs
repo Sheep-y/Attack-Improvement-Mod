@@ -17,7 +17,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void ModStarts () {
          ModLogDir = LogDir;
-         LoadSettings<ModSettings>( ref Settings, SanitizeSettings );
+         LoadSettings( ref Settings, SanitizeSettings );
+         NormaliseSettings();
          Log( "Do NOT change settings here. This is just a log." );
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
 
@@ -32,7 +33,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          Log();
 
-         Add( new AttackLog(){ Name = "Logger" } ); // @TODO Must be above RollCorrection as long as GetCorrectedRoll is overriden
          Add( new UserInterface(){ Name = "User Interface" } );
          Add( new LineOfSight(){ Name = "Line of Fire" } );
          Add( new CalledShotPopUp(){ Name = "Called Shot HUD" } );
@@ -40,6 +40,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Add( new RollModifier(){ Name = "Roll Modifier" } );
          Add( new RollCorrection(){ Name = "Roll Corrections" } );
          Add( new HitLocation(){ Name = "Hit Distribution" } );
+         Add( new AttackLog(){ Name = "Logger" } ); // Must be after all other modules if we want to log modded data
       }
 
       private ModSettings SanitizeSettings ( ModSettings settings ) {
@@ -60,14 +61,49 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          // if ( old.ShowDecimalHitChance == true ); // Same as new default, don't change
          if ( settings.LogHitRolls == true && ( settings.AttackLogLevel == null || settings.AttackLogLevel.Trim().ToLower() == "none" ) )
             settings.AttackLogLevel = "All";
-#pragma warning restore CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
+#pragma warning restore CS0618
 
+         RangeCheck( "LOSWidth", ref Settings.LOSWidth, 0f, 10f );
+         RangeCheck( "LOSWidthBlocked", ref Settings.LOSWidthBlocked, 0f, 10f );
+         RangeCheck( "LOSMarkerBlockedMultiplier", ref Settings.LOSMarkerBlockedMultiplier, 0f, 10f );
+         RangeCheck( "ArcLineSegments", ref Settings.ArcLinePoints, 1, 1000 );
+
+         RangeCheck( "MechCalledShotMultiplier", ref Settings.MechCalledShotMultiplier, 0f, 1024f );
+         RangeCheck( "VehicleCalledShotMultiplier", ref Settings.VehicleCalledShotMultiplier, 0f, 1024f );
+
+         RangeCheck( "HitChanceStep", ref Settings.HitChanceStep, 0f, 1f );
+         RangeCheck( "BaseHitChanceModifier", ref Settings.BaseHitChanceModifier, -10f, 10f );
+         RangeCheck( "MeleeHitChanceModifier", ref Settings.MeleeHitChanceModifier, -10f, 10f );
+         RangeCheck( "MaxFinalHitChance", ref Settings.MaxFinalHitChance, 0.1f, 1f );
+         RangeCheck( "MinFinalHitChance", ref Settings.MinFinalHitChance, 0f, 1f );
+
+         RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
+         RangeCheck( "MissStreakBreakerThreshold", ref Settings.MissStreakBreakerThreshold, 0f, 1f );
+         RangeCheck( "MissStreakBreakerDivider", ref Settings.MissStreakBreakerDivider, -100f, 100f );
+         
          if ( ! settings.PersistentLog ) {
             // In version 1.0, I thought we may need to keep two logs: attack/location rolls and critical rolls. They are now merged, and the old log may be removed.
             new Logger( LogDir + "Log_AttackRoll.txt" ).Delete();
          }
 
          return settings;
+      }
+
+      /* Changes that we don't want to write back to settings.json */
+      private void NormaliseSettings () {
+         // Colours that fail to parse will be changed to empty string
+         LineOfSight.Parse( ref Settings.LOSMeleeColor );
+         LineOfSight.Parse( ref Settings.LOSClearColor );
+         LineOfSight.Parse( ref Settings.LOSBlockedPreColor );
+         LineOfSight.Parse( ref Settings.LOSBlockedPostColor );
+         LineOfSight.Parse( ref Settings.LOSIndirectColor );
+         LineOfSight.Parse( ref Settings.LOSNoAttackColor );
+
+         NullIfEmpty( ref Settings.CalledChanceFormat );
+         NullIfEmpty( ref Settings.HitChanceFormat );
+
+         NullIfEmpty( ref Settings.MeleeAccuracyFactors );
+         NullIfEmpty( ref Settings.AttackLogLevel );
       }
 
       // ============ Logging ============

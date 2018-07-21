@@ -24,9 +24,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static readonly Type BuldType = typeof( BattleTech.Building );
 
       public override void ModStarts () {
+         if ( Settings.AttackLogLevel == null ) return;
          PersistentLog = Settings.PersistentLog;
          // Patch prefix early to increase chance of successful capture in face of other mods
-         switch ( Settings.AttackLogLevel?.Trim().ToLower() ) {
+         switch ( Settings.AttackLogLevel.Trim().ToLower() ) {
             case "all":
             case "critical":
                LogCritical = true;
