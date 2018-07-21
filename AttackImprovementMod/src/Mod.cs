@@ -44,7 +44,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void GameStarts () {
-         Log( "Detected Mod List: ", Join( ", ", BattleMod.GetHarmonyIdList() ) );
+         Log( "Detected Mods: " + Join( ", ", BattleMod.GetModList() ) );
       }
 
       private ModSettings SanitizeSettings ( ModSettings settings ) {

@@ -17,12 +17,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static string WeaponHitChanceFormat = "{0:0}%";
 
       public override void CombatStartsOnce () {
-         if ( BattleMod.GetHarmonyIdList().Contains( "Battletech.realitymachina.NoCorrections" ) ) {
-            Warn( "realitymachina's True RNG (NoCorrections) mod detected. Roll Correction disabled." );
-            Settings.RollCorrectionStrength = 0;
+         if ( Settings.RollCorrectionStrength != 0f && BattleMod.FoundMod( "Battletech.realitymachina.NoCorrections", "NoCorrectedRoll.InitClass" ) ) {
+            Logger.BTML_LOG.Warn( Mod.Name + " detected realitymachina's True RNG (NoCorrections) mod, roll correction disabled." );
+            Settings.RollCorrectionStrength = 0f;
          }
-         if ( BattleMod.GetHarmonyIdList().Contains( "aa.battletech.realhitchance" ) ) {
-            Warn( "casualmods's Real Hit Chance mod detected. Please remove it since it does not support this mod's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display." );
+         if ( Settings.ShowCorrectedHitChance && BattleMod.FoundMod( "aa.battletech.realhitchance", "RealHitChance.Loader" ) ) {
+            Logger.BTML_LOG.Warn( Mod.Name + " detected casualmods's Real Hit Chance mod, which should be REMOVED since it does not support AIM's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display." );
             Settings.ShowCorrectedHitChance = false;
          }
 

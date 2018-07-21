@@ -13,8 +13,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class Melee : BattleModModule {
 
       public override void CombatStartsOnce () {
-         if ( BattleMod.GetHarmonyIdList().Contains( "com.joelmeador.BTMLColorLOSMod" ) ) {
-            Warn( "de.morphyum.MeleeMover detected. Melee position unlock disabled." );
+         if ( Settings.UnlockMeleePositioning && BattleMod.FoundMod( "de.morphyum.MeleeMover", "MeleeMover.MeleeMover" ) ) {
+            Logger.BTML_LOG.Warn( Mod.Name + " detected morphyum's MeleeMover, melee positioning unlock left in MeleeMover's hands." );
             Settings.UnlockMeleePositioning = false;
          }
          if ( Settings.UnlockMeleePositioning )
@@ -42,11 +42,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          MovementConstants con = CombatConstants.MoveConstants;
          MaxMeleeVerticalOffset = con.MaxMeleeVerticalOffset;
          HalfMaxMeleeVerticalOffset = MaxMeleeVerticalOffset / 2;
-         if ( Settings.IncreaseMeleePositionChoice )
-            con.NumMeleeDestinationChoices = 6;
-         if ( Settings.IncreaseDFAPositionChoice )
-            con.NumDFADestinationChoices = 6;
-         typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( CombatConstants, con, null );
+         if ( Settings.IncreaseMeleePositionChoice || Settings.IncreaseDFAPositionChoice ) {
+            if ( Settings.IncreaseMeleePositionChoice )
+               con.NumMeleeDestinationChoices = 6;
+            if ( Settings.IncreaseDFAPositionChoice )
+               con.NumDFADestinationChoices = 6;
+            typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( CombatConstants, con, null );
+         }
       }
 
       // Almost a direct copy of the original, only to remove melee position locking code

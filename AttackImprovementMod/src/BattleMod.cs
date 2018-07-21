@@ -47,7 +47,7 @@ namespace Sheepy.BattleTechMod {
          get { return _LogDir; }
          protected set {
             _LogDir = value;
-            Logger.LogFile = GetLogFile();
+            Logger = new Logger( GetLogFile() );
          }
       }
       internal HarmonyInstance harmony;
@@ -148,13 +148,13 @@ namespace Sheepy.BattleTechMod {
 
       public void PatchBattleMods () {
          if ( BattleModsPatched ) return;
-         string oldLog = Logger.LogFile;
-         Logger.LogFile = Logger.BTML_LOG.LogFile;
+         Logger oldLog = this.Logger;
+         this.Logger = Logger.BTML_LOG;
          Patch( typeof( UnityGameInstance ).GetMethod( "InitUserSettings", Instance | NonPublic ), null, typeof( BattleMod ).GetMethod( "RunGameStarts", Static | NonPublic ) );
          Patch( typeof( SimGameState ).GetMethod( "Init" ), null, typeof( BattleMod ).GetMethod( "RunCampaignStarts", Static | NonPublic ) );
          Patch( typeof( CombatHUD ).GetMethod( "Init", new Type[]{ typeof( CombatGameState ) } ), null, typeof( BattleMod ).GetMethod( "RunCombatStarts", Static | NonPublic ) );
          BattleModsPatched = true;
-         Logger.LogFile = oldLog;
+         this.Logger = oldLog;
       }
 
       private static bool CalledGameStartsOnce = false;
@@ -200,16 +200,34 @@ namespace Sheepy.BattleTechMod {
          }
       }
 
-      private static HashSet<string> harmonyIds;
-      public static string[] GetHarmonyIdList() {
-         if ( harmonyIds == null ) {
-            if ( BattleTechGame == null ) 
+      private static HashSet<string> modList;
+      public static string[] GetModList() {
+         if ( modList == null ) {
+            if ( BattleTechGame == null )
                throw new InvalidOperationException( "Mod List is not known until GameStartsOnce." );
-            harmonyIds = new HashSet<string>();
-            foreach ( MethodBase method in PatchProcessor.AllPatchedMethods() )
-               harmonyIds.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
+            modList = new HashSet<string>();
+            try {
+               foreach ( MethodBase method in PatchProcessor.AllPatchedMethods() )
+                  modList.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
+               // Some mods may not leave a harmony trace and can only be parsed from log
+               Regex regx = new Regex( " in type \"([^\"]+)\"", RegexOptions.Compiled );
+               foreach ( string line in File.ReadAllLines( "Mods/BTModLoader.log" ) ) {
+                  Logger.BTML_LOG.Log( line );
+                  Match match = regx.Match( line );
+                  if ( match.Success ) modList.Add( match.Groups[1].Value );
+               }
+            } catch ( Exception ex ) {
+               Logger.BTML_LOG.Error( ex );
+            }
          }
-         return harmonyIds.ToArray();
+         return modList.ToArray();
+      }
+
+      public static bool FoundMod ( params string[] mods ) {
+         if ( modList == null ) GetModList();
+         foreach ( string mod in mods )
+            if ( modList.Contains( mod ) ) return true;
+         return false;
       }
    }
 
@@ -434,7 +452,7 @@ namespace Sheepy.BattleTechMod {
          LogFile = file;
       }
 
-      public string LogFile { get; set; }
+      public string LogFile { get; private set; }
 
       public bool IgnoreDuplicateExceptions = true;
       public Dictionary<string, int> exceptions = new Dictionary<string, int>();

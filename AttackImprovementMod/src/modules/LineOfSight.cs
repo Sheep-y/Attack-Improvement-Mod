@@ -11,33 +11,37 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class LineOfSight : BattleModModule {
 
       public override void CombatStartsOnce () {
-         if ( BattleMod.GetHarmonyIdList().Contains( "com.joelmeador.BTMLColorLOSMod" ) ) {
-            Warn( "joelmeador's BTMLColorLOSMod detected. LOS styling disabled." );
-            return;
-         }
-         Type Indicator = typeof( WeaponRangeIndicators );
-
          bool SolidLinesChanged = Settings.LOSIndirectDotted || Settings.LOSIndirectColor != null ||
                                    ! Settings.LOSMeleeDotted || Settings.LOSMeleeColor != null ||
                                    ! Settings.LOSClearDotted || Settings.LOSClearColor != null ||
                               ! Settings.LOSBlockedPreDotted || Settings.LOSBlockedPreColor != null ||
                              ! Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != null ; 
                                   // NoAttackLine is overriden once and leave alone.
+         bool AnyLineChanged = SolidLinesChanged || ! Settings.LOSNoAttackDotted || Settings.LOSNoAttackColor != null;
+         Type Indicator = typeof( WeaponRangeIndicators );
 
-         bool TwoSectionsLOS = Settings.LOSBlockedPreDotted != Settings.LOSBlockedPostDotted || Settings.LOSBlockedPreColor != Settings.LOSBlockedPostColor;
+         if ( AnyLineChanged ) {
+            if ( BattleMod.FoundMod( "com.joelmeador.BTMLColorLOSMod", "BTMLColorLOSMod.BTMLColorLOSMod" ) ) {
+               Logger.BTML_LOG.Warn( Mod.Name + " detected joelmeador's BTMLColorLOSMod, LOS styling disabled and left in the hands of BTMLColorLOSMod." );
 
-         if ( Settings.LOSWidth != 0f || Settings.LOSWidthBlocked != 0f || Settings.LOSMarkerBlockedMultiplier != 1f )
-            Patch( Indicator, "Init", null, "ResizeLOS" );
-         if ( SolidLinesChanged || Settings.LOSNoAttackColor != null || ! Settings.LOSNoAttackDotted )
-            Patch( Indicator, "Init", null, "CreateLOSTexture" );
-         if ( Settings.ArcLinePoints != 18 || TwoSectionsLOS )
-            Patch( Indicator, "getLine" , NonPublic, null, "RecordLOS" );
-         if ( TwoSectionsLOS ) {
-            Patch( Indicator, "DrawLine", NonPublic, null, "SetBlockedLOS" );
-            Patch( Indicator, "ShowLineToTarget", NonPublic, null, "ShowBlockedLOS" );
+            } else {
+               bool TwoSectionsLOS = Settings.LOSBlockedPreDotted != Settings.LOSBlockedPostDotted || Settings.LOSBlockedPreColor != Settings.LOSBlockedPostColor;
+
+               if ( Settings.LOSWidth != 0f || Settings.LOSWidthBlocked != 0f || Settings.LOSMarkerBlockedMultiplier != 1f )
+                  Patch( Indicator, "Init", null, "ResizeLOS" );
+               if ( SolidLinesChanged || Settings.LOSNoAttackColor != null || ! Settings.LOSNoAttackDotted )
+                  Patch( Indicator, "Init", null, "CreateLOSTexture" );
+               if ( Settings.ArcLinePoints != 18 || TwoSectionsLOS )
+                  Patch( Indicator, "getLine" , NonPublic, null, "RecordLOS" );
+               if ( TwoSectionsLOS ) {
+                  Patch( Indicator, "DrawLine", NonPublic, null, "SetBlockedLOS" );
+                  Patch( Indicator, "ShowLineToTarget", NonPublic, null, "ShowBlockedLOS" );
+               }
+               if ( SolidLinesChanged )
+                  Patch( Indicator, "DrawLine", NonPublic, "SetupLOS", "CleanupLOS" );
+            }
          }
-         if ( SolidLinesChanged )
-            Patch( Indicator, "DrawLine", NonPublic, "SetupLOS", "CleanupLOS" );
+
          if ( Settings.ArcLinePoints != 18 ) {
             Patch( Indicator, "GetPointsForArc", Static, "OverrideGetPointsForArc", null );
             Patch( Indicator, "DrawLine", NonPublic, null, "SetIndirectSegments" );
