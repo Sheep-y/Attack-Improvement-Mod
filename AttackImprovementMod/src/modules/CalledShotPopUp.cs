@@ -19,6 +19,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          Type CalledShot = typeof( CombatHUDCalledShotPopUp );
          if ( Settings.FixBossHeadCalledShotDisplay ) {
+            currentHitTableProp = typeof( CombatHUDCalledShotPopUp ).GetProperty( "currentHitTable", NonPublic | Instance );
             if ( currentHitTableProp == null )
                Error( "Cannot find CombatHUDCalledShotPopUp.currentHitTable, boss head called shot display not fixed. Boss should still be immune from headshot." );
             else
@@ -46,8 +47,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       // ============ Boss heads ============
-   
-      private static PropertyInfo currentHitTableProp = typeof( CombatHUDCalledShotPopUp ).GetProperty( "currentHitTable", NonPublic | Instance );
+
+      private static PropertyInfo currentHitTableProp;
       private static int? head = null;
 
       public static void FixBossHead ( CombatHUDCalledShotPopUp __instance ) {

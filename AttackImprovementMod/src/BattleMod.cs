@@ -212,7 +212,6 @@ namespace Sheepy.BattleTechMod {
                // Some mods may not leave a harmony trace and can only be parsed from log
                Regex regx = new Regex( " in type \"([^\"]+)\"", RegexOptions.Compiled );
                foreach ( string line in File.ReadAllLines( "Mods/BTModLoader.log" ) ) {
-                  Logger.BTML_LOG.Log( line );
                   Match match = regx.Match( line );
                   if ( match.Success ) modList.Add( match.Groups[1].Value );
                }

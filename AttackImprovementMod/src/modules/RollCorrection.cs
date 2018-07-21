@@ -56,8 +56,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             WeaponHitChanceFormat = "{0:0.#}%";
 
          bool HitChanceFormatChanged = Settings.HitChanceFormat != null || ( Settings.HitChanceStep == 0f && Settings.HitChanceFormat != "{0:0}%" );
-         if ( HitChanceFormatChanged || Settings.ShowCorrectedHitChance || Settings.MinFinalHitChance < 0.05f || Settings.MaxFinalHitChance > 0.95f )
+         if ( HitChanceFormatChanged || Settings.ShowCorrectedHitChance || Settings.MinFinalHitChance < 0.05f || Settings.MaxFinalHitChance > 0.95f ) {
+            HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", Instance | NonPublic );
+            Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", Instance | NonPublic );
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideDisplayedHitChance", null );
+         }
 
          if ( NoRollCorrection )
             UseWeightedHitNumbersProp = typeof( AttackDirector.AttackSequence ).GetField( "UseWeightedHitNumbers", Static | NonPublic );
@@ -130,8 +133,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          chance = corrected;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static MethodInfo HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", Instance | NonPublic );
-      private static MethodInfo Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", Instance | NonPublic );
+      private static MethodInfo HitChance, Refresh;
 
       // Override the original code to remove accuracy cap on display, since correction or other settings can push it above 95%.
       public static bool OverrideDisplayedHitChance ( CombatHUDWeaponSlot __instance, float chance ) { try {

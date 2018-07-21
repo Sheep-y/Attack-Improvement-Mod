@@ -15,6 +15,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class UserInterface : BattleModModule {
 
       public override void CombatStartsOnce () {
+         if ( Settings.FixPaperDollRearStructure || Settings.PaperDollDivulgeUnderskinDamage ) TryRun( Logger, () => {
+            outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
+            armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
+            structureProp = typeof( HUDMechArmorReadout ).GetProperty( "structureCached", NonPublic | Instance );
+            outlineRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineRearCached", NonPublic | Instance );
+            armorRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorRearCached", NonPublic | Instance );
+            structureRearProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
+            timeSinceStructureDamagedProp = typeof( HUDMechArmorReadout ).GetProperty( "timeSinceStructureDamaged", NonPublic | Instance );
+         } );
          if ( Settings.FixPaperDollRearStructure ) {
             if ( structureRearProp == null || timeSinceStructureDamagedProp == null )
                Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, paper doll rear structures not fixed." );
@@ -31,6 +40,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          if ( Settings.FixMultiTargetBackout ) {
+            TryRun( Logger, () => {
+               targetedCombatant = typeof( SelectionState ).GetField( "targetedCombatant", NonPublic | Instance );
+               weaponTargetIndices = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
+               RemoveTargetedCombatant = typeof( SelectionStateFireMulti ).GetMethod( "RemoveTargetedCombatant", NonPublic | Instance );
+               ClearTargetedActor = typeof( SelectionStateFireMulti ).GetMethod( "ClearTargetedActor", NonPublic | Instance | FlattenHierarchy );
+            } );
+
             if ( targetedCombatant == null )
                Warn( "Cannot find SelectionState.targetedCombatant. MultiTarget backup may triggers target lock sound effect." );
             if ( ClearTargetedActor == null )
@@ -74,14 +90,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Paper Doll ============
 
+      private static PropertyInfo outlineProp, armorProp, structureProp, outlineRearProp, armorRearProp, structureRearProp, timeSinceStructureDamagedProp;
       private static readonly ChassisLocations[] Normal  = new ChassisLocations[]{ Head, LeftArm , LeftTorso , CenterTorso, RightTorso, RightArm, LeftLeg , RightLeg };
       private static readonly ChassisLocations[] Flipped = new ChassisLocations[]{ Head, RightArm, RightTorso, CenterTorso, LeftTorso , LeftArm , RightLeg, LeftLeg  };
 
-      private static bool IsStructureDamaged ( ref float percent, Mech mech, ChassisLocations location ) {
+      private static bool IsStructureDamaged ( ref float percent, Mech mech, MechDef mechDef, ChassisLocations location ) {
          if ( float.IsNaN( percent ) ) {
-            float hp = mech.GetCurrentStructure( location );
-            float max = mech.MechDef.GetChassisLocationDef( location ).InternalStructure;
-            percent = hp / max;
+            float hp;
+            if ( mech != null )
+               hp = mech.GetCurrentStructure( location );
+            else // if ( mechDef != null )
+               hp = mechDef.GetLocationLoadoutDef( location ).CurrentInternalStructure;
+            percent = hp / mechDef.GetChassisLocationDef( location ).InternalStructure;
          }
          return percent < 1f;
       }
@@ -89,7 +109,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ShowStructureDamageThroughArmour ( HUDMechArmorReadout __instance ) { try {
          HUDMechArmorReadout me = __instance;
          Mech mech = me.DisplayedMech;
-         if ( mech == null ) return;
+         MechDef mechDef = mech?.MechDef ?? me.DisplayedMechDef;
+         if ( mech == null && mechDef == null ) return;
          ChassisLocations[] location = me.flipFrontDisplay ? Flipped : Normal;
          int[] back = me.flipFrontDisplay != me.flipRearDisplay ? new int[] { 0, 0, 4, 3, 2 } : new int[] { 0, 0, 2, 3, 4 };
          Color clear = Color.clear;
@@ -101,7 +122,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             float percent = float.NaN;
             // Front
             if ( armor[i] != clear ) { // Skip check on armour-less locations
-               if ( IsStructureDamaged( ref percent, mech, location[ i ] ) ) {
+               if ( IsStructureDamaged( ref percent, mech, mechDef, location[ i ] ) ) {
                   if ( structure == null ) { // Lazy reflection access
                      structure = (Color[]) structureProp.GetValue( me, null );
                      outline = (Color[]) outlineProp.GetValue( me, null );
@@ -117,7 +138,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( i < 2 || i > 4 ) continue;
             int j = back[ i ];
             if ( armorRear[ j ] != clear ) {
-               if ( IsStructureDamaged( ref percent, mech, location[ i ] ) ) { // i is not typo. We want to check same chassis location as front.
+               if ( IsStructureDamaged( ref percent, mech, mechDef, location[ i ] ) ) { // i is not typo. We want to check same chassis location as front.
                   if ( structureRear == null ) {
                      structureRear = (Color[]) structureRearProp.GetValue( me, null );
                      outlineRear = (Color[]) outlineRearProp.GetValue( me, null );
@@ -144,14 +165,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Log( Join( ", ", structureRear, ColorUtility.ToHtmlStringRGBA ) );
          */
       }                 catch ( Exception ex ) { Error( ex ); } }
-
-      private static PropertyInfo outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
-      private static PropertyInfo armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
-      private static PropertyInfo structureProp = typeof( HUDMechArmorReadout ).GetProperty( "structureCached", NonPublic | Instance );
-      private static PropertyInfo outlineRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineRearCached", NonPublic | Instance );
-      private static PropertyInfo armorRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorRearCached", NonPublic | Instance );
-      private static PropertyInfo structureRearProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
-      private static PropertyInfo timeSinceStructureDamagedProp = typeof( HUDMechArmorReadout ).GetProperty( "timeSinceStructureDamaged", NonPublic | Instance );
 
       public static void FixRearStructureDisplay ( HUDMechArmorReadout __instance, AttackDirection shownAttackDirection ) { try {
          HUDMechArmorReadout me = __instance;
@@ -198,10 +211,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
-      private static FieldInfo targetedCombatant = typeof( SelectionState ).GetField( "targetedCombatant", NonPublic | Instance );
-      private static PropertyInfo weaponTargetIndices = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
-      private static MethodInfo RemoveTargetedCombatant = typeof( SelectionStateFireMulti ).GetMethod( "RemoveTargetedCombatant", NonPublic | Instance );
-      private static MethodInfo ClearTargetedActor = typeof( SelectionStateFireMulti ).GetMethod( "ClearTargetedActor", NonPublic | Instance | FlattenHierarchy );
+      private static FieldInfo targetedCombatant;
+      private static PropertyInfo weaponTargetIndices;
+      private static MethodInfo RemoveTargetedCombatant, ClearTargetedActor;
       private static readonly object[] RemoveTargetParams = new object[]{ null, false };
 
       public static bool OverrideMultiTargetBackout ( SelectionStateFireMulti __instance ) { try {

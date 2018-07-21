@@ -27,6 +27,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.MeleeAccuracyFactors != null ) {
             InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
             if ( Modifiers.Count > 0 ) {
+               contemplatingDFA = typeof( CombatHUDWeaponSlot ).GetMethod( "contemplatingDFA", NonPublic | Instance );
                Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );
                Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
                Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "OverrideMeleeToolTips", null );
@@ -221,7 +222,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Log( "Melee and DFA modifiers: " + Join( ",", Factors.ToArray() ) );
       }
 
-      private static MethodInfo contemplatingDFA = typeof( CombatHUDWeaponSlot ).GetMethod( "contemplatingDFA", NonPublic | Instance );
+      private static MethodInfo contemplatingDFA;
 
       public static bool OverrideMeleeToolTips ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          CombatHUDWeaponSlot slot = __instance;

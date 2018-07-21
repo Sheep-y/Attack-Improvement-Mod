@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription( "BattleTech mod: Attack Improvement Mod" )]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("FixHitLocation")]
+[assembly: AssemblyProduct( "AttackImprovementMod" )]
 [assembly: AssemblyCopyright( "Copyright © Ho Yiu Yeung 2018" )]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
