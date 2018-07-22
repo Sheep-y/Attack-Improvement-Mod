@@ -47,42 +47,42 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Line change ============
 
-      private static float newScale = float.NaN;
-      private static bool dotTextureScaled = false;
+      private static bool losTextureScaled = false;
 
       public static void ResizeLOS ( WeaponRangeIndicators __instance ) {
          WeaponRangeIndicators me = __instance;
-         if ( me.LOSWidthBegin == newScale ) return;
-         Log( "Setting LOS width to {0} and {1}", Settings.LOSWidth, Settings.LOSWidthBlocked );
 
          float width = Settings.LOSWidth;
-         if ( width > 0f ) {
+         if ( width > 0f && me.LOSWidthBegin != width ) {
+            Log( "Setting default LOS width to {0}", width );
             // Scale solid line width
             me.LOSWidthBegin = width;
             me.LOSWidthEnd = width;
-            newScale = me.LOSWidthBegin;
             // Scale Out of Range line width, when line is solid
             me.LineTemplate.startWidth = width;
             me.LineTemplate.endWidth = width;
             // Scale all dotted lines
-            if ( ! dotTextureScaled ) {
+            if ( ! losTextureScaled ) {
                Vector2 s = me.MaterialOutOfRange.mainTextureScale;
                s.x /= width;
                me.MaterialOutOfRange.mainTextureScale = s;
-               dotTextureScaled = true;
             }
          }
 
-         if ( Settings.LOSWidthBlocked > 0f )
-            __instance.LOSWidthBlocked = Settings.LOSWidthBlocked;
+         width = Settings.LOSWidthBlocked;
+         if ( width > 0f && me.LOSWidthBlocked != width )
+            me.LOSWidthBlocked = width;
+         Log( "LOS widths, normal = {0}, post-blocked = {1}", me.LOSWidthBegin, me.LOSWidthBlocked );
 
          width = Settings.LOSMarkerBlockedMultiplier;
-         if ( width != 1f ) {
+         if ( width != 1f && ! losTextureScaled ) {
+            Log( "Scaling LOS block marker by {0}", width );
             Vector3 zoom = me.CoverTemplate.transform.localScale;
             zoom.x *= width;
             zoom.y *= width;
             me.CoverTemplate.transform.localScale = zoom;
          }
+         losTextureScaled = true;
       }
 
       private const int Melee = 0, Clear = 1, BlockedPre = 2, BlockedPost = 3, Indirect = 4, NoAttack = 5;
@@ -107,6 +107,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             // Make sure post mat is applied even if pre mat was not modified
             if ( Mats[ BlockedPost ] != null && Mats[ BlockedPre ] == null )
                Mats[ BlockedPre ] = new Material( OrigInRangeMat ) { name = "BlockedPreLOS" };
+
             OverwriteNonMeleeLine = Mats[ Indirect ] != null || Mats[ Clear ] != null || Mats[ BlockedPre ] != null;
          }
          if ( Mats[ NoAttack ] != null ) {
@@ -118,8 +119,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool RestoreMat = false;
       private static LineRenderer thisLine;
 
-      public static void RecordLOS ( LineRenderer __result ) {
+      public static void RecordLOS ( LineRenderer __result, WeaponRangeIndicators __instance ) {
          thisLine = __result;
+         // Reset line width to default to prevent blocked width from leaking to no attack width.
+         thisLine.startWidth = __instance.LOSWidthBegin;
+         thisLine.endWidth = __instance.LOSWidthEnd;
       }
 
       public static void SetupLOS ( WeaponRangeIndicators __instance, ICombatant target, bool usingMultifire, bool isMelee ) { try {
@@ -156,11 +160,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void SetBlockedLOS () { try {
-         //Log( "Mat is " + thisLine.material.name );
+         //Log( "Mat = {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
          if ( thisLine.material.name.StartsWith( "BlockedPreLOS" ) ) {
             thisLine.material = Mats[ BlockedPost ];
             thisLine.startColor = thisLine.endColor = Mats[ BlockedPost ].color;
-            //Log( "Swap to blocked post " + thisLine.material.name );
+            //Log( "Swap to blocked post {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
@@ -199,9 +203,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          mat.color = newColour;
          // Blocked Post scale need to be override if normal width is not same as blocked width
-         if ( name == "BlockedPost" && dotted && Settings.LOSWidth != Settings.LOSWidthBlocked ) {
+         float width = Settings.LOSWidthBlocked, origWidth = Settings.LOSWidth <= 0 ? 1 : Settings.LOSWidth;
+         if ( name == "BlockedPost" && dotted && origWidth != width && width > 0 ) {
             Vector2 s = mat.mainTextureScale;
-            s.x *= Settings.LOSWidth / Settings.LOSWidthBlocked;
+            s.x *= origWidth / width;
             mat.mainTextureScale = s;
          }
          mat.name = name + "LOS";
