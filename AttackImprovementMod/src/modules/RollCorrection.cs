@@ -52,7 +52,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.HitChanceFormat != null )
             WeaponHitChanceFormat = Settings.HitChanceFormat;
-         else if ( Settings.HitChanceStep == 0f )
+         else if ( Settings.HitChanceStep == 0f && ! Settings.DiminishingHitChanceModifier )
             WeaponHitChanceFormat = "{0:0.#}%";
 
          bool HitChanceFormatChanged = Settings.HitChanceFormat != null || ( Settings.HitChanceStep == 0f && Settings.HitChanceFormat != "{0:0}%" );

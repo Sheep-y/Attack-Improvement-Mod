@@ -190,7 +190,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( new String[]{
         "Format of called shot location percentages, in C# String.Format syntax.",
         "Game default is \"{0:0}%\". Use \"{0:0.0}%\" to *always* show one decimal, or \"{0:0.#}%\" for *up to* one decimal.",
-        "Default is \"\", which will use \"{0:0.#}%\" if HitChanceStep is 0, otherwise leave alone." } ) ]
+        "Default is \"\", which will use \"{0:0.#}%\" if HitChanceStep is 0 and DiminishingHitChanceModifier is false, otherwise leave alone." } ) ]
       public string HitChanceFormat = "";
 
       //

@@ -1,6 +1,15 @@
 <title>BATTLETECH Attack Improvement Mod</title>
 <style>
-.warn { font-weight: bold; color: red; clear: both; float: left; }
+   body { margin: 0 auto; max-width: 800px; }
+   p, li { font-size: 1.1rem; margin-bottom: 1ex; margin-top: 1ex; }
+   h1, h2, h3 { display: inline-block; margin: 0.5ex 0; }
+   h1 { font-size: 1.5rem; }
+   ul, ol { margin-top: 0.5ex; }
+   a { text-decoration: none; }
+   a:hover { text-decoration: underline; }
+   dt { margin-top: 0.5ex; }
+
+   .warn { font-weight: bold; color: red; clear: both; float: left; }
 </style>
 
 <h1>AIM: Attack Improvement Mod</h1>
@@ -26,23 +35,21 @@
 <details>
    <summary><h2>Change Log</h2></summary>
    <dl>
-      <dt>Current Version 2.0 Beta
-      <dd>Big architecture update, some speed ups, and more safeguards.
+      <dt>Current Version 2.0 Release Candidate
+      <dd>Big architecture update, some speed ups, and safeguards such as mod conflict detection.
       <dd>New: Persistent settings in settings.json instead of mod.json. Auto-upgrade settings.json of old releases.
       <dd>New: Fix Multi-Shot back out.
-      <dd>New: Fix paper doll's rear structure display.
+      <dd>New: Fix paper doll's rear structure display, and show structure damage through armour.
       <dd>New: Fix the Grey Head disease which prevents all mechs from being headshoted during and after a boss fight.
       <dd>New: Force damage to be integer to avoid "0 hp location".
-      <dd>New: Change styles of targeting lines by their status.
-      <dd>New: Fix Multi-Shot back out.
-      <dd>New: Show heat and stability numbers in combat.
-      <dd>New: Unlock Melee and DFA positioning.
+      <dd>New: Show heat and stability numbers and cooldown/heatup projection in combat.
+      <dd>New: Change styles of targeting lines. (Disabled if Line Colour Changer is found.)
+      <dd>New: Unlock Melee and DFA positioning. (Compatible with melee mover.)
       <dd>New: Changing hit modifier steps and range.
       <dd>New: Allow net bonus hit modifier, height penalty, and/or diminishing modifier.
       <dd>New: A new attack log system that is faster, detailed, and bug fixed.
-      <dd>Fix: Defer combat constants access to improves compatibility and robustness.
-      <dd>Fix: Attack log now fill in all blanks even when missing.
-      <dd>Change: Re-enable hit location fix by default on ver 1.1.1 and up.
+      <dd>Fix: Defer combat constants access and reflections to improves compatibility and robustness.
+      <dd>Change: Re-enable hit location fix by default to improve hit distribution.
       <dd>Change: Minimised settings dependency, e.g. ShowDecimalCalledChance no longer depends on ShowRealMechCalledShotChance and ShowRealVehicleCalledShotChance.
       <dd>Settings: Log folder may now be set. Decimal chance formats upgraded to free form string.
    </dl>
@@ -468,14 +475,3 @@
       <li> You may notice that this patch manually calls Harmony to patch things, instead of using annotations. This gives me much better control. Read <a href="https://github.com/pardeike/Harmony/wiki">Harmony wiki</a> to learn how it works.
    </ol>
 </details>
-
-
-<style>
-   body { margin: 0 auto; max-width: 800px; }
-   p, li { font-size: 110%; margin-bottom: 1ex; margin-top: 1ex; }
-   h1, h2, h3 { display: inline-block; margin: 0.5ex 0; }
-   ul, ol { margin-top: 0.5ex; }
-   a { text-decoration: none; }
-   a:hover { text-decoration: underline; }
-   dt { margin-top: 0.5ex; }
-</style>
