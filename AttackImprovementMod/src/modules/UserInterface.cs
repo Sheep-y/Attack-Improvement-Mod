@@ -297,25 +297,30 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowUnitTonnage ( CombatHUDActorDetailsDisplay __instance ) { try {
+         CombatHUDActorDetailsDisplay me = __instance;
+         TMPro.TextMeshProUGUI label = me.ActorWeightText;
          string from = null, to = null;
 
-         if ( __instance.DisplayedActor is Mech mech ) {
+         if ( me.DisplayedActor is Mech mech ) {
             from = mech.weightClass.ToString();
             to = mech.tonnage.ToString();
-         } else if ( __instance.DisplayedActor is Vehicle vehicle ) {
+            if ( mech.WorkingJumpjets <= 0 )
+               to += " TONS " + from;
+            else switch ( from ) {
+               case "LIGHT"   : to += "t LT"; break;
+               case "MEDIUM"  : to += "t MED"; break;
+               case "HEAVY"   : to += "t HVY"; break;
+               case "ASSAULT" : to += "t AST"; break;
+            }
+         } else if ( me.DisplayedActor is Vehicle vehicle ) {
             from = vehicle.weightClass.ToString();
             to = vehicle.tonnage.ToString();
+            if ( label.text.Contains( to ) ) return; // Already added by Extended Info, which has a generic name and may have false positive with usual detection
+            to += " TONS\n" + from;
          } else
             return;
 
-         switch ( from ) {
-         case "LIGHT"   : to += "t LT"; break;
-         case "MEDIUM"  : to += "t MED"; break;
-         case "HEAVY"   : to += "t HVY"; break;
-         case "ASSAULT" : to += "t AST"; break;
-         }
-
-         __instance.ActorWeightText.text = __instance.ActorWeightText.text.Replace( from, to );
+         label.text = label.text.Replace( from, to );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static bool needRefresh = false;
