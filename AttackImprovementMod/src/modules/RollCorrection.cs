@@ -1,5 +1,6 @@
 using BattleTech;
 using BattleTech.UI;
+using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,9 +23,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Logger.BTML_LOG.Warn( Mod.Name + " detected realitymachina's True RNG (NoCorrections) mod, roll correction and streak breaker disabled." );
             TrueRNG = true;
          }
-         if ( Settings.ShowCorrectedHitChance && BattleMod.FoundMod( "aa.battletech.realhitchance", "RealHitChance.Loader" ) ) {
-            Logger.BTML_LOG.Warn( Mod.Name + " detected casualmods's Real Hit Chance mod, which should be REMOVED since it does not support AIM's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display." );
-            Settings.ShowCorrectedHitChance = false;
+         if ( Settings.ShowCorrectedHitChance ) {
+            string pre = Mod.Name + " detected casualmods's Real Hit Chance mod", post = "it does not support AIM's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display.";
+            if ( BattleMod.FoundMod( "aa.battletech.realhitchance" ) ) {
+               Logger.BTML_LOG.Warn( pre + ", and REMOVED it since " + post );
+               //Mod.harmony.UnpatchAll( "aa.battletech.realhitchance" );
+               Mod.harmony.Unpatch( typeof( CombatHUDWeaponSlot ).GetMethod( "SetHitChance", Public | Instance ), HarmonyPatchType.Prefix, "aa.battletech.realhitchance" );
+            } else if ( BattleMod.FoundMod( "RealHitChance.Loader" ) ) {
+               Logger.BTML_LOG.Warn( pre + ", which should be REMOVED because " + post );
+               Settings.ShowCorrectedHitChance = false;
+            }
          }
 
          NoRollCorrection = Settings.RollCorrectionStrength == 0f;

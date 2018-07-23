@@ -50,7 +50,7 @@ namespace Sheepy.BattleTechMod {
             Logger = new Logger( GetLogFile() );
          }
       }
-      internal HarmonyInstance harmony;
+      public HarmonyInstance harmony { get; internal set; }
 
       // ============ Setup ============
 
