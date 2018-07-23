@@ -64,6 +64,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          if ( Settings.ShowHeatAndStab ) {
+            Patch( typeof( CombatHUDTargetingComputer ), "Init", null, "RecordTargetingPanel" );
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowHeatAndStab" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
@@ -262,6 +263,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Heat and Stability ============
 
+      private static CombatHUDActorDetailsDisplay targetDisplay = null;
+
+      public static void RecordTargetingPanel ( CombatHUDTargetingComputer __instance ) {
+         targetDisplay = __instance.ActorInfo?.DetailsDisplay;
+      }
+
       public static void ShowHeatAndStab ( CombatHUDActorDetailsDisplay __instance ) { try {
          // Only override mechs. Other actors are unimportant to us.
          if ( !( __instance.DisplayedActor is Mech mech ) ) return;
@@ -272,7 +279,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          int baseHeat = mech.CurrentHeat, newHeat = baseHeat,
             baseStab = (int) mech.CurrentStability, newStab = baseStab;
-         if ( mech == HUD.SelectedActor ) { // Two lines in selection panel
+         if ( mech == HUD.SelectedActor && __instance != targetDisplay ) { // More info in selection panel
             line1 = "·\n" + line1;
             CombatSelectionHandler selection = HUD?.SelectionHandler;
             newHeat += mech.TempHeat;
