@@ -36,22 +36,37 @@
    <summary><h2>Change Log</h2></summary>
    <dl>
       <dt>Current Version 2.0 Release Candidate
-      <dd>Big architecture update, some speed ups, and safeguards such as mod conflict detection.
-      <dd>New: Persistent settings in settings.json instead of mod.json. Auto-upgrade settings.json of old releases.
-      <dd>New: Fix Multi-Shot back out.
-      <dd>New: Fix paper doll's rear structure display, and show structure damage through armour.
-      <dd>New: Fix the Grey Head disease which prevents all mechs from being headshoted during and after a boss fight.
-      <dd>New: Force damage to be integer to avoid "0 hp location".
-      <dd>New: Show heat and stability numbers and cooldown/heatup projection in combat.
-      <dd>New: Change styles of targeting lines. (Disabled if Line Colour Changer is found.)
-      <dd>New: Unlock Melee and DFA positioning. (Compatible with melee mover.)
-      <dd>New: Changing hit modifier steps and range.
-      <dd>New: Allow net bonus hit modifier, height penalty, and/or diminishing modifier.
-      <dd>New: A new attack log system that is faster, detailed, and bug fixed.
-      <dd>Fix: Defer combat constants access and reflections to improves compatibility and robustness.
-      <dd>Change: Re-enable hit location fix by default to improve hit distribution.
-      <dd>Change: Minimised settings dependency, e.g. ShowDecimalCalledChance no longer depends on ShowRealMechCalledShotChance and ShowRealVehicleCalledShotChance.
-      <dd>Settings: Log folder may now be set. Decimal chance formats upgraded to free form string.
+      <dd>Mod: Settings migrated to settings.json and is automatically updated by the mod.
+      <dd>New: Unlock hit accuracy's 5% step and make odd gunnery useful.
+      <dd>New: Show current and projected heat and stability number in selection panel and target panel.
+      <dd>New: Fix and allow to-hit modifier to be a net bonus, instead of capping at no penalty.
+      <dd>New: Allow height modifier to be net penalty, instead of capping at no bonus.
+      <dd>New: Display base hit chance of ranged and melee attack and the relevant stat.
+      <dd>New: Fix Multi-Target back out.
+      <dd>New: Fix rear armour structure display, and show structural damage through armour.
+      <dd>New: Fix Grey Head Disease, spread by headshot immune unit to all mechs until load game or restart.
+      <dd>New: Fix the bug that make 0 HP mech location not destroyed.  Does not retroactively back fix bugged save.
+      <dd>New: Make sure walk and jump result in same LOS quality (clear/blocked/indirect/none).
+      <dd>New: Change Line of Fire colours, style (solid/dotted), and width.
+      <dd>New: Refine (or rough up / flatten) indirect firing arc and jump arc.
+      <dd>New: Unlock melee positioning: allow all valid spots to be moved to and mechs are not locked in place by melee.
+      <dd>New: Customise list and order of melee attack modifiers, with new factors such as height and inspired.<br>When used, fix the bug that prone stand up penalty is not actually applied to melee.
+      <dd>New: A rewritten attack log that is faster and supports various level of details including direction, damage, and crit.
+      <dd>New: (Optional) Change ranged/melee base hit chances and min/max of modified hit chance.
+      <dd>New: (Optional) Diminishing to-hit modifier effect that makes light penalties more punishing and big penalties less hopeless.
+      <dd>New: (Optional) Show mech and vehicle tonnage in selection panel and target panel, before unit class.
+      <dd>Mod: New mod architecture that is faster, safer, and enables mod conflict detection and resolution.
+      <dd>Mod: Detect and resolve conflicts with Firing Line Improvement, Extended Information, Melee Mover, True RNG, and Real Hit Chance.
+      <dd>Mod: Log folder can now be set through the LogDir setting.
+      <dd>Mod: More setting validations.
+      <dd>Fix: Compatibility with early mod loading, before most game states are initiated.
+      <dd>Fix: Re-enable hit distribution override by default.
+      <dd>Fix: Display of corrected hit chance no longer caps at 95%.
+      <dd>Fix: Call chance displays no longer inter-dependent; enabling any relevant settings will triggers display patch.
+      <dd>Fix: Hit chance format is now free, and defaults to optionally displayed to one decimal point if stepping modifier is used and 5% stepping is removed.
+      <dd>Fix: Attack Log now logs attacks on turrets and buildings, and fill in all blanks. Total weight and call goal removed.
+      <dd>Fix: Mod log now ignores all duplicate exceptions, if logged through Error( object ), to not slow down the game with disk writes.
+      <dd>Fix: High speed miss streak breaker bypass when it is disabled. (Roll correction already has fast bypass.)
    </dl>
    <dl>
       <dt>2018-06-28 Version 1.0.1
