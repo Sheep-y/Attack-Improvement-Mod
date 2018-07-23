@@ -25,8 +25,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             timeSinceStructureDamagedProp = typeof( HUDMechArmorReadout ).GetProperty( "timeSinceStructureDamaged", NonPublic | Instance );
          } );
          if ( Settings.FixPaperDollRearStructure ) {
-            if ( structureRearProp == null || timeSinceStructureDamagedProp == null )
-               Error( "Cannot find HUDMechArmorReadout.structureRearCached and/or HUDMechArmorReadout.timeSinceStructureDamaged, paper doll rear structures not fixed." );
+            LookAndColor = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
+            if ( LookAndColor == null || structureRearProp == null || timeSinceStructureDamagedProp == null )
+               Error( "Cannot find UIManager.UILookAndColorConstants, HUDMechArmorReadout.structureRearCached, and/or HUDMechArmorReadout.timeSinceStructureDamaged, paper doll rear structures not fixed." );
             else
                Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, "FixRearStructureDisplay" );
          }
@@ -64,7 +65,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          if ( Settings.ShowHeatAndStab ) {
-            Patch( typeof( CombatHUDTargetingComputer ), "Init", typeof( CombatHUD ), null, "RecordTargetingPanel" );
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowHeatAndStab" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
@@ -80,13 +80,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
-      private static UILookAndColorConstants LookAndColor;
-
       public override void CombatStarts () {
-         if ( HUD != null )
-            LookAndColor = null;
-         else
-            LookAndColor = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
+         if ( Settings.ShowHeatAndStab )
+            targetDisplay = HUD.TargetingComputer?.ActorInfo?.DetailsDisplay;
       }
 
       // ============ Paper Doll ============
@@ -166,6 +162,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Log( Join( ", ", structureRear, ColorUtility.ToHtmlStringRGBA ) );
          */
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static UILookAndColorConstants LookAndColor;
 
       public static void FixRearStructureDisplay ( HUDMechArmorReadout __instance, AttackDirection shownAttackDirection ) { try {
          HUDMechArmorReadout me = __instance;
@@ -265,10 +263,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static CombatHUDActorDetailsDisplay targetDisplay = null;
 
-      public static void RecordTargetingPanel ( CombatHUDTargetingComputer __instance ) {
-         targetDisplay = __instance.ActorInfo?.DetailsDisplay;
-      }
-
       public static void ShowHeatAndStab ( CombatHUDActorDetailsDisplay __instance ) { try {
          // Only override mechs. Other actors are unimportant to us.
          if ( !( __instance.DisplayedActor is Mech mech ) ) return;
@@ -312,7 +306,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             from = mech.weightClass.ToString();
             to = mech.tonnage.ToString();
             if ( mech.WorkingJumpjets <= 0 )
-               to += " TONS " + from;
+               to += "t " + from;
             else switch ( from ) {
                case "LIGHT"   : to += "t LT"; break;
                case "MEDIUM"  : to += "t MED"; break;
@@ -323,7 +317,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             from = vehicle.weightClass.ToString();
             to = vehicle.tonnage.ToString();
             if ( label.text.Contains( to ) ) return; // Already added by Extended Info, which has a generic name and may have false positive with usual detection
-            to += " TONS\n" + from;
+            to += " TONS\n" + from; // Otherwise mimic the style for consistency
          } else
             return;
 
