@@ -62,9 +62,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          settings.KillZeroHpLocation = settings.FixNonIntegerDamage.GetValueOrDefault( settings.KillZeroHpLocation );
 
          if ( settings.LOSWidthMultiplier != null && settings.LOSWidthMultiplier != 2f )
-            settings.LOSWidth = settings.LOSWidthMultiplier;
+            settings.LOSWidth = settings.LOSWidthMultiplier.GetValueOrDefault( 2f );
          if ( settings.LOSWidthBlockedMultiplier != null && settings.LOSWidthBlockedMultiplier != 3f )
-            settings.LOSWidthBlocked = settings.LOSWidthBlockedMultiplier * 0.75;
+            settings.LOSWidthBlocked = settings.LOSWidthBlockedMultiplier.GetValueOrDefault( 3f ) * 0.75f;
 
          settings.ShowCorrectedHitChance = settings.ShowRealWeaponHitChance.GetValueOrDefault( settings.ShowCorrectedHitChance );
          if ( settings.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )

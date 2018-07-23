@@ -64,7 +64,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          if ( Settings.ShowHeatAndStab ) {
-            Patch( typeof( CombatHUDTargetingComputer ), "Init", null, "RecordTargetingPanel" );
+            Patch( typeof( CombatHUDTargetingComputer ), "Init", typeof( CombatHUD ), null, "RecordTargetingPanel" );
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowHeatAndStab" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );

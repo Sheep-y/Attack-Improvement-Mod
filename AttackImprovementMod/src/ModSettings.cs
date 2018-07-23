@@ -256,10 +256,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
 
       [ Obsolete( "[v2.0-rc] Default true.  Replaced by ShowUnderArmourDamage." ) ]
-      public bool? PaperDollDivulgeUnderskinDamage = null
+      public bool? PaperDollDivulgeUnderskinDamage = null;
 
       [ Obsolete( "[v2.0-rc] Default true.  Replaced by KillZeroHpLocation." ) ]
-      public bool? FixNonIntegerDamage = null
+      public bool? FixNonIntegerDamage = null;
 
       [ Obsolete( "[v2.0-20170712] Default 2.  Replaced by LOSWidth." ) ]
       public float? LOSWidthMultiplier = null;

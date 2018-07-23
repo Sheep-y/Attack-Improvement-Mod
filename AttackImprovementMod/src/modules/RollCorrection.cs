@@ -26,12 +26,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowCorrectedHitChance ) {
             string pre = Mod.Name + " detected casualmods's Real Hit Chance mod", post = "it does not support AIM's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display.";
             if ( BattleMod.FoundMod( "aa.battletech.realhitchance" ) ) {
-               Logger.BTML_LOG.Warn( pre + ", and REMOVED it since " + post );
                //Mod.harmony.UnpatchAll( "aa.battletech.realhitchance" );
-               Mod.harmony.Unpatch( typeof( CombatHUDWeaponSlot ).GetMethod( "SetHitChance", Public | Instance ), HarmonyPatchType.Prefix, "aa.battletech.realhitchance" );
+               Mod.harmony.RemovePatch( typeof( CombatHUDWeaponSlot ).GetMethod( "SetHitChance", Public | Instance, null, new Type[]{ typeof(float) }, null ), HarmonyPatchType.Prefix, "aa.battletech.realhitchance" );
+               Logger.BTML_LOG.Warn( pre + ", and REMOVED it since " + post );
             } else if ( BattleMod.FoundMod( "RealHitChance.Loader" ) ) {
-               Logger.BTML_LOG.Warn( pre + ", which should be REMOVED because " + post );
                Settings.ShowCorrectedHitChance = false;
+               Logger.BTML_LOG.Warn( pre + ", which should be REMOVED because " + post );
             }
          }
 

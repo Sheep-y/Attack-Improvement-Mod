@@ -309,15 +309,18 @@ namespace Sheepy.BattleTechMod {
       }
 
       protected void Patch ( Type patchedClass, string patchedMethod, BindingFlags flags, Type[] parameterTypes, string prefix, string postfix ) {
-         MethodInfo patched;
          if ( ( flags & ( Static | Instance  ) ) == 0  ) flags |= Instance;
          if ( ( flags & ( Public | NonPublic ) ) == 0  ) flags |= Public;
-         if ( parameterTypes == null )
-            patched = patchedClass.GetMethod( patchedMethod, flags );
-         else
-            patched = patchedClass.GetMethod( patchedMethod, flags, null, parameterTypes, null );
+         MethodInfo patched = null;
+         Exception ex = null;
+         try {
+            if ( parameterTypes == null )
+               patched = patchedClass.GetMethod( patchedMethod, flags );
+            else
+               patched = patchedClass.GetMethod( patchedMethod, flags, null, parameterTypes, null );
+         } catch ( Exception e ) { ex = e; }
          if ( patched == null ) {
-            Logger.Error( "Cannot find {0}.{1}(...) to patch", patchedClass.Name, patchedMethod );
+            Logger.Error( "Cannot find {0}.{1}(...) to patch {2}", patchedClass.Name, patchedMethod, ex );
             return;
          }
          Patch( patched, prefix, postfix );
