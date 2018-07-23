@@ -13,23 +13,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class RollCorrection : BattleModModule {
       
       private static bool NoRollCorrection = false;
+      private static bool TrueRNG = false;
       private static Dictionary<float, float> correctionCache;
       private static string WeaponHitChanceFormat = "{0:0}%";
 
       public override void CombatStartsOnce () {
-         if ( Settings.RollCorrectionStrength != 0f && BattleMod.FoundMod( "Battletech.realitymachina.NoCorrections", "NoCorrectedRoll.InitClass" ) ) {
-            Logger.BTML_LOG.Warn( Mod.Name + " detected realitymachina's True RNG (NoCorrections) mod, roll correction disabled." );
-            Settings.RollCorrectionStrength = 0f;
+         if ( BattleMod.FoundMod( "Battletech.realitymachina.NoCorrections", "NoCorrectedRoll.InitClass" ) ) {
+            Logger.BTML_LOG.Warn( Mod.Name + " detected realitymachina's True RNG (NoCorrections) mod, roll correction and streak breaker disabled." );
+            TrueRNG = true;
          }
          if ( Settings.ShowCorrectedHitChance && BattleMod.FoundMod( "aa.battletech.realhitchance", "RealHitChance.Loader" ) ) {
             Logger.BTML_LOG.Warn( Mod.Name + " detected casualmods's Real Hit Chance mod, which should be REMOVED since it does not support AIM's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display." );
             Settings.ShowCorrectedHitChance = false;
          }
 
-         NoRollCorrection = Settings.RollCorrectionStrength == 0.0f;
+         NoRollCorrection = Settings.RollCorrectionStrength == 0f;
 
-         if ( ! NoRollCorrection ) {
-            if ( Settings.RollCorrectionStrength != 1.0f )
+         if ( ! NoRollCorrection && ! TrueRNG ) {
+            if ( Settings.RollCorrectionStrength != 1f )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
             if ( Settings.ShowCorrectedHitChance ) {
                correctionCache = new Dictionary<float, float>(20);
@@ -38,7 +39,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          } else if ( Settings.ShowCorrectedHitChance )
             Log( "ShowCorrectedHitChance auto-disabled because roll Correction is disabled." );
 
-         if ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) {
+         if ( ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) && ! TrueRNG ) {
             if ( Settings.MissStreakBreakerThreshold == 1f || Settings.MissStreakBreakerDivider == 0f )
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "BypassMissStreakBreaker", null );
             else {
