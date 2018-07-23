@@ -17,7 +17,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool FixPaperDollRearStructure = true;
 
       [ JsonComment( "Show structural damage through armour.  i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true." ) ]
-      public bool PaperDollDivulgeUnderskinDamage = true;
+      public bool ShowUnderArmourDamage = true;
 
       [ JsonComment( "Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense." ) ]
       public bool ShowUnitTonnage = false;
@@ -234,10 +234,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Damage" ) ]
       //
 
-      [ JsonComment( new String[]{
-        "Fix the bug that damage may not be in integer, which causes other bugs.  Default true.",
-        "Does not retroactively fix in-battle saves with partial damage, but will not break them or be broken by them either." } ) ]
-      public bool FixNonIntegerDamage = true;
+      [ JsonComment( 
+        "If a location would become a zombie part with zero hp, make sure it is destroyed instead. Default true." ) ]
+      public bool KillZeroHpLocation = true;
 
       //
       [ JsonSection( "Logging" ) ]
@@ -256,18 +255,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string LogFolder = "";
 
 
+      [ Obsolete( "[v2.0-rc] Default true.  Replaced by ShowUnderArmourDamage." ) ]
+      public bool? PaperDollDivulgeUnderskinDamage = null
 
+      [ Obsolete( "[v2.0-rc] Default true.  Replaced by KillZeroHpLocation." ) ]
+      public bool? FixNonIntegerDamage = null
 
-      [ Obsolete( "Default false.  Renamed to ShowCorrectedHitChance." ) ]
+      [ Obsolete( "[v2.0-20170712] Default 2.  Replaced by LOSWidth." ) ]
+      public float? LOSWidthMultiplier = null;
+
+      [ Obsolete( "[v2.0-20170712] Default 3.  Replaced by LOSWidthBlocked." ) ]
+      public float? LOSWidthBlockedMultiplier = null;
+
+      [ Obsolete( "[v1.0] Default false.  Renamed to ShowCorrectedHitChance." ) ]
       public bool? ShowRealWeaponHitChance = null;
 
-      [ Obsolete( "Default false.  Upgraded to CalledChanceFormat." ) ]
+      [ Obsolete( "[v1.0] Default false.  Upgraded to CalledChanceFormat." ) ]
       public bool? ShowDecimalCalledChance = null;
 
-      [ Obsolete( "Default false.  Upgraded to HitChanceFormat." ) ]
+      [ Obsolete( "[v1.0] Default false.  Upgraded to HitChanceFormat." ) ]
       public bool? ShowDecimalHitChance = null;
 
-      [ Obsolete( "Default false.  Upgraded to AttackLogLevel." ) ]
+      [ Obsolete( "[v1.0] Default false.  Upgraded to AttackLogLevel." ) ]
       public bool? LogHitRolls = null;
    }
 }

@@ -19,7 +19,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
 
       public override void CombatStartsOnce () {
-         if ( Settings.FixNonIntegerDamage )
+         if ( Settings.KillZeroHpLocation )
             Patch( typeof( AbstractActor ), "GetAdjustedDamage", null, "FixDamageToInteger" );
 
          scale = Settings.FixHitDistribution ? SCALE : 1;

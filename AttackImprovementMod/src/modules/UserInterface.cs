@@ -15,7 +15,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class UserInterface : BattleModModule {
 
       public override void CombatStartsOnce () {
-         if ( Settings.FixPaperDollRearStructure || Settings.PaperDollDivulgeUnderskinDamage ) TryRun( Logger, () => {
+         if ( Settings.FixPaperDollRearStructure || Settings.ShowUnderArmourDamage ) TryRun( Logger, () => {
             outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
             armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
             structureProp = typeof( HUDMechArmorReadout ).GetProperty( "structureCached", NonPublic | Instance );
@@ -30,7 +30,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, "FixRearStructureDisplay" );
          }
-         if ( Settings.PaperDollDivulgeUnderskinDamage ) {
+         if ( Settings.ShowUnderArmourDamage ) {
             if ( outlineProp == null || armorProp == null || structureProp == null || outlineRearProp == null || armorRearProp == null || structureRearProp == null )
                Error( "Cannot find outline, armour, and/or structure colour cache of HUDMechArmorReadout.  Cannot make paper dolls divulge under skin damage." );
             else {

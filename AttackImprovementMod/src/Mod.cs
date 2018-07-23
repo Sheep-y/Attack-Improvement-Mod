@@ -58,8 +58,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
 #pragma warning disable CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
-         if ( settings.ShowRealWeaponHitChance == true )
-            settings.ShowCorrectedHitChance = true;
+         settings.ShowUnderArmourDamage = settings.PaperDollDivulgeUnderskinDamage.GetValueOrDefault( settings.ShowUnderArmourDamage );
+         settings.KillZeroHpLocation = settings.FixNonIntegerDamage.GetValueOrDefault( settings.KillZeroHpLocation );
+
+         if ( settings.LOSWidthMultiplier != null && settings.LOSWidthMultiplier != 2f )
+            settings.LOSWidth = settings.LOSWidthMultiplier;
+         if ( settings.LOSWidthBlockedMultiplier != null && settings.LOSWidthBlockedMultiplier != 3f )
+            settings.LOSWidthBlocked = settings.LOSWidthBlockedMultiplier * 0.75;
+
+         settings.ShowCorrectedHitChance = settings.ShowRealWeaponHitChance.GetValueOrDefault( settings.ShowCorrectedHitChance );
          if ( settings.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )
             settings.CalledChanceFormat = "{0:0.0}%"; // Keep digits consistent
          // if ( old.ShowDecimalHitChance == true ); // Same as new default, don't change
