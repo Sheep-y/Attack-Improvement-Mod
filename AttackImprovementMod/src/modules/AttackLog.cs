@@ -27,7 +27,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void ModStarts () {
          if ( Settings.AttackLogLevel == null ) return;
          PersistentLog = Settings.PersistentLog;
-         // Patch prefix early to increase chance of successful capture in face of other mods
+         // Patch prefix early to increase chance of successful capture in face of other mods.
+         // TODO: Move to CombatStartsOnce and merge code.
          switch ( Settings.AttackLogLevel.Trim().ToLower() ) {
             case "all":
             case "critical":
@@ -184,11 +185,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             teamName = "Player";
          else if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
             teamName = "OpFor";
-         else if ( team.IsEnemy( Combat.LocalPlayerTeam ) )
+         else if ( team.IsFriendly( Combat.LocalPlayerTeam ) )
             teamName = "Allies";
          else
             teamName = "NPC";
          teamName += "\t";
+         // TODO: Merge to one line
          if ( who.GetPilot() != null ) 
             teamName += who.GetPilot().Callsign;
          else if ( who is AbstractActor actor )
@@ -211,7 +213,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Weapon weapon = me.ArtilleryWeapon;
          float range = ( me.TargetPos - target.CurrentPosition ).magnitude;
          BuildSequenceLine( weapon.parent, target, AttackDirection.FromArtillery, range );
-         RecordSequenceWeapon( me.ArtilleryWeapon, 1f );
+         RecordSequenceWeapon( weapon, 1f );
          RecordAttackRoll( 0f, null );
       }
 
@@ -491,9 +493,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisCritSlot = index;
          thisCritComp = __result;
          if ( __result != null ) {
-            if ( __result is AmmunitionBox box )
-               halfFullAmmo = ( (float)box.CurrentAmmo / (float)box.ammunitionBoxDef.Capacity ) >= 0.5f;
             thisCompBefore = __result.DamageLevel;
+            if ( __result is AmmunitionBox box )
+               halfFullAmmo = box.CurrentAmmo > ( box.ammunitionBoxDef.Capacity / 2f );
          }
       }
 

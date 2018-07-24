@@ -45,6 +45,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.FixVehicleCalledShot ) {
             // Store popup location
             Patch( typeof( SelectionStateFire ), "SetCalledShot", typeof( VehicleChassisLocations ), null, "RecordVehicleCalledShotFireLocation" );
+
             ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", NonPublic | Instance );
             if ( ReadoutProp != null )
                Patch( typeof( CombatHUDVehicleArmorHover ), "OnPointerClick", typeof( PointerEventData ), null, "RecordVehicleCalledShotClickLocation" );
@@ -169,11 +170,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static PropertyInfo ReadoutProp = null;
 
       // Somehow PostfixSetCalledShot is NOT called since 1.1 beta. So need to override PostPointerClick to make sure called shot location is translated
-      public static void RecordVehicleCalledShotClickLocation ( CombatHUDVehicleArmorHover __instance ) { try {
+      public static void RecordVehicleCalledShotClickLocation ( CombatHUDVehicleArmorHover __instance ) {
          HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
          if ( Readout?.HUD?.SelectionHandler?.ActiveState is SelectionStateFire selectionState )
             selectionState.calledShotLocation = TranslateLocation( selectionState.calledShotVLocation );
-      }                 catch ( Exception ex ) { Error( ex ); } }
+      }
 
       // Store vehicle called shot location in mech location, so that it will be passed down event chain
       public static void RecordVehicleCalledShotFireLocation ( SelectionStateFire __instance, VehicleChassisLocations location ) {

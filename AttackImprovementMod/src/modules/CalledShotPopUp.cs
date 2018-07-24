@@ -42,6 +42,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float ActorCalledShotBonus { get { return HUD.SelectedActor.CalledShotBonusMultiplier; } }
 
       private static AttackDirection AttackDirection;
+
       public static void RecordAttackDirection ( AttackDirection value ) {
          AttackDirection = value;
       }
@@ -52,7 +53,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static int? head = null;
 
       public static void FixBossHead ( CombatHUDCalledShotPopUp __instance ) {
-         if ( __instance.DisplayedActor.CanBeHeadShot ) return;
+         if ( __instance.DisplayedActor?.CanBeHeadShot ?? true ) return;
          Dictionary<ArmorLocation, int> currentHitTable = (Dictionary<ArmorLocation, int>) currentHitTableProp.GetValue( __instance, null );
          if ( ! ( currentHitTable?.ContainsKey( ArmorLocation.Head ) ?? false ) ) return;
          head = currentHitTable[ ArmorLocation.Head ];
@@ -72,10 +73,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static int lastCalledShotLocation;
 
       private static bool CacheNeedRefresh ( Object hitTable, int targetedLocation ) {
-         bool result = ! Object.ReferenceEquals( hitTable, LastHitTable ) || lastCalledShotLocation != (int) targetedLocation;
+         bool result = ! Object.ReferenceEquals( hitTable, LastHitTable ) || lastCalledShotLocation != targetedLocation;
          if ( result ) {
             LastHitTable = hitTable;
-            lastCalledShotLocation = (int) targetedLocation;
+            lastCalledShotLocation = targetedLocation;
          }
          return result;
       }
@@ -105,16 +106,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          int local = TryGet( hitTable, location ) * scale;
          if ( location == targetedLocation )
-            local = (int)( (float) local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
+            local = (int)( local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
 
          __result = FineTuneAndFormat( hitTable, location, local, Settings.ShowRealVehicleCalledShotChance );
          return false;
-
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ Subroutines ============
 
-      private static string FineTuneAndFormat<T> ( Dictionary<T, int> hitTable, T location, int local, bool simulate  ) {
+      private static string FineTuneAndFormat<T> ( Dictionary<T, int> hitTable, T location, int local, bool simulate  ) { try {
          if ( GameHitLocationBugged && ! Settings.FixHitDistribution && simulate ) { // If hit distribution is bugged, simulate it.
             T def = default(T), last = def;
             foreach ( KeyValuePair<T, int> e in hitTable ) {
@@ -127,8 +127,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             if ( last.Equals( location ) ) local--; // Last location get one less weight
          }
-         float perc = (float) local * 100f / (float) HitTableTotalWeight;
+         float perc = local * 100f / HitTableTotalWeight;
          return string.Format( CalledShotHitChanceFormat, perc );
-      }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
    }
 }

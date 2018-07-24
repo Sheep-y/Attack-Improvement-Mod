@@ -49,7 +49,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static bool losTextureScaled = false;
 
-      public static void ResizeLOS ( WeaponRangeIndicators __instance ) {
+      public static void ResizeLOS ( WeaponRangeIndicators __instance ) { try {
          WeaponRangeIndicators me = __instance;
 
          float width = Settings.LOSWidth;
@@ -83,7 +83,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             me.CoverTemplate.transform.localScale = zoom;
          }
          losTextureScaled = true;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private const int Melee = 0, Clear = 1, BlockedPre = 2, BlockedPost = 3, Indirect = 4, NoAttack = 5;
       private enum Line { Melee = 0, Clear = 1, BlockedPre = 2, BlockedPost = 3, Indirect = 4, NoAttack = 5 }
@@ -93,7 +93,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Material[] Mats;
       private static bool OverwriteNonMeleeLine = false;
 
-      public static void CreateLOSTexture ( WeaponRangeIndicators __instance ) {
+      public static void CreateLOSTexture ( WeaponRangeIndicators __instance ) { try {
          WeaponRangeIndicators me = __instance;
          if ( Solid == null ) {
             Solid = OrigInRangeMat = me.MaterialInRange;
@@ -114,7 +114,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             me.MaterialOutOfRange = Mats[ NoAttack ];
             me.LOSOutOfRange = Mats[ NoAttack ].color;
          }
-      }
+      } catch ( Exception ex ) {
+         Mats = new Material[ NoAttack + 1 ]; // Reset all materials
+         Error( ex );
+      } }
 
       private static bool RestoreMat = false;
       private static LineRenderer thisLine;
@@ -168,6 +171,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
+      // Make sure Blocked LOS is displayed in single target mode.
       public static void ShowBlockedLOS () {
          thisLine?.gameObject?.SetActive( true );
       }
@@ -191,7 +195,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Mats[ (int) line ] = NewMat( name, name != "NoAttack", color, dotted );
       }
 
-      private static Material NewMat ( string name, bool origInRange, string color, bool dotted ) {
+      private static Material NewMat ( string name, bool origInRange, string color, bool dotted ) { try {
          Material mat = new Material( dotted ? Dotted : Solid );
          Color newColour;
          if ( color != null )
@@ -212,7 +216,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          mat.name = name + "LOS";
          Log( "Created {0} {1}, Color {2} = {3}", mat.name, dotted ? "Dotted":"Solid", color, newColour );
          return mat;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
       private static void SwapMat ( WeaponRangeIndicators __instance, int matIndex, ref Color lineColor, bool IsMultifire ) {
          Material newMat = Mats[ matIndex ];

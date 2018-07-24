@@ -240,13 +240,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool OverrideRemoveTargetedCombatant ( SelectionStateFireMulti __instance, ICombatant target, bool clearedForFiring ) { try {
-         var allTargets = __instance.AllTargetedCombatants;
+         List<ICombatant> allTargets = __instance.AllTargetedCombatants;
          int index = target == null ? allTargets.Count - 1 : allTargets.IndexOf( target );
          if ( index < 0 ) return false;
 
          // Fix weaponTargetIndices
-         var indice = (Dictionary<Weapon, int>) weaponTargetIndices.GetValue( __instance, null );
-         foreach ( var weapon in indice.Keys.ToArray() ) {
+         Dictionary<Weapon, int> indice = (Dictionary<Weapon, int>) weaponTargetIndices.GetValue( __instance, null );
+         foreach ( Weapon weapon in indice.Keys.ToArray() ) {
             if ( indice[ weapon ] > index ) 
                indice[ weapon ] -= - 1;
             else if ( indice[ weapon ] == index )

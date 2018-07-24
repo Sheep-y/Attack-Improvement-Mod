@@ -53,6 +53,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       // Almost a direct copy of the original, only to remove melee position locking code
+      // TODO Can we do it with IL update?
       public static bool OverrideMeleeDestinations ( ref List<PathNode> __result, Pathing __instance, AbstractActor target ) { try {
          AbstractActor owner = __instance.OwningActor;
          // Not skipping AI cause them to hang up
@@ -94,6 +95,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Melee Accuracy ============
 
+      // TODO Move to RollModifier or a new class to share code with ranged modifier
       public struct AttackModifier {
          public string DisplayName;
          public float Value;
@@ -212,13 +214,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static void InitMeleeModifiers ( string[] factors ) {
          HashSet<string> Factors = new HashSet<string>();
          foreach ( string e in factors ) Factors.Add( e.Trim().ToLower() );
-         foreach ( string e in Factors ) {
+         foreach ( string e in Factors ) try {
             Func<AttackModifier> factor = GetMeleeModifierFactor( e );
             if ( factor == null )
-               Warn( "Ignoring unknown accuracy component \"{0}\"", e );
+               Warn( "Unknown accuracy component \"{0}\"", e );
             else
                Modifiers.Add( factor );
-         }
+         } catch ( Exception ex ) { Error( ex ); }
          Log( "Melee and DFA modifiers: " + Join( ",", Factors.ToArray() ) );
       }
 
@@ -235,13 +237,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          foreach ( var modifier in Modifiers ) {
             AttackModifier mod = modifier();
             thisModifier = mod.DisplayName;
-            TotalModifiers += Mathf.RoundToInt( mod.Value );
-            AddToolTipDetail( mod );
+            TotalModifiers += AddToolTipDetail( mod );
          }
          tip.BasicModifierInt = TotalModifiers; //Mathf.RoundToInt( Combat.ToHit.GetAllMeleeModifiers( us, they, they.CurrentPosition, attackType ) );
          return false;
       } catch ( Exception ex ) {
-         // Reset before handing over control
+         // Reset before giving up
          tip?.DebuffStrings.Clear();
          tip?.BuffStrings.Clear();
          return Error( new ApplicationException( "Error in the melee modifier *after* '" + thisModifier + "'", ex ) );
@@ -269,13 +270,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return Error( new ApplicationException( "Error in the melee modifier *after* '" + thisModifier + "'", ex ) );
       } }
 
-      private static void AddToolTipDetail( AttackModifier tooltip ) {
+      private static int AddToolTipDetail( AttackModifier tooltip ) {
          int mod = Mathf.RoundToInt( tooltip.Value );
-         if ( mod == 0 ) return;
+         if ( mod == 0 ) return 0;
          if ( mod > 0 )
             tip.DebuffStrings.Add( tooltip.DisplayName + " +" + mod );
          else // if ( mod < 0 )
             tip.BuffStrings.Add( tooltip.DisplayName + " " + mod );
+         return mod;
       }
    }
 }
