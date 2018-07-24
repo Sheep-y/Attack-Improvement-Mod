@@ -475,7 +475,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       public void Log ( object message ) {
-         string txt = message.ToString();
+         string txt = message?.ToString();
          if ( message is Exception ex ) {
             if ( exceptions.ContainsKey( txt ) ) {
                exceptions[ txt ]++;
@@ -490,7 +490,7 @@ namespace Sheepy.BattleTechMod {
       public void Log ( string message ) { WriteLog( message + NewLine ); }
       private static readonly string NewLine = Environment.NewLine;
 
-      public void Warn ( object message ) { Warn( message.ToString() ); }
+      public void Warn ( object message ) { Warn( message?.ToString() ); }
       public void Warn ( string message ) { Log( "Warning: " + message ); }
       public void Warn ( string message, params object[] args ) {
          message = Format( message, args );
@@ -502,7 +502,7 @@ namespace Sheepy.BattleTechMod {
          if ( message is Exception )
             Log( message );
          else
-            Error( message.ToString() );
+            Error( message?.ToString() );
          return true;
       }
       public void Error ( string message ) { Log( "Error: " + message ); }

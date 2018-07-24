@@ -22,9 +22,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( ToHitType, "GetAllMeleeModifiers", "FixAllModifiersTargetHeight", null ); // Should be always using CurrentPosition, but really won't hurt
             Patch( ToHitType, "GetAllModifiersDescription", "FixAllModifiersTargetHeight", null );
          }
-         */
          Patch( ToHitType, "GetAllModifiers", "LogModifiers", null );
          Patch( ToHitType, "GetHeightModifier", "LogHeightModifier", null );
+         */
 
          if ( Settings.HitChanceStep != 0.05f || Settings.MaxFinalHitChance != 0.95f || Settings.MinFinalHitChance != 0.05f || Settings.DiminishingHitChanceModifier ) {
             if ( ! Settings.DiminishingHitChanceModifier )

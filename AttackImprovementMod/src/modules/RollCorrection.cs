@@ -23,14 +23,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Logger.BTML_LOG.Warn( Mod.Name + " detected realitymachina's True RNG (NoCorrections) mod, roll correction and streak breaker disabled." );
             TrueRNG = true;
          }
-         if ( Settings.ShowCorrectedHitChance ) {
+         if ( BattleMod.FoundMod( "aa.battletech.realhitchance", "RealHitChance.Loader" ) ) {
             string pre = Mod.Name + " detected casualmods's Real Hit Chance mod", post = "it does not support AIM's features such as adjustable correction weight, accuracy step unlock, and decimal percentage display.";
-            if ( BattleMod.FoundMod( "aa.battletech.realhitchance" ) ) {
-               //Mod.harmony.UnpatchAll( "aa.battletech.realhitchance" );
-               Mod.harmony.RemovePatch( typeof( CombatHUDWeaponSlot ).GetMethod( "SetHitChance", Public | Instance, null, new Type[]{ typeof(float) }, null ), HarmonyPatchType.Prefix, "aa.battletech.realhitchance" );
+            try {
+               MethodInfo RealHitChance = AppDomain.CurrentDomain.GetAssemblies().First( e => e.GetName().Name == "AA.BT.RealHitChance" )
+                  ?.GetType( "RealHitChance.CombatHUDWeaponSlotHitChancePatch" )
+                  ?.GetMethod( "Prefix" );
+               if ( RealHitChance == null ) throw new NullReferenceException( "Method RealHitChance.CombatHUDWeaponSlotHitChancePatch.Prefix not found" );
+               Patch( RealHitChance, MakePatch( "OverrideRealHitChance" ), null );
                Logger.BTML_LOG.Warn( pre + ", and REMOVED it since " + post );
-            } else if ( BattleMod.FoundMod( "RealHitChance.Loader" ) ) {
+            } catch ( Exception ex ) {
                Settings.ShowCorrectedHitChance = false;
+               Warn( ex );
                Logger.BTML_LOG.Warn( pre + ", which should be REMOVED because " + post );
             }
          }
@@ -106,6 +110,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       // ============ Fixes ============
+
+      public static bool OverrideRealHitChance () { return false; }
 
       public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) { try {
          roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
