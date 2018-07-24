@@ -1,4 +1,5 @@
 ﻿using BattleTech;
+using Harmony;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -130,11 +131,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( LogCritical ) {
             Type CritRulesType = typeof( CritChanceRules );
-            Patch( typeof( AttackDirector ), "GetRandomFromCache", new Type[]{ typeof( WeaponHitInfo ), typeof( int ) }, null, "RecordCritRolls" );
-            Patch( CritRulesType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "RecordBaseCritChance" );
-            Patch( CritRulesType, "GetCritMultiplier", null, "RecordCritMultiplier" );
-            Patch( CritRulesType, "GetCritChance", null, "RecordCritChance" );
-            Patch( MechType, "GetComponentInSlot", null, "RecordCritComp" );
+            Patch( typeof( AttackDirector ), "GetRandomFromCache", new Type[]{ typeof( WeaponHitInfo ), typeof( int ) }, null, "LogCritRolls" );
+            Patch( CritRulesType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "LogBaseCritChance" );
+            Patch( CritRulesType, "GetCritMultiplier", null, "LogCritMultiplier" );
+            Patch( CritRulesType, "GetCritChance", null, "LogCritChance" );
+            Patch( MechType, "GetComponentInSlot", null, "LogCritComp" );
             Patch( MechType, "CheckForCrit", NonPublic, null, "LogCritResult" );
          }
       }
@@ -145,6 +146,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<string, int> hitMap; // Used to assign critical hit information
       private static List<string> log = new List<string>( 32 );
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void WriteRollLog ( AttackDirector __instance ) {
          if ( __instance != null && __instance.IsAnyAttackSequenceActive )
             return; // Defer if Multi-Target is not finished
@@ -203,6 +205,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static string thisSequenceId = "";
       internal static string thisSequenceTargetId = "";
 
+      [ HarmonyPriority( Priority.First ) ]
       public static void RecordArtilleryAttack ( ArtillerySequence __instance, ICombatant target ) {
          ArtillerySequence me = __instance;
          Weapon weapon = me.ArtilleryWeapon;
@@ -212,6 +215,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RecordAttackRoll( 0f, null );
       }
 
+      [ HarmonyPriority( Priority.First ) ]
       public static void RecordAttack ( AttackDirector.AttackSequence __instance ) {
          AttackDirector.AttackSequence me = __instance;
          AttackDirection direction = Combat.HitLocation.GetAttackDirection( me.attackPosition, me.target );
@@ -240,6 +244,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static string thisWeaponName = "";
       internal static float thisHitChance;
 
+      [ HarmonyPriority( Priority.First ) ]
       public static void RecordSequenceWeapon ( Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
          thisWeapon = weapon.GUID;
@@ -252,6 +257,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static float thisRoll;
       internal static float thisStreak;
 
+      [ HarmonyPriority( Priority.First ) ]
       public static void RecordAttackRoll ( float roll, Team team ) {
          //Log( "Roll = " + roll );
          thisRoll = roll;
@@ -264,6 +270,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static float thisCorrectedRoll;
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogMissedAttack ( float __result, float roll, Team team ) {
          thisCorrectedRoll = __result;
          bool miss = __result > thisHitChance;
@@ -288,6 +295,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Location Log ============
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogMechHit ( ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) {
          LogHitSequence( MechStructureRules.GetChassisLocationFromArmorLocation( __result ), randomRoll, bonusLocation, bonusLocationMultiplier, true,
             TryGet( hitTable, ArmorLocation.Head ) + "\t" +
@@ -300,6 +308,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             TryGet( hitTable, ArmorLocation.RightLeg ) );
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogVehicleHit ( VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) {
          LogHitSequence( __result, randomRoll, bonusLocation, bonusLocationMultiplier, false,
             TryGet( hitTable, VehicleChassisLocations.Turret ) + "\t" +
@@ -309,10 +318,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             TryGet( hitTable, VehicleChassisLocations.Rear   ) + "\t--\t--\t--" );
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogBuildingHit ( int __result, float hitLocationRoll, BuildingLocation calledShotLocation, float bonusMultiplier ) {
          LogHitSequence( BuildingLocation.Structure, hitLocationRoll, calledShotLocation, bonusMultiplier, false, "1\t--\t--\t--\t--\t--\t--\t--" );
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogBuildingClusterHit ( int __result, float randomRoll ) {
          LogHitSequence( BuildingLocation.Structure.ToString(), randomRoll, "None", 0, false, "1\t--\t--\t--\t--\t--\t--\t--" );
       }
@@ -347,26 +358,31 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float beforeStruct;
       private static bool damageResolved;
 
+      [ HarmonyPriority( Priority.First ) ]
       public static void RecordMechDamage ( Mech __instance, ArmorLocation aLoc, float totalDamage ) {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
          RecordUnitDamage( aLoc.ToString(), totalDamage,
             __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
       }
 
+      [ HarmonyPriority( Priority.First ) ]
       public static void RecordVehicleDamage ( Vehicle __instance, VehicleChassisLocations vLoc, float totalDamage ) {
          if ( vLoc == VehicleChassisLocations.None || vLoc == VehicleChassisLocations.Invalid ) return;
          RecordUnitDamage( vLoc.ToString(), totalDamage, __instance.GetCurrentArmor( vLoc ), __instance.GetCurrentStructure( vLoc ) );
       }
 
+      [ HarmonyPriority( Priority.First ) ]
       public static void RecordTurretDamage ( Turret __instance, BuildingLocation bLoc, float totalDamage ) {
          if ( bLoc == BuildingLocation.None || bLoc == BuildingLocation.Invalid ) return;
          RecordUnitDamage( bLoc.ToString(), totalDamage, __instance.GetCurrentArmor( bLoc ), __instance.GetCurrentStructure( bLoc ) );
       }
 
+      [ HarmonyPriority( Priority.First ) ]
       public static void RecordBuildingDamage ( BattleTech.Building __instance, float totalDamage ) {
          RecordUnitDamage( BuildingLocation.Structure.ToString(), totalDamage, 0, __instance.CurrentStructure );
       }
 
+      [ HarmonyPriority( Priority.First ) ]
       private static void RecordUnitDamage ( string loc, float totalDamage, float armour, float structure ) {
          //Log( $"{totalDamage} Damage @ {loc}" );
          lastLocation = loc;
@@ -376,21 +392,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          damageResolved = false;
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc ) {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
          LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogVehicleDamage ( Vehicle __instance, VehicleChassisLocations vLoc ) {
          if ( vLoc == VehicleChassisLocations.None || vLoc == VehicleChassisLocations.Invalid ) return;
          LogActorDamage( __instance.GetCurrentArmor( vLoc ), __instance.GetCurrentStructure( vLoc ) );
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogTurretDamage ( Turret __instance, BuildingLocation bLoc ) {
          if ( bLoc == BuildingLocation.None || bLoc == BuildingLocation.Invalid ) return;
          LogActorDamage( __instance.GetCurrentArmor( bLoc ), __instance.GetCurrentStructure( bLoc ) );
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogBuildingDamage ( BattleTech.Building __instance ) {
          LogActorDamage( 0, __instance.CurrentStructure );
       }
@@ -429,8 +449,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          "\t--\t--\t--" +     // Slot info
          "\t--\t--";          // Crit Result
 
-      private static float thisCritRoll, thisCritSlotRoll;
-      public static void RecordCritRolls ( float[] __result, int amount ) {
+      private static float thisCritRoll, thisCritSlotRoll, thisBaseCritChance, thisCritMultiplier, thisCritChance, thisLocationMaxHP;
+
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogCritRolls ( float[] __result, int amount ) {
          if ( amount == 2 ) {
             //Log( $"Crit Roll = {__result[0]}" );
             thisCritRoll = __result[0];
@@ -438,17 +460,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
-      private static float thisBaseCritChance, thisCritMultiplier, thisCritChance, thisLocationMaxHP;
-      public static void RecordBaseCritChance ( float __result, Mech target, ChassisLocations hitLocation ) {
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogBaseCritChance ( float __result, Mech target, ChassisLocations hitLocation ) {
          thisBaseCritChance = __result;
          //thisLocationHP = target.GetCurrentStructure( hitLocation );
          thisLocationMaxHP = target.GetMaxStructure( hitLocation );
          //Log( $"Location Max HP = {thisLocationMaxHP}" );
       }
-      public static void RecordCritMultiplier ( float __result ) {
+
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogCritMultiplier ( float __result ) {
          thisCritMultiplier = __result;
       }
-      public static void RecordCritChance ( float __result ) {
+
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogCritChance ( float __result ) {
          thisCritChance = __result;
          thisCritComp = null;
       }
@@ -458,7 +484,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static ComponentDamageLevel thisCompBefore;
       private static bool halfFullAmmo = false;
 
-      public static void RecordCritComp ( MechComponent __result, ChassisLocations location, int index ) {
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogCritComp ( MechComponent __result, ChassisLocations location, int index ) {
          if ( thisCritComp == __result ) return;
          //Log( $"Record Crit Comp @ {location} = {__result.UIName}" );
          thisCritSlot = index;
@@ -470,6 +497,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritResult ( Mech __instance, ChassisLocations location, Weapon weapon ) { try {
          string key = GetHitKey( weapon.GUID, location, __instance.GUID );
          //Log( "Crit " + DateTime.Now.ToString( "s" ) + "\t" + weapon.defId + "\t" + __instance.GetPilot().Callsign + "\t" + location );
