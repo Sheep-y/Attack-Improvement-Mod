@@ -10,12 +10,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStartsOnce () {
          Type ToHitType = typeof( ToHit );
-         if ( Settings.AllowNetBonusModifier )
+         if ( Settings.AllowNetBonusModifier && ! Settings.DiminishingHitChanceModifier )
             Patch( ToHitType, "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );
          if ( Settings.BaseHitChanceModifier != 0f )
             Patch( ToHitType, "GetBaseToHitChance", new Type[]{ typeof( AbstractActor ) }, null, "ModifyBaseHitChance" );
          if ( Settings.MeleeHitChanceModifier != 0f )
             Patch( ToHitType, "GetBaseMeleeToHitChance", new Type[]{ typeof( Mech ) }, null, "ModifyBaseMeleeHitChance" );
+         /*
+         if ( Settings.FixModifierTargetHeight ) {
+            Patch( ToHitType, "GetAllModifiers", "FixAllModifiersTargetHeight", null );
+            Patch( ToHitType, "GetAllMeleeModifiers", "FixAllModifiersTargetHeight", null ); // Should be always using CurrentPosition, but really won't hurt
+            Patch( ToHitType, "GetAllModifiersDescription", "FixAllModifiersTargetHeight", null );
+         }
+         */
+         Patch( ToHitType, "GetAllModifiers", "LogModifiers", null );
+         Patch( ToHitType, "GetHeightModifier", "LogHeightModifier", null );
 
          if ( Settings.HitChanceStep != 0.05f || Settings.MaxFinalHitChance != 0.95f || Settings.MinFinalHitChance != 0.05f || Settings.DiminishingHitChanceModifier ) {
             if ( ! Settings.DiminishingHitChanceModifier )
@@ -52,7 +61,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          List<float> mods = new List<float>(22);
          float lastMod = float.NaN;
          for ( int i = 1 ; ; i++ ) {
-            float mod = GetSteppedValue( i );
+            float mod = GetSteppedModifier( i );
             if ( float.IsNaN( mod ) || mod == lastMod ) break;
             mods.Add( mod );
             if ( mod == 0 || mod <= -1f ) break;
@@ -62,7 +71,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Log( "Stepping ToHit Multipliers\t" + Join( "\t", steppingModifier ) );
       }
 
-      internal static float GetSteppedValue ( float modifier ) {
+      internal static float GetSteppedModifier ( float modifier ) {
          int[] Levels = CombatConstants.ToHit.ToHitStepThresholds;
          float[] values = CombatConstants.ToHit.ToHitStepValues;
          int mod = Mathf.RoundToInt( modifier ), lastLevel = int.MaxValue;
@@ -106,11 +115,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             mod = Math.Min( mod, steppingModifier.Length );
             __result += steppingModifier[ mod - 1 ];
          }
+         //Log( "ProcessNetBonusModifier - Base Hit {0}, Modifier {1}, result {2}", originalHitChance, modifier, __result );
          return false;
       }
 
       public static bool OverrideHitChanceStepNClamp ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) {
          // A pretty intense routine that AI use to evaluate attacks, try catch disabled.
+         //Log( "OverrideHitChanceStepNClamp - Base Hit {0}, Modifier {1}", baseChance, totalModifiers );
          __result = ClampHitChance( __instance.GetSteppedValue( baseChance, totalModifiers ) );
          return false;
       }
@@ -144,5 +155,47 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( chance <= Settings.MinFinalHitChance ) return Settings.MinFinalHitChance;
          return chance;
       }
+
+      /*
+      public static void FixAllModifiersTargetHeight ( ICombatant target, ref Vector3 targetPosition ) {
+         // Almost everything use CurrentPosition, so don't use TargetPosition!
+         // But this does not work on CombatHUDWeaponSlot.UpdateToolTipsFiring, leaving for next release
+         targetPosition = target.CurrentPosition;
+      }
+
+      public static void LogHeightModifier ( float attackerY, float targetY ) {
+         Log( ">>> {0}, {1} <<<", attackerY, targetY );
+      }
+
+      public static void LogModifiers ( ToHit __instance, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot ) { TryRun( ModLog, () => {
+         Log( "==== {0}, {1}, {2} ====", attackPosition.y, targetPosition.y, target.CurrentPosition.y );
+      /*
+         ToHit me = __instance;
+         bool flag = lofLevel < LineOfFireLevel.LOFObstructed && weapon.IndirectFireCapable;
+         Log( "==== {0}, {1}, {2} ====", attackPosition.y, targetPosition.y, target.CurrentPosition.y );
+         Log( "rangeModifier = {0}", me.GetRangeModifier(weapon, attackPosition, targetPosition) );
+         Log( "coverModifier = {0}", me.GetCoverModifier(attacker, target, lofLevel) );
+         Log( "selfSpeedModifier = {0}", me.GetSelfSpeedModifier(attacker) );
+         Log( "selfSprintedModifier = {0}", me.GetSelfSprintedModifier(attacker) );
+         Log( "selfArmMountedModifier = {0}", me.GetSelfArmMountedModifier(weapon) );
+         Log( "stoodUpModifier = {0}", me.GetStoodUpModifier(attacker) );
+         Log( "heightModifier = {0}", me.GetHeightModifier(attackPosition.y, targetPosition.y) );
+         Log( "heatModifier = {0}", me.GetHeatModifier(attacker) );
+         Log( "targetTerrainModifier = {0}", me.GetTargetTerrainModifier(target, targetPosition, false) );
+         Log( "selfTerrainModifier = {0}", me.GetSelfTerrainModifier(attackPosition, false) );
+         Log( "targetSpeedModifier = {0}", me.GetTargetSpeedModifier(target, weapon) );
+         Log( "selfDamageModifier = {0}", me.GetSelfDamageModifier(attacker, weapon) );
+         Log( "targetSizeModifier = {0}", me.GetTargetSizeModifier(target) );
+         Log( "targetShutdownModifier = {0}", me.GetTargetShutdownModifier(target, false) );
+         Log( "targetProneModifier = {0}", me.GetTargetProneModifier(target, false) );
+         Log( "weaponAccuracyModifier = {0}", me.GetWeaponAccuracyModifier(attacker, weapon) );
+         Log( "attackerAccuracyModifier = {0}", me.GetAttackerAccuracyModifier(attacker) );
+         Log( "enemyEffectModifier = {0}", me.GetEnemyEffectModifier(target) );
+         Log( "refireModifier = {0}", me.GetRefireModifier(weapon) );
+         Log( "targetDirectFireModifier = {0}", me.GetTargetDirectFireModifier(target, flag) );
+         Log( "indirectModifier = {0}", me.GetIndirectModifier(attacker, flag) );
+         Log( "moraleAttackModifier = {0}", me.GetMoraleAttackModifier(target, isCalledShot) );
+      } ); }
+      /**/
    }
 }

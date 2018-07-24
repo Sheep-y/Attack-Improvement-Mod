@@ -124,8 +124,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Allow bonus total modifier to increase hit chance.  Default true." ) ]
       public bool AllowNetBonusModifier = true;
 
-      [ JsonComment( "Allow attacks from low ground to high ground to incur accuracy penalty." ) ]
+      [ JsonComment( "Allow attacks from low ground to high ground to incur accuracy penalty.  Default true." ) ]
       public bool AllowLowElevationPenalty = true;
+
+      //[ JsonComment( "Fix potential target height discrepancy between modifier breakdown and total accuracy.  Default true." ) ]
+      //public bool FixModifierTargetHeight = true;
 
       [ JsonComment( new String[]{
         "Step of hit chance, range 0 to 0.2.  Game default is 0.05, or 5%.  Hit chance is always rounded down.",
