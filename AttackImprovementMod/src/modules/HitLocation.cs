@@ -19,8 +19,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
 
       public override void CombatStartsOnce () {
-         if ( Settings.KillZeroHpLocation )
-            Patch( typeof( AbstractActor ), "GetAdjustedDamage", null, "FixDamageToInteger" );
+         if ( Settings.KillZeroHpLocation ) {
+            Patch( typeof( Mech )   , "DamageLocation", NonPublic, null, "FixZombieMech" );
+            Patch( typeof( Vehicle ), "DamageLocation", NonPublic, null, "FixZombieVehicle" );
+            Patch( typeof( Turret ) , "DamageLocation", NonPublic, null, "FixZombieTurret" );
+            Patch( typeof( BattleTech.Building ), "DamageBuilding", NonPublic, null, "FixZombieBuilding" );
+         }
 
          scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering || GameUseClusteredCallShot;
@@ -96,11 +100,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return multiplier;
       }
 
-      // ============ Fixes ============
-
-      public static void FixDamageToInteger ( ref float __result ) {
-         __result = Mathf.Round( __result );
-      }
+      // ============ Called Shot ============
 
       public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
@@ -131,6 +131,33 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      // ============ Zombie ============
+         
+      public static void FixZombieMech ( Mech __instance, ref float totalDamage, ArmorLocation aLoc ) {
+         float armour = __instance.GetCurrentArmor( aLoc );
+         if ( armour >= totalDamage ) return;
+         killZombie( "mech", __instance.DisplayName, armour + __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ), ref totalDamage );
+      }
+
+      public static void FixZombieVehicle ( Vehicle __instance, ref float totalDamage, VehicleChassisLocations vLoc ) {
+         killZombie( "vehicle", __instance.DisplayName, __instance.GetCurrentArmor( vLoc ) + __instance.GetCurrentStructure( vLoc ), ref totalDamage );
+      }
+
+      public static void FixZombieTurret ( Turret __instance, ref float totalDamage, BuildingLocation bLoc ) {
+         killZombie( "turret", __instance.DisplayName, __instance.GetCurrentArmor( bLoc ) + __instance.GetCurrentStructure( bLoc ), ref totalDamage );
+      }
+
+      public static void FixZombieBuilding ( BattleTech.Building __instance, ref float totalDamage ) {
+         killZombie( "building", __instance.DisplayName, __instance.CurrentStructure, ref totalDamage );
+      }
+
+      private static void killZombie ( string type, string name, float HP, ref float totalDamage ) {
+         float newHP = HP - totalDamage;
+         if ( newHP >= 1 || newHP <= 0 ) return;
+         Log( "Upgrading damage dealt to {1} by {2} to kill zombie {0}", type, name, newHP );
+         totalDamage += newHP + 0.001f;
+      }
 
       // ============ GetHitLocation ============
 
