@@ -105,6 +105,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private bool LoggerPatched = false;
 
       public override void CombatStarts () {
+         if ( idGenerator == null ) return;
          thisCombatId = GetNewId();
 
          if ( LoggerPatched ) return;
@@ -156,7 +157,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          hitList?.Clear();
          hitMap?.Clear();
          thisSequenceId = GetNewId();
-         //Log( "Log written and HitMap Cleared" );
+         //Log( "Log written and HitMap Cleared\n" );
       }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
@@ -426,8 +427,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          string line = log[ hitList[0] ];
          if ( LogCritical )
-            line = line.Substring( 0, line.Length - CritDummy.Length );
+            if ( ! line.EndsWith( CritDummy ) ) {
+               Warn( "Damage Log found a crit'ed line." );
+               hitList.RemoveAt( 0 );
+               //Log( $"Hit list remaining: {hitList.Count}" );
+               thisDamage = null;
+               return;
+            } else
+               line = line.Substring( 0, line.Length - CritDummy.Length );
 
+         if ( ! line.EndsWith( DamageDummy ) ) {
+            Warn( "Damage Log found a damaged'ed line." );
+            hitList.RemoveAt( 0 );
+            //Log( $"Hit list remaining: {hitList.Count}" );
+            thisDamage = null;
+            return;
+         }
          line = line.Substring( 0, line.Length - DamageDummy.Length ) + "\t" +
                thisDamage   + "\t" + lastLocation + "\t" +
                beforeArmour + "\t" + afterArmour  + "\t" +
@@ -489,7 +504,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritComp ( MechComponent __result, ChassisLocations location, int index ) {
          if ( thisCritComp == __result ) return;
-         //Log( $"Record Crit Comp @ {location} = {__result.UIName}" );
+         //Log( $"Record Crit Comp @ {location} = {__result?.UIName}" );
          thisCritSlot = index;
          thisCritComp = __result;
          if ( __result != null ) {

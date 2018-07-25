@@ -129,6 +129,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          float perc = local * 100f / HitTableTotalWeight;
          return string.Format( CalledShotHitChanceFormat, perc );
-      }                 catch ( Exception ex ) { return Error( ex ); } }
+      } catch ( Exception ex ) { 
+         Error( ex ); 
+         return "ERR";
+      } }
    }
 }
