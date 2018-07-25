@@ -82,7 +82,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Actor Team", "Actor Pilot", "Actor Unit", "Target Team", "Target Pilot", "Target Unit", "Combat Id", "Attack Id", "Direction", "Range" } ) );
             if ( LogShot || PersistentLog ) {
-               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Weapon", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
+               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Weapon", "Weapon Id", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
                if ( LogLocation || PersistentLog )
                   logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
                logBuffer.Append( "\tHit Location" );
@@ -167,9 +167,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static Random idGenerator; // Use an independent generator to make sure we don't affect the game's own RNG or be affected.
 
       public static string GetNewId () {
-         byte[] buffer = new byte[32];
+         byte[] buffer = new byte[24];
          idGenerator.NextBytes( buffer );
-         return BitConverter.ToString( buffer ).Replace( "-", "" );
+         return Convert.ToBase64String( buffer );
       }
 
       private static string GetHitKey<T> ( string weapon, T hitLocation, string targetId ) {
@@ -250,7 +250,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.First ) ]
       public static void RecordSequenceWeapon ( Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
-         thisWeapon = weapon.GUID;
+         thisWeapon = weapon.GUID.Replace( "SRC<the one and only>_", "" );
          string weaponDef = weapon?.defId ?? weapon?.UIName;
          if ( weaponDef != null && weaponDef.StartsWith( "Weapon_" ) ) weaponDef = weaponDef.Substring( 7 );
          thisWeaponName = weaponDef;
@@ -268,7 +268,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       internal static string GetShotLog () {
-         return thisSequence + "\t" + thisWeaponName + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance;
+         return thisSequence + "\t" + thisWeaponName + "\t" + thisWeapon + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance;
       }
 
       internal static float thisCorrectedRoll;
