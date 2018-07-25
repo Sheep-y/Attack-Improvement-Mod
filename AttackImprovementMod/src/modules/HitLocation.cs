@@ -133,18 +133,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ Zombie ============
-         
+
       public static void FixZombieMech ( Mech __instance, ref float totalDamage, ArmorLocation aLoc ) {
+         if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
          float armour = __instance.GetCurrentArmor( aLoc );
          if ( armour >= totalDamage ) return;
          killZombie( "mech", __instance.DisplayName, armour + __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ), ref totalDamage );
       }
 
       public static void FixZombieVehicle ( Vehicle __instance, ref float totalDamage, VehicleChassisLocations vLoc ) {
+         if ( vLoc == VehicleChassisLocations.None || vLoc == VehicleChassisLocations.Invalid ) return;
          killZombie( "vehicle", __instance.DisplayName, __instance.GetCurrentArmor( vLoc ) + __instance.GetCurrentStructure( vLoc ), ref totalDamage );
       }
 
       public static void FixZombieTurret ( Turret __instance, ref float totalDamage, BuildingLocation bLoc ) {
+         if ( bLoc == BuildingLocation.None || bLoc == BuildingLocation.Invalid ) return;
          killZombie( "turret", __instance.DisplayName, __instance.GetCurrentArmor( bLoc ) + __instance.GetCurrentStructure( bLoc ), ref totalDamage );
       }
 
