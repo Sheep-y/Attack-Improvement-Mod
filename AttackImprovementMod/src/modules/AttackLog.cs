@@ -80,9 +80,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( ! ROLL_LOG.Exists() ) {
             StringBuilder logBuffer = new StringBuilder();
-            logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Attacker", "Pilot", "Unit", "Target", "Pilot", "Unit", "Combat Id", "Attack Id", "Direction", "Range" } ) );
+            logBuffer.Append( String.Join( "\t", new string[]{ "Time", "Actor", "Pilot", "Unit", "Target", "Pilot", "Unit", "Combat Id", "Attack Id", "Direction", "Range" } ) );
             if ( LogShot || PersistentLog ) {
-               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Weapon", "Weapon Id", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
+               logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Weapon", "Weapon Template", "Weapon Id", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
                if ( LogLocation || PersistentLog )
                   logBuffer.Append( "\t" ).Append( String.Join( "\t", new string[]{ "Location Roll", "Head/Turret", "CT/Front", "LT/Left", "RT/Right", "LA/Rear", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
                logBuffer.Append( "\tHit Location" );
@@ -191,13 +191,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else
             teamName = "NPC";
          teamName += "\t";
-         // TODO: Merge to one line
-         if ( who.GetPilot() != null ) 
-            teamName += who.GetPilot().Callsign;
-         else if ( who is AbstractActor actor )
-            teamName += actor.Nickname;
-         else
-            teamName += who.DisplayName;
+         if ( who is Building ) {
+            teamName += "Building";
+         } else {
+            // TODO: Merge to one line
+            if ( who.GetPilot() != null ) 
+               teamName += who.GetPilot().Callsign;
+            else if ( who is AbstractActor actor )
+               teamName += actor.Nickname;
+            else
+               teamName += who.DisplayName;
+         }
          teamName += "\t";
          return teamName + who.DisplayName + "\t";
       }
@@ -243,16 +247,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Shot Log ============
 
-      internal static string thisWeapon = "";
-      internal static string thisWeaponName = "";
+      internal static string thisWeapon, thisWeaponDef, thisWeaponId;
       internal static float thisHitChance;
 
       [ HarmonyPriority( Priority.First ) ]
       public static void RecordSequenceWeapon ( Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
-         thisWeapon = weapon?.uid;
-         thisWeaponName = weapon?.defId ?? weapon?.UIName;
-         //Log( $"GetIndividualHits / GetClusteredHits / ArtillerySequence = {thisWeaponName} {thisWeapon}" );
+         thisWeapon = weapon?.UIName;
+         thisWeaponDef = weapon?.defId ?? thisWeapon;
+         thisWeaponId = weapon?.uid;
+         //Log( $"GetIndividualHits / GetClusteredHits / ArtillerySequence = {thisWeapon} {thisWeaponUid}" );
       }
 
       internal static float thisRoll;
@@ -266,9 +270,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       internal static string GetShotLog () {
-         string weaponName = thisWeaponName;
-         if ( weaponName != null && weaponName.StartsWith( "Weapon_" ) ) weaponName = weaponName.Substring( 7 );
-         return thisSequence + "\t" + weaponName + "\t" + thisWeapon + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance;
+         return thisSequence + "\t" + thisWeapon + "\t" + thisWeaponDef + "\t" + thisWeaponId + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance;
       }
 
       internal static float thisCorrectedRoll;
@@ -340,7 +342,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( LogCritical ) {
                line += CritDummy;
                if ( canCrit ) {
-                  string key = GetHitKey( thisWeapon, hitLocation, thisSequenceTargetId );
+                  string key = GetHitKey( thisWeaponId, hitLocation, thisSequenceTargetId );
                   //Log( "Hit key = " + key );
                   hitMap[ key ] = log.Count;
                }
