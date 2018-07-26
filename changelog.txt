@@ -1,0 +1,53 @@
+CHANGE LOG
+
+2018-07-26 AIM Version 2.0 for BATTLETECH 1.1.2
+
+* Mod: Settings migrated to settings.json and is automatically updated by the mod.
+* New: Unlock hit accuracy's 5% step and make odd gunnery useful.
+* New: Show current and projected heat and stability number in selection panel and target panel.
+* New: Fix and allow to-hit modifier to be a net bonus, instead of capping at no penalty.
+* New: Allow height modifier to be net penalty, instead of capping at no bonus.
+* New: Display base hit chance of ranged and melee attack and the relevant stat.
+* New: Fix Multi-Target back out.
+* New: Fix rear armour structure display, and show structural damage through armour.
+* New: Fix Grey Head Disease, spread by headshot immune unit to all mechs until load game or restart.
+* New: Fix the bug that parts and units has a very low chance to be zombified at 0 HP.
+* New: Make sure walk and jump result in same LOS quality (clear/blocked/indirect/none).
+* New: Change Line of Fire colours, style (solid/dotted), and width.
+* New: Refine (or rough up / flatten) indirect firing arc and jump arc.
+* New: Unlock melee positioning: allow all valid spots to be moved to and mechs are not locked in place by melee.
+* New: Customise list and order of melee attack modifiers, with new factors such as height and inspired.<br>When used, fix the bug that prone stand up penalty is not actually applied to melee.
+* New: A rewritten attack log that is faster and supports various level of details including direction, damage, and crit.
+* New: (Optional) Change ranged/melee base hit chances and min/max of modified hit chance.
+* New: (Optional) Diminishing to-hit modifier effect that makes light penalties more punishing and big penalties less hopeless.
+* New: (Optional) Show mech and vehicle tonnage in selection panel and target panel, before unit class.
+* Mod: New mod architecture that is faster, safer, and enables mod conflict detection and resolution.
+* Mod: Detect and resolve conflicts with Firing Line Improvement, Extended Information, Melee Mover, True RNG, and Real Hit Chance.
+* Mod: Log folder can now be set through the LogDir setting.
+* Mod: More setting validations.
+* Fix: Compatibility with early mod loading, before most game states are initiated.
+* Fix: Re-enable hit distribution override by default.
+* Fix: Display of corrected hit chance no longer caps at 95%.
+* Fix: Call chance displays no longer inter-dependent; enabling any relevant settings will triggers display patch.
+* Fix: Hit chance format is now free, and defaults to optionally displayed to one decimal point if stepping modifier is used and 5% stepping is removed.
+* Fix: Attack Log now logs attacks on turrets and buildings, and fill in all blanks. Total weight and call goal removed.
+* Fix: Mod log now ignores all duplicate exceptions, if logged through Error( object ), to not slow down the game with disk writes.
+* Fix: Optimise miss streak breaker bypass when it is disabled. (Roll correction already has fast bypass.)
+
+2018-06-28 AIM Version 1.0.1 for BATTLETECH 1.1.1
+
+* Fix: Fix vehicle called shot no longer float mech location name.
+* Fix: Auto-detect Log directory.
+* Fix: Cap accuracy between 0 and 100.
+* Fix: Override called shot percent cap when ShowRealWeaponHitChance is true but ShowDecimalHitChance is false.
+* Fix: Auto-bypass Hit Location bug fix on 1.1.1 and up.
+
+2018-06-21 AIM Version 1.0.0 for BATTLETECH 1.0 and 1.1
+
+Initial version with 
+* Vehicle Called Shot fixed
+* Hit Location fixed
+* Clustering Called Shot
+* Roll Correction Adjustment
+* Miss Streak Adjustment
+* Attack Roll Log.

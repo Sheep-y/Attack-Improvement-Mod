@@ -57,11 +57,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Set to 1 to use game default, or 0 to hide the marker." } ) ]
       public float LOSMarkerBlockedMultiplier = 1.5f;
 
-      [ JsonComment( "Controls whether indirect attack lines / can't attack lines are dotted. Default both true." ) ]
+      [ JsonComment( "Controls whether indirect attack lines / can't attack lines are dotted.  Default both true." ) ]
       public bool LOSIndirectDotted = true;
       public bool LOSNoAttackDotted = true;
 
-      [ JsonComment( "Controls whether other attack lines are dotted. Default all false." ) ]
+      [ JsonComment( "Controls whether other attack lines are dotted.  Default all false." ) ]
       public bool LOSMeleeDotted = false;
       public bool LOSClearDotted = false;
       public bool LOSBlockedPreDotted  = false;
@@ -77,7 +77,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string LOSIndirectColor = "";
       public string LOSNoAttackColor = "";
 
-      [ JsonComment( "Number of points of indirect attack lines and jump lines. Game uses 18. Default 48 for a smoother curve." ) ]
+      [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
 
       //
@@ -93,7 +93,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default true.  Disable to give yourself the false hope of headshoting the boss, provided FixGreyHeadDisease is true." } ) ]
       public bool FixBossHeadCalledShotDisplay = true;
 
-      [ JsonComment( "Enable clustering effect for called shots against mechs. Default true." ) ]
+      [ JsonComment( "Enable clustering effect for called shots against mechs.  Default true." ) ]
       public bool CalledShotUseClustering = true;
 
       [ JsonComment( new String[]{
@@ -131,8 +131,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       //public bool FixModifierTargetHeight = true;
 
       [ JsonComment( new String[]{
-        "Step of hit chance, range 0 to 0.2.  Game default is 0.05, or 5%.  Hit chance is always rounded down.",
-        "Default 0 to remove hit chance step, so that odd piloting stat can enjoy their +2.5% hit chance." } ) ]
+        "Step of hit chance.  Game default is 0.05, or 5%.  Hit chance is always rounded down.",
+        "Default 0 to remove hit chance step, so that odd gunnery stats can enjoy their +2.5% hit chance." } ) ]
       public float HitChanceStep = 0;
 
       [ JsonComment( "Modify base weapon hit chance.  -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
@@ -229,8 +229,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new String[]{
         "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order will be followed, and letter case does not matter.",
-        "Default \"DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy\".",
-        "Other options are \"ArmMounted,Obstruction,Refire,SelfTerrain,SensorImpaired,TargetTerrain\"." } ) ]
+        "Default \"DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfWalked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy\".",
+        "Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain." } ) ]
       public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
 
       //
