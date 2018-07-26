@@ -247,16 +247,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Shot Log ============
 
-      internal static string thisWeapon, thisWeaponDef, thisWeaponId;
+      internal static Weapon thisWeapon;
       internal static float thisHitChance;
 
       [ HarmonyPriority( Priority.First ) ]
       public static void RecordSequenceWeapon ( Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
-         thisWeapon = weapon?.UIName;
-         thisWeaponDef = weapon?.defId ?? thisWeapon;
-         thisWeaponId = weapon?.uid;
-         //Log( $"GetIndividualHits / GetClusteredHits / ArtillerySequence = {thisWeapon} {thisWeaponUid}" );
+         thisWeapon = weapon;
+         //Log( $"GetIndividualHits / GetClusteredHits / ArtillerySequence = {weapon?.UIName} {thisWeapon?.uid}" );
       }
 
       internal static float thisRoll;
@@ -270,7 +268,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       internal static string GetShotLog () {
-         return thisSequence + "\t" + thisWeapon + "\t" + thisWeaponDef + "\t" + thisWeaponId + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance;
+         string weaponName = thisWeapon?.UIName?.Replace( " +", "+" );
+         return thisSequence + "\t" + weaponName + "\t" + thisWeapon?.defId + "\t" + thisWeapon?.uid + "\t" + thisRoll + "\t" + ( thisCorrectedRoll + thisStreak ) + "\t" + thisStreak + "\t" + thisCorrectedRoll + "\t" + thisHitChance;
       }
 
       internal static float thisCorrectedRoll;
@@ -342,7 +341,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( LogCritical ) {
                line += CritDummy;
                if ( canCrit ) {
-                  string key = GetHitKey( thisWeaponId, hitLocation, thisSequenceTargetId );
+                  string key = GetHitKey( thisWeapon?.uid, hitLocation, thisSequenceTargetId );
                   //Log( "Hit key = " + key );
                   hitMap[ key ] = log.Count;
                }
