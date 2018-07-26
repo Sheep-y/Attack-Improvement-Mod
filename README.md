@@ -357,7 +357,7 @@ These settings can be changed in `settings.json`.
 
 **Diminishing Hit Chance Modifier**
 
-> Setting: DiminishingHitChanceModifier  (true/false, default false)
+> Setting: `DiminishingHitChanceModifier`  (true/false, default false)
 >
 > Set this to true to enable diminishing return of modifiers, instead of simple add and subtract.
 > As a result, small penalties have a bigger effect, but very large penalties may be more bearable.
@@ -387,7 +387,7 @@ These settings can be changed in `settings.json`.
 
 **Adjust Roll Correction**
 
-> Setting: RollCorrectionStrength (0.0 to 2.0, default 0.5)
+> Setting: `RollCorrectionStrength`  (0.0 to 2.0, default 0.5)
 >
 > It is no secret that the game fudge all hit rolls, called a "correction".  As a result, real hit chances are shifted away from 50%, for example 75% becomes 84% while 25% becomes 16%.  This can create a rift between what you see and what you get, especially on low chance shots.
 >
@@ -398,7 +398,7 @@ These settings can be changed in `settings.json`.
 
 (Advanced) **Adjust Miss Streak Threshold**
 
-> Setting: `MissStreakBreakerThreshold` (0.00 to 1.00, default 0.5)
+> Setting: `MissStreakBreakerThreshold`  (0.00 to 1.00, default 0.5)
 >
 > In addition to roll adjustment, the game also has a "miss streak breaker".  Whenever you miss an attack of which uncorrected hit chance > 50%, the streak breaker will adjust your hit chance up on top of roll correction.  The bonus accumulates until you land a hit (regards of hit chance), at which point it resets to 0.
 >
@@ -409,7 +409,7 @@ These settings can be changed in `settings.json`.
 
 (Advanced) **Adjust Miss Streak Bonus**
 
-> Setting: MissStreakBreakerDivider (-100.0 to 100.0, default 5.0)
+> Setting: `MissStreakBreakerDivider`  (-100.0 to 100.0, default 5.0)
 >
 > For every miss that crosses the streak breaker threshold, the threshold is deduced from hit chance, then divided by 5.  The result is then added as streak breaker bonus.
 >
@@ -420,7 +420,7 @@ These settings can be changed in `settings.json`.
 
 **Format Hit Chance** (default "")
 
-> Setting: `HitChanceFormat` (free string, default "")
+> Setting: `HitChanceFormat`  (free string, default "")
 >
 > Use Microsoft C# [String.Format](https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2008/0c899ak8(v=vs.90) syntax to format weapon hit chances.
 >
@@ -432,7 +432,7 @@ These settings can be changed in `settings.json`.
 
 (Advanced) **Show Corrected Hit Chance**
 
-> Setting: `ShowCorrectedHitChance` (true/false, default false)
+> Setting: `ShowCorrectedHitChance`  (true/false, default false)
 >
 > It's one thing to fudge the rolls.  It is another to let you know.
 > Set this to true to show the corrected hit chance in weapon panel.
@@ -446,7 +446,7 @@ These settings can be changed in `settings.json`.
 
 **Precise Hit Location Distribution**
 
-> Setting: FixHitDistribution (true/false, default true)
+> Setting: `FixHitDistribution`  (true/false, default true)
 >
 > Set to true to increase hit location precision, specifically to improve the hit distribution of SRM and MG called shots.
 >
@@ -456,16 +456,23 @@ but because the code that determine hit distribution is not designed for fractio
 > On game version 1.1.0 and before, enabling this would also fix the bug that causes abnormally high head hit chances.
 
 
-**Precise Hit Location Distribution**
+**Kill Zombies**
 
-KillZeroHpLocation 
+> Setting: `KillZeroHpLocation`  (true/false, default true)
+>
+> Set to true to prevent locations and units from surviving at 0 HP.
+>
+> Some units have non-integer hp (usually turrets), and an attack may dealt non-integer damage (e.g. cover).  As a result, this may result in zombie locations and units that are at 0 structure but not dead.
+>
+> This mod can detect these cases and boosts the final damage just enough to finish the job.
+
 
 
 ## Attack Log Settings
 
 (Advanced) **Attack Log**
 
-> Setting: AttackLogLevel ("None", "Attack", "Shot", "Location", "Damage", "Critical", or "All", default "None")
+> Setting: `AttackLogLevel`  ("None", "Attack", "Shot", "Location", "Damage", "Critical", or "All", default "None")
 >
 > When not None, the mod will writes to an attack log in the mod's folder, called Log_Attack.txt.
 >
@@ -489,11 +496,11 @@ KillZeroHpLocation
 
 (Advanced) **Log Options**
 
-> Setting: PersistentLog (true/false, default false)
+> Setting: `PersistentLog`  (true/false, default false)
 >
 > When set to false, the attack log will auto-clear on launch.
 >
-> Setting: LogFolder (string, default "")
+> Setting: `LogFolder`  (string, default "")
 >
 > Set path of mod log and attack log.  Default is empty which will use mod folder.
 
