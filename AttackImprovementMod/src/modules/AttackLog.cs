@@ -39,7 +39,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                break;
             case "tsv":
             case "txt":
-               Separator = Separator;
+               Separator = "\t";
                break;
          }
 
@@ -293,7 +293,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static string GetShotLog () {
          string weaponName = thisWeapon?.UIName?.Replace( " +", "+" );
-         return thisSequence + Separator + weaponName + Separator + thisWeapon?.defId + Separator + thisWeapon?.uid + Separator + thisRoll + Separator + ( thisCorrectedRoll + thisStreak ) + Separator + thisStreak + Separator + thisCorrectedRoll + Separator + thisHitChance;
+         string uid = thisWeapon?.uid;
+         if ( uid != null ) {
+            if ( uid.EndsWith( "_Melee" ) ) uid = "Melee";
+            else if ( uid.EndsWith( "_DFA" ) ) uid = "DFA";
+         }
+         return Join( Separator, new object[]{ thisSequence, weaponName, thisWeapon?.defId, uid, thisRoll, thisCorrectedRoll + thisStreak, thisStreak, thisCorrectedRoll, thisHitChance } );
       }
 
       internal static float thisCorrectedRoll;
@@ -442,7 +447,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( damageResolved ) return;
          damageResolved = true;
          if ( hitList.Count <= 0 ) {
-            Warn( "Damage Log cannot find matching hit record." );
+            Warn( "Damage Log cannot find matching hit record. May be DFA self-damage?" );
             return;
          }
          string line = log[ hitList[0] ];
