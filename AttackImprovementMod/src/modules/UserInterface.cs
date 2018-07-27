@@ -344,16 +344,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Weapon Slots ============
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
-         Mech mech = HUD.SelectedActor as Mech;
-         if ( mech != null ) {
+         if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseToHitChance( HUD.SelectedActor ) ) * 100;
             __instance.ToolTipHoverElement.BuffStrings.Add( "Gunnery " + mech.SkillGunnery + " = " + string.Format( "{0:0.#}%", baseChance ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowBaseMeleeChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
-         Mech mech = HUD.SelectedActor as Mech;
-         if ( mech != null ) {
+         if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseMeleeToHitChance( mech ) ) * 100;
             __instance.ToolTipHoverElement.BuffStrings.Add( "Piloting " + mech.SkillPiloting + " = " + string.Format( "{0:0.#}%", baseChance ) );
          }

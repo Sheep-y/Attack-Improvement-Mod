@@ -138,24 +138,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
          float armour = __instance.GetCurrentArmor( aLoc );
          if ( armour >= totalDamage ) return;
-         killZombie( "mech", __instance.DisplayName, armour + __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ), ref totalDamage );
+         KillZombie( "mech", __instance.DisplayName, armour + __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ), ref totalDamage );
       }
 
       public static void FixZombieVehicle ( Vehicle __instance, ref float totalDamage, VehicleChassisLocations vLoc ) {
          if ( vLoc == VehicleChassisLocations.None || vLoc == VehicleChassisLocations.Invalid ) return;
-         killZombie( "vehicle", __instance.DisplayName, __instance.GetCurrentArmor( vLoc ) + __instance.GetCurrentStructure( vLoc ), ref totalDamage );
+         KillZombie( "vehicle", __instance.DisplayName, __instance.GetCurrentArmor( vLoc ) + __instance.GetCurrentStructure( vLoc ), ref totalDamage );
       }
 
       public static void FixZombieTurret ( Turret __instance, ref float totalDamage, BuildingLocation bLoc ) {
          if ( bLoc == BuildingLocation.None || bLoc == BuildingLocation.Invalid ) return;
-         killZombie( "turret", __instance.DisplayName, __instance.GetCurrentArmor( bLoc ) + __instance.GetCurrentStructure( bLoc ), ref totalDamage );
+         KillZombie( "turret", __instance.DisplayName, __instance.GetCurrentArmor( bLoc ) + __instance.GetCurrentStructure( bLoc ), ref totalDamage );
       }
 
       public static void FixZombieBuilding ( BattleTech.Building __instance, ref float totalDamage ) {
-         killZombie( "building", __instance.DisplayName, __instance.CurrentStructure, ref totalDamage );
+         KillZombie( "building", __instance.DisplayName, __instance.CurrentStructure, ref totalDamage );
       }
 
-      private static void killZombie ( string type, string name, float HP, ref float totalDamage ) {
+      private static void KillZombie ( string type, string name, float HP, ref float totalDamage ) {
          float newHP = HP - totalDamage;
          if ( newHP >= 1 || newHP <= 0 ) return;
          Log( "Upgrading damage dealt to {1} by {2} to kill zombie {0}", type, name, newHP );
