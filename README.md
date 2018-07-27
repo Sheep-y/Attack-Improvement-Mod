@@ -520,10 +520,16 @@ but because the code that determine hit distribution is not designed for fractio
 
 (Advanced) **Log Options**
 
+> Setting: `AttackLoFormat`  ("csv", "tsv", "txt", default "csv")
+>
+> Set the format and extension of attack log.  Default is csv which can be opened directly by Excel.
+<br>
+
 > Setting: `PersistentLog`  (true/false, default false)
 >
 > When set to false, the attack log will auto-clear on launch.
->
+<br>
+
 > Setting: `LogFolder`  (string, default "")
 >
 > Set path of mod log and attack log.  Default is empty which will use mod folder.

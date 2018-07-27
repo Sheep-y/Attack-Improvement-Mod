@@ -251,6 +251,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "\"All\" is currently same as \"Critical\", but more levels may be added in future.  Letter case does not matter." } ) ]
       public string AttackLogLevel = "None";
 
+      [ JsonComment( "Format of attack log.  Can be \"csv\", \"tsv\", or \"txt\" (same as tsv). Default \"csv\"." ) ]
+      public string AttackLogFormat = "csv";
+
       [ JsonComment( "If true, don't clear attack log when the game launches." ) ]
       public bool PersistentLog = false;
 
