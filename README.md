@@ -310,27 +310,27 @@ These settings can be changed in `settings.json`.
 >
 > Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, and TargetTerrain.
 >
-> **ArmMounted** - Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle.
-> **DFA** - Apply DFA penalty if attack is DFA.
-> **Height** - Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position.
-> **Inspired** - Apply inspired bonus.
-> **Obstruction** - Apply obstructed penalty.
-> **Refire** - Apply refire penalty.  Which should be 0 by default but can be changed in weapon data files.
-> **SelfChassis** - Apply chassis modifier.
-> **SelfHeat** - Apply overheat penalty.
-> **SelfStoodUp** - Apply stood up penalty.
-> **SelfTerrain** - Apply self terrain penalty as if this is a ranged attack.
-> **SelfWalked** - Apply self walked penalty, default 0 but can be changed in game configuration file.
-> **SensorImpaired** - Apply sensor impaired penalty.
-> **Sprint** - Apply sprint penalty.
-> **TargetEffect** - Apply target effect penalty such as gyro.
-> **TargetEvasion** - Apply target evasion penalty.  Melee attacks ignore up to 4 evasion by default.
-> **TargetProne** - Apply target prone penalty.
-> **TargetShutdown** - Apply target shutdown bonus.
-> **TargetSize** - Apply target size penalty.
-> **TargetTerrain** - Apply target terrain's modifier as if this is a ranged attack.
-> **TargetTerrainMelee** - Apply target terrain's melee modifier.
-> **WeaponAccuracy** - Apply weapon accuracy modifier.
+> **ArmMounted** - Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle. <br>
+> **DFA** - Apply DFA penalty if attack is DFA. <br>
+> **Height** - Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position. <br>
+> **Inspired** - Apply inspired bonus. <br>
+> **Obstruction** - Apply obstructed penalty. <br>
+> **Refire** - Apply refire penalty.  Which should be 0 by default but can be changed in weapon data files. <br>
+> **SelfChassis** - Apply chassis modifier. <br>
+> **SelfHeat** - Apply overheat penalty. <br>
+> **SelfStoodUp** - Apply stood up penalty. <br>
+> **SelfTerrain** - Apply self terrain penalty as if this is a ranged attack. <br>
+> **SelfWalked** - Apply self walked penalty, default 0 but can be changed in game configuration file. <br>
+> **SensorImpaired** - Apply sensor impaired penalty. <br>
+> **Sprint** - Apply sprint penalty. <br>
+> **TargetEffect** - Apply target effect penalty such as gyro. <br>
+> **TargetEvasion** - Apply target evasion penalty.  Melee attacks ignore up to 4 evasion by default. <br>
+> **TargetProne** - Apply target prone penalty. <br>
+> **TargetShutdown** - Apply target shutdown bonus. <br>
+> **TargetSize** - Apply target size penalty. <br>
+> **TargetTerrain** - Apply target terrain's modifier as if this is a ranged attack. <br>
+> **TargetTerrainMelee** - Apply target terrain's melee modifier. <br>
+> **WeaponAccuracy** - Apply weapon accuracy modifier. <br>
 
 
 
@@ -391,12 +391,12 @@ These settings can be changed in `settings.json`.
 > Setting: `DiminishingPenaltyPowerBase`  (default 0.8)<br>
 > Setting: `DiminishingPenaltyPowerDivisor`  (default 3.3)<br>
 >
-> Bonus formula is "2-Base^(Modifier/Divisor)".
-> Example: +3 Bonus = 0.8^(3/6) = -1.1055728 = 110%.
+> Bonus formula is "2-Base^(Modifier/Divisor)". <br>
+> Example: +3 Bonus = 0.8^(3/6) = -1.1055728 = 110%. <br>
 > Thus +3 Bonus @ 80% To Hit = 80% x 110% = 88% final to hit.
 >
-> Penalty formula is "Base^(Modifier/Divisor)".
-> Penalty Example: +6 Penalty = 0.8^(6/3.3) = 0.6665 = 66.7%.
+> Penalty formula is "Base^(Modifier/Divisor)". <br>
+> Penalty Example: +6 Penalty = 0.8^(6/3.3) = 0.6665 = 66.7%. <br>
 > Thus +6 Penalty @ 80% To Hit = 80% x 66.7% = 53% final to hit.
 <br>
 
@@ -515,7 +515,7 @@ but because the code that determine hit distribution is not designed for fractio
 > **Critical** - Crit Location, Crit Roll, Crit Slot, Crit Component, and the result of the crit.
 > Crit is determined in yet another phase, so the log code is *very fun* to write.
 >
-> *All* - same as Critical for now.  More info may be added in the future, though I am not sure I wouldn't go crazy.  Would you believe logging is the most complicated feature of this mod?
+> **All** - same as Critical for now.  More info may be added in the future, though I am not sure I wouldn't go crazy.  Would you believe logging is the most complicated feature of this mod?
 
 (Advanced) **Log Options**
 

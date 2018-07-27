@@ -13,6 +13,9 @@
    .warn { font-weight: bold; color: red; clear: both; float: left; }
 </style>
 <script>
+// TOC https://ecotrust-canada.github.io/markdown-toc/
+// MD to HTML https://www.browserling.com/tools/markdown-to-html
+
 /* // Convert settings to <details>.
 // Disabled because I'll be asking users to click them open one by one
 document.addEventListener( 'DOMContentLoaded', () => {
@@ -42,28 +45,28 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 
 <ul>
-<li><a href="#user-interface-settings">User Interface Settings</a></li>
+<li><a href="#userinterfacesettings">User Interface Settings</a></li>
 
-<li><a href="#targeting-line-settings">Targeting Line Settings</a></li>
+<li><a href="#targetinglinesettings">Targeting Line Settings</a></li>
 
-<li><a href="#called-shot-settings">Called Shot Settings</a></li>
+<li><a href="#calledshotsettings">Called Shot Settings</a></li>
 
-<li><a href="#melee-and-dfa-settings">Melee and DFA Settings</a></li>
+<li><a href="#meleeanddfasettings">Melee and DFA Settings</a></li>
 
-<li><a href="#hit-modifier-settings">Hit Modifier Settings</a></li>
+<li><a href="#hitmodifiersettings">Hit Modifier Settings</a></li>
 
-<li><a href="#hit-roll-settings">Hit Roll Settings</a></li>
+<li><a href="#hitrollsettings">Hit Roll Settings</a></li>
 
-<li><a href="#hit-resolution-settings">Hit Resolution Settings</a></li>
+<li><a href="#hitresolutionsettings">Hit Resolution Settings</a></li>
 
-<li><a href="#attack-log-settings">Attack Log Settings</a></li></ul>
+<li><a href="#attacklogsettings">Attack Log Settings</a></li></ul>
 </li>
 
 <li><a href="#compatibilities">Compatibilities</a></li>
 
-<li><a href="#the-story-of-aim">The Story of AIM</a></li>
+<li><a href="#thestoryofaim">The Story of AIM</a></li>
 
-<li><a href="#learn-to-mod">Learn to Mod</a></li>
+<li><a href="#learntomod">Learn to Mod</a></li>
 </ul>
 
 <p>AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as tune down roll correction, show heat and stability numbers, and a detailed attack log, without deviating too far from vanilla.</p>
@@ -401,27 +404,27 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   
   <p>Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, and TargetTerrain.</p>
   
-  <p><strong>ArmMounted</strong> - Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle.
-  <strong>DFA</strong> - Apply DFA penalty if attack is DFA.
-  <strong>Height</strong> - Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position.
-  <strong>Inspired</strong> - Apply inspired bonus.
-  <strong>Obstruction</strong> - Apply obstructed penalty.
-  <strong>Refire</strong> - Apply refire penalty.  Which should be 0 by default but can be changed in weapon data files.
-  <strong>SelfChassis</strong> - Apply chassis modifier.
-  <strong>SelfHeat</strong> - Apply overheat penalty.
-  <strong>SelfStoodUp</strong> - Apply stood up penalty.
-  <strong>SelfTerrain</strong> - Apply self terrain penalty as if this is a ranged attack.
-  <strong>SelfWalked</strong> - Apply self walked penalty, default 0 but can be changed in game configuration file.
-  <strong>SensorImpaired</strong> - Apply sensor impaired penalty.
-  <strong>Sprint</strong> - Apply sprint penalty.
-  <strong>TargetEffect</strong> - Apply target effect penalty such as gyro.
-  <strong>TargetEvasion</strong> - Apply target evasion penalty.  Melee attacks ignore up to 4 evasion by default.
-  <strong>TargetProne</strong> - Apply target prone penalty.
-  <strong>TargetShutdown</strong> - Apply target shutdown bonus.
-  <strong>TargetSize</strong> - Apply target size penalty.
-  <strong>TargetTerrain</strong> - Apply target terrain's modifier as if this is a ranged attack.
-  <strong>TargetTerrainMelee</strong> - Apply target terrain's melee modifier.
-  <strong>WeaponAccuracy</strong> - Apply weapon accuracy modifier.</p>
+  <p><strong>ArmMounted</strong> - Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle. <br>
+  <strong>DFA</strong> - Apply DFA penalty if attack is DFA. <br>
+  <strong>Height</strong> - Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position. <br>
+  <strong>Inspired</strong> - Apply inspired bonus. <br>
+  <strong>Obstruction</strong> - Apply obstructed penalty. <br>
+  <strong>Refire</strong> - Apply refire penalty.  Which should be 0 by default but can be changed in weapon data files. <br>
+  <strong>SelfChassis</strong> - Apply chassis modifier. <br>
+  <strong>SelfHeat</strong> - Apply overheat penalty. <br>
+  <strong>SelfStoodUp</strong> - Apply stood up penalty. <br>
+  <strong>SelfTerrain</strong> - Apply self terrain penalty as if this is a ranged attack. <br>
+  <strong>SelfWalked</strong> - Apply self walked penalty, default 0 but can be changed in game configuration file. <br>
+  <strong>SensorImpaired</strong> - Apply sensor impaired penalty. <br>
+  <strong>Sprint</strong> - Apply sprint penalty. <br>
+  <strong>TargetEffect</strong> - Apply target effect penalty such as gyro. <br>
+  <strong>TargetEvasion</strong> - Apply target evasion penalty.  Melee attacks ignore up to 4 evasion by default. <br>
+  <strong>TargetProne</strong> - Apply target prone penalty. <br>
+  <strong>TargetShutdown</strong> - Apply target shutdown bonus. <br>
+  <strong>TargetSize</strong> - Apply target size penalty. <br>
+  <strong>TargetTerrain</strong> - Apply target terrain's modifier as if this is a ranged attack. <br>
+  <strong>TargetTerrainMelee</strong> - Apply target terrain's melee modifier. <br>
+  <strong>WeaponAccuracy</strong> - Apply weapon accuracy modifier. <br></p>
 </blockquote>
 
 <h2 id="hitmodifiersettings">Hit Modifier Settings</h2>
@@ -486,12 +489,12 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   Setting: <code>DiminishingPenaltyPowerBase</code>  (default 0.8)<br>
   Setting: <code>DiminishingPenaltyPowerDivisor</code>  (default 3.3)<br></p>
   
-  <p>Bonus formula is "2-Base^(Modifier/Divisor)".
-  Example: +3 Bonus = 0.8^(3/6) = -1.1055728 = 110%.
+  <p>Bonus formula is "2-Base^(Modifier/Divisor)". <br>
+  Example: +3 Bonus = 0.8^(3/6) = -1.1055728 = 110%. <br>
   Thus +3 Bonus @ 80% To Hit = 80% x 110% = 88% final to hit.</p>
   
-  <p>Penalty formula is "Base^(Modifier/Divisor)".
-  Penalty Example: +6 Penalty = 0.8^(6/3.3) = 0.6665 = 66.7%.
+  <p>Penalty formula is "Base^(Modifier/Divisor)". <br>
+  Penalty Example: +6 Penalty = 0.8^(6/3.3) = 0.6665 = 66.7%. <br>
   Thus +6 Penalty @ 80% To Hit = 80% x 66.7% = 53% final to hit.
   <br></p>
   
@@ -616,7 +619,7 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p><strong>Critical</strong> - Crit Location, Crit Roll, Crit Slot, Crit Component, and the result of the crit.
   Crit is determined in yet another phase, so the log code is <em>very fun</em> to write.</p>
   
-  <p><em>All</em> - same as Critical for now.  More info may be added in the future, though I am not sure I wouldn't go crazy.  Would you believe logging is the most complicated feature of this mod?</p>
+  <p><strong>All</strong> - same as Critical for now.  More info may be added in the future, though I am not sure I wouldn't go crazy.  Would you believe logging is the most complicated feature of this mod?</p>
 </blockquote>
 
 <p>(Advanced) <strong>Log Options</strong></p>
@@ -637,13 +640,12 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
 
 <p>These behaviours will not change saved settings.  If you want to replace them with AIM, you may need to change AIM settings.</p>
 
-<table border=1>
-<tr><th>When have mod <th> AIM will
-<tr><td><a href="https://www.nexusmods.com/battletech/mods/135">Firing Line Improvement</a> <td> AIM will skip line styling and arc point adjustment to not crash line drawings.
-<tr><td><a href="https://www.nexusmods.com/battletech/mods/226">MeleeMover</a> <td> AIM will skip its own melee unlock to preserve sprint range melee.
-<tr><td><a href="https://www.nexusmods.com/battletech/mods/90">Real Hit Chance</a> <td> AIM will enable corrected hit chance display and overrides this mod, since it does not support AIM features such as adjustable correction strength.
-<tr><td><a href="https://www.nexusmods.com/battletech/mods/100">True RNG Hit Rolls</a> <td> AIM will disable its own adjustable roll correction and miss streak breaker.
-</table>
+<p>When have mod | AIM will
+--- | ---------
+<a href="https://www.nexusmods.com/battletech/mods/135">Firing Line Improvement</a> | AIM will skip line styling and arc point adjustment to not crash line drawings.
+<a href="https://www.nexusmods.com/battletech/mods/226">MeleeMover</a> | AIM will skip its own melee unlock to preserve sprint range melee.
+<a href="https://www.nexusmods.com/battletech/mods/90">Real Hit Chance</a> | AIM will enable corrected hit chance display and overrides this mod, since it does not support AIM features such as adjustable correction strength.
+<a href="https://www.nexusmods.com/battletech/mods/100">True RNG Hit Rolls</a> | AIM will disable its own adjustable roll correction and miss streak breaker.</p>
 
 <p>The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.</p>
 
