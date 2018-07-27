@@ -78,7 +78,8 @@ When the mod is first loaded by the game, it will try to read settings.json and 
 Some configurations are bundled with the mod.  You may copy or rename a setting to `settings.json` to apply it.
 
 * `settings.default.json` - Out of box default.
-* `settings.spatan.json` - Enable diminishing modifier, more melee modifiers, more info display, and disables roll correction and streak breaker.
+* `settings.spartan.json` - Enable diminishing modifier, more melee modifiers, more info display, and disables roll correction and streak breaker.
+* `settings.fix-only.json` - Only enable game fixes for an enhanced vanilla experience.  No clustered called shot or hit chance stepping unlock.
 * `settings.log-only.json` - Disable all features except attack log, which is enabled in full.
 
 Note that `settings.json` is auto-managed.  Old settings will be upgraded and removed, out of range settings will be corrected, and the formats and comments are fixed.  You can only change setting values, which may be written back to the file in a standard computerised form.

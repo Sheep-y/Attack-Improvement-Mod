@@ -16,16 +16,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return;
          }
          bool SolidLinesChanged = Settings.LOSIndirectDotted || Settings.LOSIndirectColor != null ||
-                                   ! Settings.LOSMeleeDotted || Settings.LOSMeleeColor != null ||
-                                   ! Settings.LOSClearDotted || Settings.LOSClearColor != null ||
-                              ! Settings.LOSBlockedPreDotted || Settings.LOSBlockedPreColor != null ||
-                             ! Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != null ; 
+                                     Settings.LOSMeleeDotted || Settings.LOSMeleeColor != null ||
+                                     Settings.LOSClearDotted || Settings.LOSClearColor != null ||
+                                Settings.LOSBlockedPreDotted || Settings.LOSBlockedPreColor != null ||
+                               Settings.LOSBlockedPostDotted || Settings.LOSBlockedPostColor != null ; 
                                   // NoAttackLine is overriden once and leave alone.
          Type Indicator = typeof( WeaponRangeIndicators );
 
          bool TwoSectionsLOS = Settings.LOSBlockedPreDotted != Settings.LOSBlockedPostDotted || Settings.LOSBlockedPreColor != Settings.LOSBlockedPostColor;
 
-         if ( Settings.LOSWidth != 0f || Settings.LOSWidthBlocked != 0f || Settings.LOSMarkerBlockedMultiplier != 1f )
+         if ( Settings.LOSWidth != 1f || Settings.LOSWidthBlocked != 0.75f || Settings.LOSMarkerBlockedMultiplier != 1f )
             Patch( Indicator, "Init", null, "ResizeLOS" );
          if ( SolidLinesChanged || Settings.LOSNoAttackColor != null || ! Settings.LOSNoAttackDotted )
             Patch( Indicator, "Init", null, "CreateLOSTexture" );

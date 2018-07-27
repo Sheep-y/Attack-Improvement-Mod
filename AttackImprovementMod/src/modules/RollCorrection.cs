@@ -37,8 +37,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                correctionCache = new Dictionary<float, float>(20);
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowCorrectedHitChance", null );
             }
-         } else if ( Settings.ShowCorrectedHitChance )
+         } else if ( Settings.ShowCorrectedHitChance ) {
             Log( "ShowCorrectedHitChance auto-disabled because roll Correction is disabled." );
+            Settings.ShowCorrectedHitChance = false;
+         }
 
          if ( ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) && ! TrueRNG ) {
             if ( Settings.MissStreakBreakerThreshold == 1f || Settings.MissStreakBreakerDivider == 0f )
