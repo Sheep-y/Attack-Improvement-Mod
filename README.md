@@ -1,23 +1,43 @@
 # AIM - Attack Improvement Mod 2.0 #
 For BATTLETECH 1.1.2.
 
+- [Features](#features)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Settings](#settings)
+  * [User Interface Settings](#user-interface-settings)
+  * [Targeting Line Settings](#targeting-line-settings)
+  * [Called Shot Settings](#called-shot-settings)
+  * [Melee and DFA Settings](#melee-and-dfa-settings)
+  * [Hit Modifier Settings](#hit-modifier-settings)
+  * [Hit Roll Settings](#hit-roll-settings)
+  * [Hit Resolution Settings](#hit-resolution-settings)
+  * [Attack Log Settings](#attack-log-settings)
+- [Compatibilities](#compatibilities)
+- [The Story of AIM](#the-story-of-aim)
+- [Learn to Mod](#learn-to-mod)
+
+
 AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as tune down roll correction, show heat and stability numbers, and a detailed attack log, without deviating too far from vanilla.
 
 This mod does *not* modify game data.  Saves made with this mod on will *not* be affected by disabling or removing this mod.
+
+# Features
 
 **ALL features can be enabled or disabled individually.**
 
 ## Game Bugs Fixed and HUD Enhancements ##
 
-* Vehicle Called Shot fixed
-* Damaged Structure Display fixed and enhanced
+* Vehicle Called Shot fixed.
+* Damaged Structure Display fixed and enhanced.
 * Grey Head Disease fixed.
 * Line of Fire fixed and stylised.
 * Multi-Target Back Out fixed.
+* Make sure 0 HP means dead, never zombie.
 * Show Heat and Stability Numbers, including cooldown overhead.
 * Show Base Hit Chance in accuracy modifier popup.
-* (Optional) Show mech tonnage.
-* (Optional) Show corrected hit chance.
+* (Optional) Show Mech Tonnage.
+* (Optional) Show Corrected Hit chance and Called Shot Chance.
 
 ## Mechanic Enhancements ##
 
@@ -25,36 +45,39 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Called Shots cluster around called mech location.
 * Precise Hit Distribution that improves SRM and MG called shot.
 * More Melee Modifiers, which fixes the absent of stood up penalty.
-* Allow modifiers to be net bouns.
-* Allow height modifier to be negative.
-* Remove hard cap on possible melee positons.
+* Allow Net Bonus Hit modifiers.
+* Allow Negative Height Modifier.
+* Remove Melee Positon Cap.
 
-## Other Adjustable Mechanics ##
+## Other Adjustables ##
 
 * Tabular Attack Log that can be copied and pasted to Excel.
 * Adjustable Roll Correction Strength, default halved.
 * Adjustable Miss Streak Breaker.
 * Adjustable Base Hit Chance.
-* Adjustable Hit Chance stepping and min/mac cap.
-* Adjustable called shot chances and hit chances display precision.
+* Adjustable Hit Chance stepping and min/max cap.
+* Control Display Precision of hit chance and called shot chance.
 
 
 # Installation
 
-***IMPORTANT Note on upgrading from 1.0**: Rename your old `mod.json` to `settings.json` to keep old settings.
+<span style="color:red">
+**IMPORTANT Note on upgrading FROM 1.0**:</span>
+Rename your old `mod.json` to `settings.json` to keep old settings.
 
 1. [Install BTML and ModTek.](https://github.com/Mpstark/ModTek/wiki/The-Drop-Dead-Simple-Guide-to-Installing-BTML-&-ModTek-&-ModTek-mods)
-2. [Download](https://github.com/Sheep-y/Attack-Improvement-Mod/releases) and extract in the nod folder. i.e. You should have BATTLETECH\Mods\AttackImprovementMod\mod.json
-3. Launch the game. The mod should be initialised with its default settings, and creates a "settings.json" in its folder, plus a mod log.
-4. Open the file to see mod settings.  If you change any, restart game to apply changes.
+2. [Download this mod](https://github.com/Sheep-y/Attack-Improvement-Mod/releases), extract in the mod folder. i.e. You should see `BATTLETECH\Mods\AttackImprovementMod\mod.json`
+3. Launch the game. The mod will creates a "settings.json" and a mod log in the same folder as `mod.json`.
+4. Open `settings.json` to see mod settings.  If you want to change it, restart game to apply changes.
 
 
 # Configuration
 
 When the mod is first loaded by the game, it will try to read settings.json and validate its settings.
 
-Two defaults are bundled with the mod.  You may copy or rename them to `settings.json` to use the config.
+Some configurations are bundled with the mod.  You may copy or rename a setting to `settings.json` to apply it.
 
+* `settings.default.json` - Out of box default.
 * `settings.spatan.json` - Enable diminishing modifier, more melee modifiers, more info display, and disables roll correction and streak breaker.
 * `settings.log-only.json` - Disable all features except attack log, which is enabled in full.
 
@@ -105,9 +128,9 @@ These settings can be changed in `settings.json`.
 **Fix Multi-Target Back Out**
 
 > Setting: `FixMultiTargetBackout`  (true/false, default true)
-
+>
 > The game's Muti-Target back out (escape/right click) is bugged. Backing out from first target will cancel the action, and second back out (regardless of target) will always cancel the whole thing.
-
+>
 > When set to true, this mod will make Multi-Target back out deselect targets one by one as expected.
 
 
@@ -116,40 +139,31 @@ These settings can be changed in `settings.json`.
 
 **Change Widths of Targeting Lines**
 
-> Setting: `LOSWidth`  (0 to 10, default 2) 
+> Setting: `LOSWidth`  (0 to 10, default 2, game default 1)
 >
-> Set width of all targeting lines (direct, indirect, blocked, can't attack etc.).  Game default is 1, but set to 0 also leaves it at game default.  Mod default is 2. 
->
->
-> Setting: `LOSWidthBlocked`  (0 to 10, default 1.5)
->
-> Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75, but set to 0 also leaves it at game default.  Mod default is 1.5.
+> Set width of all targeting lines (direct, indirect, blocked, can't attack etc.).  Game default is 1  Mod default is 2.
+<br>
 
-> Auto-disable to avoid conflict when Firing Line Improvement is used.
-
-
-**Change Widths of Obstruction Marker**
-
-> Setting: `LOSMarkerBlockedMultiplier`  (0 to 10, default 1.5)
+> Setting: `LOSWidthBlocked`  (0 to 10, default 1.5, game default 0.75)
 >
-> Scale the obstruction marker of targeting lines, the "light dot" that split the obstructed line into two. 2 means double width and height, 0.5 means half-half.  Set to 1 to leave at game default.  Set to 0 will not remove them from game but will effectively hide them.
+> Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
 >
 > When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
 
 
 **Styles and Colours Targeting Lines**
 
-> Setting: `LOSIndirectDotted`  (default true, game default false)
-> Setting: `LOSNoAttackDotted`  (default true)
-> Setting: `LOSMeleeDotted`  (default false)
-> Setting: `LOSClearDotted`  (default false)
-> Setting: `LOSBlockedPreDotted`   (default false)
-> Setting: `LOSBlockedPostDotted`  (default false)
-> Setting: `LOSMeleeColor`  (default "")
-> Setting: `LOSClearColor`  (default "")
-> Setting: `LOSBlockedPreColor`   (default "#D0F")
-> Setting: `LOSBlockedPostColor`  (default "#C8E")
-> Setting: `LOSIndirectColor`  (default "")
+> Setting: `LOSIndirectDotted`  (default true, game default false)<br>
+> Setting: `LOSNoAttackDotted`  (default true)<br>
+> Setting: `LOSMeleeDotted`  (default false)<br>
+> Setting: `LOSClearDotted`  (default false)<br>
+> Setting: `LOSBlockedPreDotted`   (default false)<br>
+> Setting: `LOSBlockedPostDotted`  (default false)<br>
+> Setting: `LOSMeleeColor`  (default "")<br>
+> Setting: `LOSClearColor`  (default "")<br>
+> Setting: `LOSBlockedPreColor`   (default "#D0F")<br>
+> Setting: `LOSBlockedPostColor`  (default "#C8E")<br>
+> Setting: `LOSIndirectColor`  (default "")<br>
 > Setting: `LOSNoAttackColor`  (default "")
 >
 > Set the colour and style of various targeting lines.
@@ -161,12 +175,21 @@ These settings can be changed in `settings.json`.
 > When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
 
 
+**Change Widths of Obstruction Marker**
+
+> Setting: `LOSMarkerBlockedMultiplier`  (0 to 10, default 1.5)
+>
+> Scale the obstruction marker of targeting lines, the "light dot" that split the obstructed line into two. 2 means double width and height, 0.5 means half-half.  Set to 1 to leave at game default.  Set to 0 will not remove them from game but will effectively hide them.
+>
+> When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
+
+
 **Refine or Rough Fire Arc and Jump Arc**
 
 > Setting: `ArcLinePoints`  (2 to 1000, default 48, game default 18)
 >
-> On a high resolution monitor it is easy to see the hard corners of the arc of indirect targeting lines.  Lines are quick to draw, so this mod will happily improves their quality for you.
-> Set to 2 to make them flat like other lines.  Set to 18 to disable.
+> On a high resolution monitor it is easy to see the hard corners of the arc of indirect targeting lines.  Lines are quick to draw, so this mod will happily improves their qualities for you.
+> Set to 2 to make them flat like other lines.  Set to 18 to leave at game default.
 >
 > When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
 
@@ -198,7 +221,7 @@ These settings can be changed in `settings.json`.
 > Set to true to confine the grey head disease to the boss and not spread.
 >
 > When anyone, friends or foes, attacks a headshot immune character, all attacks from the same direction will never hit the head ever again.  Every one's head will be grey.  I call it the grey head disease.  It lasts until you load the game.
-
+<br>
 
 > Setting: `FixBossHeadCalledShotDisplay`  (true/false, default true)
 >
@@ -232,8 +255,8 @@ These settings can be changed in `settings.json`.
 >
 > When clustering called shot is enabled, chance to hit called locations will be amplified by clustering weight.  This setting let you tune called shot's weight multipliers.
 > Default is 0.33 to counter the effect of CalledShotClusterStrength.  Set to 1.0 would leave original multiplier unchanged, while 0.0 will removing it leaving only clustering effect (if enabled).
->
->
+<br>
+
 > Setting: `VehicleCalledShotMultiplier`  (0 to 1024.0, default 0.75)
 >
 > Called shot didn't work on vehicles without modding.  Once that is fixed, unmodified called shot is pretty powerful on vehicles because of its low number of locations.  This setting tries to balance that.
@@ -241,7 +264,7 @@ These settings can be changed in `settings.json`.
 
 **Show Modded Called Shot Chance**
 
-> Setting: `ShowRealMechCalledShotChance`  (true/false, default true)
+> Setting: `ShowRealMechCalledShotChance`  (true/false, default true)<br>
 > Setting: `ShowRealVehicleCalledShotChance`  (true/false, default true)
 >
 > When enabled, the popups will reflect modded hit distribution.  Also, if vehicle called shot fix is disabled, vehicle called shot chance will be updated to reflect disabled called shot.
@@ -264,7 +287,7 @@ These settings can be changed in `settings.json`.
 
 **Allow free Melee and DFA positioning**
 
-> Setting: `IncreaseMeleePositionChoice`  (true/false, default true)
+> Setting: `IncreaseMeleePositionChoice`  (true/false, default true)<br>
 > Setting: `IncreaseDFAPositionChoice`  (true/false, default true)
 >
 > When set to true, melee and DFA can use all available positions, instead of nearest three.  Compatible with MeleeMover.
@@ -301,7 +324,7 @@ These settings can be changed in `settings.json`.
 > **SensorImpaired** - Apply sensor impaired penalty.
 > **Sprint** - Apply sprint penalty.
 > **TargetEffect** - Apply target effect penalty such as gyro.
-> **TargetEvasion** - Apply target evasion penalty.  Note that melee attacks ignore up to 4 evasion by default.
+> **TargetEvasion** - Apply target evasion penalty.  Melee attacks ignore up to 4 evasion by default.
 > **TargetProne** - Apply target prone penalty.
 > **TargetShutdown** - Apply target shutdown bonus.
 > **TargetSize** - Apply target size penalty.
@@ -317,7 +340,7 @@ These settings can be changed in `settings.json`.
 
 > Setting: `AllowNetBonusModifier`  (true/false, default true)
 >
-> When set to true, total modifier of an attack can be a net bonus that increase the hit chance beyond the attacker's base hit chance (but still subjects to 95% cap unless lifted by the `MaxFinalHitChance` settings).
+> When set to true, total modifier of an attack can be a net bonus that increases the hit chance beyond the attacker's base hit chance (but still subjects to 95% cap unless lifted by the `MaxFinalHitChance` settings).
 > Game default is false.
 >
 > When the net modifier is a bonus, it will use the same handling as penalty but reversed: first 10 modifiers are ±5% each, and subsequence modifiers are ±2.5% each.
@@ -333,7 +356,7 @@ These settings can be changed in `settings.json`.
 
 **Modify Base Hit Chance**
 
-> Setting: `BaseHitChanceModifier` (-10.0 to 10.0, default 0)
+> Setting: `BaseHitChanceModifier` (-10.0 to 10.0, default 0)<br>
 > Setting: `MeleeHitChanceModifier` (-10.0 to 10.0, default 0)
 >
 > Increase or decrease base hit chance of ranged/melee attacks.
@@ -349,7 +372,7 @@ These settings can be changed in `settings.json`.
 > Set this to 0 to remove all stepping.  Set it to 0.005 will step the accuracy by 0.5%, and so on.
 >
 >
-> Setting: `MaxFinalHitChance`  (0.1 to 1.0, default 0.95)
+> Setting: `MaxFinalHitChance`  (0.1 to 1.0, default 0.95)<br>
 > Setting: `MinFinalHitChance`  (0.0 to 1.0, default 0.0)
 >
 > Use this to set max and min hit chance after all modifiers but before roll correction.
@@ -361,12 +384,12 @@ These settings can be changed in `settings.json`.
 >
 > Set this to true to enable diminishing return of modifiers, instead of simple add and subtract.
 > As a result, small penalties have a bigger effect, but very large penalties may be more bearable.
->
->
-> Setting: `DiminishingBonusPowerBase`  (default 0.8)
-> Setting: `DiminishingBonusPowerDivisor`  (default 6)
-> Setting: `DiminishingPenaltyPowerBase`  (default 0.8)
-> Setting: `DiminishingPenaltyPowerDivisor`  (default 3.3)
+<br>
+
+> Setting: `DiminishingBonusPowerBase`  (default 0.8)<br>
+> Setting: `DiminishingBonusPowerDivisor`  (default 6)<br>
+> Setting: `DiminishingPenaltyPowerBase`  (default 0.8)<br>
+> Setting: `DiminishingPenaltyPowerDivisor`  (default 3.3)<br>
 >
 > Bonus formula is "2-Base^(Modifier/Divisor)".
 > Example: +3 Bonus = 0.8^(3/6) = -1.1055728 = 110%.
@@ -375,8 +398,8 @@ These settings can be changed in `settings.json`.
 > Penalty formula is "Base^(Modifier/Divisor)".
 > Penalty Example: +6 Penalty = 0.8^(6/3.3) = 0.6665 = 66.7%.
 > Thus +6 Penalty @ 80% To Hit = 80% x 66.7% = 53% final to hit.
->
->
+<br>
+
 > Setting: `DiminishingBonusMax`  (default 16)
 > Setting: `DiminishingPenaltyMax`  (default 32)
 >
@@ -508,20 +531,20 @@ but because the code that determine hit distribution is not designed for fractio
 
 # Compatibilities
 
-AIM is aware of some mods and will behave differently in their present to meet player expectations.
+AIM is aware of some other mods and will behave differently in their present to meet player expectations.
 
 These behaviours will not change saved settings.  If you want to replace them with AIM, you may need to change AIM settings.
 
 When have mod | AIM will
 --- | ---------
-Firing Line Improvement | AIM will skip line styling and arc point adjustment to not crash the game.
-MeleeMover | AIM will skip its own melee unlock to preserve sprint range melee.
-Real Hit Chance | AIM will enable corrected hit chance display and overrides this mod, since it does not support AIM features such as adjustable correction strength.
-True RNG Hit Rolls | AIM will disable its own adjustable roll correction and miss streak breaker.
+[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135) | AIM will skip line styling and arc point adjustment to not crash line drawings.
+[MeleeMover](https://www.nexusmods.com/battletech/mods/226) | AIM will skip its own melee unlock to preserve sprint range melee.
+[Real Hit Chance](https://www.nexusmods.com/battletech/mods/90) | AIM will enable corrected hit chance display and overrides this mod, since it does not support AIM features such as adjustable correction strength.
+[True RNG Hit Rolls](https://www.nexusmods.com/battletech/mods/100) | AIM will disable its own adjustable roll correction and miss streak breaker.
 
-The first thing to check when you suspect any compatibility problems with the game or with other mods is to check the mod log (`BATTLETECH\Mods\AttackImprovementMod\Log_AIMAttackImprovementMod.log`), BTML log (`BATTLETECH\Mods\*.log`), and the game's own log (`BATTLETECH\`).
+The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.
 
-The keyword is "Exception".  It is almost always followed by lots of codes.  If you see *any* exception and see "AttackImprovementMod" in the code below it, please [file an issue](https://github.com/Sheep-y/Attack-Improvement-Mod/issues/new) and attach the log.
+You can also check the mod log (`BATTLETECH\Mods\AttackImprovementMod\Log_AIMAttackImprovementMod.log`), BTML log (`BATTLETECH\Mods\*.log`), and the game's own log (`BATTLETECH\`).  The keyword is "Exception".  It is almost always followed by lots of code.  If you see *any* exception with "AttackImprovementMod" in the code below it, please [file an issue](https://github.com/Sheep-y/Attack-Improvement-Mod/issues/new) and attach the log.
 
 
 # The Story of AIM
