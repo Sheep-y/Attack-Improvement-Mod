@@ -123,6 +123,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideMechCalledShot ( ref ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
          __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
@@ -132,6 +133,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
          __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
          return false;
@@ -216,16 +218,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __instance.calledShotLocation = TranslateLocation( location );
       }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool RestoreVehicleCalledShotLocation_1_0 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation ) { try {
          __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), attacker.CalledShotBonusMultiplier );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool RestoreVehicleCalledShotLocation_1_1 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) { try {
          __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), bonusMultiplier );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool FixVehicleCalledShotFloatie ( ref string __result, ArmorLocation location ) { try {
          if ( (int) location >= 0 ) return true;
          __result = Vehicle.GetLongChassisLocation( TranslateLocation( location ) );
@@ -237,6 +242,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Balanced Ammo Load ============
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideDecrementAmmo ( Weapon __instance, ref int __result, int stackItemUID ) { try {
          Weapon me = __instance;
          if ( me.AmmoCategory == AmmoCategory.NotSet || ! ( me.parent is Mech mech ) ) return true;

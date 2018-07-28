@@ -105,6 +105,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result += Settings.MeleeHitChanceModifier;
       }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool ProcessNetBonusModifier ( ref float __result, float originalHitChance, float modifier ) {
          int mod = Mathf.RoundToInt( modifier );
          __result = originalHitChance;
@@ -119,6 +120,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideHitChanceStepNClamp ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) {
          // A pretty intense routine that AI use to evaluate attacks, try catch disabled.
          //Log( "OverrideHitChanceStepNClamp - Base Hit {0}, Modifier {1}", baseChance, totalModifiers );
@@ -126,6 +128,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideHitChanceDiminishing ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) { try {
          // A pretty intense routine that AI use to evaluate attacks, try catch disabled.
          int mod = Mathf.RoundToInt( totalModifiers );

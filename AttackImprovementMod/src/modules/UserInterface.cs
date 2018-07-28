@@ -192,6 +192,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static PropertyInfo MechTrayArmorHoverToolTipProp;
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverridePaperDollTooltip ( CombatHUDMechTrayArmorHover __instance, Mech mech, ArmorLocation location ) { try {
          if ( ! Settings.ShowEnemyAmmo && ! mech.team.IsFriendly( Combat.LocalPlayerTeam ) ) return false;
          CombatHUDMechTrayArmorHover me = __instance;
@@ -225,6 +226,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideMultiTargetCanBackout ( SelectionStateFireMulti __instance, ref bool __result ) {
          __result = __instance.Orders == null && __instance.AllTargetedCombatantsCount > 0;
          return false;
@@ -235,6 +237,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static MethodInfo RemoveTargetedCombatant, ClearTargetedActor;
       private static readonly object[] RemoveTargetParams = new object[]{ null, false };
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideMultiTargetBackout ( SelectionStateFireMulti __instance ) { try {
          SelectionStateFireMulti me = __instance;
          List<ICombatant> allTargets = me.AllTargetedCombatants;
@@ -259,6 +262,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return true;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideRemoveTargetedCombatant ( SelectionStateFireMulti __instance, ICombatant target, bool clearedForFiring ) { try {
          List<ICombatant> allTargets = __instance.AllTargetedCombatants;
          int index = target == null ? allTargets.Count - 1 : allTargets.IndexOf( target );

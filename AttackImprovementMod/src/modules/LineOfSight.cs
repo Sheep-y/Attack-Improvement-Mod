@@ -238,6 +238,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float thisArcHeight;
       private static readonly Vector3[] linePoints = new Vector3[18]; // Must be at least 18 for game to copy points, which we will override
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideGetPointsForArc ( ref Vector3[] __result, int numPoints, float minArcHeight, Vector3 begin, Vector3 end ) {
          if ( numPoints == 2 || numPoints == 18 ) {
             thisArcHeight = minArcHeight;

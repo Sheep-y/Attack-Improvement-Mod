@@ -102,8 +102,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Fixes ============
 
+      [ HarmonyPriority( Priority.Low ) ]
       public static bool OverrideRealHitChance () { return false; }
 
+      [ HarmonyPriority( Priority.Low ) ]
       public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) { try {
          roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
          if ( team != null )
@@ -112,11 +114,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
+      [ HarmonyPriority( Priority.Low ) ]
       public static bool BypassMissStreakBreaker () {
          return false;
       }
 
       private static FieldInfo StreakBreakingValueProp = null;
+
+      [ HarmonyPriority( Priority.Low ) ]
       public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) { try {
          if ( succeeded ) {
             StreakBreakingValueProp.SetValue( __instance, 0f );

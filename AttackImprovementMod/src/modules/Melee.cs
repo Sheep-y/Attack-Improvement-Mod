@@ -42,6 +42,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // Almost a direct copy of the original, only to remove melee position locking code
       // TODO Can we do it with IL update?
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideMeleeDestinations ( ref List<PathNode> __result, Pathing __instance, AbstractActor target ) { try {
          AbstractActor owner = __instance.OwningActor;
          // Not skipping AI cause them to hang up

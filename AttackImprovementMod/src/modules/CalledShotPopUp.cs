@@ -81,6 +81,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return result;
       }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideHUDMechCalledShotPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) { try {
          Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! HitResolution.CallShotClustered || ! Settings.ShowRealMechCalledShotChance )
                                                    ? Combat.HitLocation.GetMechHitTable( AttackDirection )
@@ -96,6 +97,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideHUDVehicleCalledShotPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) { try {
          if ( ! Settings.FixVehicleCalledShot || ! Settings.ShowRealVehicleCalledShotChance )
             targetedLocation = VehicleChassisLocations.None; // Disable called location if vehicle called shot is not fixed

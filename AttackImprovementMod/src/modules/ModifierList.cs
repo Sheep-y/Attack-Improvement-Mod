@@ -164,6 +164,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static MethodInfo contemplatingDFA;
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideMeleeToolTips ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          CombatHUDWeaponSlot slot = __instance;
          tip = slot.ToolTipHoverElement;
@@ -190,6 +191,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          AttackPos = attackPosition;
       }
 
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideMeleeModifiers ( ref float __result, Mech attacker, ICombatant target, Vector3 targetPosition, MeleeAttackType meleeAttackType ) { try {
          Weapon weapon = ( meleeAttackType == MeleeAttackType.DFA ) ? attacker.DFAWeapon : attacker.MeleeWeapon;
          thisModifier = "(Init)";
