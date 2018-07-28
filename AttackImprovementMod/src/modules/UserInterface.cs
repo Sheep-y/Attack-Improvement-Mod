@@ -5,11 +5,10 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using static BattleTech.ChassisLocations;
-using static BattleTech.UI.HUDMechArmorReadout;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using static ChassisLocations;
    using static Mod;
 
    public class UserInterface : BattleModModule {
@@ -181,7 +180,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             float structureFlash = Mathf.Clamp01( 1f - timeSinceStructureDamaged[i] / flashPeriod );
             Color structureColor = structureRear[ i ]; // The first line that has typo in original code
             if ( mayDisableParts ) {
-               ArmorLocation rearLocation = GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
+               ArmorLocation rearLocation = HUDMechArmorReadout.GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
                bool isIntact = dictionary.ContainsKey( rearLocation ) && dictionary[ rearLocation ] != 0;
                if ( ! isIntact )                       // And the second typo line
                   structureColor = Color.Lerp( structureColor, Color.black, me.hiddenColorLerp );

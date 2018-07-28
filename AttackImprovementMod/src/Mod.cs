@@ -40,6 +40,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Add( new RollModifier(){ Name = "Roll Modifier" } );
          Add( new ModifierList(){ Name = "Modifier List" } );
          Add( new RollCorrection(){ Name = "Roll Corrections" } );
+         Add( new HitLocation(){ Name = "Hit Location" } );
          Add( new HitResolution(){ Name = "Hit Resolution" } );
          Add( new AttackLog(){ Name = "Logger" } ); // Must be after all other modules if we want to log modded data
       }
