@@ -19,9 +19,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( BattleTech.Building ), "DamageBuilding", NonPublic, null, "FixZombieBuilding" );
          }
 
-         if ( Settings.BalanceAmmoLoad || Settings.BalanceEnemyAmmoLoad ) {
+         if ( Settings.BalanceAmmoLoad || Settings.BalanceEnemyAmmoLoad )
             Patch( typeof( Weapon ), "DecrementAmmo", "OverrideDecrementAmmo", null );
-         }
+
+         if ( Settings.AutoJettisonAmmo || Settings.AutoJettisonEnemyAmmo )
+            Patch( typeof( MechHeatSequence ), "setState", NonPublic, null, "AutoJettisonAmmo" );
       }
 
       private static bool ClusterChanceNeverMultiplyHead = true;
@@ -78,8 +80,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static bool OverrideDecrementAmmo ( Weapon __instance, ref int __result, int stackItemUID ) { try {
          Weapon me = __instance;
          if ( me.AmmoCategory == AmmoCategory.NotSet || ! ( me.parent is Mech mech ) ) return true;
-         bool isFriend = mech.team.IsFriendly( Combat.LocalPlayerTeam );
-         if ( ! ( ( Settings.BalanceAmmoLoad && isFriend ) || ( Settings.BalanceEnemyAmmoLoad && ! isFriend ) ) ) return true;
+         if ( Settings.BalanceAmmoLoad != Settings.BalanceEnemyAmmoLoad ) {
+            bool isFriend = mech.team.IsFriendly( Combat.LocalPlayerTeam );
+            if ( ! ( ( Settings.BalanceAmmoLoad && isFriend ) || ( Settings.BalanceEnemyAmmoLoad && ! isFriend ) ) ) return true;
+         }
 
          int needAmmo = __result = me.ShotsWhenFired;
          int internalAmmo = me.InternalAmmo;
@@ -171,5 +175,39 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          //Log( ( aboveHalf ? "Before": "After" ) + " Half : " + Join( ", ", me.ammoBoxes.Select( box => $"{box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" ).ToArray() ) );
          return maxDraw - needAmmo;
       }
+
+      // ============ Jettison Ammo ============
+
+      public static void AutoJettisonAmmo ( MechHeatSequence __instance ) { try {
+         if ( ! __instance.IsComplete ) return;
+         Mech mech = __instance.OwningMech;
+         if ( mech.IsDead || mech.IsProne ) return;
+         if ( Settings.AutoJettisonAmmo != Settings.AutoJettisonEnemyAmmo ) {
+            bool isFriend = mech.team.IsFriendly( Combat.LocalPlayerTeam );
+            if ( ! ( ( Settings.AutoJettisonAmmo && isFriend ) || ( Settings.AutoJettisonEnemyAmmo && ! isFriend ) ) ) return;
+         }
+
+         Dictionary<AmmoCategory, bool> checkedType = new Dictionary<AmmoCategory, bool>();
+         List<AmmunitionBox> jettison = new List<AmmunitionBox>();
+         foreach ( AmmunitionBox box in mech.ammoBoxes ) {
+            if ( box.CurrentAmmo <= 0 ) continue;
+            AmmoCategory type = box.ammoCategory;
+            if ( checkedType.ContainsKey( type ) ) {
+               if ( checkedType[ type ] ) jettison.Add( box );
+               continue;
+            }
+            bool canUseAmmo = mech.Weapons.Any( e => e.AmmoCategory == type && e.DamageLevel < ComponentDamageLevel.NonFunctional );
+            if ( ! canUseAmmo ) jettison.Add( box );
+            checkedType[ type ] = ! canUseAmmo;
+         }
+
+         if ( jettison.Count <= 0 ) return;
+         foreach ( AmmunitionBox box in jettison )
+            box.StatCollection.ModifyStat<int>( mech.uid, __instance.SequenceGUID, "CurrentAmmo", StatCollection.StatOperation.Set, 0, -1, true );
+         foreach ( AmmoCategory type in checkedType.Where( e => e.Value ).Select( e => e.Key ) )
+            Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech, 
+               type + " AMMO JETTISONED", FloatieMessage.MessageNature.ComponentDestroyed, false ) ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
    }
 }
