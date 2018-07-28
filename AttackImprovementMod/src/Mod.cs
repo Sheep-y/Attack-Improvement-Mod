@@ -7,8 +7,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static ModSettings Settings = new ModSettings();
 
-      internal static readonly Dictionary<string, BattleModModule> modules = new Dictionary<string, BattleModModule>();
-
       public static void Init ( string directory, string settingsJSON ) {
          new Mod().Start( ref ModLog );
       }

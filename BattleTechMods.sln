@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AttackImprovementMod", "AttackImprovementMod\AttackImprovementMod.csproj", "{02C8AB19-160A-474F-9135-5C72B38CE1B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Turbine", "Turbine\Turbine.csproj", "{6AF80B81-1533-4352-8E44-266970CC84F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{02C8AB19-160A-474F-9135-5C72B38CE1B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{02C8AB19-160A-474F-9135-5C72B38CE1B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{02C8AB19-160A-474F-9135-5C72B38CE1B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AF80B81-1533-4352-8E44-266970CC84F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AF80B81-1533-4352-8E44-266970CC84F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AF80B81-1533-4352-8E44-266970CC84F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AF80B81-1533-4352-8E44-266970CC84F1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
