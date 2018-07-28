@@ -28,6 +28,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
       public bool FixLosPreviewHeight = true;
 
+      [ JsonComment( "Show remaining ammo in paper doll mouseover.  Default true." ) ]
+      public bool ShowWeaponAmmo = true;
+      public bool ShowAmmoBoxAmmo = true;
+
+      [ JsonComment( "Show remaining ammo in enemy paper doll mouseover.  Default false.  Depends on ShowWeaponAmmo and/or ShowAmmoBoxAmmo." ) ]
+      public bool ShowEnemyAmmo = false;
+
       /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
       public bool FixHeatPrediction = true;
 

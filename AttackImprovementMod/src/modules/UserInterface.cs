@@ -75,6 +75,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
          if ( Settings.FixLosPreviewHeight )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
+
+         if ( Settings.ShowAmmoBoxAmmo || Settings.ShowWeaponAmmo ) {
+            MechTrayArmorHoverToolTipProp = typeof( CombatHUDMechTrayArmorHover ).GetProperty( "ToolTip", NonPublic | Instance );
+            if ( MechTrayArmorHoverToolTipProp == null )
+               Warn( "Cannot access CombatHUDMechTrayArmorHover.ToolTip, ammo not displayed in paperdoll tooltip." );
+            else
+               Patch( typeof( CombatHUDMechTrayArmorHover ), "setToolTipInfo", NonPublic, new Type[]{ typeof( Mech ), typeof( ArmorLocation ) }, "OverridePaperDollTooltip", null );
+         } else if ( Settings.ShowEnemyAmmo ) {
+            Warn( "ShowEnemyAmmo only works with ShowAmmoBoxAmmo and/or ShowWeaponAmmo" );
+         }
+
          if ( Settings.ShowBaseHitchance ) {
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", NonPublic, typeof( ICombatant ), "ShowBaseHitChance", null );
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "ShowBaseMeleeChance", null );
@@ -178,6 +189,30 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             UIHelpers.SetImageColor( me.StructureRear[ i ], Color.Lerp( structureColor, flashColour, structureFlash ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static PropertyInfo MechTrayArmorHoverToolTipProp;
+
+      public static bool OverridePaperDollTooltip ( CombatHUDMechTrayArmorHover __instance, Mech mech, ArmorLocation location ) { try {
+         if ( ! Settings.ShowEnemyAmmo && ! mech.team.IsFriendly( Combat.LocalPlayerTeam ) ) return false;
+         CombatHUDMechTrayArmorHover me = __instance;
+         CombatHUDTooltipHoverElement ToolTip = (CombatHUDTooltipHoverElement) MechTrayArmorHoverToolTipProp.GetValue( me, null );
+			ToolTip.BuffStrings.Clear();
+			ToolTip.DebuffStrings.Clear();
+			ToolTip.BasicString = Mech.GetLongArmorLocation(location);
+         foreach ( MechComponent mechComponent in mech.GetComponentsForLocation( MechStructureRules.GetChassisLocationFromArmorLocation( location ), ComponentType.NotSet ) ) {
+            string componentName = mechComponent.UIName;
+            int allAmmo = 1;
+            if ( mechComponent is AmmunitionBox ammo )
+               componentName += " (" + ammo.CurrentAmmo + ")";
+            else if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
+               componentName += " (" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
+            if ( mechComponent.DamageLevel >= ComponentDamageLevel.NonFunctional || allAmmo <= 0 )
+               ToolTip.DebuffStrings.Add( componentName );
+            else
+					ToolTip.BuffStrings.Add( componentName );
+			}
+         return false;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ Multi-Target ============
 
@@ -326,7 +361,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
       }
 
-      // ============ Weapon Slots ============
+      // ============ Base Hit Chances ============
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
