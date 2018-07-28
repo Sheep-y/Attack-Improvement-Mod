@@ -99,8 +99,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new String[]{
         "Did you know you can called shot the head of headshot immune boss?",
-        "You can do that before any headshot immune unit has been attacked (not necessary an enemy).  And, surprise, it won't have any effect!",
-        "Default true.  Disable to give yourself the false hope of headshoting the boss, provided FixGreyHeadDisease is true." } ) ]
+        "You can do that before any headshot immune unit has been attacked.  But it won't have any effect.  Default true." } ) ]
       public bool FixBossHeadCalledShotDisplay = true;
 
       [ JsonComment( "Enable clustering effect for called shots against mechs.  Default true." ) ]

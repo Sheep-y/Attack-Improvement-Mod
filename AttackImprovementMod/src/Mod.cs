@@ -7,8 +7,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static ModSettings Settings = new ModSettings();
 
-      internal static bool GameUseClusteredCallShot = false; // True if game version is less than 1.1
-      internal static bool GameHitLocationBugged = false; // True if game version is less than 1.1.1
       internal static readonly Dictionary<string, BattleModModule> modules = new Dictionary<string, BattleModModule>();
 
       public static void Init ( string directory, string settingsJSON ) {
@@ -21,16 +19,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NormaliseSettings();
          Log( "Do NOT change settings here. This is just a log." );
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
-
-         if ( ( VersionInfo.ProductVersion + ".0.0" ).Substring( 0, 4 ) == "1.0." ) {
-            GameUseClusteredCallShot = GameHitLocationBugged = true;
-            Log( "Game is 1.0.x (Clustered Called Shot, Hit Location bugged)" );
-         } else if ( ( VersionInfo.ProductVersion + ".0.0." ).Substring( 0, 6 ) == "1.1.0" ) {
-            GameHitLocationBugged = true;
-            Log( "Game is 1.1.0 (Non-Clustered Called Shot, Hit Location bugged)" );
-         } else {
-            Log( "Game is 1.1.1 or up (Non-Clustered Called Shot, Hit Location fixed)" );
-         }
          Log();
 
          Add( new UserInterface(){ Name = "User Interface" } );

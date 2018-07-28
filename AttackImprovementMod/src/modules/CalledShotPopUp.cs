@@ -117,18 +117,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Subroutines ============
 
       private static string FineTuneAndFormat<T> ( Dictionary<T, int> hitTable, T location, int local, bool simulate  ) { try {
-         if ( GameHitLocationBugged && ! Settings.FixHitDistribution && simulate ) { // If hit distribution is bugged, simulate it.
-            T def = default(T), last = def;
-            foreach ( KeyValuePair<T, int> e in hitTable ) {
-               if ( e.Value == 0 ) continue;
-               if ( last.Equals( def ) && e.Key.Equals( location ) ) {
-                  local++; // First location get one more weight
-                  break;
-               }
-               last = e.Key;
-            }
-            if ( last.Equals( location ) ) local--; // Last location get one less weight
-         }
          float perc = local * 100f / HitTableTotalWeight;
          return string.Format( CalledShotHitChanceFormat, perc );
       } catch ( Exception ex ) { 

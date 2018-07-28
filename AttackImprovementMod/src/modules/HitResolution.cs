@@ -1,11 +1,8 @@
-using BattleTech.UI;
 using BattleTech;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
 using System.Linq;
-using UnityEngine.EventSystems;
-using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static ArmorLocation;

@@ -494,7 +494,7 @@ namespace Sheepy.BattleTechMod {
       public void Warn ( string message ) { Log( "Warning: " + message ); }
       public void Warn ( string message, params object[] args ) {
          message = Format( message, args );
-         HBS.Logging.Logger.GetLogger( "Mods" ).LogWarning( "[AttackImprovementMod] " + message );
+         //HBS.Logging.Logger.GetLogger( "Mods" ).LogWarning( "[AttackImprovementMod] " + message );
          Log( "Warning: " + message );
       }
 

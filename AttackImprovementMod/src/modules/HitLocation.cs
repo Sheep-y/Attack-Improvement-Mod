@@ -21,7 +21,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStartsOnce () {
          scale = Settings.FixHitDistribution ? SCALE : 1;
-         CallShotClustered = Settings.CalledShotUseClustering || GameUseClusteredCallShot;
+         CallShotClustered = Settings.CalledShotUseClustering;
 
          bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
               prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot;
@@ -51,10 +51,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Error( "Can't find CombatHUDVehicleArmorHover.Readout. OnPointerClick not patched. Vehicle called shot may not work." );
 
-            if ( GameUseClusteredCallShot ) // 1.0.x
-               Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "RestoreVehicleCalledShotLocation_1_0", null );
-            else // 1.1.x
-               Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, "RestoreVehicleCalledShotLocation_1_1", null );
+            Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, "RestoreVehicleCalledShotLocation", null );
          }
       }
 
@@ -179,13 +176,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool RestoreVehicleCalledShotLocation_1_0 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation ) { try {
-         __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), attacker.CalledShotBonusMultiplier );
-         return false;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
-
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool RestoreVehicleCalledShotLocation_1_1 ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) { try {
+      public static bool RestoreVehicleCalledShotLocation ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) { try {
          __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), bonusMultiplier );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
