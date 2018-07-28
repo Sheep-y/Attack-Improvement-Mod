@@ -13,6 +13,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "You can still quickly switch out of Multi-Target by pressing another action." } ) ]
       public bool FixMultiTargetBackout = true;
 
+      [ JsonComment( "Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game." ) ]
+      public bool FixGreyHeadDisease = true;
+
       [ JsonComment( "Fix the bug that rear paper doll is incorrectly showing front structure.  Default true." ) ]
       public bool FixPaperDollRearStructure = true;
 
@@ -32,7 +35,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool ShowWeaponAmmo = true;
       public bool ShowAmmoBoxAmmo = true;
 
-      [ JsonComment( "Show remaining ammo in enemy paper doll mouseover.  Default false.  Depends on ShowWeaponAmmo and/or ShowAmmoBoxAmmo." ) ]
+      [ JsonComment( "Show remaining ammo in enemy paper doll mouseover.  Default false.  Requires ShowWeaponAmmo and/or ShowAmmoBoxAmmo." ) ]
       public bool ShowEnemyAmmo = false;
 
       /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
@@ -204,16 +207,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string HitChanceFormat = "";
 
       //
-      [ JsonSection( "Hit Locations" ) ]
-      //
-
-      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below." ) ]
-      public bool FixHitDistribution = true;
-
-      [ JsonComment( "Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game." ) ]
-      public bool FixGreyHeadDisease = true;
-
-      //
       [ JsonSection( "Melee and DFA" ) ]
       //
 
@@ -241,12 +234,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string MeleeAccuracyFactors = "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy";
 
       //
-      [ JsonSection( "Damage" ) ]
+      [ JsonSection( "Hit Resolution" ) ]
       //
 
-      [ JsonComment( 
+      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below." ) ]
+      public bool FixHitDistribution = true;
+
+      [ JsonComment(
         "If a location would become a zombie part with zero hp, make sure it is destroyed instead. Default true." ) ]
       public bool KillZeroHpLocation = true;
+
+      [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true." ) ]
+      public bool BalanceAmmoLoad = true;
+      public bool BalanceEnemyAmmoLoad = false;
 
       //
       [ JsonSection( "Logging" ) ]

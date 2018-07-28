@@ -202,10 +202,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          foreach ( MechComponent mechComponent in mech.GetComponentsForLocation( MechStructureRules.GetChassisLocationFromArmorLocation( location ), ComponentType.NotSet ) ) {
             string componentName = mechComponent.UIName;
             int allAmmo = 1;
-            if ( mechComponent is AmmunitionBox ammo )
-               componentName += " (" + ammo.CurrentAmmo + ")";
-            else if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
+            if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
                componentName += " (" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
+            else if ( mechComponent is AmmunitionBox ammo )
+               componentName += " (" + ammo.CurrentAmmo + ")";
             if ( mechComponent.DamageLevel >= ComponentDamageLevel.NonFunctional || allAmmo <= 0 )
                ToolTip.DebuffStrings.Add( componentName );
             else

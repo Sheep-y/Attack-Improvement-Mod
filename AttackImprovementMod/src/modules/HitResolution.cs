@@ -3,6 +3,7 @@ using BattleTech;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
+using System.Linq;
 using UnityEngine.EventSystems;
 using UnityEngine;
 
@@ -60,6 +61,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ) }, "RestoreVehicleCalledShotLocation_1_0", null );
             else // 1.1.x
                Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, "RestoreVehicleCalledShotLocation_1_1", null );
+         }
+
+         if ( Settings.BalanceAmmoLoad || Settings.BalanceEnemyAmmoLoad ) {
+            Patch( typeof( Weapon ), "DecrementAmmo", "OverrideDecrementAmmo", null );
          }
       }
 
@@ -229,5 +234,95 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static ArmorLocation TranslateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(-(int)location); }
       public static VehicleChassisLocations TranslateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(-(int)location); }
+
+      // ============ Balanced Ammo Load ============
+
+      public static bool OverrideDecrementAmmo ( Weapon __instance, ref int __result, int stackItemUID ) { try {
+         Weapon me = __instance;
+         if ( me.AmmoCategory == AmmoCategory.NotSet || ! ( me.parent is Mech mech ) ) return true;
+         bool isFriend = mech.team.IsFriendly( Combat.LocalPlayerTeam );
+         if ( ! ( ( Settings.BalanceAmmoLoad && isFriend ) || ( Settings.BalanceEnemyAmmoLoad && ! isFriend ) ) ) return true;
+
+         int needAmmo = __result = me.ShotsWhenFired;
+         int internalAmmo = me.InternalAmmo;
+         if ( internalAmmo > 0 ) {
+            if ( internalAmmo > needAmmo ) {
+               me.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "InternalAmmo", StatCollection.StatOperation.Int_Subtract, needAmmo, -1, true );
+               return false;
+            } // else {
+            me.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "InternalAmmo", StatCollection.StatOperation.Set, 0, -1, true );
+            needAmmo -= internalAmmo;
+            if ( needAmmo <= 0 ) return false;
+         }
+
+         // Yeah we are sorting everytime. Not easy to cache since it varies by structure and armour.
+         SortAmmunitionBoxes( mech, me.ammoBoxes );
+         needAmmo -= TryGetAmmo( me, stackItemUID, needAmmo, true ); // Above half
+         if ( needAmmo <= 0 ) return false;
+
+         needAmmo -= TryGetAmmo( me, stackItemUID, needAmmo, false ); // Below half
+         __result = me.ShotsWhenFired - needAmmo;
+         return false;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      private static void SortAmmunitionBoxes ( Mech mech, List<AmmunitionBox> boxes ) {
+         Dictionary<ChassisLocations, int> locationOrder = new Dictionary<ChassisLocations, int> {
+            { ChassisLocations.CenterTorso, 1 },
+            { ChassisLocations.Head, 2 },
+            { ChassisLocations.LeftTorso, 4 },
+            { ChassisLocations.RightTorso, LeftInDanger( mech, LeftTorso, LeftTorsoRear, RightTorso, RightTorsoRear ) ? 5 : 3 },
+            { ChassisLocations.LeftArm, 7 },
+            { ChassisLocations.RightArm, LeftInDanger( mech, LeftArm, RightArm ) ? 8 : 6 },
+            { ChassisLocations.LeftLeg, 10 },
+            { ChassisLocations.RightLeg, LeftInDanger( mech, LeftLeg, RightLeg ) ? 11 : 9 }
+         };
+
+         boxes.Sort( ( a, b ) => {
+            locationOrder.TryGetValue( (ChassisLocations) a.Location, out int aLoc );
+            locationOrder.TryGetValue( (ChassisLocations) b.Location, out int bLoc );
+            if ( aLoc != bLoc ) return aLoc - bLoc;
+            return a.CurrentAmmo - b.CurrentAmmo;
+         } );
+         //Log( "Sorted Ammo: " + Join( ", ", boxes.Select( box => $"{box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" ).ToArray() ) );
+      }
+
+      private static bool LeftInDanger ( Mech mech, ArmorLocation leftFront, ArmorLocation rightFront ) {
+         return LeftInDanger( mech, leftFront, leftFront, rightFront, rightFront );
+      }
+
+      private static bool LeftInDanger ( Mech mech, ArmorLocation leftFront, ArmorLocation leftRear, ArmorLocation rightFront, ArmorLocation rightRear ) {
+         ChassisLocations left  = MechStructureRules.GetChassisLocationFromArmorLocation( leftFront );
+         ChassisLocations right = MechStructureRules.GetChassisLocationFromArmorLocation( rightFront );
+         float leftHP = mech.GetCurrentStructure( left ), rightHP = mech.GetCurrentStructure( right );
+         if ( leftHP != rightHP ) return leftHP < rightHP;
+         leftHP = mech.GetCurrentArmor( leftFront );
+         if ( leftFront != leftRear ) leftHP = Math.Min( leftHP, mech.GetCurrentArmor( leftRear ) );
+         rightHP = mech.GetCurrentArmor( rightFront );
+         if ( rightFront != rightRear ) rightHP = Math.Min( rightHP, mech.GetCurrentArmor( rightRear ) );
+         return leftHP < rightHP;
+      }
+
+      private static int TryGetAmmo ( Weapon me, int stackItemUID, int maxDraw, bool aboveHalf ) {
+         if ( maxDraw <= 0 ) return 0;
+         int needAmmo = maxDraw;
+         foreach ( AmmunitionBox box in me.ammoBoxes ) {
+            int drawn = 0, ammo = box.CurrentAmmo;
+            if ( ammo <= 0 ) continue;
+            if ( aboveHalf ) {
+               int half = box.AmmoCapacity / 2;
+               if ( ammo <= half ) continue;
+               drawn = Math.Min( needAmmo, ammo - half );
+            } else 
+               drawn = Math.Min( needAmmo, ammo );
+            if ( ammo > drawn )
+               box.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "CurrentAmmo", StatCollection.StatOperation.Int_Subtract, drawn, -1, true );
+            else
+               box.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "CurrentAmmo", StatCollection.StatOperation.Set, 0, -1, true );
+            needAmmo -= drawn;
+            if ( needAmmo <= 0 ) break;
+         }
+         //Log( ( aboveHalf ? "Before": "After" ) + " Half : " + Join( ", ", me.ammoBoxes.Select( box => $"{box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" ).ToArray() ) );
+         return maxDraw - needAmmo;
+      }
    }
 }
