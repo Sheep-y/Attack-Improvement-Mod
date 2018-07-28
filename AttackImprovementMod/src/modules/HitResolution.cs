@@ -11,7 +11,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static BindingFlags;
    using static Mod;
 
-   public class HitLocation : BattleModModule {
+   public class HitResolution : BattleModModule {
 
       private const int SCALE = 1024; // Increase precisions of float to int conversions. Set it too high may cause overflow.
       internal static int scale = SCALE; // Actual scale. Determined by FixHitDistribution.

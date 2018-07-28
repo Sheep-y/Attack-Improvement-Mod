@@ -15,6 +15,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class UserInterface : BattleModModule {
 
       public override void CombatStartsOnce () {
+
          if ( Settings.FixPaperDollRearStructure || Settings.ShowUnderArmourDamage ) TryRun( Logger, () => {
             outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
             armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
@@ -142,25 +143,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   }
                   outlineRear[ j ] = structureRear[ j ] = armorRear[ j ];
                   armorRear[ j ] = clear;
-                  /*
-                  outlineRear[ j ] = armorRear[ j ];
-                  structureRear[ j ] = UIHelpers.getLerpedColorFromArray(  // Get proper structure colour
-                     LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.StructureColors, 1f - percent, 
-                     LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.StructureUseStairSteps,
-                     LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.StructureNumStairSteps );
-                  armorRear[ j ].a *= 0.4f; // But can't get a consistent result on both front and rear and called shot
-                  */
                }
             }
          }
-         /*
-         if ( structure == null ) structure = (Color[]) structureProp.GetValue( me, null );
-         if ( structureRear == null ) structureRear = (Color[]) structureRearProp.GetValue( me, null );
-         Log( Join( ", ", armor, ColorUtility.ToHtmlStringRGBA ) );
-         Log( Join( ", ", structure, ColorUtility.ToHtmlStringRGBA ) );
-         Log( Join( ", ", armorRear, ColorUtility.ToHtmlStringRGBA ) );
-         Log( Join( ", ", structureRear, ColorUtility.ToHtmlStringRGBA ) );
-         */
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static UILookAndColorConstants LookAndColor;

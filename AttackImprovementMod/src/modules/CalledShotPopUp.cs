@@ -6,7 +6,7 @@ using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using System.Reflection;
-   using static HitLocation;
+   using static HitResolution;
    using static Mod;
 
    public class CalledShotPopUp : BattleModModule {
@@ -82,7 +82,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static bool OverrideHUDMechCalledShotPercent ( ref string __result, ArmorLocation location, ArmorLocation targetedLocation ) { try {
-         Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! HitLocation.CallShotClustered || ! Settings.ShowRealMechCalledShotChance )
+         Dictionary<ArmorLocation, int> hitTable = ( targetedLocation == ArmorLocation.None || ! HitResolution.CallShotClustered || ! Settings.ShowRealMechCalledShotChance )
                                                    ? Combat.HitLocation.GetMechHitTable( AttackDirection )
                                                    : CombatConstants.GetMechClusterTable( targetedLocation, AttackDirection );
          if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )

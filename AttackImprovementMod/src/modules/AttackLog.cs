@@ -25,7 +25,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static readonly Type TurtType = typeof( Turret );
       private static readonly Type BuldType = typeof( BattleTech.Building );
 
-      public override void ModStarts () {
+      private static string thisCombatId = String.Empty;
+
+      public override void CombatStartsOnce () {
          if ( Settings.AttackLogLevel == null ) return;
          PersistentLog = Settings.PersistentLog;
 
@@ -44,30 +46,44 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          // Patch prefix early to increase chance of successful capture in face of other mods.
-         // TODO: Move to CombatStartsOnce and merge code.
          switch ( Settings.AttackLogLevel.Trim().ToLower() ) {
             case "all":
             case "critical":
                LogCritical = true;
+               CritDummy = FillBlanks( 10 );
+               Type CritRulesType = typeof( CritChanceRules );
+               Patch( typeof( AttackDirector ), "GetRandomFromCache", new Type[]{ typeof( WeaponHitInfo ), typeof( int ) }, null, "LogCritRolls" );
+               Patch( CritRulesType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "LogBaseCritChance" );
+               Patch( CritRulesType, "GetCritMultiplier", null, "LogCritMultiplier" );
+               Patch( CritRulesType, "GetCritChance", null, "LogCritChance" );
+               Patch( MechType, "GetComponentInSlot", null, "LogCritComp" );
+               Patch( MechType, "CheckForCrit", NonPublic, null, "LogCritResult" );
                goto case "damage";
 
             case "damage":
-               Patch( MechType, "DamageLocation", NonPublic, "RecordMechDamage", null );
-               Patch( VehiType, "DamageLocation", NonPublic, "RecordVehicleDamage", null );
-               Patch( TurtType, "DamageLocation", NonPublic, "RecordTurretDamage", null );
-               Patch( BuldType, "DamageBuilding", NonPublic, "RecordBuildingDamage", null );
+               DamageDummy = FillBlanks( 6 );
+               Patch( MechType, "DamageLocation", NonPublic, "RecordMechDamage", "LogMechDamage" );
+               Patch( VehiType, "DamageLocation", NonPublic, "RecordVehicleDamage", "LogVehicleDamage" );
+               Patch( TurtType, "DamageLocation", NonPublic, "RecordTurretDamage", "LogTurretDamage" );
+               Patch( BuldType, "DamageBuilding", NonPublic, "RecordBuildingDamage", "LogBuildingDamage" );
                LogDamage = true;
                goto case "location";
 
             case "location":
                LogLocation = true;
+               Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
+               Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
+               Patch( TurtType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
+               Patch( BuldType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
+               Patch( TurtType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
+               Patch( BuldType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
                goto case "shot";
 
             case "shot":
                LogShot = true;
                Patch( AttackType, "GetIndividualHits", NonPublic, "RecordSequenceWeapon", null );
                Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordSequenceWeapon", null );
-               Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", null );
+               Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", "LogMissedAttack" );
                goto case "attack";
 
             case "attack":
@@ -117,47 +133,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             hitMap = new Dictionary<string, int>( 16 );
       }
 
-      private static string thisCombatId = String.Empty;
-      private bool LoggerPatched = false;
-
       public override void CombatStarts () {
          if ( idGenerator == null ) return;
          thisCombatId = GetNewId();
-
-         if ( LoggerPatched ) return;
-         LoggerPatched = true;
-
-         // Patch Postfix late to increase odds of capturing modded values
-         if ( LogShot )
-            Patch( AttackType, "GetCorrectedRoll" , NonPublic, null, "LogMissedAttack" );
-
-         if ( LogLocation ) {
-            Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
-            Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
-            Patch( TurtType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
-            Patch( BuldType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
-            Patch( TurtType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
-            Patch( BuldType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
-         }
-
-         if ( LogDamage ) {
-            DamageDummy = FillBlanks( 6 );
-            Patch( MechType, "DamageLocation", NonPublic, null, "LogMechDamage" );
-            Patch( VehiType, "DamageLocation", NonPublic, null, "LogVehicleDamage" );
-            Patch( TurtType, "DamageLocation", NonPublic, null, "LogTurretDamage" );
-            Patch( BuldType, "DamageBuilding", NonPublic, null, "LogBuildingDamage" );
-         }
-
-         if ( LogCritical ) {
-            CritDummy = FillBlanks( 10 );
-            Type CritRulesType = typeof( CritChanceRules );
-            Patch( typeof( AttackDirector ), "GetRandomFromCache", new Type[]{ typeof( WeaponHitInfo ), typeof( int ) }, null, "LogCritRolls" );
-            Patch( CritRulesType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "LogBaseCritChance" );
-            Patch( CritRulesType, "GetCritMultiplier", null, "LogCritMultiplier" );
-            Patch( CritRulesType, "GetCritChance", null, "LogCritChance" );
-            Patch( MechType, "GetComponentInSlot", null, "LogCritComp" );
-            Patch( MechType, "CheckForCrit", NonPublic, null, "LogCritResult" );
-         }
       }
 
       // ============ UTILS ============
@@ -194,10 +172,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return weapon + "@" + hitLocation + "@" + targetId;
       }
 
-      private static string FillBlanks ( int blankCount ) { // TODO: Cache!
-         StringBuilder buf = new StringBuilder( blankCount * 3 );
-         while ( blankCount-- > 0 ) buf.Append( Separator ).Append( "--" );
-         return buf.ToString();
+      private static List<string> blankCache = new List<string>(12);
+
+      private static string FillBlanks ( int blankCount ) {
+         while ( blankCache.Count <= blankCount ) blankCache.Add( null );
+         string result = blankCache[ blankCount ];
+         if ( result == null ) {
+            StringBuilder buf = new StringBuilder( blankCount * 3 );
+            for ( int i = blankCount ; i > 0 ; i-- )
+               buf.Append( Separator ).Append( "--" );
+            result = blankCache[ blankCount ] = buf.ToString();
+         }
+         return result;
       }
 
       public static string TeamAndCallsign ( ICombatant who ) {
@@ -215,17 +201,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else
             teamName = "NPC";
          teamName += Separator;
-         if ( who is Building ) {
+         if ( who is Building )
             teamName += "Building";
-         } else {
-            // TODO: Merge to one line
-            if ( who.GetPilot() != null ) 
-               teamName += who.GetPilot().Callsign;
-            else if ( who is AbstractActor actor )
-               teamName += actor.Nickname;
-            else
-               teamName += who.DisplayName;
-         }
+         else
+            teamName += who.GetPilot()?.Callsign ?? ( who as AbstractActor )?.Nickname ?? who.DisplayName;
          teamName += Separator;
          return teamName + who.DisplayName + Separator;
       }

@@ -69,7 +69,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\modules\AttackLog.cs" />
     <Compile Include="src\modules\CalledShotPopUp.cs" />
-    <Compile Include="src\modules\HitLocation.cs" />
+    <Compile Include="src\modules\ModifierList.cs" />
+    <Compile Include="src\modules\HitResolution.cs" />
     <Compile Include="src\modules\LineOfSight.cs" />
     <Compile Include="src\modules\Melee.cs" />
     <Compile Include="src\modules\RollCorrection.cs" />

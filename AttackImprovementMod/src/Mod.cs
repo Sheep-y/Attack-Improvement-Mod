@@ -38,8 +38,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Add( new CalledShotPopUp(){ Name = "Called Shot HUD" } );
          Add( new Melee(){ Name = "Melee" } );
          Add( new RollModifier(){ Name = "Roll Modifier" } );
+         Add( new ModifierList(){ Name = "Modifier List" } );
          Add( new RollCorrection(){ Name = "Roll Corrections" } );
-         Add( new HitLocation(){ Name = "Hit Distribution" } );
+         Add( new HitResolution(){ Name = "Hit Resolution" } );
          Add( new AttackLog(){ Name = "Logger" } ); // Must be after all other modules if we want to log modded data
       }
 
