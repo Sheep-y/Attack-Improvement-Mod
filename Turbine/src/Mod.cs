@@ -16,8 +16,8 @@ namespace Sheepy.BattleTechMod.Turbine {
 
       private static Type dmType = typeof( DataManager );
       private static MessageCenter center;
-      private static Dictionary<string, DataManager.DataManagerLoadRequest> foreground = new Dictionary<string, DataManager.DataManagerLoadRequest>(1000);
-      private static Dictionary<string, DataManager.DataManagerLoadRequest> background = new Dictionary<string, DataManager.DataManagerLoadRequest>(1000);
+      private static Dictionary<string, DataManager.DataManagerLoadRequest> foreground = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
+      private static Dictionary<string, DataManager.DataManagerLoadRequest> background = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
       private static HashSet<DataManager.DataManagerLoadRequest> foregroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
       private static HashSet<DataManager.DataManagerLoadRequest> backgroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
       private static float currentTimeout = -1;
