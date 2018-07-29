@@ -19,7 +19,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( BattleTech.Building ), "DamageBuilding", NonPublic, null, "FixZombieBuilding" );
          }
 
-         if ( Settings.BalanceAmmoLoad || Settings.BalanceEnemyAmmoLoad )
+         if ( Settings.BalanceAmmoConsumption || Settings.BalanceEnemyAmmoConsumption )
             Patch( typeof( Weapon ), "DecrementAmmo", "OverrideDecrementAmmo", null );
 
          if ( Settings.AutoJettisonAmmo || Settings.AutoJettisonEnemyAmmo )
@@ -80,9 +80,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static bool OverrideDecrementAmmo ( Weapon __instance, ref int __result, int stackItemUID ) { try {
          Weapon me = __instance;
          if ( me.AmmoCategory == AmmoCategory.NotSet || ! ( me.parent is Mech mech ) ) return true;
-         if ( Settings.BalanceAmmoLoad != Settings.BalanceEnemyAmmoLoad ) {
+         if ( Settings.BalanceAmmoConsumption != Settings.BalanceEnemyAmmoConsumption ) {
             bool isFriend = mech.team.IsFriendly( Combat.LocalPlayerTeam );
-            if ( ! ( ( Settings.BalanceAmmoLoad && isFriend ) || ( Settings.BalanceEnemyAmmoLoad && ! isFriend ) ) ) return true;
+            if ( ! ( ( Settings.BalanceAmmoConsumption && isFriend ) || ( Settings.BalanceEnemyAmmoConsumption && ! isFriend ) ) ) return true;
          }
 
          int needAmmo = __result = me.ShotsWhenFired;

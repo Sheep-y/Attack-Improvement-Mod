@@ -244,8 +244,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool KillZeroHpLocation = true;
 
       [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends." ) ]
-      public bool BalanceAmmoLoad = true;
-      public bool BalanceEnemyAmmoLoad = false;
+      public bool BalanceAmmoConsumption = true;
+      public bool BalanceEnemyAmmoConsumption = false;
 
       [ JsonComment( "When an ammo is useless, such as because the weapon is destroyed, eject the ammo at end of turn if not prone.  Default true for friends." ) ]
       public bool AutoJettisonAmmo = true;
