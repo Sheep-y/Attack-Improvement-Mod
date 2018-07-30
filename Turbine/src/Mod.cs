@@ -11,7 +11,7 @@ namespace Sheepy.BattleTechMod.Turbine {
    public class Mod : BattleMod {
 
       // A kill switch to press when any things go wrong during initialisation
-      private static bool ModDisabled = true;
+      private static bool UnpatchManager = true;
 
       public static void Init () {
          new Mod().Start();
@@ -24,8 +24,8 @@ namespace Sheepy.BattleTechMod.Turbine {
       private static float currentTimeout = -1, currentAsyncTimeout = -1;
 
       public override void ModStarts () {
-         Logger.Delete();
-         Logger = Logger.BT_LOG;
+         //Logger.Delete();
+         //Logger = Logger.BT_LOG;
          dmType = typeof( DataManager );
          backgroundRequestsCurrentAllowedWeight = dmType.GetField( "backgroundRequestsCurrentAllowedWeight", NonPublic | Instance );
          foregroundRequestsCurrentAllowedWeight = dmType.GetField( "foregroundRequestsCurrentAllowedWeight", NonPublic | Instance );
@@ -56,17 +56,17 @@ namespace Sheepy.BattleTechMod.Turbine {
          background = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
          foregroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
          backgroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
-         ModDisabled = false;
+         UnpatchManager = false;
          Log( "Turbine initialised" );
       }
          
       private static bool Override_CheckRequestsComplete ( ref bool __result ) {
-         if ( ModDisabled ) return true;
+         if ( UnpatchManager ) return true;
          __result = CheckRequestsComplete();
          return false;
       }
       private static bool Override_CheckAsyncRequestsComplete ( ref bool __result ) {
-         if ( ModDisabled ) return true;
+         if ( UnpatchManager ) return true;
          __result = CheckAsyncRequestsComplete();
          return false;
       }
@@ -87,18 +87,18 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
 
       public static void ClearRequests () {
-         if ( ModDisabled ) return;
+         if ( UnpatchManager ) return;
          foreground.Clear();
          background.Clear();
          foregroundLoading.Clear();
          backgroundLoading.Clear();
       }
       
-      public static bool Override_GraduateBackgroundRequest ( DataManager __instance, ref bool __result, BattleTechResourceType resourceType, string id ) {
-         if ( ModDisabled ) return true;
+      public static bool Override_GraduateBackgroundRequest ( DataManager __instance, ref bool __result, BattleTechResourceType resourceType, string id ) { try {
+         if ( UnpatchManager ) return true;
          __result = GraduateBackgroundRequest( __instance, resourceType, id );
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
       private static bool GraduateBackgroundRequest ( DataManager me, BattleTechResourceType resourceType, string id ) {
          string key = GetKey( resourceType, id );
@@ -123,11 +123,12 @@ namespace Sheepy.BattleTechMod.Turbine {
          return true;
       }
 
-      public static bool Override_NotifyFileLoaded ( DataManager __instance, DataManager.DataManagerLoadRequest request ) {
-         if ( ModDisabled ) return true;
+      public static bool Override_NotifyFileLoaded ( DataManager __instance, DataManager.DataManagerLoadRequest request ) { try {
+         if ( UnpatchManager ) return true;
          NotifyFileLoaded( __instance, request );
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
+
       private static void NotifyFileLoaded ( DataManager me, DataManager.DataManagerLoadRequest request ) {
          if ( request.Prewarm != null ) {
             List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( me );
@@ -143,11 +144,12 @@ namespace Sheepy.BattleTechMod.Turbine {
          }
       }
 
-      public static bool Override_NotifyFileLoadedAsync ( DataManager __instance, DataManager.DataManagerLoadRequest request ) {
-         if ( ModDisabled ) return true;
+      public static bool Override_NotifyFileLoadedAsync ( DataManager __instance, DataManager.DataManagerLoadRequest request ) { try {
+         if ( UnpatchManager ) return true;
          NotifyFileLoadedAsync( __instance, request );
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
+
       private static void NotifyFileLoadedAsync ( DataManager me, DataManager.DataManagerLoadRequest request ) {
          if ( request.Prewarm != null ) {
             List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( me );
@@ -163,18 +165,18 @@ namespace Sheepy.BattleTechMod.Turbine {
          }
       }
 
-      public static bool Override_NotifyFileLoadFailed ( DataManager __instance, DataManager.DataManagerLoadRequest request ) {
-         if ( ModDisabled ) return true;
+      public static bool Override_NotifyFileLoadFailed ( DataManager __instance, DataManager.DataManagerLoadRequest request ) { try {
+         if ( UnpatchManager ) return true;
          string key = GetKey( request );
          if ( foreground.Remove( key ) )
             NotifyFileLoaded( __instance, request );
          else if ( background.Remove( key ) )
             NotifyFileLoadedAsync( __instance, request );
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
-      public static bool Override_ProcessRequests ( DataManager __instance ) {
-         if ( ModDisabled ) return true;
+      public static bool Override_ProcessRequests ( DataManager __instance ) { try {
+         if ( UnpatchManager ) return true;
          DataManager me = __instance;
          int lightLoad = 0;
          int heavyLoad = 0;
@@ -227,10 +229,10 @@ namespace Sheepy.BattleTechMod.Turbine {
             }
          }
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
       public static bool Override_ProcessAsyncRequests ( DataManager __instance ) {
-         if ( ModDisabled ) return true;
+         if ( UnpatchManager ) return true;
          DataManager me = __instance;
          uint currentAllowedWeight = (uint) backgroundRequestsCurrentAllowedWeight.GetValue( me );
          foreach ( DataManager.DataManagerLoadRequest request in background.Values ) {
@@ -270,8 +272,8 @@ namespace Sheepy.BattleTechMod.Turbine {
          return false;
       }
 
-      public static bool Override_RequestResourceAsync_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm ) {
-         if ( ModDisabled || string.IsNullOrEmpty( identifier ) ) return false;
+      public static bool Override_RequestResourceAsync_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm ) { try {
+         if ( UnpatchManager || string.IsNullOrEmpty( identifier ) ) return false;
          DataManager me = __instance;
          string key = GetKey( resourceType, identifier );
          background.TryGetValue( key, out DataManager.DataManagerLoadRequest dataManagerLoadRequest );
@@ -298,9 +300,9 @@ namespace Sheepy.BattleTechMod.Turbine {
             backgroundLoading.Add( dataManagerLoadRequest );
          }
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
-      public static bool Override_RequestResource_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm, bool allowRequestStacking ) {
+      public static bool Override_RequestResource_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm, bool allowRequestStacking ) { try {
          if ( string.IsNullOrEmpty( identifier ) ) return false;
          DataManager me = __instance;
          string key = GetKey( resourceType, identifier );
@@ -322,10 +324,10 @@ namespace Sheepy.BattleTechMod.Turbine {
             foregroundLoading.Add( dataManagerLoadRequest );
          }
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
-      public static bool Override_SetLoadRequestWeights ( DataManager __instance, uint foregroundRequestWeight, uint backgroundRequestWeight ) {
-         if ( ModDisabled ) return true;
+      public static bool Override_SetLoadRequestWeights ( DataManager __instance, uint foregroundRequestWeight, uint backgroundRequestWeight ) { try {
+         if ( UnpatchManager ) return true;
          foregroundRequestsCurrentAllowedWeight.SetValue( __instance, foregroundRequestWeight );
          backgroundRequestsCurrentAllowedWeight.SetValue( __instance, backgroundRequestWeight );
          foreach ( DataManager.DataManagerLoadRequest dataManagerLoadRequest in foregroundLoading )
@@ -335,10 +337,10 @@ namespace Sheepy.BattleTechMod.Turbine {
             if ( backgroundRequestWeight > dataManagerLoadRequest.RequestWeight.AllowedWeight )
                dataManagerLoadRequest.RequestWeight.SetAllowedWeight( backgroundRequestWeight );
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
-      public static bool Override_UpdateRequestsTimeout ( DataManager __instance, float deltaTime ) {
-         if ( ModDisabled ) return true;
+      public static bool Override_UpdateRequestsTimeout ( DataManager __instance, float deltaTime ) { try {
+         if ( UnpatchManager ) return true;
          DataManager me = __instance;
          if ( currentTimeout >= 0f ) {
             if ( foregroundLoading.Any( IsProcessing ) ) {
@@ -365,11 +367,33 @@ namespace Sheepy.BattleTechMod.Turbine {
             }
          }
          return false;
-      }
+      }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
       private static bool IsProcessing ( DataManager.DataManagerLoadRequest e ) {
          return e.State == DataManager.DataManagerLoadRequest.RequestState.Processing;
       }
+
+      private static bool KillManagerPatch ( DataManager me, Exception err ) { try {
+         Error( err );
+         Log( "Trying to hand resource loading over due to exception." );
+         List<DataManager.DataManagerLoadRequest> backgroundRequests = (List<DataManager.DataManagerLoadRequest>) 
+            dmType.GetField( "backgroundRequests", NonPublic | Instance ).GetValue( me );
+         List<DataManager.DataManagerLoadRequest> foregroundRequests = (List<DataManager.DataManagerLoadRequest>) 
+            dmType.GetField( "foregroundRequests", NonPublic | Instance ).GetValue( me );
+         if ( backgroundRequests == null || foregroundRequests == null ) 
+            throw new NullReferenceException( "Requests not found; handover safely aborted." );
+         UnpatchManager = true;
+         backgroundRequests.AddRange( background.Values );
+         background.Clear();
+         backgroundLoading.Clear();
+         foregroundRequests.AddRange( foreground.Values );
+         foreground.Clear();
+         foregroundLoading.Clear();
+         return true;
+      } catch ( Exception ex ) {
+         Log( "Exception during handover." );
+         return Error( ex );
+      } }
 
       // ============ Logging ============
 
@@ -383,10 +407,10 @@ namespace Sheepy.BattleTechMod.Turbine {
       public static void Warn ( object message ) { ModLog.Warn( message ); }
       public static void Warn ( string message ) { ModLog.Warn( message ); }
       public static void Warn ( string message, params object[] args ) { ModLog.Warn( message, args ); }
+      */
 
       public static bool Error ( object message ) { return ModLog.Error( message ); }
-      public static void Error ( string message ) { ModLog.Error( message ); }
-      public static void Error ( string message, params object[] args ) { ModLog.Error( message, args ); }
-      */
+      //public static void Error ( string message ) { ModLog.Error( message ); }
+      //public static void Error ( string message, params object[] args ) { ModLog.Error( message, args ); }
    }
 }
