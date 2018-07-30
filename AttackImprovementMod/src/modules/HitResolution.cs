@@ -113,17 +113,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       private static void SortAmmunitionBoxByExplosion ( Mech mech, List<AmmunitionBox> boxes ) {
-         Comparer<ChassisLocations> comparer = LocationSorter( mech );
+         IComparer<ChassisLocations> comparer = LocationSorter( mech );
          // Default load order: CT > Head > LT/RT > LA/RA > LL/RL (prioritising the weaker side).
          Dictionary<ChassisLocations, int> locationOrder = new Dictionary<ChassisLocations, int> {
             { ChassisLocations.CenterTorso, 1 },
             { ChassisLocations.Head, 2 },
             { ChassisLocations.LeftTorso, 5 },
-            { ChassisLocations.RightTorso, comparer( ChassisLocations.LeftTorso, ChassisLocations.RightTorso ) < 0 ? 6 : 4 },
+            { ChassisLocations.RightTorso, comparer.Compare( ChassisLocations.LeftTorso, ChassisLocations.RightTorso ) < 0 ? 6 : 4 },
             { ChassisLocations.LeftArm, 8 },
-            { ChassisLocations.RightArm, comparer( ChassisLocations.LeftArm, ChassisLocations.RightArm ) < 0 ? 9 : 7 },
+            { ChassisLocations.RightArm, comparer.Compare( ChassisLocations.LeftArm, ChassisLocations.RightArm ) < 0 ? 9 : 7 },
             { ChassisLocations.LeftLeg, 11 },
-            { ChassisLocations.RightLeg, comparer( ChassisLocations.LeftLeg, ChassisLocations.RightLeg ) < 0 ? 12 : 10 }
+            { ChassisLocations.RightLeg, comparer.Compare( ChassisLocations.LeftLeg, ChassisLocations.RightLeg ) < 0 ? 12 : 10 }
          };
 
          // If one leg is destroyed, boost the other leg's priority.
@@ -143,46 +143,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          //Log( "Sorted Ammo: " + Join( ", ", boxes.Select( box => $"{box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" ).ToArray() ) );
       }
 
-      private static void SortAmmunitionBoxByExplosion ( Mech mech, List<AmmunitionBox> boxes ) {
-         Comparer<ChassisLocations> comparer = LocationSorter( mech );
-         // Default load order: CT > Head > LT/RT > LA/RA > LL/RL (prioritising the weaker side).
-         Dictionary<ChassisLocations, int> locationOrder = new Dictionary<ChassisLocations, int> {
-            { ChassisLocations.CenterTorso, 1 },
-            { ChassisLocations.Head, 2 },
-            { ChassisLocations.LeftTorso, 5 },
-            { ChassisLocations.RightTorso, comparer( ChassisLocations.LeftTorso, ChassisLocations.RightTorso ) < 0 ? 6 : 4 },
-            { ChassisLocations.LeftArm, 8 },
-            { ChassisLocations.RightArm, comparer( ChassisLocations.LeftArm, ChassisLocations.RightArm ) < 0 ? 9 : 7 },
-            { ChassisLocations.LeftLeg, 11 },
-            { ChassisLocations.RightLeg, comparer( ChassisLocations.LeftLeg, ChassisLocations.RightLeg ) < 0 ? 12 : 10 }
-         };
-
-         // If one leg is destroyed, boost the other leg's priority.
-         if ( mech.GetLocationDamageLevel( ChassisLocations.LeftLeg ) >= LocationDamageLevel.NonFunctional )
-            locationOrder[ ChassisLocations.RightLeg ] = 3;
-         else if ( mech.GetLocationDamageLevel( ChassisLocations.RightLeg ) >= LocationDamageLevel.NonFunctional )
-            locationOrder[ ChassisLocations.LeftLeg ] = 3;
-
-         // Sort by location, then by ammo - draw from emptier bin first to get more bins below explosion threshold.
-         boxes.Sort( ( a, b ) => {
-            locationOrder.TryGetValue( (ChassisLocations) a.Location, out int aLoc );
-            locationOrder.TryGetValue( (ChassisLocations) b.Location, out int bLoc );
-            if ( aLoc != bLoc ) return aLoc - bLoc;
-            return a.CurrentAmmo - b.CurrentAmmo;
-         } );
-         //Log( "Sorted Ammo by explosion risk: " + Join( ", ", boxes.Select( box => $"{box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" ).ToArray() ) );
-      }
-
       private static List<ChassisLocations> postHalf;
 
       private static void SortAmmunitionBoxByRisk ( Mech mech, List<AmmunitionBox> boxes ) {
-         Comparer<ChassisLocations> comparer = LocationSorter( mech );
+         IComparer<ChassisLocations> comparer = LocationSorter( mech );
          // Default load order: CT > Head > LT/RT > LA/RA > LL/RL (prioritising the weaker side).
          Dictionary<ChassisLocations, int> locationOrder = new Dictionary<ChassisLocations, int> {
             { ChassisLocations.CenterTorso, 12 },
             { ChassisLocations.Head, 11 }
          };
-         postHalf.sort( LocationSorter( mech ) );
+         postHalf.Sort( LocationSorter( mech ) );
          for ( int i = 0 ; i < 6 ; i++ )
             locationOrder.Add( postHalf[ i ], i + 1 );
 
@@ -202,21 +172,31 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          //Log( "Sorted Ammo by lost risk: " + Join( ", ", boxes.Select( box => $"{box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" ).ToArray() ) );
       }
 
-      public static Comparer<ChassisLocations> LocationSorter ( Mech mech ) {
-         return ( a, b ) => {
-            bool aDead = mech.GetLocationDamageLevel( a ), bDead = mech.GetLocationDamageLevel( b );
+      // https://stackoverflow.com/a/16839662/893578 by Timothy Shields
+      public class FunctionalComparer<T> : IComparer<T> {
+         private readonly Func<T, T, int> comparer;
+         public FunctionalComparer ( Func<T, T, int> comparer ) { this.comparer = comparer; }
+         public int Compare ( T x, T y ) { return comparer( x, y ); }
+      }
+
+      public static IComparer<ChassisLocations> LocationSorter ( Mech mech ) {
+         return new FunctionalComparer<ChassisLocations>( ( a, b ) => {
+            LocationDamageLevel aDead = mech.GetLocationDamageLevel( a ), bDead = mech.GetLocationDamageLevel( b );
             if ( aDead != bDead ) { // Dead location has last priority
                if ( aDead >= LocationDamageLevel.Destroyed  ) return 1; 
                else if ( bDead >= LocationDamageLevel.Destroyed ) return -1;
             }
-            if ( aDead ) return 0; // Both destroyed.
+            if ( aDead >= LocationDamageLevel.Destroyed ) return 0; // Both destroyed.
             float aArm = WeakestArmour( mech, a ), bArm = WeakestArmour( mech, b );
             if ( aArm == 0 || bArm == 0 ) { // Armor breached!
-               if ( aArm != bArm ) return aArm - bArm; // Breached one goes first
-               return WeakestHP( mech, a ) - WeakestHP( mech, b ); // Both breached, compare HP.
+               if ( aArm != bArm ) return compare( aArm, bArm ); // Breached one goes first
+               return compare( WeakestHP( mech, a ), WeakestHP( mech, b ) ); // Both breached, compare HP.
             }
-            return aArm - bArm;
-         };
+            return compare( aArm, bArm );
+         } );
+      }
+      private static int compare ( float a, float b ) {
+         return a > b ? 1 : ( a < b ? -1 : 0 );
       }
 
       public static float WeakestArmour ( Mech mech, ChassisLocations location ) {
@@ -229,17 +209,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float armour = mech.GetCurrentArmor( MechStructureRules.GetArmorFromChassisLocation( location ) );
          // Arms are at most as strong as the side torsos
          if ( location == ChassisLocations.LeftArm )
-            return Math.min( armour, WeakestArmour( mech, ChassisLocations.LeftTorso ) );
+            return Math.Min( armour, WeakestArmour( mech, ChassisLocations.LeftTorso ) );
          else if ( location == ChassisLocations.RightArm )
-            return Math.min( armour, WeakestArmour( mech, ChassisLocations.RightTorso ) );
+            return Math.Min( armour, WeakestArmour( mech, ChassisLocations.RightTorso ) );
          return armour;
       }
 
       public static float WeakestHP ( Mech mech, ChassisLocations location ) {
-         if ( location == LeftArm )
-            return Math.min( mech.GetCurrentStructure( ChassisLocations.LeftArm ), mech.GetCurrentStructure( ChassisLocations.LeftTorso ) );
-         else if ( location == RightArm )
-            return Math.min( mech.GetCurrentStructure( ChassisLocations.RightArm ), mech.GetCurrentStructure( ChassisLocations.RightTorso ) );
+         if ( location == ChassisLocations.LeftArm )
+            return Math.Min( mech.GetCurrentStructure( ChassisLocations.LeftArm ), mech.GetCurrentStructure( ChassisLocations.LeftTorso ) );
+         else if ( location == ChassisLocations.RightArm )
+            return Math.Min( mech.GetCurrentStructure( ChassisLocations.RightArm ), mech.GetCurrentStructure( ChassisLocations.RightTorso ) );
          return mech.GetCurrentStructure( location );
       }
 
@@ -272,7 +252,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ! __instance.IsComplete ) return;
          Mech mech = __instance.OwningMech;
          if ( mech == null || mech.IsDead || mech.HasMovedThisRound || mech.IsProne || mech.IsShutDown ) return;
-         if ( ! FriendOrFoe( mech, Settings.AutoJettisonAmmo, Settings.AutoJettisonEnemyAmmo ) ) return false;
+         if ( ! FriendOrFoe( mech, Settings.AutoJettisonAmmo, Settings.AutoJettisonEnemyAmmo ) ) return;
 
          Dictionary<AmmoCategory, bool> checkedType = new Dictionary<AmmoCategory, bool>();
          List<AmmunitionBox> jettison = new List<AmmunitionBox>();

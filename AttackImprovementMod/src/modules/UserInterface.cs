@@ -75,7 +75,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.FixLosPreviewHeight )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
 
-         if ( Settings.ShowAmmoInTooltip || ShowEnemyAmmoInTooltip ) {
+         if ( Settings.ShowAmmoInTooltip || Settings.ShowEnemyAmmoInTooltip ) {
             MechTrayArmorHoverToolTipProp = typeof( CombatHUDMechTrayArmorHover ).GetProperty( "ToolTip", NonPublic | Instance );
             if ( MechTrayArmorHoverToolTipProp == null )
                Warn( "Cannot access CombatHUDMechTrayArmorHover.ToolTip, ammo not displayed in paperdoll tooltip." );
@@ -203,7 +203,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
                componentName += " (" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
             else if ( mechComponent is AmmunitionBox ammo )
-               componentName += " (" + ammo.CurrentAmmo + "/" + ammo.AmmoCapacity ")";
+               componentName += " (" + ammo.CurrentAmmo + "/" + ammo.AmmoCapacity + ")";
             if ( mechComponent.DamageLevel >= ComponentDamageLevel.NonFunctional || allAmmo <= 0 )
                ToolTip.DebuffStrings.Add( componentName );
             else

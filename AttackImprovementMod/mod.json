@@ -5,7 +5,7 @@
    "Version" : "2.1 development",
    "Description" : "Fix, enhance, and upgrade various aspects of attacking, from Line of Sight to Hit Distribution. Each feature can be configured individually.",
    "Author" : "Sheepy",
-   "Website" : "https://github.com/Sheep-y/BattleTech_Mods",
+   "Website" : "https://github.com/Sheep-y/Attack-Improvement-Mod/",
    "Contact" : "your.sheepy@gmail.com",
 
    "DLL" : "AttackImprovementMod.dll",
