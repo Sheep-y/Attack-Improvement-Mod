@@ -10,22 +10,33 @@ namespace Sheepy.BattleTechMod.Turbine {
 
    public class Mod : BattleMod {
 
+      // A kill switch to press when any things go wrong during initialisation
+      private static bool ModDisabled = true;
+
       public static void Init () {
          new Mod().Start();
       }
 
-      private static Type dmType = typeof( DataManager );
+      private static Type dmType;
       private static MessageCenter center;
-      private static Dictionary<string, DataManager.DataManagerLoadRequest> foreground = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
-      private static Dictionary<string, DataManager.DataManagerLoadRequest> background = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
-      private static HashSet<DataManager.DataManagerLoadRequest> foregroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
-      private static HashSet<DataManager.DataManagerLoadRequest> backgroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
-      private static float currentTimeout = -1;
-      private static float currentAsyncTimeout = -1;
+      private static Dictionary<string, DataManager.DataManagerLoadRequest> foreground, background;
+      private static HashSet<DataManager.DataManagerLoadRequest> foregroundLoading, backgroundLoading;
+      private static float currentTimeout = -1, currentAsyncTimeout = -1;
 
       public override void ModStarts () {
          Logger.Delete();
          Logger = Logger.BT_LOG;
+         dmType = typeof( DataManager );
+         backgroundRequestsCurrentAllowedWeight = dmType.GetField( "backgroundRequestsCurrentAllowedWeight", NonPublic | Instance );
+         foregroundRequestsCurrentAllowedWeight = dmType.GetField( "foregroundRequestsCurrentAllowedWeight", NonPublic | Instance );
+         prewarmRequests = dmType.GetField( "prewarmRequests", NonPublic | Instance );
+         isLoading = dmType.GetField( "isLoading", NonPublic | Instance );
+         isLoadingAsync = dmType.GetField( "isLoadingAsync", NonPublic | Instance );
+         CreateByResourceType = dmType.GetMethod( "CreateByResourceType", NonPublic | Instance );
+         SaveCache = dmType.GetMethod( "SaveCache", NonPublic | Instance );
+         if ( backgroundRequestsCurrentAllowedWeight == null || foregroundRequestsCurrentAllowedWeight == null || prewarmRequests == null ||
+              isLoading == null || isLoadingAsync == null || CreateByResourceType == null || SaveCache == null )
+            throw new NullReferenceException( "One or more DataManager fields not found with reflection." );
          logger = HBS.Logging.Logger.GetLogger( "Data.DataManager" );
          Patch( dmType.GetConstructors()[0], "DataManager_ctor", null );
          Patch( dmType, "Clear", "ClearRequests", null );
@@ -41,13 +52,21 @@ namespace Sheepy.BattleTechMod.Turbine {
          Patch( dmType, "RequestResource_Internal", NonPublic, "Override_RequestResource_Internal", null );
          Patch( dmType, "SetLoadRequestWeights", "Override_SetLoadRequestWeights", null );
          Patch( dmType, "UpdateRequestsTimeout", NonPublic, "Override_UpdateRequestsTimeout", null );
+         foreground = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
+         background = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
+         foregroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
+         backgroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
+         ModDisabled = false;
+         Log( "Turbine initialised" );
       }
          
       private static bool Override_CheckRequestsComplete ( ref bool __result ) {
+         if ( ModDisabled ) return true;
          __result = CheckRequestsComplete();
          return false;
       }
       private static bool Override_CheckAsyncRequestsComplete ( ref bool __result ) {
+         if ( ModDisabled ) return true;
          __result = CheckAsyncRequestsComplete();
          return false;
       }
@@ -56,13 +75,9 @@ namespace Sheepy.BattleTechMod.Turbine {
       private static bool IsComplete ( DataManager.DataManagerLoadRequest e ) { return e.IsComplete(); }
 
       private static HBS.Logging.ILog logger;
-      private static FieldInfo backgroundRequestsCurrentAllowedWeight = dmType.GetField( "backgroundRequestsCurrentAllowedWeight", NonPublic | Instance );
-      private static FieldInfo foregroundRequestsCurrentAllowedWeight = dmType.GetField( "foregroundRequestsCurrentAllowedWeight", NonPublic | Instance );
-      private static FieldInfo prewarmRequests = dmType.GetField( "prewarmRequests", NonPublic | Instance );
-      private static FieldInfo isLoading = dmType.GetField( "isLoading", NonPublic | Instance );
-      private static FieldInfo isLoadingAsync = dmType.GetField( "isLoadingAsync", NonPublic | Instance );
-      private static MethodInfo CreateByResourceType = dmType.GetMethod( "CreateByResourceType", NonPublic | Instance );
-      private static MethodInfo SaveCache = dmType.GetMethod( "SaveCache", NonPublic | Instance );
+      private static FieldInfo backgroundRequestsCurrentAllowedWeight, foregroundRequestsCurrentAllowedWeight;
+      private static FieldInfo prewarmRequests, isLoading, isLoadingAsync;
+      private static MethodInfo CreateByResourceType, SaveCache;
 
       private static string GetKey ( DataManager.DataManagerLoadRequest request ) { return GetKey( request.ResourceType, request.ResourceId ); }
       private static string GetKey ( BattleTechResourceType resourceType, string id ) { return (int) resourceType + "_" + id; }
@@ -72,6 +87,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
 
       public static void ClearRequests () {
+         if ( ModDisabled ) return;
          foreground.Clear();
          background.Clear();
          foregroundLoading.Clear();
@@ -79,6 +95,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
       
       public static bool Override_GraduateBackgroundRequest ( DataManager __instance, ref bool __result, BattleTechResourceType resourceType, string id ) {
+         if ( ModDisabled ) return true;
          __result = GraduateBackgroundRequest( __instance, resourceType, id );
          return false;
       }
@@ -107,48 +124,57 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
 
       public static bool Override_NotifyFileLoaded ( DataManager __instance, DataManager.DataManagerLoadRequest request ) {
+         if ( ModDisabled ) return true;
+         NotifyFileLoaded( __instance, request );
+         return false;
+      }
+      private static void NotifyFileLoaded ( DataManager me, DataManager.DataManagerLoadRequest request ) {
          if ( request.Prewarm != null ) {
-            List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( __instance );
+            List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( me );
             pre.Remove( request.Prewarm );
          }
          foregroundLoading.Remove( request );
          if ( CheckRequestsComplete() ) {
-            isLoading.SetValue( __instance, false );
-            SaveCache.Invoke( __instance, null );
+            isLoading.SetValue( me, false );
+            SaveCache.Invoke( me, null );
             foreground.Clear();
             foregroundLoading.Clear();
             center.PublishMessage( new DataManagerLoadCompleteMessage() );
          }
-         return false;
       }
 
-      // Token: 0x06005F72 RID: 24434 RVA: 0x001D8F40 File Offset: 0x001D7140
       public static bool Override_NotifyFileLoadedAsync ( DataManager __instance, DataManager.DataManagerLoadRequest request ) {
+         if ( ModDisabled ) return true;
+         NotifyFileLoadedAsync( __instance, request );
+         return false;
+      }
+      private static void NotifyFileLoadedAsync ( DataManager me, DataManager.DataManagerLoadRequest request ) {
          if ( request.Prewarm != null ) {
-            List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( __instance );
+            List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( me );
             pre.Remove( request.Prewarm );
          }
          backgroundLoading.Remove( request );
          if ( CheckAsyncRequestsComplete() ) {
-            isLoadingAsync.SetValue( __instance, false );
-            SaveCache.Invoke( __instance, null );
+            isLoadingAsync.SetValue( me, false );
+            SaveCache.Invoke( me, null );
             background.Clear();
             backgroundLoading.Clear();
             center.PublishMessage( new DataManagerAsyncLoadCompleteMessage() );
          }
-         return false;
       }
 
       public static bool Override_NotifyFileLoadFailed ( DataManager __instance, DataManager.DataManagerLoadRequest request ) {
+         if ( ModDisabled ) return true;
          string key = GetKey( request );
          if ( foreground.Remove( key ) )
-            Override_NotifyFileLoaded( __instance, request );
+            NotifyFileLoaded( __instance, request );
          else if ( background.Remove( key ) )
-            Override_NotifyFileLoadedAsync( __instance, request );
+            NotifyFileLoadedAsync( __instance, request );
          return false;
       }
 
       public static bool Override_ProcessRequests ( DataManager __instance ) {
+         if ( ModDisabled ) return true;
          DataManager me = __instance;
          int lightLoad = 0;
          int heavyLoad = 0;
@@ -204,6 +230,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
 
       public static bool Override_ProcessAsyncRequests ( DataManager __instance ) {
+         if ( ModDisabled ) return true;
          DataManager me = __instance;
          uint currentAllowedWeight = (uint) backgroundRequestsCurrentAllowedWeight.GetValue( me );
          foreach ( DataManager.DataManagerLoadRequest request in background.Values ) {
@@ -244,7 +271,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
 
       public static bool Override_RequestResourceAsync_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm ) {
-         if ( string.IsNullOrEmpty( identifier ) ) return false;
+         if ( ModDisabled || string.IsNullOrEmpty( identifier ) ) return false;
          DataManager me = __instance;
          string key = GetKey( resourceType, identifier );
          background.TryGetValue( key, out DataManager.DataManagerLoadRequest dataManagerLoadRequest );
@@ -274,7 +301,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
 
       public static bool Override_RequestResource_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm, bool allowRequestStacking ) {
-         if ( string.IsNullOrEmpty( identifier ) ) return false;
+         if ( ModDisabled || string.IsNullOrEmpty( identifier ) ) return false;
          DataManager me = __instance;
          string key = GetKey( resourceType, identifier );
          foreground.TryGetValue( key, out DataManager.DataManagerLoadRequest dataManagerLoadRequest );
@@ -298,18 +325,20 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
 
       public static bool Override_SetLoadRequestWeights ( DataManager __instance, uint foregroundRequestWeight, uint backgroundRequestWeight ) {
+         if ( ModDisabled ) return true;
          foregroundRequestsCurrentAllowedWeight.SetValue( __instance, foregroundRequestWeight );
          backgroundRequestsCurrentAllowedWeight.SetValue( __instance, backgroundRequestWeight );
-         foreach ( DataManager.DataManagerLoadRequest dataManagerLoadRequest in foreground.Values )
+         foreach ( DataManager.DataManagerLoadRequest dataManagerLoadRequest in foregroundLoading )
             if ( foregroundRequestWeight > dataManagerLoadRequest.RequestWeight.AllowedWeight )
                dataManagerLoadRequest.RequestWeight.SetAllowedWeight( foregroundRequestWeight );
-         foreach ( DataManager.DataManagerLoadRequest dataManagerLoadRequest in background.Values )
+         foreach ( DataManager.DataManagerLoadRequest dataManagerLoadRequest in backgroundLoading )
             if ( backgroundRequestWeight > dataManagerLoadRequest.RequestWeight.AllowedWeight )
                dataManagerLoadRequest.RequestWeight.SetAllowedWeight( backgroundRequestWeight );
          return false;
       }
 
       public static bool Override_UpdateRequestsTimeout ( DataManager __instance, float deltaTime ) {
+         if ( ModDisabled ) return true;
          DataManager me = __instance;
          if ( currentTimeout >= 0f ) {
             if ( foregroundLoading.Any( IsProcessing ) ) {
@@ -349,7 +378,8 @@ namespace Sheepy.BattleTechMod.Turbine {
       public static void Log ( object message ) { ModLog.Log( message ); }
       public static void Log ( string message = "" ) { ModLog.Log( message ); }
       public static void Log ( string message, params object[] args ) { ModLog.Log( message, args ); }
-      
+
+      /*
       public static void Warn ( object message ) { ModLog.Warn( message ); }
       public static void Warn ( string message ) { ModLog.Warn( message ); }
       public static void Warn ( string message, params object[] args ) { ModLog.Warn( message, args ); }
@@ -357,5 +387,6 @@ namespace Sheepy.BattleTechMod.Turbine {
       public static bool Error ( object message ) { return ModLog.Error( message ); }
       public static void Error ( string message ) { ModLog.Error( message ); }
       public static void Error ( string message, params object[] args ) { ModLog.Error( message, args ); }
+      */
    }
 }
