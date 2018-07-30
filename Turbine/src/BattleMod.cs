@@ -150,9 +150,11 @@ namespace Sheepy.BattleTechMod {
          if ( BattleModsPatched ) return;
          Logger oldLog = this.Logger;
          this.Logger = Logger.BTML_LOG;
+         LogPatch = false;
          Patch( typeof( UnityGameInstance ).GetMethod( "InitUserSettings", Instance | NonPublic ), null, typeof( BattleMod ).GetMethod( "RunGameStarts", Static | NonPublic ) );
          Patch( typeof( SimGameState ).GetMethod( "Init" ), null, typeof( BattleMod ).GetMethod( "RunCampaignStarts", Static | NonPublic ) );
          Patch( typeof( CombatHUD ).GetMethod( "Init", new Type[]{ typeof( CombatGameState ) } ), null, typeof( BattleMod ).GetMethod( "RunCombatStarts", Static | NonPublic ) );
+         LogPatch = true;
          BattleModsPatched = true;
          this.Logger = oldLog;
       }
@@ -336,6 +338,8 @@ namespace Sheepy.BattleTechMod {
          Patch( patched, new HarmonyMethod( prefix ), new HarmonyMethod( postfix ) );
       }
 
+      protected bool LogPatch = true; // TODO: Control with Log Level
+
       protected void Patch ( MethodBase patched, HarmonyMethod prefix, HarmonyMethod postfix ) {
          string pre = prefix?.method?.Name, post = postfix?.method?.Name;
          if ( patched == null ) {
@@ -345,7 +349,8 @@ namespace Sheepy.BattleTechMod {
          if ( Mod.harmony == null )
             Mod.harmony = HarmonyInstance.Create( Id );
          Mod.harmony.Patch( patched, prefix, postfix );
-         Logger.Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
+         if ( LogPatch )
+            Logger.Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
       }
 
       // ============ UTILS ============
