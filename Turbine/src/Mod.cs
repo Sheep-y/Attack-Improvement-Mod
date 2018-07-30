@@ -48,10 +48,10 @@ namespace Sheepy.BattleTechMod.Turbine {
          Patch( dmType, "NotifyFileLoadFailed", NonPublic, "Override_NotifyFileLoadFailed", null );
          Patch( dmType, "ProcessAsyncRequests", "Override_ProcessAsyncRequests", null );
          Patch( dmType, "ProcessRequests", "Override_ProcessRequests", null );
-         Patch( dmType, "RequestResourceAsync_Internal", NonPublic, "Override_RequestResourceAsync_Internal", null );
-         Patch( dmType, "RequestResource_Internal", NonPublic, "Override_RequestResource_Internal", null );
          Patch( dmType, "SetLoadRequestWeights", "Override_SetLoadRequestWeights", null );
          Patch( dmType, "UpdateRequestsTimeout", NonPublic, "Override_UpdateRequestsTimeout", null );
+         Patch( dmType, "RequestResourceAsync_Internal", NonPublic, "Override_RequestResourceAsync_Internal", null );
+         Patch( dmType, "RequestResource_Internal", NonPublic, "Override_RequestResource_Internal", null ); // Placed last so we can skip kill switch test
          foreground = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
          background = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
          foregroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
@@ -301,7 +301,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       }
 
       public static bool Override_RequestResource_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm, bool allowRequestStacking ) {
-         if ( ModDisabled || string.IsNullOrEmpty( identifier ) ) return false;
+         if ( string.IsNullOrEmpty( identifier ) ) return false;
          DataManager me = __instance;
          string key = GetKey( resourceType, identifier );
          foreground.TryGetValue( key, out DataManager.DataManagerLoadRequest dataManagerLoadRequest );
