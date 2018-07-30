@@ -191,7 +191,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverridePaperDollTooltip ( CombatHUDMechTrayArmorHover __instance, Mech mech, ArmorLocation location ) { try {
-         if ( ! FriendOrFoe( mech, Settings.ShowAmmoInTooltip, Settings.ShowEnemyAmmoInTooltip ) ) return false;
+         if ( ! FriendOrFoe( mech, Settings.ShowAmmoInTooltip, Settings.ShowEnemyAmmoInTooltip ) ) return true;
          CombatHUDMechTrayArmorHover me = __instance;
          CombatHUDTooltipHoverElement ToolTip = (CombatHUDTooltipHoverElement) MechTrayArmorHoverToolTipProp.GetValue( me, null );
          ToolTip.BuffStrings.Clear();
