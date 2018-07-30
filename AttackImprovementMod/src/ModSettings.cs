@@ -31,12 +31,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
       public bool FixLosPreviewHeight = true;
 
-      [ JsonComment( "Show remaining ammo in paper doll mouseover.  Default true." ) ]
-      public bool ShowWeaponAmmo = true;
-      public bool ShowAmmoBoxAmmo = true;
-
-      [ JsonComment( "Show remaining ammo in enemy paper doll mouseover.  Default false.  Requires ShowWeaponAmmo and/or ShowAmmoBoxAmmo." ) ]
-      public bool ShowEnemyAmmo = false;
+      [ JsonComment( "Show ammo count in the list of components when you mouseover the paper doll.  Default true for friends." ) ]
+      public bool ShowAmmoInTooltip = true;
+      public bool ShowEnemyAmmoInTooltip = false;
 
       /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
       public bool FixHeatPrediction = true;
@@ -236,13 +233,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Hit Resolution" ) ]
       //
 
-      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below." ) ]
-      public bool FixHitDistribution = true;
-
-      [ JsonComment(
-        "If a location would become a zombie part with zero hp, make sure it is destroyed instead. Default true." ) ]
-      public bool KillZeroHpLocation = true;
-
       [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends." ) ]
       public bool BalanceAmmoConsumption = true;
       public bool BalanceEnemyAmmoConsumption = false;
@@ -250,6 +240,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "When an ammo is useless, such as because the weapon is destroyed, eject the ammo at end of turn if not prone.  Default true for friends." ) ]
       public bool AutoJettisonAmmo = true;
       public bool AutoJettisonEnemyAmmo = false;
+
+      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below." ) ]
+      public bool FixHitDistribution = true;
+
+      [ JsonComment(
+        "If a location would become a zombie part with zero hp, make sure it is destroyed instead. Default true." ) ]
+      public bool KillZeroHpLocation = true;
 
       //
       [ JsonSection( "Logging" ) ]

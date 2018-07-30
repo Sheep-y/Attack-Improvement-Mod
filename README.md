@@ -1,7 +1,7 @@
-# AIM - Attack Improvement Mod 2.0 #
-For BATTLETECH 1.1.2.
+# AIM - Attack Improvement Mod 2.1 Development #
+For BATTLETECH 1.1.2
 
-- [Features](#features)
+- [Features Overview](#features-overview)
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Settings](#settings)
@@ -18,11 +18,11 @@ For BATTLETECH 1.1.2.
 - [Learn to Mod](#learn-to-mod)
 
 
-AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as tune down roll correction, show heat and stability numbers, and a detailed attack log, without deviating too far from vanilla.
+AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as fixing vehicle called shot, improves targeting lines, tune down roll correction, show heat and stability numbers, and a detailed attack log.  The default settings aims to not deviate too far from vanilla.
 
 This mod does *not* modify game data.  Saves made with this mod on will *not* be affected by disabling or removing this mod.
 
-# Features
+# Features Overview
 
 **ALL features can be enabled or disabled individually.**
 
@@ -62,7 +62,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 # Installation
 
 <span style="color:red">
-**IMPORTANT Note on upgrading FROM 1.0**:</span>
+**IMPORTANT Note on upgrading FROM mod version 1.0**:</span>
 Rename your old `mod.json` to `settings.json` to keep old settings.
 
 1. [Install BTML and ModTek.](https://github.com/Mpstark/ModTek/wiki/The-Drop-Dead-Simple-Guide-to-Installing-BTML-&-ModTek-&-ModTek-mods)
@@ -124,6 +124,16 @@ These settings can be changed in `settings.json`.
 > When set to true, show mech and vehicle tonnage in selection and target panel.
 >
 > Duplicates with Extended Information, but AIM override it and use a shorter form for mechs to fit in heat and stability numbers.  Default false because the short form can overwhelm inexperienced players.
+
+
+**Show Ammo In Tooltip**
+
+> Setting: `ShowAmmoInTooltip`  (true/false, default true)<br>
+> Setting: `ShowEnemyAmmoInTooltip`  (true/false, default false)<br>
+>
+> When set to true, show ammo count in the list of components when you mouseover a location on the paper doll.
+>
+> The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
 
 
 **Fix Multi-Target Back Out**
@@ -209,7 +219,7 @@ These settings can be changed in `settings.json`.
 
 > Setting: `FixVehicleCalledShot`  (true/false, default true)
 >
-> Called shot have absolutely no effect on vehicles, as if game version 1.1.2.  Set to true to make it work again.
+> Called shot have absolutely no effect on vehicles, as of game version 1.1.2.  Set to true to make it work again.
 >
 > In the code, Mech Locations and Vehicle Locations are two separate data type, meaning there are two set of states and methods to handle hit location.  And vehicle's called shot handling is incomplete.  You can pick a called shot location, but it never reach the hit location routine.  This can be verified by disabling this setting and enabling attack log.
 
@@ -280,7 +290,7 @@ These settings can be changed in `settings.json`.
 > Set to "{0:0.0}%" to always show one decimal, or "{0:0.00}%" for two decimals.
 > Leave empty to round them to nearest integer.
 >
-> Replace the old "ShowDecimalCalledChance" setting in version 1.0.
+> Replace the old "ShowDecimalCalledChance" setting in mod version 1.0.
 
 
 ## Melee and DFA Settings
@@ -422,7 +432,7 @@ These settings can be changed in `settings.json`.
 
 (Advanced) **Adjust Miss Streak Threshold**
 
-> Setting: `MissStreakBreakerThreshold`  (0.00 to 1.00, default 0.5)
+> Setting: `MissStreakBreakerThreshold`  (0.0 to 1.0, default 0.5)
 >
 > In addition to roll adjustment, the game also has a "miss streak breaker".  Whenever you miss an attack of which uncorrected hit chance > 50%, the streak breaker will adjust your hit chance up on top of roll correction.  The bonus accumulates until you land a hit (regards of hit chance), at which point it resets to 0.
 >
@@ -451,7 +461,7 @@ These settings can be changed in `settings.json`.
 > Set to "{0:0.0}%" to always show one decimal, or "{0:0.00}%" for two decimals.
 > When empty AND HitChanceStep is 0, will use "{0:0.#}%" to optionally show hit chance to one decimal point.
 >
-> Replace the old "ShowDecimalHitChance" setting in version 1.0.
+> Replace the old "ShowDecimalHitChance" setting in mod version 1.0.
 
 
 (Advanced) **Show Corrected Hit Chance**
@@ -468,6 +478,30 @@ These settings can be changed in `settings.json`.
 
 ## Hit Resolution Settings
 
+**Balance Ammo Consumption**
+
+> Setting: `BalanceAmmoConsumption`  (true/false, default true)<br>
+> Setting: `BalanceEnemyAmmoConsumption`  (true/false, default false)
+>
+> When set to true, mechs will draw ammo in an intelligent way to minimise chance of ammo explosion.
+> After that is done, the AI will then minimise risk of losing ammo to crits and destroyed locations.
+>
+> The AI is pretty smart, but it can't shift ammo, so spreading ammo around will help it does its job faster.
+
+
+**Auto Jettison Ammo**
+
+> Setting: `AutoJettisonAmmo`  (true/false, default true)<br>
+> Setting: `AutoJettisonEnemyAmmo`  (true/false, default false)
+>
+> When set to true, mechs will jettison useless ammo at end of its turn, if the mech has not moved, is not prone, and is not shutdown.
+> (The jettison doors are at the rear, so no prone jettisons.)
+>
+> This can happen if all weapons that use that kind of ammo is destroyed mid-fight,
+> or the mech could be deployed with new ammo installed but not the weapon yet.
+> Jettisoning the ammo will make sure they won't explode when hit.
+
+
 **Precise Hit Location Distribution**
 
 > Setting: `FixHitDistribution`  (true/false, default true)
@@ -476,8 +510,6 @@ These settings can be changed in `settings.json`.
 >
 > Game version 1.1 introduced degrading called shot effect for SRM and MG,
 but because the code that determine hit distribution is not designed for fraction called shot weight, the actual distribution is slightly bugged.
->
-> On game version 1.1.0 and before, enabling this would also fix the bug that causes abnormally high head hit chances.
 
 
 **Kill Zombies**
@@ -489,7 +521,6 @@ but because the code that determine hit distribution is not designed for fractio
 > Some units have non-integer hp (usually turrets), and an attack may dealt non-integer damage (e.g. cover).  As a result, this may result in zombie locations and units that are at 0 structure but not dead.
 >
 > This mod can detect these cases and boosts the final damage just enough to finish the job.
-
 
 
 ## Attack Log Settings
@@ -542,12 +573,17 @@ AIM is aware of some other mods and will behave differently in their present to 
 
 These behaviours will not change saved settings.  If you want to replace them with AIM, you may need to change AIM settings.
 
-When have mod | AIM will
---- | ---------
-[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135) | AIM will skip line styling and arc point adjustment to not crash line drawings.
-[MeleeMover](https://www.nexusmods.com/battletech/mods/226) | AIM will skip its own melee unlock to preserve sprint range melee.
-[Real Hit Chance](https://www.nexusmods.com/battletech/mods/90) | AIM will enable corrected hit chance display and overrides this mod, since it does not support AIM features such as adjustable correction strength.
-[True RNG Hit Rolls](https://www.nexusmods.com/battletech/mods/100) | AIM will disable its own adjustable roll correction and miss streak breaker.
+**[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)**
+AIM will skip line styling and arc point adjustment to not crash line drawings.
+
+**[MeleeMover](https://www.nexusmods.com/battletech/mods/226)**
+AIM will skip its own melee unlock to preserve sprint range melee.
+
+**[Real Hit Chance](https://www.nexusmods.com/battletech/mods/90)**
+AIM will enable corrected hit chance display and overrides this mod, since it does not support AIM features such as adjustable correction strength.
+
+**[True RNG Hit Rolls](https://www.nexusmods.com/battletech/mods/100)**
+AIM will disable its own adjustable roll correction and miss streak breaker.
 
 The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.
 
@@ -614,3 +650,10 @@ Follow these steps to see game code and learn how BATTLETECH mod works:
 1. Head to the [ModTek wiki](https://github.com/Mpstark/ModTek/wiki) to learn how to make a mod.  For a code mode like this one, you need to compile a [dll](https://github.com/Mpstark/ModTek/wiki/Writing-ModTek-DLL-mods) and perhaps a [`mod.json`](https://github.com/Mpstark/ModTek/wiki/The-mod.json-Format).
 1. The code of this mod is available on GitHub: https://github.com/Sheep-y/Attack-Improvement-Mod/ and you can also find other people's mods such as [Firing Line Improvement](https://github.com/janxious/BTMLColorLOSMod) or [MeleeMover](https://github.com/Morphyum/MeleeMover) and we all use different licenses.
 1. You may notice that this patch manually calls Harmony to patch things, instead of using annotations. This gives me much better control. Read [Harmony wiki](https://github.com/pardeike/Harmony/wiki) to learn how it works.
+
+# Credits
+
+* Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.
+* Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.
+
+Despite feature overlap with some mods, this mod does not reference or use their code due to lack of license, and in most cases the approaches are different.

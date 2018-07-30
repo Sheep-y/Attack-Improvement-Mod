@@ -105,6 +105,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NullIfEmpty( ref Settings.AttackLogLevel );
       }
 
+      internal static bool FriendOrFoe ( AbstractActor subject, bool TrueIfFriend, bool TrueIfFoe ) {
+         if ( TrueIfFriend == TrueIfFoe ) return TrueIfFriend;
+         bool isFriend = mech.team.IsFriendly( Combat.LocalPlayerTeam );
+         return isFriend == TrueIfFriend; // Same as ( isFriend && TrueIfFriend ) || ( ! isFriend && TrueIfFoe );
+      }
+
       // ============ Logging ============
 
       internal static string ModLogDir = ""; // A static variable for roll log

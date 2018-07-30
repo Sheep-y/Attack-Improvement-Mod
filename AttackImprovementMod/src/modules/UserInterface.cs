@@ -75,14 +75,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.FixLosPreviewHeight )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
 
-         if ( Settings.ShowAmmoBoxAmmo || Settings.ShowWeaponAmmo ) {
+         if ( Settings.ShowAmmoInTooltip || ShowEnemyAmmoInTooltip ) {
             MechTrayArmorHoverToolTipProp = typeof( CombatHUDMechTrayArmorHover ).GetProperty( "ToolTip", NonPublic | Instance );
             if ( MechTrayArmorHoverToolTipProp == null )
                Warn( "Cannot access CombatHUDMechTrayArmorHover.ToolTip, ammo not displayed in paperdoll tooltip." );
             else
                Patch( typeof( CombatHUDMechTrayArmorHover ), "setToolTipInfo", NonPublic, new Type[]{ typeof( Mech ), typeof( ArmorLocation ) }, "OverridePaperDollTooltip", null );
-         } else if ( Settings.ShowEnemyAmmo ) {
-            Warn( "ShowEnemyAmmo only works with ShowAmmoBoxAmmo and/or ShowWeaponAmmo" );
          }
 
          if ( Settings.ShowBaseHitchance ) {
@@ -193,24 +191,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverridePaperDollTooltip ( CombatHUDMechTrayArmorHover __instance, Mech mech, ArmorLocation location ) { try {
-         if ( ! Settings.ShowEnemyAmmo && ! mech.team.IsFriendly( Combat.LocalPlayerTeam ) ) return false;
+         if ( ! FriendOrFoe( mech, Settings.ShowAmmoInTooltip, Settings.ShowEnemyAmmoInTooltip ) ) return false;
          CombatHUDMechTrayArmorHover me = __instance;
          CombatHUDTooltipHoverElement ToolTip = (CombatHUDTooltipHoverElement) MechTrayArmorHoverToolTipProp.GetValue( me, null );
-			ToolTip.BuffStrings.Clear();
-			ToolTip.DebuffStrings.Clear();
-			ToolTip.BasicString = Mech.GetLongArmorLocation(location);
+         ToolTip.BuffStrings.Clear();
+         ToolTip.DebuffStrings.Clear();
+         ToolTip.BasicString = Mech.GetLongArmorLocation(location);
          foreach ( MechComponent mechComponent in mech.GetComponentsForLocation( MechStructureRules.GetChassisLocationFromArmorLocation( location ), ComponentType.NotSet ) ) {
             string componentName = mechComponent.UIName;
             int allAmmo = 1;
             if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
                componentName += " (" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
             else if ( mechComponent is AmmunitionBox ammo )
-               componentName += " (" + ammo.CurrentAmmo + ")";
+               componentName += " (" + ammo.CurrentAmmo + "/" + ammo.AmmoCapacity ")";
             if ( mechComponent.DamageLevel >= ComponentDamageLevel.NonFunctional || allAmmo <= 0 )
                ToolTip.DebuffStrings.Add( componentName );
             else
-					ToolTip.BuffStrings.Add( componentName );
-			}
+               ToolTip.BuffStrings.Add( componentName );
+         }
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 

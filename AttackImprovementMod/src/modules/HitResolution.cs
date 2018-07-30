@@ -80,10 +80,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static bool OverrideDecrementAmmo ( Weapon __instance, ref int __result, int stackItemUID ) { try {
          Weapon me = __instance;
          if ( me.AmmoCategory == AmmoCategory.NotSet || ! ( me.parent is Mech mech ) ) return true;
-         if ( Settings.BalanceAmmoConsumption != Settings.BalanceEnemyAmmoConsumption ) {
-            bool isFriend = mech.team.IsFriendly( Combat.LocalPlayerTeam );
-            if ( ! ( ( Settings.BalanceAmmoConsumption && isFriend ) || ( Settings.BalanceEnemyAmmoConsumption && ! isFriend ) ) ) return true;
-         }
+         if ( ! FriendOrFoe( mech, Settings.BalanceAmmoConsumption, Settings.BalanceEnemyAmmoConsumption ) ) return false;
 
          int needAmmo = __result = me.ShotsWhenFired;
          int internalAmmo = me.InternalAmmo;
@@ -181,11 +178,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void AutoJettisonAmmo ( MechHeatSequence __instance ) { try {
          if ( ! __instance.IsComplete ) return;
          Mech mech = __instance.OwningMech;
-         if ( mech.IsDead || mech.IsProne ) return;
-         if ( Settings.AutoJettisonAmmo != Settings.AutoJettisonEnemyAmmo ) {
-            bool isFriend = mech.team.IsFriendly( Combat.LocalPlayerTeam );
-            if ( ! ( ( Settings.AutoJettisonAmmo && isFriend ) || ( Settings.AutoJettisonEnemyAmmo && ! isFriend ) ) ) return;
-         }
+         if ( mech == null || mech.IsDead || mech.HasMovedThisRound || mech.IsProne || mech.IsShutDown ) return;
+         if ( ! FriendOrFoe( mech, Settings.AutoJettisonAmmo, Settings.AutoJettisonEnemyAmmo ) ) return false;
 
          Dictionary<AmmoCategory, bool> checkedType = new Dictionary<AmmoCategory, bool>();
          List<AmmunitionBox> jettison = new List<AmmunitionBox>();
