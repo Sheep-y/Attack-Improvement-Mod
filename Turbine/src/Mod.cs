@@ -14,7 +14,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       private static bool UnpatchManager = true;
 
       public static void Init () {
-         new Mod().Start();
+         new Mod().Start( ref ModLog );
       }
 
       private static Type dmType;
@@ -70,7 +70,17 @@ namespace Sheepy.BattleTechMod.Turbine {
          __result = CheckAsyncRequestsComplete();
          return false;
       }
-      private static bool CheckRequestsComplete () { return foregroundLoading.All( IsComplete ); }
+      private static bool CheckRequestsComplete () {
+         bool done = foregroundLoading.All( IsComplete );
+         /**
+         if ( done && foregroundLoading.Count > 0 ) {
+            Warn( $"Found {foregroundLoading.Count} completed requests in loading queue" );
+            foreach ( var request in foregroundLoading )
+               Log( GetKey( request ) + " = " + request.GetType() );
+         }
+         /**/
+         return done;
+      }
       private static bool CheckAsyncRequestsComplete () { return backgroundLoading.All( IsComplete ); }
       private static bool IsComplete ( DataManager.DataManagerLoadRequest e ) { return e.IsComplete(); }
 
@@ -104,12 +114,13 @@ namespace Sheepy.BattleTechMod.Turbine {
          string key = GetKey( resourceType, id );
          if ( ! background.TryGetValue( key, out DataManager.DataManagerLoadRequest dataManagerLoadRequest ) )
             return false;
+         //Log( "Graduate: " + GetKey( dataManagerLoadRequest ) + " = " + dataManagerLoadRequest.GetType() );
          dataManagerLoadRequest.SetAsync( false );
          dataManagerLoadRequest.ResetRequestState();
          background.Remove( key );
-         backgroundLoading.Remove( dataManagerLoadRequest );
          foreground.Add( key, dataManagerLoadRequest );
-         foregroundLoading.Add( dataManagerLoadRequest );
+         if ( backgroundLoading.Remove( dataManagerLoadRequest ) )
+            foregroundLoading.Add( dataManagerLoadRequest );
          bool wasLoadingAsync = (bool) isLoadingAsync.GetValue( me );
          bool nowLoadingAsync = ! CheckAsyncRequestsComplete();
          if ( nowLoadingAsync != wasLoadingAsync ) {
@@ -117,6 +128,7 @@ namespace Sheepy.BattleTechMod.Turbine {
             if ( wasLoadingAsync ) {
                SaveCache.Invoke( me, null );
                background.Clear();
+               backgroundLoading.Clear();
                center.PublishMessage( new DataManagerAsyncLoadCompleteMessage() );
             }
          }
@@ -131,10 +143,13 @@ namespace Sheepy.BattleTechMod.Turbine {
 
       private static void NotifyFileLoaded ( DataManager me, DataManager.DataManagerLoadRequest request ) {
          if ( request.Prewarm != null ) {
+            //Log( "Done Prewarm: " + GetKey( request ) );
             List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( me );
             pre.Remove( request.Prewarm );
          }
-         foregroundLoading.Remove( request );
+         //Log( "Done: " + GetKey( request ) );
+         if ( request.IsComplete() )
+            foregroundLoading.Remove( request );
          if ( CheckRequestsComplete() ) {
             isLoading.SetValue( me, false );
             SaveCache.Invoke( me, null );
@@ -152,10 +167,13 @@ namespace Sheepy.BattleTechMod.Turbine {
 
       private static void NotifyFileLoadedAsync ( DataManager me, DataManager.DataManagerLoadRequest request ) {
          if ( request.Prewarm != null ) {
+            //Log( "Done Prewarm: " + GetKey( request ) );
             List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( me );
             pre.Remove( request.Prewarm );
          }
-         backgroundLoading.Remove( request );
+         //Log( "Done Async: " + GetKey( request ) );
+         if ( request.IsComplete() )
+            backgroundLoading.Remove( request );
          if ( CheckAsyncRequestsComplete() ) {
             isLoadingAsync.SetValue( me, false );
             SaveCache.Invoke( me, null );
@@ -296,8 +314,10 @@ namespace Sheepy.BattleTechMod.Turbine {
          if ( ! isForeground && ! isTemplate ) {
             dataManagerLoadRequest = (DataManager.DataManagerLoadRequest) CreateByResourceType.Invoke( me, new object[]{ resourceType, identifier, prewarm } );
             dataManagerLoadRequest.SetAsync( true );
+            //Log( "Queue Async: " + GetKey( dataManagerLoadRequest ) + " = " + dataManagerLoadRequest.GetType() + " @ " + dataManagerLoadRequest.IsComplete() );
             background.Add( key, dataManagerLoadRequest );
-            backgroundLoading.Add( dataManagerLoadRequest );
+            if ( ! dataManagerLoadRequest.IsComplete() )
+               backgroundLoading.Add( dataManagerLoadRequest );
          }
          return false;
       }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
@@ -320,8 +340,10 @@ namespace Sheepy.BattleTechMod.Turbine {
          bool isTemplate = identifier.ToLowerInvariant().Contains("template");
          if ( !movedToForeground && !skipLoad && !isTemplate ) {
             dataManagerLoadRequest = (DataManager.DataManagerLoadRequest) CreateByResourceType.Invoke( me, new object[]{ resourceType, identifier, prewarm } );
+            //Log( "Queue: " + GetKey( dataManagerLoadRequest ) + " = " + dataManagerLoadRequest.GetType() + " @ " + dataManagerLoadRequest.IsComplete() );
             foreground.Add( key, dataManagerLoadRequest );
-            foregroundLoading.Add( dataManagerLoadRequest );
+            if ( ! dataManagerLoadRequest.IsComplete() )
+               foregroundLoading.Add( dataManagerLoadRequest );
          }
          return false;
       }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
@@ -403,14 +425,12 @@ namespace Sheepy.BattleTechMod.Turbine {
       public static void Log ( string message = "" ) { ModLog.Log( message ); }
       public static void Log ( string message, params object[] args ) { ModLog.Log( message, args ); }
 
-      /*
       public static void Warn ( object message ) { ModLog.Warn( message ); }
       public static void Warn ( string message ) { ModLog.Warn( message ); }
       public static void Warn ( string message, params object[] args ) { ModLog.Warn( message, args ); }
-      */
 
       public static bool Error ( object message ) { return ModLog.Error( message ); }
-      //public static void Error ( string message ) { ModLog.Error( message ); }
-      //public static void Error ( string message, params object[] args ) { ModLog.Error( message, args ); }
+      public static void Error ( string message ) { ModLog.Error( message ); }
+      public static void Error ( string message, params object[] args ) { ModLog.Error( message, args ); }
    }
 }
