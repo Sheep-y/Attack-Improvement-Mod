@@ -193,13 +193,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( aDead >= LocationDamageLevel.Destroyed ) return 0; // Both destroyed.
             float aArm = WeakestArmour( mech, a ), bArm = WeakestArmour( mech, b );
             if ( aArm == 0 || bArm == 0 ) { // Armor breached!
-               if ( aArm != bArm ) return compare( aArm, bArm ); // Breached one goes first
-               return compare( WeakestHP( mech, a ), WeakestHP( mech, b ) ); // Both breached, compare HP.
+               if ( aArm != bArm ) return Compare( aArm, bArm ); // Breached one goes first
+               return Compare( WeakestHP( mech, a ), WeakestHP( mech, b ) ); // Both breached, compare HP.
             }
-            return compare( aArm, bArm );
+            return Compare( aArm, bArm );
          } );
       }
-      private static int compare ( float a, float b ) {
+      private static int Compare ( float a, float b ) {
          return a > b ? 1 : ( a < b ? -1 : 0 );
       }
 

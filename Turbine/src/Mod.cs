@@ -48,17 +48,52 @@ namespace Sheepy.BattleTechMod.Turbine {
          Patch( dmType, "NotifyFileLoadFailed", NonPublic, "Override_NotifyFileLoadFailed", null );
          Patch( dmType, "ProcessAsyncRequests", "Override_ProcessAsyncRequests", null );
          Patch( dmType, "ProcessRequests", "Override_ProcessRequests", null );
+         Patch( dmType, "RequestResourceAsync_Internal", NonPublic, "Override_RequestResourceAsync_Internal", null );
+         Patch( dmType, "RequestResource_Internal", NonPublic, "Override_RequestResource_Internal", null );
          Patch( dmType, "SetLoadRequestWeights", "Override_SetLoadRequestWeights", null );
          Patch( dmType, "UpdateRequestsTimeout", NonPublic, "Override_UpdateRequestsTimeout", null );
-         Patch( dmType, "RequestResourceAsync_Internal", NonPublic, "Override_RequestResourceAsync_Internal", null );
-         Patch( dmType, "RequestResource_Internal", NonPublic, "Override_RequestResource_Internal", null ); // Placed last so we can skip kill switch test
-         foreground = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
-         background = new Dictionary<string, DataManager.DataManagerLoadRequest>(1024);
+         foreground = new Dictionary<string, DataManager.DataManagerLoadRequest>(4096);
+         background = new Dictionary<string, DataManager.DataManagerLoadRequest>(4096);
          foregroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
          backgroundLoading = new HashSet<DataManager.DataManagerLoadRequest>();
          UnpatchManager = false;
          Log( "Turbine initialised" );
+         /*
+         Type ReqType = typeof( DataManager.ResourceLoadRequest<> );
+         // I _hope_ I got everything in the primary assembly.  Not going to check the whole game!
+         foreach ( Type nested in typeof( DataManager ).GetNestedTypes( Harmony.AccessTools.all ).Where( e => IsSubclassOfRawGeneric( e, ReqType ) ) ) try {
+            if ( nested.Name.StartsWith( "ResourceLoadRequest" ) ) continue; // Empty body
+            Patch( nested, "Load", "OverrideLoadComplete", "LogLoadCompleteEnd" );
+         } catch ( ArgumentException ) {}
+         */
+         Patch( typeof( DataManagerRequestCompleteMessage ).GetConstructors()[0], null, "SkipDupComplete" );
       }
+
+      // https://stackoverflow.com/a/457708/893578 by JaredPar
+      private static bool IsSubclassOfRawGeneric(Type toCheck, Type generic) {
+         while ( toCheck != null && toCheck != typeof(object) ) {
+            var cur = toCheck.IsGenericType ? toCheck.GetGenericTypeDefinition() : toCheck;
+            if ( generic == cur ) return true;
+            toCheck = toCheck.BaseType;
+         }
+         return false;
+      }
+
+      private static string lastMessage;
+
+      private static void SkipDupComplete ( DataManagerRequestCompleteMessage __instance ) {
+         if ( String.IsNullOrEmpty( __instance.ResourceId ) ) {
+            __instance.hasBeenPublished = true; // Skip publishing empty id
+            return;
+         }
+         string key = GetKey( __instance.ResourceType, __instance.ResourceId );
+         if ( lastMessage == key )
+            __instance.hasBeenPublished = true;
+         else
+            lastMessage = key;
+      }
+
+      private static Dictionary<MechDef, List<string>> mechDefDependency = new Dictionary<MechDef, List<string>>();
          
       private static bool Override_CheckRequestsComplete ( ref bool __result ) {
          if ( UnpatchManager ) return true;
@@ -92,16 +127,20 @@ namespace Sheepy.BattleTechMod.Turbine {
       private static string GetKey ( DataManager.DataManagerLoadRequest request ) { return GetKey( request.ResourceType, request.ResourceId ); }
       private static string GetKey ( BattleTechResourceType resourceType, string id ) { return (int) resourceType + "_" + id; }
 
+      private static DataManager manager;
+
       public static void DataManager_ctor ( MessageCenter messageCenter ) {
          center = messageCenter;
       }
 
-      public static void ClearRequests () {
+      public static void ClearRequests ( DataManager __instance ) {
          if ( UnpatchManager ) return;
          foreground.Clear();
          background.Clear();
          foregroundLoading.Clear();
          backgroundLoading.Clear();
+         mechDefDependency.Clear();
+         manager = __instance;
       }
       
       public static bool Override_GraduateBackgroundRequest ( DataManager __instance, ref bool __result, BattleTechResourceType resourceType, string id ) { try {
@@ -155,6 +194,7 @@ namespace Sheepy.BattleTechMod.Turbine {
             SaveCache.Invoke( me, null );
             foreground.Clear();
             foregroundLoading.Clear();
+            mechDefDependency.Clear();
             center.PublishMessage( new DataManagerLoadCompleteMessage() );
          }
       }
@@ -179,6 +219,7 @@ namespace Sheepy.BattleTechMod.Turbine {
             SaveCache.Invoke( me, null );
             background.Clear();
             backgroundLoading.Clear();
+            mechDefDependency.Clear();
             center.PublishMessage( new DataManagerAsyncLoadCompleteMessage() );
          }
       }
@@ -196,8 +237,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       public static bool Override_ProcessRequests ( DataManager __instance ) { try {
          if ( UnpatchManager ) return true;
          DataManager me = __instance;
-         int lightLoad = 0;
-         int heavyLoad = 0;
+         int lightLoad = 0, heavyLoad = 0;
          uint currentAllowedWeight = (uint) foregroundRequestsCurrentAllowedWeight.GetValue( me );
          foreach ( DataManager.DataManagerLoadRequest request in foreground.Values.ToArray() ) {
             if ( lightLoad >= DataManager.MaxConcurrentLoadsLight && heavyLoad >= DataManager.MaxConcurrentLoadsHeavy )
@@ -290,6 +330,18 @@ namespace Sheepy.BattleTechMod.Turbine {
          return false;
       }
 
+      /*
+      public static void LogStart ( MechDef __instance, MessageCenterMessage message ) {
+         if ( ! ( message is DataManagerRequestCompleteMessage ) ) return;
+         Log( "START " + __instance.ChassisID + ", " + message.GetType() );
+      }
+
+      public static void LogEnd ( MechDef __instance, MessageCenterMessage message ) {
+         if ( ! ( message is DataManagerRequestCompleteMessage ) ) return;
+         Log( "END " + __instance.ChassisID );
+      }
+      */
+
       public static bool Override_RequestResourceAsync_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm ) { try {
          if ( UnpatchManager || string.IsNullOrEmpty( identifier ) ) return false;
          DataManager me = __instance;
@@ -323,7 +375,7 @@ namespace Sheepy.BattleTechMod.Turbine {
       }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
       public static bool Override_RequestResource_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm, bool allowRequestStacking ) { try {
-         if ( string.IsNullOrEmpty( identifier ) ) return false;
+         if ( UnpatchManager || string.IsNullOrEmpty( identifier ) ) return false;
          DataManager me = __instance;
          string key = GetKey( resourceType, identifier );
          foreground.TryGetValue( key, out DataManager.DataManagerLoadRequest dataManagerLoadRequest );
@@ -411,6 +463,7 @@ namespace Sheepy.BattleTechMod.Turbine {
          foregroundRequests.AddRange( foreground.Values );
          foreground.Clear();
          foregroundLoading.Clear();
+         mechDefDependency.Clear();
          return true;
       } catch ( Exception ex ) {
          Log( "Exception during handover." );
