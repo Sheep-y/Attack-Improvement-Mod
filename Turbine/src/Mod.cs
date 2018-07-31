@@ -67,6 +67,8 @@ namespace Sheepy.BattleTechMod.Turbine {
          } catch ( ArgumentException ) {}
          */
          Patch( typeof( DataManagerRequestCompleteMessage ).GetConstructors()[0], null, "SkipDupComplete" );
+         Patch( typeof( MechDef ), "CheckDependenciesAfterLoad", "QuickCheckDependenciesAfterLoad", null );
+         Patch( typeof( MechDef ), "RequestDependencies", "StartLogDependencies", "EndLogDependencies" );
       }
 
       // https://stackoverflow.com/a/457708/893578 by JaredPar
@@ -93,14 +95,41 @@ namespace Sheepy.BattleTechMod.Turbine {
             lastMessage = key;
       }
 
-      private static Dictionary<MechDef, List<string>> mechDefDependency = new Dictionary<MechDef, List<string>>();
+      private static Dictionary<MechDef, HashSet<string>> mechDefDependency = new Dictionary<MechDef, HashSet<string>>();
+      private static Dictionary<string, HashSet<MechDef>> mechDefLookup = new Dictionary<string, HashSet<MechDef>>();
+      private static MechDef monitoringMech;
+
+      public static bool QuickCheckDependenciesAfterLoad ( MechDef __instance, MessageCenterMessage message ) { try {
+         if ( UnpatchManager ) return true;
+         if ( ! ( message is DataManagerRequestCompleteMessage ) ) return false;
+         if ( ! mechDefDependency.TryGetValue( __instance, out HashSet<string> toLoad ) ) {
+            //Warn( "Already checked once before - " + __instance.Name + " / " + __instance.ChassisID );
+            return true;
+         }
+         if ( toLoad.Count > 0 ) return false;
+         mechDefDependency.Remove( __instance );
+         return true;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      public static void StartLogDependencies ( MechDef __instance ) {
+         if ( UnpatchManager ) return;
+         if ( monitoringMech != null ) Warn( "Already logging dependencies for " + monitoringMech.ChassisID );
+         monitoringMech = __instance;
+         //Log( "Logging dependencies for " + monitoringMech.Name + " / " + monitoringMech.ChassisID );
+         if ( ! mechDefDependency.ContainsKey( __instance ) )
+            mechDefDependency[ __instance ] = new HashSet<string>();
+      }
+      
+      public static void EndLogDependencies () {
+         monitoringMech = null;
+      }
          
-      private static bool Override_CheckRequestsComplete ( ref bool __result ) {
+      public static bool Override_CheckRequestsComplete ( ref bool __result ) {
          if ( UnpatchManager ) return true;
          __result = CheckRequestsComplete();
          return false;
       }
-      private static bool Override_CheckAsyncRequestsComplete ( ref bool __result ) {
+      public static bool Override_CheckAsyncRequestsComplete ( ref bool __result ) {
          if ( UnpatchManager ) return true;
          __result = CheckAsyncRequestsComplete();
          return false;
@@ -140,6 +169,7 @@ namespace Sheepy.BattleTechMod.Turbine {
          foregroundLoading.Clear();
          backgroundLoading.Clear();
          mechDefDependency.Clear();
+         mechDefLookup.Clear();
          manager = __instance;
       }
       
@@ -186,7 +216,20 @@ namespace Sheepy.BattleTechMod.Turbine {
             List<PrewarmRequest> pre = (List<PrewarmRequest>) prewarmRequests.GetValue( me );
             pre.Remove( request.Prewarm );
          }
+         string key = GetKey( request );
          //Log( "Done: " + GetKey( request ) );
+         if ( mechDefLookup.TryGetValue( key, out HashSet<MechDef> mechs ) ) {
+            mechDefLookup.Remove( key );
+            foreach ( MechDef mech in mechs ) {
+               if ( mechDefDependency.TryGetValue( mech, out HashSet<string> list ) &&  list.Remove( key ) ) {
+                  //Log( "Remove " + key + " from " + mech.Name + " / " + mech.ChassisID );
+                  if ( mechDefDependency[ mech ].Count <= 0 ) {
+                     mech.CheckDependenciesAfterLoad( new DataManagerLoadCompleteMessage() );
+                     //Log( "ALL LOADED " + mech.Name + " / " + mech.ChassisID );
+                  }
+               }
+            }
+         }
          if ( request.IsComplete() )
             foregroundLoading.Remove( request );
          if ( CheckRequestsComplete() ) {
@@ -195,6 +238,7 @@ namespace Sheepy.BattleTechMod.Turbine {
             foreground.Clear();
             foregroundLoading.Clear();
             mechDefDependency.Clear();
+            mechDefLookup.Clear();
             center.PublishMessage( new DataManagerLoadCompleteMessage() );
          }
       }
@@ -219,7 +263,6 @@ namespace Sheepy.BattleTechMod.Turbine {
             SaveCache.Invoke( me, null );
             background.Clear();
             backgroundLoading.Clear();
-            mechDefDependency.Clear();
             center.PublishMessage( new DataManagerAsyncLoadCompleteMessage() );
          }
       }
@@ -330,18 +373,6 @@ namespace Sheepy.BattleTechMod.Turbine {
          return false;
       }
 
-      /*
-      public static void LogStart ( MechDef __instance, MessageCenterMessage message ) {
-         if ( ! ( message is DataManagerRequestCompleteMessage ) ) return;
-         Log( "START " + __instance.ChassisID + ", " + message.GetType() );
-      }
-
-      public static void LogEnd ( MechDef __instance, MessageCenterMessage message ) {
-         if ( ! ( message is DataManagerRequestCompleteMessage ) ) return;
-         Log( "END " + __instance.ChassisID );
-      }
-      */
-
       public static bool Override_RequestResourceAsync_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm ) { try {
          if ( UnpatchManager || string.IsNullOrEmpty( identifier ) ) return false;
          DataManager me = __instance;
@@ -374,10 +405,23 @@ namespace Sheepy.BattleTechMod.Turbine {
          return false;
       }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
 
+      private static BattleTechResourceType lastResourceType;
+      private static string lastIdentifier;
+
       public static bool Override_RequestResource_Internal ( DataManager __instance, BattleTechResourceType resourceType, string identifier, PrewarmRequest prewarm, bool allowRequestStacking ) { try {
          if ( UnpatchManager || string.IsNullOrEmpty( identifier ) ) return false;
+         // Quickly skip duplicate request
+         if ( resourceType == lastResourceType && identifier == lastIdentifier ) return false;
+         lastResourceType = resourceType;
+         lastIdentifier = identifier;
          DataManager me = __instance;
          string key = GetKey( resourceType, identifier );
+         if ( monitoringMech != null ) {
+            if ( ! mechDefLookup.ContainsKey( key ) ) mechDefLookup[ key ] = new HashSet<MechDef>();
+            //if ( ! mechDefLookup[ key ].Contains( monitoringMech ) ) Log( "   " + monitoringMech + " requested " + key );
+            mechDefLookup[ key ].Add( monitoringMech );
+            mechDefDependency[ monitoringMech ].Add( key );
+         }
          foreground.TryGetValue( key, out DataManager.DataManagerLoadRequest dataManagerLoadRequest );
          if ( dataManagerLoadRequest != null ) {
             if ( dataManagerLoadRequest.State != DataManager.DataManagerLoadRequest.RequestState.Complete || !dataManagerLoadRequest.DependenciesLoaded( dataManagerLoadRequest.RequestWeight.RequestWeight ) ) {
@@ -394,8 +438,9 @@ namespace Sheepy.BattleTechMod.Turbine {
             dataManagerLoadRequest = (DataManager.DataManagerLoadRequest) CreateByResourceType.Invoke( me, new object[]{ resourceType, identifier, prewarm } );
             //Log( "Queue: " + GetKey( dataManagerLoadRequest ) + " = " + dataManagerLoadRequest.GetType() + " @ " + dataManagerLoadRequest.IsComplete() );
             foreground.Add( key, dataManagerLoadRequest );
-            if ( ! dataManagerLoadRequest.IsComplete() )
+            if ( ! dataManagerLoadRequest.IsComplete() ) {
                foregroundLoading.Add( dataManagerLoadRequest );
+            }
          }
          return false;
       }                 catch ( Exception ex ) { return KillManagerPatch( __instance, ex ); } }
@@ -464,6 +509,7 @@ namespace Sheepy.BattleTechMod.Turbine {
          foreground.Clear();
          foregroundLoading.Clear();
          mechDefDependency.Clear();
+         mechDefLookup.Clear();
          return true;
       } catch ( Exception ex ) {
          Log( "Exception during handover." );
