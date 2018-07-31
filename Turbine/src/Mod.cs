@@ -13,6 +13,9 @@ namespace Sheepy.BattleTechMod.Turbine {
       // A kill switch to press when any things go wrong during initialisation
       private static bool UnpatchManager = true;
 
+      // Hack MechDef dependency checking?
+      private const bool HackMechDefDependencyCheck = true;
+
       public static void Init () {
          new Mod().Start( ref ModLog );
       }
@@ -61,14 +64,16 @@ namespace Sheepy.BattleTechMod.Turbine {
          /*
          Type ReqType = typeof( DataManager.ResourceLoadRequest<> );
          // I _hope_ I got everything in the primary assembly.  Not going to check the whole game!
-         foreach ( Type nested in typeof( DataManager ).GetNestedTypes( Harmony.AccessTools.all ).Where( e => IsSubclassOfRawGeneric( e, ReqType ) ) ) try {
+         foreach ( Type nested in typeof( DataManager ).GetNestedTypes( Harmony.AccessTools.all ).Where( e => IsSubclassOfRawGeneric( e, ReqType ) ) ) {
             if ( nested.Name.StartsWith( "ResourceLoadRequest" ) ) continue; // Empty body
-            Patch( nested, "Load", "OverrideLoadComplete", "LogLoadCompleteEnd" );
-         } catch ( ArgumentException ) {}
+            Patch( nested, "Load", "LoadStart", "LoadEnd" );
+         }
          */
-         Patch( typeof( DataManagerRequestCompleteMessage ).GetConstructors()[0], null, "SkipDupComplete" );
-         Patch( typeof( MechDef ), "CheckDependenciesAfterLoad", "QuickCheckDependenciesAfterLoad", null );
-         Patch( typeof( MechDef ), "RequestDependencies", "StartLogDependencies", "EndLogDependencies" );
+         Patch( typeof( DataManagerRequestCompleteMessage ).GetConstructors()[0], null, "Skip_DuplicateRequestCompleteMessage" );
+         if ( HackMechDefDependencyCheck ) {
+            Patch( typeof( MechDef ), "CheckDependenciesAfterLoad", "Skip_CheckDependenciesAfterLoad", "Cleanup_CheckDependenciesAfterLoad" );
+            Patch( typeof( MechDef ), "RequestDependencies", "StartLogMechDefDependencies", "StopLogMechDefDependencies" );
+         }
       }
 
       // https://stackoverflow.com/a/457708/893578 by JaredPar
@@ -83,7 +88,8 @@ namespace Sheepy.BattleTechMod.Turbine {
 
       private static string lastMessage;
 
-      private static void SkipDupComplete ( DataManagerRequestCompleteMessage __instance ) {
+      private static void Skip_DuplicateRequestCompleteMessage ( DataManagerRequestCompleteMessage __instance ) {
+         if ( UnpatchManager ) return;
          if ( String.IsNullOrEmpty( __instance.ResourceId ) ) {
             __instance.hasBeenPublished = true; // Skip publishing empty id
             return;
@@ -97,21 +103,32 @@ namespace Sheepy.BattleTechMod.Turbine {
 
       private static Dictionary<MechDef, HashSet<string>> mechDefDependency = new Dictionary<MechDef, HashSet<string>>();
       private static Dictionary<string, HashSet<MechDef>> mechDefLookup = new Dictionary<string, HashSet<MechDef>>();
-      private static MechDef monitoringMech;
+      private static MechDef monitoringMech, checkingMech;
 
-      public static bool QuickCheckDependenciesAfterLoad ( MechDef __instance, MessageCenterMessage message ) { try {
+      public static bool Skip_CheckDependenciesAfterLoad ( MechDef __instance, MessageCenterMessage message ) { try {
+         //__state = false;
          if ( UnpatchManager ) return true;
          if ( ! ( message is DataManagerRequestCompleteMessage ) ) return false;
-         if ( ! mechDefDependency.TryGetValue( __instance, out HashSet<string> toLoad ) ) {
-            //Warn( "Already checked once before - " + __instance.Name + " / " + __instance.ChassisID );
-            return true;
+         MechDef me = __instance;
+         if ( ! mechDefDependency.TryGetValue( me, out HashSet<string> toLoad ) ) {
+            //Log( "MechDef re-check After Done " + me.Name + " / " + me.ChassisID );
+            //Log( new System.Diagnostics.StackTrace( true ).ToString() );
+            if ( checkingMech == null ) {
+               checkingMech = __instance;
+               return true;
+            }
+            return false;
          }
          if ( toLoad.Count > 0 ) return false;
-         mechDefDependency.Remove( __instance );
+         mechDefDependency.Remove( me );
          return true;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      public static void StartLogDependencies ( MechDef __instance ) {
+      public static void Cleanup_CheckDependenciesAfterLoad ( MechDef __instance ) {
+         if ( checkingMech == __instance ) checkingMech = null;
+      }
+
+      public static void StartLogMechDefDependencies ( MechDef __instance ) {
          if ( UnpatchManager ) return;
          if ( monitoringMech != null ) Warn( "Already logging dependencies for " + monitoringMech.ChassisID );
          monitoringMech = __instance;
@@ -120,7 +137,7 @@ namespace Sheepy.BattleTechMod.Turbine {
             mechDefDependency[ __instance ] = new HashSet<string>();
       }
       
-      public static void EndLogDependencies () {
+      public static void StopLogMechDefDependencies () {
          monitoringMech = null;
       }
          
@@ -224,8 +241,10 @@ namespace Sheepy.BattleTechMod.Turbine {
                if ( mechDefDependency.TryGetValue( mech, out HashSet<string> list ) &&  list.Remove( key ) ) {
                   //Log( "Remove " + key + " from " + mech.Name + " / " + mech.ChassisID );
                   if ( mechDefDependency[ mech ].Count <= 0 ) {
+                     checkingMech = null;
                      mech.CheckDependenciesAfterLoad( new DataManagerLoadCompleteMessage() );
                      //Log( "ALL LOADED " + mech.Name + " / " + mech.ChassisID );
+                     //Log( new System.Diagnostics.StackTrace( true ).ToString() );
                   }
                }
             }
