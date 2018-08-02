@@ -20,7 +20,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          if ( Settings.BalanceAmmoConsumption || Settings.BalanceEnemyAmmoConsumption ) {
-            nonCenter = new List<ChassisLocations> { ChassisLocations.LeftTorso, ChassisLocations.RightTorso, 
+            nonCenter = new List<ChassisLocations> { ChassisLocations.LeftTorso, ChassisLocations.RightTorso,
                ChassisLocations.LeftArm, ChassisLocations.RightArm, ChassisLocations.LeftLeg, ChassisLocations.RightLeg };
             Patch( typeof( Weapon ), "DecrementAmmo", "OverrideDecrementAmmo", null );
          }
@@ -86,39 +86,44 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ! FriendOrFoe( mech, Settings.BalanceAmmoConsumption, Settings.BalanceEnemyAmmoConsumption ) ) return true;
 
          int needAmmo = __result = me.ShotsWhenFired;
+         if ( needAmmo <= 0 ) return false;
+
          int internalAmmo = me.InternalAmmo;
          if ( internalAmmo > 0 ) {
             if ( internalAmmo > needAmmo ) {
-               me.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "InternalAmmo", StatCollection.StatOperation.Int_Subtract, needAmmo, -1, true );
+               SubtractAmmo( me, me.uid, stackItemUID, needAmmo, "InternalAmmo" );
                return false;
             } // else {
-            me.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "InternalAmmo", StatCollection.StatOperation.Set, 0, -1, true );
+            ZeroAmmo( me, me.uid, stackItemUID, "InternalAmmo" );
             needAmmo -= internalAmmo;
             if ( needAmmo <= 0 ) return false;
          }
 
-         if ( me.ammoBoxes.Any( e => e.CurrentAmmo > e.AmmoCapacity / 2 ) ) { // Has bins over half-full
-            SortAmmunitionBoxByExplosion( mech, me.ammoBoxes );
-
-            // Step 1: Draw from bins that can be immediately reduced to half immediately or almost immediately.
-            needAmmo -= TryGetHalfAmmo( me, stackItemUID, needAmmo, 1 );
-            needAmmo -= TryGetHalfAmmo( me, stackItemUID, needAmmo, 2 );
-
-            // Step 2: Minimise explosion chance - CT > H > LT=RT > LA=RA > LL=RR
-            needAmmo -= TryGetAmmo( me, stackItemUID, needAmmo, true );
-            if ( needAmmo <= 0 ) return false;
+         List<AmmunitionBox> boxes = me.ammoBoxes.Where( e => e.CurrentAmmo > 0 ).ToList();
+         if ( boxes.Count > 0 ) {
+            if ( me.ammoBoxes.Any( e => e.CurrentAmmo > e.AmmoCapacity / 2 ) ) {
+               //Log( $"Draw up to {needAmmo} ammo for {me.UIName} and reduce explosion chance." );
+               // Step 1: Draw from bins that can be immediately reduced to half immediately or almost immediately.
+               SortAmmunitionBoxByExplosion( mech, boxes );
+               needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, needAmmo );
+               needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, needAmmo*2 );
+               // Step 2: Minimise explosion chance - CT > H > LT=RT > LA=RA > LL=RR
+               needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, Int32.MaxValue );
+               if ( needAmmo <= 0 ) return false;
+            }
+            // Step 3: Spend ammo from weakest locations - LA=RA=LL=RR=LT=RT > CT > H
+            //Log( $"Draw up to {needAmmo} ammo for {me.UIName} and reduce ammo lost chance." );
+            SortAmmunitionBoxByRisk( mech, boxes );
+            needAmmo -= TryGetAmmo( me, boxes, stackItemUID, needAmmo );
          }
-
-         // Step 3: Spend ammo from most weakest locations - LA=RA=LL=RR=LT=RT > CT > H
-         SortAmmunitionBoxByRisk( mech, me.ammoBoxes );
-         needAmmo -= TryGetAmmo( me, stackItemUID, needAmmo, false );
          __result = me.ShotsWhenFired - needAmmo;
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      private static void SortAmmunitionBoxByExplosion ( Mech mech, List<AmmunitionBox> boxes ) {
+      private static List<AmmunitionBox> SortAmmunitionBoxByExplosion ( Mech mech, List<AmmunitionBox> boxes ) {
+         if ( boxes.Count <= 1 ) return boxes;
          IComparer<ChassisLocations> comparer = LocationSorter( mech );
-         // Default load order: CT > Head > LT/RT > LA/RA > LL/RL (prioritising the weaker side).
+         // Load order with explosion risks: CT > Head > LT/RT > LA/RA > LL/RL (prioritising the weaker side).
          Dictionary<ChassisLocations, int> locationOrder = new Dictionary<ChassisLocations, int> {
             { ChassisLocations.CenterTorso, 1 },
             { ChassisLocations.Head, 2 },
@@ -136,6 +141,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( mech.GetLocationDamageLevel( ChassisLocations.RightLeg ) >= LocationDamageLevel.NonFunctional )
             locationOrder[ ChassisLocations.LeftLeg ] = 3;
 
+         return SortAmmunitionBoxByExplosion( boxes, locationOrder );
+      }
+
+      private static List<AmmunitionBox> SortAmmunitionBoxByExplosion ( List<AmmunitionBox> boxes, Dictionary<ChassisLocations, int> locationOrder ) {
          // Sort by location, then by ammo - draw from emptier bin first to get more bins below explosion threshold.
          boxes.Sort( ( a, b ) => {
             locationOrder.TryGetValue( (ChassisLocations) a.Location, out int aLoc );
@@ -143,15 +152,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( aLoc != bLoc ) return aLoc - bLoc;
             return a.CurrentAmmo - b.CurrentAmmo;
          } );
-
          //Log( "Sorted Ammo by explosion: " + Join( ", ", boxes.Select( box => $"{box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" ).ToArray() ) );
+         return boxes;
       }
 
       private static List<ChassisLocations> nonCenter;
 
-      private static void SortAmmunitionBoxByRisk ( Mech mech, List<AmmunitionBox> boxes ) {
-         IComparer<ChassisLocations> comparer = LocationSorter( mech );
-         // Default load order: CT > Head > LT/RT > LA/RA > LL/RL (prioritising the weaker side).
+      private static List<AmmunitionBox> SortAmmunitionBoxByRisk ( Mech mech, List<AmmunitionBox> boxes ) {
+         if ( boxes.Count <= 1 ) return boxes;
+         // Load order when no explosion risks: LT/RT/LA/RA/LL/RL > CT > Head
          Dictionary<ChassisLocations, int> locationOrder = new Dictionary<ChassisLocations, int> {
             { ChassisLocations.CenterTorso, 9 },
             { ChassisLocations.Head, 8 }
@@ -166,6 +175,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( mech.GetLocationDamageLevel( ChassisLocations.RightLeg ) >= LocationDamageLevel.NonFunctional )
             locationOrder[ ChassisLocations.LeftLeg ] = 7;
 
+         return SortAmmunitionBoxByRisk( boxes, locationOrder );
+      }
+
+      private static List<AmmunitionBox> SortAmmunitionBoxByRisk ( List<AmmunitionBox> boxes, Dictionary<ChassisLocations, int> locationOrder ) {
          // Sort by location, then by ammo - draw from emptier bin first.
          boxes.Sort( ( a, b ) => {
             locationOrder.TryGetValue( (ChassisLocations) a.Location, out int aLoc );
@@ -174,6 +187,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return a.CurrentAmmo - b.CurrentAmmo;
          } );
          //Log( "Sorted Ammo by lost risk: " + Join( ", ", boxes.Select( box => $"{box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" ).ToArray() ) );
+         return boxes;
       }
 
       // https://stackoverflow.com/a/16839662/893578 by Timothy Shields
@@ -182,12 +196,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public FunctionalComparer ( Func<T, T, int> comparer ) { this.comparer = comparer; }
          public int Compare ( T x, T y ) { return comparer( x, y ); }
       }
+      private static int Compare ( float a, float b ) { return a > b ? 1 : ( a < b ? -1 : 0 ); }
 
       public static IComparer<ChassisLocations> LocationSorter ( Mech mech ) {
          return new FunctionalComparer<ChassisLocations>( ( a, b ) => {
             LocationDamageLevel aDead = mech.GetLocationDamageLevel( a ), bDead = mech.GetLocationDamageLevel( b );
             if ( aDead != bDead ) { // Dead location has last priority
-               if ( aDead >= LocationDamageLevel.Destroyed  ) return 1; 
+               if ( aDead >= LocationDamageLevel.Destroyed  ) return 1;
                else if ( bDead >= LocationDamageLevel.Destroyed ) return -1;
             }
             if ( aDead >= LocationDamageLevel.Destroyed ) return 0; // Both destroyed.
@@ -198,9 +213,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             return Compare( aArm, bArm );
          } );
-      }
-      private static int Compare ( float a, float b ) {
-         return a > b ? 1 : ( a < b ? -1 : 0 );
       }
 
       public static float WeakestArmour ( Mech mech, ChassisLocations location ) {
@@ -221,50 +233,47 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static float WeakestHP ( Mech mech, ChassisLocations location ) {
          if ( location == ChassisLocations.LeftArm )
-            return Math.Min( mech.GetCurrentStructure( ChassisLocations.LeftArm ), mech.GetCurrentStructure( ChassisLocations.LeftTorso ) );
+            return Math.Min( mech.GetCurrentStructure( ChassisLocations.LeftArm  ), mech.GetCurrentStructure( ChassisLocations.LeftTorso  ) );
          else if ( location == ChassisLocations.RightArm )
             return Math.Min( mech.GetCurrentStructure( ChassisLocations.RightArm ), mech.GetCurrentStructure( ChassisLocations.RightTorso ) );
          return mech.GetCurrentStructure( location );
       }
-      
-      private static int TryGetHalfAmmo ( Weapon me, int stackItemUID, int maxDraw, int scale ) {
+
+      private static int TryGetHalfAmmo ( Weapon me, List<AmmunitionBox> boxes, int stackItemUID, int maxDraw, int threshold ) {
          if ( maxDraw <= 0 ) return 0;
          int needAmmo = maxDraw;
-         do {
-            AmmunitionBox box = me.ammoBoxes.Find( e => {
-               int spare = e.CurrentAmmo - ( e.AmmoCapacity / 2 );
-               return spare > 0 && spare <= needAmmo * scale;
-            } );
-            if ( box == null ) break;
-            int drawn = Math.Min( needAmmo, box.CurrentAmmo - ( box.AmmoCapacity / 2 ) );
-            //Log( $"Priority draw {drawn} ammo from {box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" );
-            box.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "CurrentAmmo", StatCollection.StatOperation.Int_Subtract, drawn, -1, true );
-            needAmmo -= drawn;
-         }  while ( needAmmo > 0 );
+         foreach ( AmmunitionBox box in boxes ) {
+            int spare = box.CurrentAmmo - ( box.AmmoCapacity / 2 );
+            if ( spare < 0 || spare > threshold ) continue;
+            needAmmo -= SubtractAmmo( box, me.uid, stackItemUID, Math.Min( needAmmo, spare ) );
+            if ( needAmmo <= 0 ) return maxDraw;
+         }
          return maxDraw - needAmmo;
       }
 
-      private static int TryGetAmmo ( Weapon me, int stackItemUID, int maxDraw, bool aboveHalf ) {
-         if ( maxDraw <= 0 ) return 0;
+      private static int TryGetAmmo ( Weapon weapon, List<AmmunitionBox> boxes, int stackItemUID, int maxDraw ) {
          int needAmmo = maxDraw;
-         //Log( ( aboveHalf ? "Before": "After" ) + $" Half, want {maxDraw}" );
-         foreach ( AmmunitionBox box in me.ammoBoxes ) {
-            int drawn = 0, ammo = box.CurrentAmmo;
-            if ( ammo <= 0 ) continue;
-            if ( aboveHalf ) {
-               int half = box.AmmoCapacity / 2;
-               if ( ammo <= half ) continue;
-               drawn = Math.Min( needAmmo, ammo - half );
-            } else 
-               drawn = Math.Min( needAmmo, ammo );
+         foreach ( AmmunitionBox box in boxes ) {
+            int ammo = box.CurrentAmmo, drawn = Math.Min( needAmmo, ammo );
             if ( ammo > drawn )
-               box.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "CurrentAmmo", StatCollection.StatOperation.Int_Subtract, drawn, -1, true );
+               SubtractAmmo( box, weapon.uid, stackItemUID, drawn );
             else
-               box.StatCollection.ModifyStat<int>( me.uid, stackItemUID, "CurrentAmmo", StatCollection.StatOperation.Set, 0, -1, true );
+               ZeroAmmo( box, weapon.uid, stackItemUID );
             needAmmo -= drawn;
-            if ( needAmmo <= 0 ) break;
+            if ( needAmmo <= 0 ) return maxDraw;
          }
          return maxDraw - needAmmo;
+      }
+
+      private static int SubtractAmmo ( MechComponent box, string sourceID, int stackItemUID, int howMany, string ammoType = "CurrentAmmo" ) {
+         //if ( box is AmmunitionBox ) Log( $"Draw {drawn} ammo from {box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" );
+         box.StatCollection.ModifyStat<int>( sourceID, stackItemUID, ammoType, StatCollection.StatOperation.Int_Subtract, howMany, -1, true );
+         return howMany;
+      }
+
+      private static void ZeroAmmo ( MechComponent box, string sourceID, int stackItemUID, string ammoType = "CurrentAmmo" ) {
+         //if ( box is AmmunitionBox ) Log( $"Empty {drawn} ammo from {box.UIName}@{(ChassisLocations)box.Location} ({box.CurrentAmmo})" );
+         box.StatCollection.ModifyStat<int>( sourceID, stackItemUID, ammoType, StatCollection.StatOperation.Set, 0, -1, true );
       }
 
       // ============ Jettison Ammo ============
@@ -290,10 +299,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          if ( jettison.Count <= 0 ) return;
-         foreach ( AmmunitionBox box in jettison )
-            box.StatCollection.ModifyStat<int>( mech.uid, __instance.SequenceGUID, "CurrentAmmo", StatCollection.StatOperation.Set, 0, -1, true );
+         foreach ( AmmunitionBox box in jettison ) ZeroAmmo( box, mech.uid, __instance.SequenceGUID );
          foreach ( AmmoCategory type in checkedType.Where( e => e.Value ).Select( e => e.Key ) )
-            Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech, 
+            Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech,
                type + " AMMO JETTISONED", FloatieMessage.MessageNature.Buff, false ) ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
