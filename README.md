@@ -486,7 +486,7 @@ These settings can be changed in `settings.json`.
 > When set to true, mechs will draw ammo in an intelligent way to minimise chance of ammo explosion.
 > After that is done, the AI will then minimise risk of losing ammo to crits and destroyed locations.
 >
-> The AI is pretty smart, but it can't shift ammo, so spreading ammo around will help it does its job faster.
+> The AI is pretty smart, but it can't shift ammo, so manually spreading ammo around can help it does its job.
 
 
 **Auto Jettison Ammo**
@@ -494,11 +494,12 @@ These settings can be changed in `settings.json`.
 > Setting: `AutoJettisonAmmo`  (true/false, default true)<br>
 > Setting: `AutoJettisonEnemyAmmo`  (true/false, default false)
 >
-> When set to true, mechs will jettison useless ammo at end of its turn, if the mech has not moved, is not prone, and is not shutdown.
+> When set to true, mechs will jettison useless ammo at end of its turn,
+> provided it has not moved, is not prone, and is not shutdown.
 > (The jettison doors are at the rear, so no prone jettisons.)
 >
-> This can happen if all weapons that use that kind of ammo is destroyed mid-fight,
-> or the mech could be deployed with new ammo installed but not the weapon yet.
+> This can happens if all weapons that use that kind of ammo are destroyed mid-fight,
+> or if the mech was deployed with new ammo installed but not the weapon yet.
 > Jettisoning the ammo will make sure they won't explode when hit.
 
 

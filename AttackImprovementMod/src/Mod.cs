@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
@@ -91,12 +92,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       /* Changes that we don't want to write back to settings.json */
       private void NormaliseSettings () {
          // Colours that fail to parse will be changed to empty string
-         LineOfSight.Parse( ref Settings.LOSMeleeColor );
-         LineOfSight.Parse( ref Settings.LOSClearColor );
-         LineOfSight.Parse( ref Settings.LOSBlockedPreColor );
-         LineOfSight.Parse( ref Settings.LOSBlockedPostColor );
-         LineOfSight.Parse( ref Settings.LOSIndirectColor );
-         LineOfSight.Parse( ref Settings.LOSNoAttackColor );
+         // TODO Turns null into empty
+         foreach ( LineOfSight.Line line in (LineOfSight.Line[]) Enum.GetValues( typeof( LineOfSight.Line ) ) ) {
+            FieldInfo colorsField = typeof( ModSettings ).GetField( "LOS" + line + "Colors"  );
+            string[] colors = (string[]) colorsField.GetValue( Settings );
+            if ( colors == null ) continue;
+            for ( int i = 0 ; i < 3 ; i++ )
+               LineOfSight.Parse( ref colors[i] );
+            colorsField.SetValue( Settings, colors );
+         }
 
          NullIfEmpty( ref Settings.CalledChanceFormat );
          NullIfEmpty( ref Settings.HitChanceFormat );

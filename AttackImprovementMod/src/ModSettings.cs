@@ -74,15 +74,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool LOSBlockedPreDotted  = false;
       public bool LOSBlockedPostDotted = false;
 
-      [ JsonComment( new String[]{
-        "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to empty to leave alone.",
-        "Default \"#D0F\" for blocked pre, \"#C8E\" for blocked post, and empty for the rest.  Supports RGB and RGBA." } ) ]
-      public string LOSMeleeColor = "";
-      public string LOSClearColor = "";
-      public string LOSBlockedPreColor  = "#D0F";
-      public string LOSBlockedPostColor = "#C8E";
-      public string LOSIndirectColor = "";
-      public string LOSNoAttackColor = "";
+      [ JsonComment( "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to null to leave alone." ) ]
+      public string[] LOSMeleeColors = new string[]{ "#F00", "#0FF", "#0FF" };
+      public string[] LOSClearColors = new string[]{ "#F00", "#0FF", "#0FF" };
+      public string[] LOSBlockedPreColors  = new string[]{ "#D0F", "#D8F", "#D8F" };
+      public string[] LOSBlockedPostColors = new string[]{ "#C8E", "#BBF", "#BBF" };
+      public string[] LOSIndirectColors = new string[]{ "#F00", "#0FF", "#0FF" };
+      public string[] LOSNoAttackColors = null;
 
       [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
@@ -267,28 +265,34 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Location of mod log and roll log.  Default is \"\" to put them in mod folder.  Relative path would be relative to BATTLETECH exe." ) ]
       public string LogFolder = "";
 
+      [ Obsolete( "[v2.0] Default empty. Replaced by LOSMeleeColors." ) ]
+      public string LOSMeleeColor = null;
+      [ Obsolete( "[v2.0] Default empty. Replaced by LOSClearColors." ) ]
+      public string LOSClearColor = null;
+      [ Obsolete( "[v2.0] Default empty, except Pre = #D0F. Replaced by LOSBlockedPreColors." ) ]
+      public string LOSBlockedPreColor  = null;
+      [ Obsolete( "[v2.0] Default empty, except Post = #C8E. Replaced by LOSBlockedPostColors." ) ]
+      public string LOSBlockedPostColor = null;
+      [ Obsolete( "[v2.0] Default empty. Replaced by LOSIndirectColors." ) ]
+      public string LOSIndirectColor = null;
+      [ Obsolete( "[v2.0] Default empty. Replaced by LOSNoAttackColors." ) ]
+      public string LOSNoAttackColor = null;
 
       [ Obsolete( "[v2.0-rc] Default true.  Replaced by ShowUnderArmourDamage." ) ]
       public bool? PaperDollDivulgeUnderskinDamage = null;
-
       [ Obsolete( "[v2.0-rc] Default true.  Replaced by KillZeroHpLocation." ) ]
       public bool? FixNonIntegerDamage = null;
-
       [ Obsolete( "[v2.0-20170712] Default 2.  Replaced by LOSWidth." ) ]
       public float? LOSWidthMultiplier = null;
-
       [ Obsolete( "[v2.0-20170712] Default 3.  Replaced by LOSWidthBlocked." ) ]
       public float? LOSWidthBlockedMultiplier = null;
 
       [ Obsolete( "[v1.0] Default false.  Renamed to ShowCorrectedHitChance." ) ]
       public bool? ShowRealWeaponHitChance = null;
-
       [ Obsolete( "[v1.0] Default false.  Upgraded to CalledChanceFormat." ) ]
       public bool? ShowDecimalCalledChance = null;
-
       [ Obsolete( "[v1.0] Default false.  Upgraded to HitChanceFormat." ) ]
       public bool? ShowDecimalHitChance = null;
-
       [ Obsolete( "[v1.0] Default false.  Upgraded to AttackLogLevel." ) ]
       public bool? LogHitRolls = null;
    }
