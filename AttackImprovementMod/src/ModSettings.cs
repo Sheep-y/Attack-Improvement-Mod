@@ -88,8 +88,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int ArcLinePoints = 48;
 
       [ JsonComment( "Change marker colour of the direction indicator. Directions are Front, Left, Right, Back, Prone." ) ]
-      public string DirectionMarkerColors = "#FFF,#BBF,#BBF,#BFB,#FFB";
-      public string DirectionMarkerActiveColors = "#FFF,#BBF,#BBF,#BFB,#FFB";
+      public string DirectionMarkerColors = "#FFFF,#CCFF,#CCFF,#BFBF,#FFBF";
+      public string DirectionMarkerActiveColors = "#F41F,#F41F,#F41F,#F41F,#F41F";
 
       //
        [ JsonSection( "Called Shots" ) ]

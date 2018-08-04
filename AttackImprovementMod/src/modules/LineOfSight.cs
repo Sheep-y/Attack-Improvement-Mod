@@ -92,8 +92,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( direction != AttackDirection.ToProne && direction != AttackDirection.FromTop ) {
             colors = new object[]{ DirectionMarkerColors?[0] ?? orig, DirectionMarkerColors?[1] ?? orig,
                                    DirectionMarkerColors?[2] ?? orig, DirectionMarkerColors?[3] ?? orig };
-            int dirIndex = Math.Max( 0, Math.Min( (int) direction - 1, LOSDirectionCount-1 ) );
-            colors[ dirIndex ] = DirectionMarkerActiveColors?[ dirIndex ] ?? me.ColorActive;
+            if ( direction != AttackDirection.None ) {
+               int dirIndex = Math.Max( 0, Math.Min( (int) direction - 1, LOSDirectionCount-1 ) );
+               colors[ dirIndex ] = DirectionMarkerActiveColors?[ dirIndex ] ?? me.ColorActive;
+               //Log( $"Direction {direction}, Index {dirIndex}, Color {colors[ dirIndex ]}" );
+            }
          } else {
             FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( me.Owner );
             orig = info.HasLOF ? ( DirectionMarkerActiveColors[4] ?? me.ColorActive ) : ( DirectionMarkerColors[4] ?? me.ColorInactive );
@@ -111,7 +114,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          float width = Settings.LOSWidth;
          if ( width > 0f && me.LOSWidthBegin != width ) {
-            Log( "Setting default LOS width to {0}", width );
+            //Log( "Setting default LOS width to {0}", width );
             // Scale solid line width
             me.LOSWidthBegin = width;
             me.LOSWidthEnd = width;
@@ -129,11 +132,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          width = Settings.LOSWidthBlocked;
          if ( width > 0f && me.LOSWidthBlocked != width )
             me.LOSWidthBlocked = width;
-         Log( "LOS widths, normal = {0}, post-blocked = {1}", me.LOSWidthBegin, me.LOSWidthBlocked );
+         //Log( "LOS widths, normal = {0}, post-blocked = {1}", me.LOSWidthBegin, me.LOSWidthBlocked );
 
          width = Settings.LOSMarkerBlockedMultiplier;
          if ( width != 1f && ! losTextureScaled ) {
-            Log( "Scaling LOS block marker by {0}", width );
+            //Log( "Scaling LOS block marker by {0}", width );
             Vector3 zoom = me.CoverTemplate.transform.localScale;
             zoom.x *= width;
             zoom.y *= width;
