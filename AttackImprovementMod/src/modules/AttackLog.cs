@@ -112,7 +112,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( ! ROLL_LOG.Exists() ) {
             StringBuilder logBuffer = new StringBuilder();
-            logBuffer.Append( String.Join( Separator, new string[]{ "Time", "Actor", "Pilot", "Unit", "Target", "Pilot", "Unit", "Combat Id", "Attack Id", "Direction", "Range" } ) );
+            logBuffer.Append( String.Join( Separator, new string[]{ "Time", "Actor", "Pilot", "Unit", "Target", "Pilot", "Unit", "Combat Id", "Round", "Phase", "Attack Id", "Direction", "Range" } ) );
             if ( LogShot || PersistentLog ) {
                logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Weapon", "Weapon Template", "Weapon Id", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
                if ( LogLocation || PersistentLog )
@@ -238,10 +238,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisSequenceTargetId = target.GUID;
          thisSequence = 
             time + Separator + 
-            TeamAndCallsign( attacker ) +         // Attacker team, pilot, mech
-            TeamAndCallsign( target ) +           // Target team, pilot, mech
-            thisCombatId + Separator +                    // Combat Id
-            thisSequenceId + Separator +                  // Attack Id
+            TeamAndCallsign( attacker ) + // Attacker team, pilot, mech
+            TeamAndCallsign( target ) +   // Target team, pilot, mech
+            thisCombatId + Separator +
+            Combat.TurnDirector.CurrentRound + Separator +
+            Combat.TurnDirector.CurrentPhase + Separator +
+            thisSequenceId + Separator +  // Attack Id
             direction + Separator +
             range;
          if ( ! LogShot )
