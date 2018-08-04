@@ -4,6 +4,7 @@ using Harmony;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -86,7 +87,7 @@ namespace Sheepy.BattleTechMod {
       // Override this method to override Namd and Id
       protected virtual void Setup () {
          Logger.Delete();
-         Logger.Log( "{2} Loading {0} Version {1} In {3}" + Environment.NewLine, Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
+         Logger.Info( "{2} Loading {0} Version {1} In {3}" + Environment.NewLine, Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
       }
 
       public static string Idify ( string text ) { return Join( string.Empty, new Regex( "\\W+" ).Split( text ), UppercaseFirst ); }
@@ -111,10 +112,10 @@ namespace Sheepy.BattleTechMod {
          if ( sanitise != null )
             TryRun( () => config = sanitise( config ) );
          string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
-         Logger.Log( "Loaded Settings: " + sanitised );
+         Logger.Info( "Loaded Settings: " + sanitised );
          string commented = BattleJsonContract.FormatSettingJsonText( settings.GetType(), sanitised );
          if ( commented != fileText ) { // Can be triggered by comment or field update, not necessary sanitisation
-            Logger.Log( "Updating " + file );
+            Logger.Info( "Updating " + file );
             SaveSettings( commented );
          }
          settings = config;
@@ -350,7 +351,7 @@ namespace Sheepy.BattleTechMod {
             Mod.harmony = HarmonyInstance.Create( Id );
          Mod.harmony.Patch( patched, prefix, postfix );
          if ( LogPatch )
-            Logger.Log( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
+            Logger.Vocal( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
       }
 
       // ============ UTILS ============
@@ -439,7 +440,7 @@ namespace Sheepy.BattleTechMod {
                   message += " >= " + shownMin;
             else
                message += " <= " + shownMin;
-            Logger.BTML_LOG.Log( message + ". Setting to " + val );
+            Logger.BTML_LOG.Info( message + ". Setting to " + val );
          }
          return val;
       }
@@ -461,8 +462,9 @@ namespace Sheepy.BattleTechMod {
 
       public string LogFile { get; private set; }
 
+      public SourceLevels LogLevel = SourceLevels.Information;
       public bool IgnoreDuplicateExceptions = true;
-      public Dictionary<string, int> exceptions = new Dictionary<string, int>();
+      private HashSet<string> exceptions = new HashSet<string>();
 
       public bool Exists () {
          return File.Exists( LogFile );
@@ -479,42 +481,24 @@ namespace Sheepy.BattleTechMod {
          return result;
       }
 
-      public void Log ( object message ) {
+      public void Log ( SourceLevels level, object message, params object[] args ) {
+         if ( ( level | LogLevel ) == 0 ) return;
          string txt = message?.ToString();
-         if ( message is Exception ex ) {
-            if ( exceptions.ContainsKey( txt ) ) {
-               exceptions[ txt ]++;
-               if ( IgnoreDuplicateExceptions )
-                  return;
-            } else
-               exceptions.Add( txt, 1 );
+         if ( IgnoreDuplicateExceptions && message is Exception ex ) {
+            if ( exceptions.Contains( txt ) ) return;
+            exceptions.Add( txt );
          }
-         Log( txt ); 
-      }
-      public void Log ( string message, params object[] args ) { Log( Format( message, args ) ); }
-      public void Log ( string message ) { WriteLog( message + NewLine ); }
-      private static readonly string NewLine = Environment.NewLine;
-
-      public void Warn ( object message ) { Warn( message?.ToString() ); }
-      public void Warn ( string message ) { Log( "Warning: " + message ); }
-      public void Warn ( string message, params object[] args ) {
-         message = Format( message, args );
-         //HBS.Logging.Logger.GetLogger( "Mods" ).LogWarning( "[AttackImprovementMod] " + message );
-         Log( "Warning: " + message );
+         if ( args != null && args.Length > 0 && txt != null ) try {
+            txt = string.Format( txt, args );
+         } catch ( Exception ) {}
+         WriteLog( txt + Environment.NewLine );
       }
 
-      public bool Error ( object message ) { 
-         if ( message is Exception )
-            Log( message );
-         else
-            Error( message?.ToString() );
-         return true;
-      }
-      public void Error ( string message ) { Log( "Error: " + message ); }
-      public void Error ( string message, params object[] args ) {
-         message = Format( message, args );
-         Log( "Error: " + message ); 
-      }
+      public void Trace ( object message = null, params object[] args ) { Log( SourceLevels.ActivityTracing, message, args ); }
+      public void Vocal ( object message = null, params object[] args ) { Log( SourceLevels.Verbose, message, args ); }
+      public void Info  ( object message = null, params object[] args ) { Log( SourceLevels.Information, message, args ); }
+      public void Warn  ( object message = null, params object[] args ) { Log( SourceLevels.Warning, message, args ); }
+      public void Error ( object message = null, params object[] args ) { Log( SourceLevels.Error, message, args ); }
 
       protected void WriteLog ( string message ) {
          try {
@@ -523,14 +507,6 @@ namespace Sheepy.BattleTechMod {
             Console.WriteLine( message );
             Console.Error.WriteLine( ex );
          }
-      }
-
-      protected static string Format ( string message, params object[] args ) {
-         try {
-            if ( args != null && args.Length > 0 )
-               return string.Format( message, args );
-         } catch ( Exception ) {}
-         return message;
       }
    }
 

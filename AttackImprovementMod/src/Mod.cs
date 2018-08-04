@@ -41,7 +41,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( ! settings.LogFolder.EndsWith( "/" ) && ! settings.LogFolder.EndsWith( "\\" ) )
                settings.LogFolder += "/";
             LogDir = settings.LogFolder;
-            Logger.Log( "{2} {0} Version {1} In {3}\r\n", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
+            Logger.Info( "{2} {0} Version {1} In {3}\r\n", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
          }
 
 #pragma warning disable CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
@@ -117,16 +117,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static string ModLogDir = ""; // A static variable for roll log
       internal static Logger ModLog = Logger.BTML_LOG;
 
-      public static void Log ( object message ) { ModLog.Log( message ); }
-      public static void Log ( string message = "" ) { ModLog.Log( message ); }
-      public static void Log ( string message, params object[] args ) { ModLog.Log( message, args ); }
-      
-      public static void Warn ( object message ) { ModLog.Warn( message ); }
-      public static void Warn ( string message ) { ModLog.Warn( message ); }
-      public static void Warn ( string message, params object[] args ) { ModLog.Warn( message, args ); }
-
-      public static bool Error ( object message ) { return ModLog.Error( message ); }
-      public static void Error ( string message ) { ModLog.Error( message ); }
-      public static void Error ( string message, params object[] args ) { ModLog.Error( message, args ); }
+      public static void Trace ( object message = null, params object[] args ) { ModLog.Trace( message, args ); }
+      public static void Vocal ( object message = null, params object[] args ) { ModLog.Vocal( message, args ); }
+      public static void Log   ( object message = null, params object[] args ) { ModLog.Info( message, args ); }
+      public static void Warn  ( object message = null, params object[] args ) { ModLog.Warn( message, args ); }
+      public static bool Error ( object message = null, params object[] args ) { ModLog.Error( message, args ); return true; }
    }
 }
