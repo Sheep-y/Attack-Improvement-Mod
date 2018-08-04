@@ -460,25 +460,25 @@ namespace Sheepy.BattleTechMod {
          LogFile = file;
       }
 
+      public static string Stacktrace { get { return new StackTrace( true ).ToString(); } }
       public string LogFile { get; private set; }
 
       public SourceLevels LogLevel = SourceLevels.Information;
+      public Func<SourceLevels,string> LevelText = ( level ) => level.ToString() + ": ";
+      public string TimeFormat = "hh:mm:ss.ffff ";
       public bool IgnoreDuplicateExceptions = true;
+
       private HashSet<string> exceptions = new HashSet<string>();
 
-      public bool Exists () {
-         return File.Exists( LogFile );
-      }
+      public bool Exists () { return File.Exists( LogFile ); }
 
       public Exception Delete () {
          if ( LogFile == "Mods/BTModLoader.log" || LogFile == "BattleTech_Data/output_log.txt" )
             return new ApplicationException( "Cannot delete BTModLoader.log or BattleTech game log." );
-
-         Exception result = null;
          try {
             File.Delete( LogFile );
-         } catch ( Exception e ) { result = e; }
-         return result;
+            return null;
+         } catch ( Exception e ) { return e; }
       }
 
       public void Log ( SourceLevels level, object message, params object[] args ) {
@@ -488,8 +488,13 @@ namespace Sheepy.BattleTechMod {
             if ( exceptions.Contains( txt ) ) return;
             exceptions.Add( txt );
          }
-         if ( args != null && args.Length > 0 && txt != null ) try {
-            txt = string.Format( txt, args );
+         try {
+            if ( args != null && args.Length > 0 && txt != null ) 
+               txt = string.Format( txt, args );
+            if ( LevelText != null )
+               txt = LevelText( level ) + txt;
+            if ( ! String.IsNullOrEmpty( TimeFormat ) )
+               txt = DateTime.Now.ToString( TimeFormat ) + txt;
          } catch ( Exception ) {}
          WriteLog( txt + Environment.NewLine );
       }

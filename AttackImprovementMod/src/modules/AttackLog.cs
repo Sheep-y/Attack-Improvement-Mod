@@ -103,7 +103,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void InitLog () {
-         ROLL_LOG = new Logger( ModLogDir + "Log_Attack." + Settings.AttackLogFormat );
+         ROLL_LOG = new Logger( ModLogDir + "Log_Attack." + Settings.AttackLogFormat ){ LevelText = null, TimeFormat = null };
          idGenerator = new Random();
          thisSequenceId = GetNewId();
 
