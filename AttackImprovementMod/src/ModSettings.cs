@@ -74,13 +74,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool LOSBlockedPreDotted  = false;
       public bool LOSBlockedPostDotted = false;
 
-      [ JsonComment( "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to null to leave alone." ) ]
-      public string[] LOSMeleeColors = new string[]{ "#F00", "#0FF", "#0FF" };
-      public string[] LOSClearColors = new string[]{ "#F00", "#0FF", "#0FF" };
-      public string[] LOSBlockedPreColors  = new string[]{ "#D0F", "#D8F", "#D8F" };
-      public string[] LOSBlockedPostColors = new string[]{ "#C8E", "#BBF", "#BBF" };
-      public string[] LOSIndirectColors = new string[]{ "#F00", "#0FF", "#0FF" };
-      public string[] LOSNoAttackColors = null;
+      [ JsonComment( new String[]{
+      "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to null to leave alone.",
+      "The colour orders are Front, Left, Right, Back, Prone" }  ) ]
+      public string LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00";
+      public string LOSClearColors = "#F00,#0FF,#0FF,#0F8,#F00";
+      public string LOSBlockedPreColors  = "#D0F,#D8F,#D8F,#DF8,#D0F";
+      public string LOSBlockedPostColors = "#C8E,#BBF,#BBF,#BFB,#D0F";
+      public string LOSIndirectColors = "#F00,#0FF,#0FF,#0F8,#F00";
+      public string LOSNoAttackColors = null;
 
       [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
