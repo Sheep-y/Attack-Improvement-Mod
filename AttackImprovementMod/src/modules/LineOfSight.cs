@@ -13,6 +13,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class LineOfSight : BattleModModule {
 
       public override void CombatStartsOnce () {
+         if ( Settings.DirectionMarkerActiveColors != null || Settings.DirectionMarkerColors != null ) {
+            SetColors = typeof( AttackDirectionIndicator ).GetMethod( "SetColors", NonPublic | Instance );
+            if ( SetColors == null ) {
+               Warn( "Cannot find AttackDirectionIndicator.SetColors, direction marker colors not patched." );
+            } else {
+               InitDirectionColors();
+               Patch( typeof( AttackDirectionIndicator ), "ShowAttackDirection", "SaveDirectionMarker", "SetDirectionMarker" );
+            }
+         }
+
          if ( BattleMod.FoundMod( "com.joelmeador.BTMLColorLOSMod", "BTMLColorLOSMod.BTMLColorLOSMod" ) ) {
             Logger.BTML_LOG.Warn( Mod.Name + " detected joelmeador's BTMLColorLOSMod, LOS and arc styling disabled and left in the hands of BTMLColorLOSMod." );
             return;
@@ -45,6 +55,52 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatPathLine ), "DrawJumpPath", null, "SetJumpPathSegments" );
          }
       }
+
+      // ============ Marker Colour ============
+
+      private static MethodInfo SetColors;
+      private static Color[] OrigDirectionMarkerColors; // [ Active #FFFFFF4B, Inactive #F8441464 ]
+      private static Color?[] DirectionMarkerColors, DirectionMarkerActiveColors;
+      
+      private static void InitDirectionColors () {
+         DirectionMarkerColors = new Color?[ LOSDirectionCount ];
+         DirectionMarkerActiveColors = new Color?[ LOSDirectionCount ];
+
+         string[] active = Settings.DirectionMarkerActiveColors?.Split( ',' ).Select( e => e.Trim() ).ToArray();
+         string[] inactive =     Settings.DirectionMarkerColors?.Split( ',' ).Select( e => e.Trim() ).ToArray();
+
+         for ( int i = 0 ; i < LOSDirectionCount ; i++ ) {
+            if ( active != null && active.Length > i )
+               DirectionMarkerActiveColors[ i ] = Parse( active[ i ] );
+            if ( inactive != null && inactive.Length > i )
+               DirectionMarkerColors[ i ] = Parse( inactive[ i ] );
+         }
+         Log( "Active directional marker = " + Join( ", ", DirectionMarkerActiveColors ) );
+         Log( "Inactive directional marker = " + Join( ", ", DirectionMarkerActiveColors ) );
+      }
+
+      public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) {
+         if ( OrigDirectionMarkerColors == null )
+            OrigDirectionMarkerColors = new Color[]{ __instance.ColorInactive, __instance.ColorActive };
+      }
+
+      public static void SetDirectionMarker ( AttackDirectionIndicator __instance, AttackDirection direction ) { try {
+         AttackDirectionIndicator me =  __instance;
+			if ( me.Owner.IsDead ) return;
+         Color orig = me.ColorInactive;
+         object[] colors;
+         if ( direction != AttackDirection.ToProne && direction != AttackDirection.FromTop ) {
+            colors = new object[]{ DirectionMarkerColors?[0] ?? orig, DirectionMarkerColors?[1] ?? orig,
+                                   DirectionMarkerColors?[2] ?? orig, DirectionMarkerColors?[3] ?? orig };
+            int dirIndex = Math.Max( 0, Math.Min( (int) direction - 1, LOSDirectionCount-1 ) );
+            colors[ dirIndex ] = DirectionMarkerActiveColors?[ dirIndex ] ?? me.ColorActive;
+         } else {
+            FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( me.Owner );
+            orig = info.HasLOF ? ( DirectionMarkerActiveColors[4] ?? me.ColorActive ) : ( DirectionMarkerColors[4] ?? me.ColorInactive );
+            colors = new object[]{ orig, orig, orig, orig };
+         }
+         SetColors.Invoke( __instance, colors );
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Line change ============
 
@@ -96,17 +152,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // Modded materials
       private static Dictionary<Line,Color?[]> parsedColor; // Exists until Mats are created. Each row and colour may be null.
       private static Material[][] Mats; // Replaces parsedColor. Either whole row is null or whole row is filled.
-      internal const int MatDirectionCount = 5;
+      internal const int LOSDirectionCount = 5;
 
       private static void InitSettings () {
-         parsedColor = new Dictionary<Line, Color?[]>( MatDirectionCount );
+         parsedColor = new Dictionary<Line, Color?[]>( LOSDirectionCount );
          foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) ) {
             FieldInfo colorsField = typeof( ModSettings ).GetField( "LOS" + line + "Colors"  );
             string colorTxt = colorsField.GetValue( Settings )?.ToString();
             List<string> colorList = colorTxt?.Split( ',' ).Select( e => e.Trim() ).ToList();
             if ( colorList == null ) continue;
-            Color?[] colors = new Color?[ MatDirectionCount ];
-            for ( int i = 0 ; i < MatDirectionCount ; i++ )
+            Color?[] colors = new Color?[ LOSDirectionCount ];
+            for ( int i = 0 ; i < LOSDirectionCount ; i++ )
                if ( colorList.Count > i )
                   colors[ i ] = Parse( colorList[ i ] );
             if ( colors.Any( e => e != null ) )
@@ -127,8 +183,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
             // Make sure post mat is applied even if pre mat was not modified
             if ( Mats[ BlockedPost ] != null && Mats[ BlockedPre ] == null ) {
-               Mats[ BlockedPre ] = new Material[ MatDirectionCount ];
-               for ( int i = 0 ; i < MatDirectionCount ; i++ )
+               Mats[ BlockedPre ] = new Material[ LOSDirectionCount ];
+               for ( int i = 0 ; i < LOSDirectionCount ; i++ )
                   Mats[ BlockedPre ][i] = new Material( OrigInRangeMat ) { name = "BlockedPreLOS"+i };
             }
             parsedColor = null;
@@ -152,7 +208,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void SetupLOS ( WeaponRangeIndicators __instance, Vector3 position, AbstractActor selectedActor, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          WeaponRangeIndicators me = __instance;
-         int dirIndex = Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, 4 ) );
+         int dirIndex = Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) );
          if ( dirIndex != lastDirIndex && Mats[ NoAttack ] != null ) {
             me.MaterialOutOfRange = Mats[ NoAttack ][ dirIndex ];
             me.LOSOutOfRange = Mats[ NoAttack ][ dirIndex ].color;
@@ -216,11 +272,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          bool dotted  = (bool) typeof( ModSettings ).GetField( "LOS" + name + "Dotted" ).GetValue( Settings );
          if ( colors == null ) {
             if ( dotted == ( name.StartsWith( "NoAttack" ) ) ) return null;
-            colors = new Color?[ MatDirectionCount ];
+            colors = new Color?[ LOSDirectionCount ];
          }
          //Log( "NewMat " + line + " = " + Join( ",", colors ) );
-         Material[] lineMats = new Material[ MatDirectionCount ];
-         for ( int i = 0 ; i < MatDirectionCount ; i++ )
+         Material[] lineMats = new Material[ LOSDirectionCount ];
+         for ( int i = 0 ; i < LOSDirectionCount ; i++ )
             lineMats[ i ] = NewMat( name + "LOS" + i, name.StartsWith( "NoAttack" ), colors[i], i > 0 ? colors[i-1] : null, dotted );
          return lineMats;
       }

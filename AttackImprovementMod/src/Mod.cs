@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
@@ -29,7 +27,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Add( new RollCorrection(){ Name = "Roll Corrections" } );
          Add( new HitLocation(){ Name = "Hit Location" } );
          Add( new HitResolution(){ Name = "Hit Resolution" } );
-         Add( new AttackLog(){ Name = "Logger" } ); // Must be after all other modules if we want to log modded data
+         Add( new AttackLog(){ Name = "Logger" } );
       }
 
       public override void GameStarts () {
@@ -91,16 +89,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       /* Changes that we don't want to write back to settings.json */
       private void NormaliseSettings () {
-         // Colours that fail to parse will be changed to empty string
-         // TODO Turns null into empty
-         foreach ( LineOfSight.Line line in (LineOfSight.Line[]) Enum.GetValues( typeof( LineOfSight.Line ) ) ) {
-            FieldInfo colorsField = typeof( ModSettings ).GetField( "LOS" + line + "Colors"  );
-            string[] colors = (string[]) colorsField.GetValue( Settings );
-            if ( colors == null ) continue;
-            for ( int i = 0 ; i < 3 ; i++ )
-               LineOfSight.Parse( ref colors[i] );
-            colorsField.SetValue( Settings, colors );
-         }
+         NullIfEmpty( ref Settings.LOSMeleeColors );
+         NullIfEmpty( ref Settings.LOSClearColors );
+         NullIfEmpty( ref Settings.LOSBlockedPreColors );
+         NullIfEmpty( ref Settings.LOSBlockedPostColors );
+         NullIfEmpty( ref Settings.LOSIndirectColors );
+         NullIfEmpty( ref Settings.LOSNoAttackColors );
+
+         NullIfEmpty( ref Settings.DirectionMarkerColors );
+         NullIfEmpty( ref Settings.DirectionMarkerActiveColors );
 
          NullIfEmpty( ref Settings.CalledChanceFormat );
          NullIfEmpty( ref Settings.HitChanceFormat );

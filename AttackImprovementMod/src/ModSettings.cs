@@ -76,7 +76,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new String[]{
       "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to null to leave alone.",
-      "The colour orders are Front, Left, Right, Back, Prone" }  ) ]
+      "The colour orders are Front, Left, Right, Back, Prone.  Set to empty string to use game default." }  ) ]
       public string LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00";
       public string LOSClearColors = "#F00,#0FF,#0FF,#0F8,#F00";
       public string LOSBlockedPreColors  = "#D0F,#D8F,#D8F,#DF8,#D0F";
@@ -86,6 +86,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
+
+      [ JsonComment( "Change marker colour of the direction indicator. Directions are Front, Left, Right, Back, Prone." ) ]
+      public string DirectionMarkerColors = "#FFF,#BBF,#BBF,#BFB,#FFB";
+      public string DirectionMarkerActiveColors = "#FFF,#BBF,#BBF,#BFB,#FFB";
 
       //
        [ JsonSection( "Called Shots" ) ]
