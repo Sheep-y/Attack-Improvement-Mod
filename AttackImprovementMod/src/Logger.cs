@@ -26,7 +26,7 @@ namespace Sheepy.CSUtils {
          if ( level <= SourceLevels.Warning  ) return "WARN "; if ( level <= SourceLevels.Information ) return "INFO ";
          if ( level <= SourceLevels.Verbose  ) return "FINE "; return "TRAC ";
       };
-      private string _TimeFormat = "hh:mm:ss.ffff ";
+      private string _TimeFormat = "hh:mm:ss.ffff ", _Prefix = null, _Postfix = null;
       private bool _IgnoreDuplicateExceptions = true;
 
       protected struct LogEntry { public DateTime time; public SourceLevels level; public object message; public object[] args; }
@@ -43,6 +43,8 @@ namespace Sheepy.CSUtils {
       public volatile SourceLevels LogLevel = SourceLevels.Information;
       public Func<SourceLevels,string> LevelText { get => _LevelText; set { lock( this ) { _LevelText = value; } } }
       public string TimeFormat { get => _TimeFormat; set { lock( this ) { _TimeFormat = value; } } }
+      public string Prefix { get => _Prefix; set { lock( this ) { _Prefix = value; } } }
+      public string Postfix { get => _Postfix; set { lock( this ) { _Postfix = value; } } }
       public bool IgnoreDuplicateExceptions { get => _IgnoreDuplicateExceptions; set { lock( this ) {
          _IgnoreDuplicateExceptions = value; 
          if ( value ) { if ( exceptions == null ) exceptions = new HashSet<string>();
@@ -113,9 +115,10 @@ namespace Sheepy.CSUtils {
                      buf.Append( line.time.ToString( TimeFormat ) );
                   if ( LevelText != null )
                      buf.Append( LevelText( line.level ) );
+                  buf.Append( Prefix );
                   if ( line.args != null && line.args.Length > 0 && txt != null ) 
                      txt = string.Format( txt, line.args );
-                  buf.Append( txt );
+                  buf.Append( txt ).Append( Postfix );
                } catch ( Exception ex ) { Console.Error.WriteLine( ex ); }
                buf.Append( Environment.NewLine ); // Null or empty message = insert blank new line
             }
