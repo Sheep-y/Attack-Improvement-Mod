@@ -1,17 +1,18 @@
-﻿using BattleTech.UI;
-using BattleTech;
+﻿using BattleTech;
+using BattleTech.UI;
 using Harmony;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
+using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using System.Text;
-using System;
+using System.Text.RegularExpressions;
+using System.Threading;
 using UnityEngine;
 using static System.Reflection.BindingFlags;
 
@@ -44,11 +45,11 @@ namespace Sheepy.BattleTechMod {
 
       public string BaseDir { get; protected set; }
       private string _LogDir;
-      public string LogDir { 
+      public string LogDir {
          get { return _LogDir; }
          protected set {
             _LogDir = value;
-            Logger = new Logger( GetLogFile() );
+            Logger = new Logger( GetLogFile(), true );
          }
       }
       public HarmonyInstance harmony { get; internal set; }
@@ -450,29 +451,52 @@ namespace Sheepy.BattleTechMod {
    // Logging
    //
 
-   public class Logger {
+   public class Logger : IDisposable {
 
       public static readonly Logger BTML_LOG = new Logger( "Mods/BTModLoader.log" );
       public static readonly Logger BT_LOG = new Logger( "BattleTech_Data/output_log.txt" );
 
-      public Logger ( string file ) {
+      public Logger ( string file ) : this( file, false ) { }
+      public Logger ( string file, bool async ) {
          if ( String.IsNullOrEmpty( file ) ) throw new NullReferenceException();
          LogFile = file;
+         if ( ! async ) return;
+         queue = new List<LogEntry>();
+         worker = new Thread( WorkerLoop );
+         worker.Start();
       }
+
+      // ============ Self Prop ============
+
+      private Func<SourceLevels,string> _LevelText = ( level ) => level.ToString() + ": ";
+      private string _TimeFormat = "hh:mm:ss.ffff ";
+      private bool _IgnoreDuplicateExceptions = true;
+
+      protected struct LogEntry { public DateTime time; public SourceLevels level; public object message; public object[] args; }
+      private HashSet<string> exceptions = new HashSet<string>();
+      private readonly List<LogEntry> queue;
+      private Thread worker;
+
+      // ============ Public Prop ============
 
       public static string Stacktrace { get { return new StackTrace( true ).ToString(); } }
       public string LogFile { get; private set; }
 
-      public SourceLevels LogLevel = SourceLevels.Information;
-      public Func<SourceLevels,string> LevelText = ( level ) => level.ToString() + ": ";
-      public string TimeFormat = "hh:mm:ss.ffff ";
-      public bool IgnoreDuplicateExceptions = true;
+      // Settings are locked by this.  Worker is locked by queue.
+      public volatile SourceLevels LogLevel = SourceLevels.Information;
+      public Func<SourceLevels,string> LevelText { get => _LevelText; set { lock( this ) { _LevelText = value; } } }
+      public string TimeFormat { get => _TimeFormat; set { lock( this ) { _TimeFormat = value; } } }
+      public bool IgnoreDuplicateExceptions { get => _IgnoreDuplicateExceptions; set { lock( this ) {
+         _IgnoreDuplicateExceptions = value; 
+         if ( value ) { if ( exceptions == null ) exceptions = new HashSet<string>();
+         } else exceptions = null;
+      } } }
 
-      private HashSet<string> exceptions = new HashSet<string>();
+      // ============ API ============
 
-      public bool Exists () { return File.Exists( LogFile ); }
+      public virtual bool Exists () { return File.Exists( LogFile ); }
 
-      public Exception Delete () {
+      public virtual Exception Delete () {
          if ( LogFile == "Mods/BTModLoader.log" || LogFile == "BattleTech_Data/output_log.txt" )
             return new ApplicationException( "Cannot delete BTModLoader.log or BattleTech game log." );
          try {
@@ -483,20 +507,14 @@ namespace Sheepy.BattleTechMod {
 
       public void Log ( SourceLevels level, object message, params object[] args ) {
          if ( ( level | LogLevel ) == 0 ) return;
-         string txt = message?.ToString();
-         if ( IgnoreDuplicateExceptions && message is Exception ex ) {
-            if ( exceptions.Contains( txt ) ) return;
-            exceptions.Add( txt );
+         LogEntry entry = new LogEntry(){ time = DateTime.Now, level = level, message = message, args = args };
+         if ( queue == null ) lock ( this ) {
+            WriteLog( entry );
+         } else lock ( queue ) {
+            if ( worker == null ) throw new InvalidOperationException( "Logger already disposed." );
+            queue.Add( entry );
+            Monitor.PulseAll( queue );
          }
-         try {
-            if ( args != null && args.Length > 0 && txt != null ) 
-               txt = string.Format( txt, args );
-            if ( LevelText != null )
-               txt = LevelText( level ) + txt;
-            if ( ! String.IsNullOrEmpty( TimeFormat ) )
-               txt = DateTime.Now.ToString( TimeFormat ) + txt;
-         } catch ( Exception ) {}
-         WriteLog( txt + Environment.NewLine );
       }
 
       public void Trace ( object message = null, params object[] args ) { Log( SourceLevels.ActivityTracing, message, args ); }
@@ -505,12 +523,57 @@ namespace Sheepy.BattleTechMod {
       public void Warn  ( object message = null, params object[] args ) { Log( SourceLevels.Warning, message, args ); }
       public void Error ( object message = null, params object[] args ) { Log( SourceLevels.Error, message, args ); }
 
-      protected void WriteLog ( string message ) {
+      // ============ Implementation ============
+
+      private void WorkerLoop () {
+         do {
+            LogEntry[] entries;
+            lock ( queue ) {
+               if ( worker == null ) return;
+               try {
+                  Thread.Sleep( 1000 ); // Throttle write frequency
+                  if ( queue.Count <= 0 ) Monitor.Wait( queue );
+               } catch ( Exception ) { }
+               entries = queue.ToArray();
+               queue.Clear();
+            }
+            WriteLog( entries );
+         } while ( true );
+      }
+
+      protected virtual void WriteLog ( params LogEntry[] entries ) {
+         if ( entries.Length <= 0 ) return;
+         StringBuilder buf = new StringBuilder();
+         lock ( this ) { // Not expecting settings to change frequently. Lock outside format loop for higher throughput.
+            foreach ( LogEntry line in entries ) {
+               string txt = line.message?.ToString();
+               if ( ! String.IsNullOrEmpty( txt ) ) try { 
+                  if ( IgnoreDuplicateExceptions && line.message is Exception ex ) {
+                     if ( exceptions.Contains( txt ) ) return;
+                     exceptions.Add( txt );
+                  }
+                  if ( ! String.IsNullOrEmpty( TimeFormat ) )
+                     buf.Append( line.time.ToString( TimeFormat ) );
+                  if ( LevelText != null )
+                     buf.Append( LevelText( line.level ) );
+                  if ( line.args != null && line.args.Length > 0 && txt != null ) 
+                     txt = string.Format( txt, line.args );
+                  buf.Append( txt );
+               } catch ( Exception ex ) { Console.Error.WriteLine( ex ); }
+               buf.Append( Environment.NewLine ); // Null or empty message = insert blank new line
+            }
+         }
          try {
-            File.AppendAllText( LogFile, message );
+            File.AppendAllText( LogFile, buf.ToString() );
          } catch ( Exception ex ) {
-            Console.WriteLine( message );
             Console.Error.WriteLine( ex );
+         }
+      }
+
+      public void Dispose () {
+         if ( queue != null ) lock ( queue ) {
+            worker = null;
+            Monitor.PulseAll( queue );
          }
       }
    }
