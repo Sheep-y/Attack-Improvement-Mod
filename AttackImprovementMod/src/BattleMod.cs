@@ -83,7 +83,7 @@ namespace Sheepy.BattleTechMod {
       // Override this method to override Namd, Id, or Logger. Remember to call this base method!
       protected virtual void Setup () {
          Logger.Delete();
-         Logger.Info( "{2} Loading {0} Version {1} @ {3}", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
+         Logger.Info( "{0:yyyy-MM-dd} Loading {1} Version {2} @ {3}", DateTime.Now, Name, Version, BaseDir );
          Logger.Info( "Game Version {0}" + Environment.NewLine, VersionInfo.ProductVersion );
       }
 
@@ -113,7 +113,7 @@ namespace Sheepy.BattleTechMod {
          Logger.Info( "Loaded Settings: " + sanitised );
          Logger.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
          string commented = BattleJsonContract.FormatSettingJsonText( settings.GetType(), sanitised );
-         if ( commented != fileText ) { // Can be triggered by comment or field update, not necessary sanitisation
+         if ( commented != fileText ) { // Can be triggered by comment or field updates, not necessary sanitisation.
             Logger.Info( "Updating " + file );
             SaveSettings( commented );
          }
@@ -144,19 +144,14 @@ namespace Sheepy.BattleTechMod {
          return this;
       }
 
-      private static bool BattleModsPatched = false;
+      private static bool GameStartPatched = false;
 
       public void PatchBattleMods () {
-         if ( BattleModsPatched ) return;
-         Logger oldLog = this.Logger;
-         this.Logger = Logger.BTML_LOG;
-         LogPatch = false;
+         if ( GameStartPatched ) return;
          Patch( typeof( UnityGameInstance ).GetMethod( "InitUserSettings", Instance | NonPublic ), null, typeof( BattleMod ).GetMethod( "RunGameStarts", Static | NonPublic ) );
          Patch( typeof( SimGameState ).GetMethod( "Init" ), null, typeof( BattleMod ).GetMethod( "RunCampaignStarts", Static | NonPublic ) );
          Patch( typeof( CombatHUD ).GetMethod( "Init", new Type[]{ typeof( CombatGameState ) } ), null, typeof( BattleMod ).GetMethod( "RunCombatStarts", Static | NonPublic ) );
-         LogPatch = true;
-         BattleModsPatched = true;
-         this.Logger = oldLog;
+         GameStartPatched = true;
       }
 
       private static bool CalledGameStartsOnce = false;
@@ -338,8 +333,6 @@ namespace Sheepy.BattleTechMod {
          Patch( patched, new HarmonyMethod( prefix ), new HarmonyMethod( postfix ) );
       }
 
-      protected bool LogPatch = true; // TODO: Control with Log Level
-
       protected void Patch ( MethodBase patched, HarmonyMethod prefix, HarmonyMethod postfix ) {
          string pre = prefix?.method?.Name, post = postfix?.method?.Name;
          if ( patched == null ) {
@@ -349,8 +342,7 @@ namespace Sheepy.BattleTechMod {
          if ( Mod.harmony == null )
             Mod.harmony = HarmonyInstance.Create( Id );
          Mod.harmony.Patch( patched, prefix, postfix );
-         if ( LogPatch )
-            Logger.Vocal( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
+         Logger.Vocal( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
       }
 
       // ============ UTILS ============
@@ -508,7 +500,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       public void Log ( SourceLevels level, object message, params object[] args ) {
-         if ( ( level | LogLevel ) == 0 ) return;
+         if ( ( level & LogLevel ) != level ) return;
          LogEntry entry = new LogEntry(){ time = DateTime.Now, level = level, message = message, args = args };
          if ( queue == null ) lock ( this ) {
             WriteLog( entry );
