@@ -1,4 +1,5 @@
 ﻿using System;
+using Sheepy.CSUtils;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
@@ -114,7 +115,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Logging ============
 
       internal static string ModLogDir = ""; // A static variable for roll log
-      internal static Logger ModLog = Logger.BTML_LOG;
+      internal static Logger ModLog = BattleMod.BTML_LOG;
 
       public static void Trace ( object message = null, params object[] args ) { ModLog.Trace( message, args ); }
       public static void Vocal ( object message = null, params object[] args ) { ModLog.Vocal( message, args ); }

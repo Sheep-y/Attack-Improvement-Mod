@@ -24,7 +24,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          if ( BattleMod.FoundMod( "com.joelmeador.BTMLColorLOSMod", "BTMLColorLOSMod.BTMLColorLOSMod" ) ) {
-            Logger.BTML_LOG.Warn( Mod.Name + " detected joelmeador's BTMLColorLOSMod, LOS and arc styling disabled and left in the hands of BTMLColorLOSMod." );
+            BattleMod.BTML_LOG.Warn( Mod.Name + " detected joelmeador's BTMLColorLOSMod, LOS and arc styling disabled and left in the hands of BTMLColorLOSMod." );
             return;
          }
          InitSettings();

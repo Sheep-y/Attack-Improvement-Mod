@@ -14,7 +14,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStartsOnce () {
          if ( Settings.UnlockMeleePositioning && BattleMod.FoundMod( "de.morphyum.MeleeMover", "MeleeMover.MeleeMover" ) ) {
-            Logger.BTML_LOG.Warn( Mod.Name + " detected morphyum's MeleeMover, melee positioning unlock left in MeleeMover's hands." );
+            BattleMod.BTML_LOG.Warn( Mod.Name + " detected morphyum's MeleeMover, melee positioning unlock left in MeleeMover's hands." );
             Settings.UnlockMeleePositioning = false;
          }
          if ( Settings.UnlockMeleePositioning )
