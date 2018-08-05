@@ -449,10 +449,12 @@ namespace Sheepy.BattleTechMod {
       public Logger ( string file ) : this( file, false ) { }
       public Logger ( string file, bool async ) {
          if ( String.IsNullOrEmpty( file ) ) throw new NullReferenceException();
-         LogFile = file;
+         LogFile = file.Trim();
          if ( ! async ) return;
          queue = new List<LogEntry>();
          worker = new Thread( WorkerLoop );
+         worker.Name = "Logger " + LogFile;
+         worker.Priority = System.Threading.ThreadPriority.BelowNormal;
          worker.Start();
       }
 
