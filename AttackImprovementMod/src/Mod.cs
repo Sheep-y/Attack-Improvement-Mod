@@ -14,7 +14,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          ModLogDir = LogDir;
          LoadSettings( ref Settings, SanitizeSettings );
          NormaliseSettings();
-         Log( "Do NOT change settings here. This is just a log." );
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
          Log();
 

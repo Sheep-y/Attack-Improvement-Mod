@@ -23,23 +23,18 @@ namespace Sheepy.BattleTechMod {
       // Basic mod info for public access, will auto load from assembly then mod.json (if exists)
       public string Version { get; protected set; } = "Unknown";
 
-      protected BattleMod ( ) {
-         SetupDefault();
-         PatchBattleMods();
+      protected BattleMod () {
+         ReadBasicModInfo();
       }
 
+      public void Start () { Logger log = Logger; Start( ref log ); }
       public void Start ( ref Logger log ) {
          CurrentMod = this;
-         TryRun( Setup );
-         log = Logger;
+         TryRun( Setup ); // May be overloaded
+         if ( log != Logger ) 
+            log = Logger;
          Add( this );
-         CurrentMod = null;
-      }
-
-      public void Start () {
-         CurrentMod = this;
-         TryRun( Setup );
-         Add( this );
+         PatchBattleMods();
          CurrentMod = null;
       }
 
@@ -68,8 +63,8 @@ namespace Sheepy.BattleTechMod {
       private class ModInfo { public string Name;  public string Version; }
 #pragma warning restore CS0649
 
-      // Fill in blanks with Assembly values
-      private void SetupDefault () { TryRun( Logger, () => {
+      // Fill in blanks with Assembly values, then read from mod.json
+      private void ReadBasicModInfo () { TryRun( Logger, () => {
          Assembly file = GetType().Assembly;
          Id = GetType().Namespace;
          Name = file.GetName().Name;
@@ -85,10 +80,11 @@ namespace Sheepy.BattleTechMod {
          LogDir = BaseDir; // Create Logger after Name is read from mod.json
       } ); }
 
-      // Override this method to override Namd and Id
+      // Override this method to override Namd, Id, or Logger. Remember to call this base method!
       protected virtual void Setup () {
          Logger.Delete();
-         Logger.Info( "{2} Loading {0} Version {1} In {3}" + Environment.NewLine, Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
+         Logger.Info( "{2} Loading {0} Version {1} @ {3}", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
+         Logger.Info( "Game Version {0}" + Environment.NewLine, VersionInfo.ProductVersion );
       }
 
       public static string Idify ( string text ) { return Join( string.Empty, new Regex( "\\W+" ).Split( text ), UppercaseFirst ); }
@@ -113,7 +109,9 @@ namespace Sheepy.BattleTechMod {
          if ( sanitise != null )
             TryRun( () => config = sanitise( config ) );
          string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
+         Logger.Info( "WARNING: Do NOT change settings here. This is just a log." );
          Logger.Info( "Loaded Settings: " + sanitised );
+         Logger.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
          string commented = BattleJsonContract.FormatSettingJsonText( settings.GetType(), sanitised );
          if ( commented != fileText ) { // Can be triggered by comment or field update, not necessary sanitisation
             Logger.Info( "Updating " + file );
@@ -138,8 +136,8 @@ namespace Sheepy.BattleTechMod {
          if ( ! modules.TryGetValue( this, out List<BattleModModule> list ) )
             modules.Add( this, list = new List<BattleModModule>() );
          if ( ! list.Contains( module ) ) {
-            if ( module != CurrentMod )
-               if ( module.Id == this.Id ) module.Id += "." + Idify( module.Name );
+            if ( module != this )
+               if ( module.Id == Id ) module.Id += "." + Idify( module.Name );
             list.Add( module );
             TryRun( Logger, module.ModStarts );
          }
@@ -468,7 +466,11 @@ namespace Sheepy.BattleTechMod {
 
       // ============ Self Prop ============
 
-      private Func<SourceLevels,string> _LevelText = ( level ) => level.ToString() + ": ";
+      private Func<SourceLevels,string> _LevelText = ( level ) => { //return level.ToString() + ": ";
+         if ( level <= SourceLevels.Critical ) return "CRIT "; if ( level <= SourceLevels.Error       ) return "ERR  ";
+         if ( level <= SourceLevels.Warning  ) return "WARN "; if ( level <= SourceLevels.Information ) return "INFO ";
+         if ( level <= SourceLevels.Verbose  ) return "FINE "; return "TRAC ";
+      };
       private string _TimeFormat = "hh:mm:ss.ffff ";
       private bool _IgnoreDuplicateExceptions = true;
 
