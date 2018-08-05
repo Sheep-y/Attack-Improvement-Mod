@@ -59,18 +59,32 @@ namespace Sheepy.Reflector {
       }
 
       public MemberProxy<T> Get<T> ( string syntax ) { try {
-         TextParser state = new TextParser( Regex.Replace( syntax, "\\s+", "" ) );
+         string normalised = Regex.Replace( syntax, "\\s+", "" );
+         MemberInfo cached = CheckParserCache( normalised );
+         if ( cached != null ) return InfoToProxy<T>( cached );
+
+         TextParser state = new TextParser( normalised );
          MemberPart member = MatchMember( state );
-         if ( state.IsEmpty ) return Reflect<T>( member );
-         state.Take( '(' );
-         throw new NotImplementedException( "Method parameter matching not implemented" );
+         if ( ! state.IsEmpty ) {
+            state.Take( '(' );
+            throw new NotImplementedException( "Method parameter matching not implemented" );
+         }
+         MemberProxy<T> result = PartToProxy<T>( member );
+         if ( result != null & UseCache ) lock( parserCache ) {
+            parserCache.Add( normalised, new WeakReference( result.Member ) );
+         }
+         return result;
       } catch ( Exception ex ) {
          Log( Error, "Cannot find {0}: {1}", syntax, ex );
          return null;
       } }
 
       public Type GetType ( string syntax ) { try {
-         TextParser state = new TextParser( Regex.Replace( syntax, "\\s+", "" ) );
+         string normalised = Regex.Replace( syntax, "\\s+", "" );
+         Type cached = CheckTypeCache( normalised );
+         if ( cached != null ) return cached;
+
+         TextParser state = new TextParser( normalised );
          MemberPart member = MatchMember( state );
          if ( state.IsEmpty ) return GetType( member );
          throw state.Error( $"Unexpected '{state.Next}'" );
@@ -130,45 +144,54 @@ namespace Sheepy.Reflector {
          return lastMember;
       }
 
-      private MemberProxy<T> Reflect<T> ( MemberPart member ) {
-         MemberInfo result = CheckParserCache( member.ToString() );
-         if ( result == null ) {
-            Type type = GetType( member.Parent ?? member );
-            if ( type == null ) return null;
-            MemberInfo[] info = type.GetMember( member.MemberName, Public | BindingFlags.Instance | Static );
-            if ( info == null || info.Length <= 0 ) info = type.GetMember( member.MemberName, NonPublic | BindingFlags.Instance | Static );
-            if ( info.Length > 1 ) Log( Warning, "Multiple matches ({1}) found for {0}", member, info.Length );
-            result = info[0];
-         }
-         switch ( result.MemberType ) {
+      private MemberProxy<T> PartToProxy<T> ( MemberPart member ) {
+         Type type = GetType( member.Parent ?? member );
+         if ( type == null ) return null;
+         MemberInfo[] info = type.GetMember( member.MemberName, Public | BindingFlags.Instance | Static );
+         if ( info == null || info.Length <= 0 ) info = type.GetMember( member.MemberName, NonPublic | BindingFlags.Instance | Static );
+         if ( info.Length > 1 ) Log( Warning, "Multiple matches ({1}) found for {0}", member, info.Length );
+         return InfoToProxy<T>( info[ 0 ] );
+      }
+
+      private MemberProxy<T> InfoToProxy<T> ( MemberInfo member ) {
+         switch ( member.MemberType ) {
          case MemberTypes.Field:
-            return new FieldProxy<T>( (FieldInfo) result );
+            return new FieldProxy<T>( (FieldInfo) member );
          case MemberTypes.Property:
-            return new PropertyProxy<T>( (PropertyInfo) result );
+            return new PropertyProxy<T>( (PropertyInfo) member );
          case MemberTypes.Method:
-            return new MethodProxy<T>( (MethodInfo) result );
+            return new MethodProxy<T>( (MethodInfo) member );
          default:
-            throw new NotSupportedException( result.MemberType + " not implemented" );
+            throw new NotSupportedException( member.MemberType + " not implemented" );
          }
       }
  
       private Type GetType ( MemberPart member ) {
-         string fullname = member.ToString();
-         Type result = CheckTypeCache( fullname );
+         string name = member.ToString();
+         Type result = CheckTypeCache( name );
          if ( result != null ) return result;
-         if ( fullname.IndexOf( '.' ) < 0 ) {
-            if ( shortTypes.Count == 0 ) BuildTypeMap();
-            if ( shortTypes.TryGetValue( fullname, out Type shortType ) ) return shortType;
+
+         result = GetTypeNoCache( name );
+         if ( result != null && UseCache ) lock( typeCache ) {
+            typeCache.Add( name, result );
          }
-         if ( fullname.IndexOf( '.' ) > 0 )
+         return result;
+      }
+
+      private Type GetTypeNoCache ( string name ) {
+         if ( name.IndexOf( '.' ) < 0 ) {
+            if ( shortTypes.Count == 0 ) BuildTypeMap();
+            if ( shortTypes.TryGetValue( name, out Type shortType ) ) return shortType;
+         }
+         if ( name.IndexOf( '.' ) > 0 )
             foreach ( Assembly assembly in Assemblies ) {
-               Type type = assembly.GetType( fullname );
+               Type type = assembly.GetType( name );
                if ( type != null ) return type;
             }
          foreach ( Assembly assembly in Assemblies ) {
-            if ( ! Namespaces.TryGetValue( assembly, out HashSet<string> names ) ) continue;
-            foreach ( string name in names ) {
-               Type type = assembly.GetType( name + "." + fullname );
+            if ( ! Namespaces.TryGetValue( assembly, out HashSet<string> spaces ) ) continue;
+            foreach ( string space in spaces ) {
+               Type type = assembly.GetType( space + "." + name );
                if ( type != null ) return type;
             }
          }
