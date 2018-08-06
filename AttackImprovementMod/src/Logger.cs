@@ -80,31 +80,6 @@ namespace Sheepy.CSUtils {
       public void Warn  ( object message = null, params object[] args ) { Log( SourceLevels.Warning, message, args ); }
       public void Error ( object message = null, params object[] args ) { Log( SourceLevels.Error, message, args ); }
 
-      /* Indent not implemented because it must be tracked by LogEntry and requires a lock 
-
-      public Logger AddIndent ( string indent = "   " ) {
-         lock( this ) { Indent += indent; }
-         return this;
-      }
-      public Logger AddIndent ( int charCount ) { return AddIndent( String.Empty.PadRight( charCount ) ); }
-
-      public Logger RemoveIndent ( string indent ) { return RemoveIndent( indent.Length ); }
-      public Logger RemoveIndent ( int charCount = 3 ) {
-         lock( this ) { 
-            if ( Indent.Length <= charCount )
-               Indent = String.Empty;
-            else
-               Indent = Indent.Substr( 0, Indent.Length - charCount );
-         }
-         return this;
-      }
-
-      public Logger ResetIndent () { 
-         lock( this ) { Indent = String.Empty; }
-         return this;
-      }
-      */
-
       // ============ Implementation ============
 
       private void WorkerLoop () {

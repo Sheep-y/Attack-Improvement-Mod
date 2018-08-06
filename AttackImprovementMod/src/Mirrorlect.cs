@@ -41,7 +41,7 @@ namespace Sheepy.Reflector {
       public static Mirrorlect Instance { get; } = new Mirrorlect();
 
       public Mirrorlect AddAssembly ( Type typeInAssembly, string[] namespaces = null ) { return AddAssembly( typeInAssembly.Assembly, namespaces ); }
-      public Mirrorlect AddAssembly ( Assembly assembly, string[] namespaces = null ) { 
+      public Mirrorlect AddAssembly ( Assembly assembly, string[] namespaces = null ) {
          if ( assembly == null ) throw new ArgumentNullException();
          lock ( this ) {
             if ( ! Assemblies.Contains( assembly ) ) {
@@ -51,7 +51,7 @@ namespace Sheepy.Reflector {
             if ( namespaces == null ) {
                namespaces = assembly.GetTypes().Select( e => e.Namespace ).ToArray();
                Log( Information, "Auto-adding all namespaces in assembly {0}", assembly );
-            } else if ( namespaces.Length <= 0 ) 
+            } else if ( namespaces.Length <= 0 )
                return this;
             else
                Log( Verbose, "Adding {1} namespaces to assembly {0}", assembly, namespaces );
@@ -62,35 +62,36 @@ namespace Sheepy.Reflector {
          return this;
       }
 
-      public MemberProxy<T> Get<T> ( string syntax ) { try {
-         string normalised = Regex.Replace( syntax, "\\s+", "" );
+      public static MemberProxy<T> Reflect<T> ( string member ) { return Instance.Get<T>( member ); }
+
+      public MemberProxy<T> Get<T> ( string member ) { try {
+         string normalised = Regex.Replace( member, "\\s+", "" );
          if ( CheckParserCache( normalised, out MemberInfo cached ) )
             return InfoToProxy<T>( cached );
 
+         Log( Trace, "Reflecting {0}", normalised );
          TextParser state = new TextParser( normalised );
-         MemberPart member = MatchMember( state );
-         if ( ! state.IsEmpty ) {
-            state.Take( '(' );
-            throw new NotImplementedException( "Method parameter matching not implemented" );
-         }
-         MemberProxy<T> result = PartToProxy<T>( member );
+         MemberPart parsed = MatchMember( state );
+         if ( ! state.IsEmpty ) parsed.Parameters = MatchMemberList( '(', state, ')' )?.ToArray();
+         MemberProxy<T> result = PartToProxy<T>( parsed );
          SaveCache( normalised, result?.Member );
          return result;
       } catch ( Exception ex ) {
-         Log( Error, "Cannot find {0}: {1}", syntax, ex );
+         Log( Error, "Cannot find {0}: {1}", member, ex );
          return null;
       } }
 
-      public Type GetType ( string syntax ) { try {
-         string normalised = Regex.Replace( syntax, "\\s+", "" );
+      public Type GetType ( string member ) { try {
+         string normalised = Regex.Replace( member, "\\s+", "" );
          if ( CheckTypeCache( normalised, out Type cached ) ) return cached;
 
+         Log( Trace, "Finding Type {0}", normalised );
          TextParser state = new TextParser( normalised );
-         MemberPart member = MatchMember( state );
-         if ( state.IsEmpty ) return GetType( member );
+         MemberPart parsed = MatchMember( state );
+         if ( state.IsEmpty ) return GetType( parsed );
          throw state.Error( $"Unexpected '{state.Next}'" );
       } catch ( Exception ex ) {
-         Log( Error, "Cannot find {0}: {1}", syntax, ex );
+         Log( Error, "Cannot find {0}: {1}", member, ex );
          return null;
       } }
 
@@ -176,14 +177,35 @@ namespace Sheepy.Reflector {
       private MemberPart MatchMember ( TextParser state ) {
          MemberPart lastMember = null;
          do {
-            string fullpart = state.TakeTill( '.', '(' );
+            string fullpart = state.TakeTill( '.', ',', '<', '(' );
             if ( fullpart.Length <= 0 ) break;
             lastMember = new MemberPart(){ MemberName = fullpart, Parent = lastMember };
-            if ( state.IsEmpty || state.Next == '(' ) break;
-            state.Take( '.' );
+            if ( state.Next == '<' ) lastMember.GenericTypes = MatchMemberList( '<', state, '>' )?.ToArray();
+            if ( state.IsEmpty || state.Next != '.' ) break;
+            state.Advance();
          } while ( true );
          if ( lastMember == null ) state.Error( "Identifier expected" );
          return lastMember;
+      }
+
+      private List<MemberPart> MatchMemberList ( char prefix, TextParser state, char postfix ) {
+         state.Take( '(' );
+         List<MemberPart> result = MatchMemberList( state );
+         state.Take( ')' );
+         return result;
+      }
+
+      private List<MemberPart> MatchMemberList ( TextParser state ) {
+         List<MemberPart> result = new List<MemberPart>();
+         Member nextMatch;
+         do {
+            nextMatch = MatchMember( state );
+            if ( nextMatch == null ) break;
+            result.Add( nextMatch );
+            if ( state.Next != ',' ) break;
+            state.Advance();
+         } while ( true );
+         return result.Count <= 0 ? null : result;
       }
 
       private MemberProxy<T> PartToProxy<T> ( MemberPart member ) {
@@ -207,16 +229,11 @@ namespace Sheepy.Reflector {
             throw new NotSupportedException( member.MemberType + " not implemented" );
          }
       }
- 
+
       private Type GetType ( MemberPart member ) {
          string name = member.ToString();
          if ( CheckTypeCache( name, out Type result ) ) return result;
-
-         result = GetTypeNoCache( name );
-         if ( result != null && UseCache ) lock( typeCache ) {
-            typeCache.Add( name, result );
-         }
-         return result;
+         return SaveCache( name, GetTypeNoCache( name ) );
       }
 
       private Type GetTypeNoCache ( string name ) {
@@ -267,7 +284,7 @@ namespace Sheepy.Reflector {
       public readonly MemberInfo Member;
       protected object subject;
       public MemberProxy ( MemberInfo info ) { Member = info; }
-      public IMemberProxy<T> Of( object subject ) { 
+      public IMemberProxy<T> Of( object subject ) {
          MemberProxy<T> cloned = (MemberProxy<T>) MemberwiseClone();
          cloned.subject = subject;
          return cloned;
@@ -345,20 +362,23 @@ namespace Sheepy.Reflector {
       public bool IsEmpty { get => text.Length <= 0; }
       public string TakeTill ( params char[] chr ) {
          int pos = text.IndexOfAny( chr );
-         if ( pos == 0 ) return "";
+         if ( pos == 0 ) return String.Empty;
          return Consume( pos < 0 ? Length : pos );
       }
       public TextParser Take ( char chr ) {
          if ( IsEmpty || text[0] != chr ) Error( $"'{chr}' expected" );
-         text = text.Substring( 1 );
-         return this;
+         return Advance( 1 );
       }
       public FormatException Error ( string message ) { throw new FormatException( message + " in " + original.Substring( 0, original.Length - text.Length ) + "λ" + text ); }
 
-      private string Consume ( int len ) { // No length check
+      public string Consume ( int len ) { // No length check
          string result = text.Substring( 0, len );
          text = text.Substring( len );
          return result;
+      }
+      public TextParser Advance ( int len = 1 ) { // No length check
+         text = text.Substring( len );
+         return this;
       }
    }
 }
