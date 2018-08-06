@@ -31,10 +31,10 @@ namespace Sheepy.CSUtils {
       protected struct LogEntry { public DateTime time; public SourceLevels level; public object message; public object[] args; }
 
       // Worker states locked by queue which is private.
-      private HashSet<string> exceptions = new HashSet<string>();
-      private readonly int writeDelay;
+      private HashSet<string> exceptions;
       private readonly List<LogEntry> queue;
       private Thread worker;
+      private int writeDelay;
 
       // ============ Public Prop ============
 
@@ -49,8 +49,7 @@ namespace Sheepy.CSUtils {
       public string Postfix { get => _Postfix; set { lock( this ) { _Postfix = value; } } }
       public bool IgnoreDuplicateExceptions { get => _IgnoreDuplicateExceptions; set { lock( this ) {
          _IgnoreDuplicateExceptions = value;
-         if ( value ) { if ( exceptions == null ) exceptions = new HashSet<string>();
-         } else exceptions = null;
+         if ( ! value ) exceptions = null;
       } } }
 
       // ============ API ============
@@ -74,7 +73,7 @@ namespace Sheepy.CSUtils {
          } else lock ( queue ) {
             if ( worker == null ) throw new InvalidOperationException( "Logger already disposed." );
             queue.Add( entry );
-            Monitor.PulseAll( queue );
+            Monitor.Pulse( queue );
          }
       }
 
@@ -104,7 +103,8 @@ namespace Sheepy.CSUtils {
                entries = queue.ToArray();
                queue.Clear();
             }
-            WriteLog( entries );
+            if ( entries.Length > 0 )
+               WriteLog( entries );
          } while ( true );
       }
 
@@ -115,7 +115,8 @@ namespace Sheepy.CSUtils {
             foreach ( LogEntry line in entries ) {
                string txt = line.message?.ToString();
                if ( ! String.IsNullOrEmpty( txt ) ) try {
-                  if ( IgnoreDuplicateExceptions && line.message is Exception ex ) {
+                  if ( line.message is Exception ex && IgnoreDuplicateExceptions ) {
+                     if ( exceptions == null ) exceptions = new HashSet<string>();
                      if ( exceptions.Contains( txt ) ) return;
                      exceptions.Add( txt );
                   }
@@ -141,8 +142,8 @@ namespace Sheepy.CSUtils {
       public void Dispose () {
          if ( queue != null ) lock ( queue ) {
             worker = null;
-            writeDelay = 0;
-            Monitor.PulseAll( queue );
+            writeDelay = 0; // Flush log immediately
+            Monitor.Pulse( queue );
          }
       }
    }
