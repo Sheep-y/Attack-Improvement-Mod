@@ -272,9 +272,11 @@ namespace Sheepy.Reflector {
          cloned.subject = subject;
          return cloned;
       }
-      public abstract T Get( params object[] index );
-      public abstract T Call( params object[] parameters );
-      public abstract void Set( T value, params object[] index );
+      public T Call( params object[] parameters ) { return Get( parameters ); }
+      public T Get( params object[] index ) { return GetValue( subject, index ); }
+      public void Set( T value, params object[] index ) { SetValue( subject, value, index ); }
+      public abstract T GetValue( object subject, params object[] index );
+      public abstract void SetValue( object subject, T value, params object[] index );
       public override string ToString () {
          string connector = Member.DeclaringType != null ? "." : "";
          return GetType().Name + "(" + Member.DeclaringType + connector + Member + ")";
@@ -284,27 +286,22 @@ namespace Sheepy.Reflector {
    public class FieldProxy <T> : MemberProxy <T> {
       public FieldInfo Field { get => (FieldInfo) Member; }
       public FieldProxy ( FieldInfo info ) : base( info ) {}
-      public override T Get( params object[] index ) { return (T) Field.GetValue( subject ); }
-      public override T Call( params object[] parameters ) { return Get( parameters ); }
-      public override void Set( T value, params object[] index ) { Field.SetValue( subject, value ); }
+      public override T GetValue( object subject, params object[] index ) { return (T) Field.GetValue( subject ); }
+      public override void SetValue( object subject, T value, params object[] index ) { Field.SetValue( subject, value ); }
    }
 
    public class PropertyProxy <T> : MemberProxy <T> {
       public PropertyInfo Property { get => (PropertyInfo) Member; }
       public PropertyProxy ( PropertyInfo info ) : base( info ) {}
-      public override T Get( params object[] index ) { return (T) Property.GetValue( subject, index ); }
-      public override T Call( params object[] parameters ) { return Get( parameters ); }
-      public override void Set( T value, params object[] index ) { Property.SetValue( subject, value, index ); }
+      public override T GetValue( object subject, params object[] index ) { return (T) Property.GetValue( subject, index ); }
+      public override void SetValue( object subject, T value, params object[] index ) { Property.SetValue( subject, value, index ); }
    }
 
    public class MethodProxy <T> : MemberProxy <T> {
       public MethodInfo Method { get => (MethodInfo) Member; }
       public MethodProxy ( MethodInfo info ) : base( info ) {}
-      public override T Get( params object[] index ) { return Call( index ); }
-      public override T Call( params object[] parameters ) {
-         return (T) Method.Invoke( subject, parameters );
-      }
-      public override void Set( T value, params object[] index ) { Call( index ); }
+      public override T GetValue( object subject, params object[] index ) { return (T) Method.Invoke( subject, index ); }
+      public override void SetValue( object subject, T value, params object[] index ) { GetValue( subject, index ); }
    }
 
    internal class MemberPart {
