@@ -83,7 +83,7 @@ namespace Sheepy.CSUtils {
       public void Warn  ( object message = null, params object[] args ) { Log( SourceLevels.Warning, message, args ); }
       public void Error ( object message = null, params object[] args ) { Log( SourceLevels.Error, message, args ); }
 
-      // ============ Implementation ============
+      // ============ Implementations ============
 
       private void WorkerLoop () {
          do {
@@ -98,13 +98,7 @@ namespace Sheepy.CSUtils {
             if ( delay > 0 ) try {
                Thread.Sleep( writeDelay );
             } catch ( Exception ) { }
-            LogEntry[] entries;
-            lock ( queue ) {
-               entries = queue.ToArray();
-               queue.Clear();
-            }
-            if ( entries.Length > 0 )
-               OutputLog( entries );
+            Flush();
          } while ( true );
       }
 
@@ -118,13 +112,13 @@ namespace Sheepy.CSUtils {
                   if ( SkipMessage( line, txt ) ) continue;
                   FormatMessage( buf, line, txt );
                } catch ( Exception ex ) { Console.Error.WriteLine( ex ); }
-               NewLine( buf ); // Null or empty message = insert blank new line
+               NewLine( buf ); // Null or empty message = insert blank new line.
             }
          }
          OutputLog( buf );
       }
 
-      // Override to control which message get logged
+      // Override to control which message get logged.
       protected virtual bool SkipMessage ( LogEntry line, string txt ) {
          if ( line.message is Exception ex && IgnoreDuplicateExceptions ) {
             if ( exceptions == null ) exceptions = new HashSet<string>();
@@ -134,7 +128,7 @@ namespace Sheepy.CSUtils {
          return false;
       }
 
-      // Override to change line/entry format
+      // Override to change line/entry format.
       protected virtual void FormatMessage ( StringBuilder buf, LogEntry line, string txt ) {
          if ( ! String.IsNullOrEmpty( TimeFormat ) )
             buf.Append( line.time.ToString( TimeFormat ) );
@@ -146,18 +140,28 @@ namespace Sheepy.CSUtils {
          buf.Append( txt ).Append( Postfix );
       }
 
-      // Called after every entry, even null or empty
+      // Called after every entry, even null or empty.
       protected virtual void NewLine ( StringBuilder buf, LogEntry line ) {
          buf.Append( Environment.NewLine );
       }
 
-      // Override to change log output, e.g. to console, system event log, or development environment
+      // Override to change log output, e.g. to console, system event log, or development environment.
       protected virtual void OutputLog ( StringBuilder buf ) {
          try {
             File.AppendAllText( LogFile, buf.ToString() );
          } catch ( Exception ex ) {
             Console.Error.WriteLine( ex );
          }
+      }
+
+      public void Flush () {
+         LogEntry[] entries;
+         lock ( queue ) {
+            entries = queue.ToArray();
+            queue.Clear();
+         }
+         if ( entries.Length > 0 )
+            OutputLog( entries );
       }
 
       public void Dispose () {
