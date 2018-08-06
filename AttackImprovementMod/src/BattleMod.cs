@@ -46,7 +46,7 @@ namespace Sheepy.BattleTechMod {
          get { return _LogDir; }
          protected set {
             _LogDir = value;
-            Logger = new Logger( GetLogFile(), true );
+            Logger = new Logger( GetLogFile() );
          }
       }
       public HarmonyInstance harmony { get; internal set; }

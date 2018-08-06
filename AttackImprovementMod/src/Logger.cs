@@ -7,11 +7,12 @@ using System.Threading;
 
 namespace Sheepy.CSUtils {
    public class Logger : IDisposable {
-      public Logger ( string file ) : this( file, false ) { }
-      public Logger ( string file, bool async ) {
+      public Logger ( string file ) : this( file, 1000 ) { }
+      public Logger ( string file, int writeDelay ) {
          if ( String.IsNullOrEmpty( file ) ) throw new NullReferenceException();
          LogFile = file.Trim();
-         if ( ! async ) return;
+         if ( ! writeDelay < 0 ) return;
+         this.writeDelay = writeDelay;
          queue = new List<LogEntry>();
          worker = new Thread( WorkerLoop ) { Name = "Logger " + LogFile, Priority = ThreadPriority.BelowNormal };
          worker.Start();
@@ -28,7 +29,10 @@ namespace Sheepy.CSUtils {
       private bool _IgnoreDuplicateExceptions = true;
 
       protected struct LogEntry { public DateTime time; public SourceLevels level; public object message; public object[] args; }
+
+      // Worker states locked by queue which is private.
       private HashSet<string> exceptions = new HashSet<string>();
+      private readonly int writeDelay;
       private readonly List<LogEntry> queue;
       private Thread worker;
 
@@ -37,7 +41,7 @@ namespace Sheepy.CSUtils {
       public static string Stacktrace { get { return new StackTrace( true ).ToString(); } }
       public string LogFile { get; private set; }
 
-      // Settings are locked by this.  Worker is locked by queue.
+      // Settings are locked by this.
       public volatile SourceLevels LogLevel = SourceLevels.Information;
       public Func<SourceLevels,string> LevelText { get => _LevelText; set { lock( this ) { _LevelText = value; } } }
       public string TimeFormat { get => _TimeFormat; set { lock( this ) { _TimeFormat = value; } } }
@@ -84,13 +88,19 @@ namespace Sheepy.CSUtils {
 
       private void WorkerLoop () {
          do {
-            LogEntry[] entries;
+            int delay = 0;
             lock ( queue ) {
                if ( worker == null ) return;
                try {
-                  Thread.Sleep( 1000 ); // Throttle write frequency
                   if ( queue.Count <= 0 ) Monitor.Wait( queue );
                } catch ( Exception ) { }
+               delay = writeDelay;
+            }
+            if ( delay > 0 ) try {
+               Thread.Sleep( writeDelay );
+            } catch ( Exception ) { }
+            LogEntry[] entries;
+            lock ( queue ) {
                entries = queue.ToArray();
                queue.Clear();
             }
@@ -131,6 +141,7 @@ namespace Sheepy.CSUtils {
       public void Dispose () {
          if ( queue != null ) lock ( queue ) {
             worker = null;
+            writeDelay = 0;
             Monitor.PulseAll( queue );
          }
       }
