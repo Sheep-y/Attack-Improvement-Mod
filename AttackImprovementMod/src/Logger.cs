@@ -44,7 +44,7 @@ namespace Sheepy.CSUtils {
       public string Prefix { get => _Prefix; set { lock( this ) { _Prefix = value; } } }
       public string Postfix { get => _Postfix; set { lock( this ) { _Postfix = value; } } }
       public bool IgnoreDuplicateExceptions { get => _IgnoreDuplicateExceptions; set { lock( this ) {
-         _IgnoreDuplicateExceptions = value; 
+         _IgnoreDuplicateExceptions = value;
          if ( value ) { if ( exceptions == null ) exceptions = new HashSet<string>();
          } else exceptions = null;
       } } }
@@ -80,6 +80,31 @@ namespace Sheepy.CSUtils {
       public void Warn  ( object message = null, params object[] args ) { Log( SourceLevels.Warning, message, args ); }
       public void Error ( object message = null, params object[] args ) { Log( SourceLevels.Error, message, args ); }
 
+      /* Indent not implemented because it must be tracked by LogEntry and requires a lock 
+
+      public Logger AddIndent ( string indent = "   " ) {
+         lock( this ) { Indent += indent; }
+         return this;
+      }
+      public Logger AddIndent ( int charCount ) { return AddIndent( String.Empty.PadRight( charCount ) ); }
+
+      public Logger RemoveIndent ( string indent ) { return RemoveIndent( indent.Length ); }
+      public Logger RemoveIndent ( int charCount = 3 ) {
+         lock( this ) { 
+            if ( Indent.Length <= charCount )
+               Indent = String.Empty;
+            else
+               Indent = Indent.Substr( 0, Indent.Length - charCount );
+         }
+         return this;
+      }
+
+      public Logger ResetIndent () { 
+         lock( this ) { Indent = String.Empty; }
+         return this;
+      }
+      */
+
       // ============ Implementation ============
 
       private void WorkerLoop () {
@@ -104,7 +129,7 @@ namespace Sheepy.CSUtils {
          lock ( this ) { // Not expecting settings to change frequently. Lock outside format loop for higher throughput.
             foreach ( LogEntry line in entries ) {
                string txt = line.message?.ToString();
-               if ( ! String.IsNullOrEmpty( txt ) ) try { 
+               if ( ! String.IsNullOrEmpty( txt ) ) try {
                   if ( IgnoreDuplicateExceptions && line.message is Exception ex ) {
                      if ( exceptions.Contains( txt ) ) return;
                      exceptions.Add( txt );
@@ -114,7 +139,7 @@ namespace Sheepy.CSUtils {
                   if ( LevelText != null )
                      buf.Append( LevelText( line.level ) );
                   buf.Append( Prefix );
-                  if ( line.args != null && line.args.Length > 0 && txt != null ) 
+                  if ( line.args != null && line.args.Length > 0 && txt != null )
                      txt = string.Format( txt, line.args );
                   buf.Append( txt ).Append( Postfix );
                } catch ( Exception ex ) { Console.Error.WriteLine( ex ); }
