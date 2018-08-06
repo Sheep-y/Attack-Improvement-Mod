@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Sheepy.Reflector {
    using static System.Diagnostics.SourceLevels;
@@ -14,17 +15,20 @@ namespace Sheepy.Reflector {
 
    public class Mirrorlect {
 
-      public volatile bool UseCache = true;
       public volatile Action<SourceLevels,string,object[]> Logger = ( level, msg, args ) => {
          if ( level <= Warning ) Console.WriteLine( String.Format( msg, args ) );
       };
 
+      public volatile bool UseCache = true;
       // All public field/prop locked to (this)
       public readonly List<Assembly> Assemblies = new List<Assembly>();
       public readonly Dictionary<Assembly, HashSet<string>> Namespaces = new Dictionary<Assembly, HashSet<string>>();
-      // Locked individually. Never lock both at the same time.
+
+      // Caches
+      private static ReaderWriterLock typeCacheLock = new ReaderWriterLock(), parserCacheLock = new ReaderWriterLock();
       private static Dictionary<string,Type> typeCache = new Dictionary<string, Type>();
       private static Dictionary<string,WeakReference> parserCache = new Dictionary<string,WeakReference>();
+      private const int CacheTimeoutMS = 50;
 
       // ============ Public API ============
 
@@ -70,9 +74,7 @@ namespace Sheepy.Reflector {
             throw new NotImplementedException( "Method parameter matching not implemented" );
          }
          MemberProxy<T> result = PartToProxy<T>( member );
-         if ( result != null & UseCache ) lock( parserCache ) {
-            parserCache.Add( normalised, new WeakReference( result.Member ) );
-         }
+         SaveCache( normalised, result.Member );
          return result;
       } catch ( Exception ex ) {
          Log( Error, "Cannot find {0}: {1}", syntax, ex );
@@ -96,27 +98,67 @@ namespace Sheepy.Reflector {
       // ============ Caching System ============
 
       public Mirrorlect ClearCache () {
-         lock ( typeCache   ) { typeCache.Clear();   }
-         lock ( parserCache ) { parserCache.Clear(); }
+         try {
+            if ( typeCacheLock.IsReaderLockHeld ) typeCacheLock.ReleaseLock();
+            typeCacheLock.AcquireWriterLock( int.MaxValue );
+            typeCache.Clear();
+         } finally {
+            typeCacheLock.ReleaseLock();
+         }
+         try {
+            if ( parserCacheLock.IsReaderLockHeld ) parserCacheLock.ReleaseLock();
+            parserCacheLock.AcquireWriterLock( int.MaxValue );
+            parserCache.Clear();
+         } finally {
+            parserCacheLock.ReleaseLock();
+         }
          return this;
       }
 
+      public MemberInfo SaveCache ( string input, MemberInfo item ) {
+         if ( item == null || ! UseCache ) return item;
+         Log( Verbose, "Caching parser result {0}", input );
+         try {
+            parserCacheLock.AcquireWriterLock( CacheTimeoutMS );
+            parserCache[ input ] = new WeakReference( item );
+         } finally {
+            parserCacheLock.ReleaseLock();
+         }
+         return item;
+      }
+
+      public Type SaveCache ( string input, Type item ) {
+         if ( item == null || ! UseCache ) return item;
+         Log( Verbose, "Caching type result {0}", input );
+         try {
+            typeCacheLock.AcquireWriterLock( CacheTimeoutMS );
+            typeCache[ input ] = item;
+         } finally {
+            typeCacheLock.ReleaseLock();
+         }
+         return item;
+      }
+
       private Type CheckTypeCache ( string input ) {
-         if ( ! UseCache ) return null;
          Type result = null;
-         lock ( typeCache ) {
+         try {
+            typeCacheLock.AcquireReaderLock( CacheTimeoutMS );
             typeCache.TryGetValue( input, out result );
+         } finally {
+            typeCacheLock.ReleaseLock();
          }
          if ( result != null ) Log( ActivityTracing, "Cache Hit Type: {0}", input );
          return result;
       }
 
       private MemberInfo CheckParserCache ( string input ) {
-         if ( ! UseCache ) return null;
          WeakReference pointer = null;
          MemberInfo result = null;
-         lock ( parserCache ) {
+         try {
+            parserCacheLock.AcquireReaderLock( CacheTimeoutMS );
             if ( ! parserCache.TryGetValue( input, out pointer ) ) return null;
+         } finally {
+            parserCacheLock.ReleaseLock();
          }
          if ( pointer.Target == null ) return null;
          if ( result != null ) Log( ActivityTracing, "Cache Hit Member: {0}", input );
