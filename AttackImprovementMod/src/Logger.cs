@@ -13,9 +13,7 @@ namespace Sheepy.CSUtils {
          LogFile = file.Trim();
          if ( ! async ) return;
          queue = new List<LogEntry>();
-         worker = new Thread( WorkerLoop );
-         worker.Name = "Logger " + LogFile;
-         worker.Priority = ThreadPriority.BelowNormal;
+         worker = new Thread( WorkerLoop ) { Name = "Logger " + LogFile, Priority = ThreadPriority.BelowNormal };
          worker.Start();
       }
 

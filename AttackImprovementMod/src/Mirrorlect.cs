@@ -64,8 +64,8 @@ namespace Sheepy.Reflector {
 
       public MemberProxy<T> Get<T> ( string syntax ) { try {
          string normalised = Regex.Replace( syntax, "\\s+", "" );
-         MemberInfo cached = CheckParserCache( normalised );
-         if ( cached != null ) return InfoToProxy<T>( cached );
+         if ( CheckParserCache( normalised, out MemberInfo cached ) )
+            return InfoToProxy<T>( cached );
 
          TextParser state = new TextParser( normalised );
          MemberPart member = MatchMember( state );
@@ -74,7 +74,7 @@ namespace Sheepy.Reflector {
             throw new NotImplementedException( "Method parameter matching not implemented" );
          }
          MemberProxy<T> result = PartToProxy<T>( member );
-         SaveCache( normalised, result.Member );
+         SaveCache( normalised, result?.Member );
          return result;
       } catch ( Exception ex ) {
          Log( Error, "Cannot find {0}: {1}", syntax, ex );
@@ -83,8 +83,7 @@ namespace Sheepy.Reflector {
 
       public Type GetType ( string syntax ) { try {
          string normalised = Regex.Replace( syntax, "\\s+", "" );
-         Type cached = CheckTypeCache( normalised );
-         if ( cached != null ) return cached;
+         if ( CheckTypeCache( normalised, out Type cached ) ) return cached;
 
          TextParser state = new TextParser( normalised );
          MemberPart member = MatchMember( state );
@@ -139,8 +138,8 @@ namespace Sheepy.Reflector {
          return item;
       }
 
-      private Type CheckTypeCache ( string input ) {
-         Type result = null;
+      private bool CheckTypeCache ( string input, out Type result ) {
+         result = null;
          try {
             typeCacheLock.AcquireReaderLock( CacheTimeoutMS );
             typeCache.TryGetValue( input, out result );
@@ -148,21 +147,22 @@ namespace Sheepy.Reflector {
             typeCacheLock.ReleaseLock();
          }
          if ( result != null ) Log( ActivityTracing, "Cache Hit Type: {0}", input );
-         return result;
+         return result != null;
       }
 
-      private MemberInfo CheckParserCache ( string input ) {
+      private bool CheckParserCache ( string input, out MemberInfo result ) {
          WeakReference pointer = null;
-         MemberInfo result = null;
+         result = null;
          try {
             parserCacheLock.AcquireReaderLock( CacheTimeoutMS );
-            if ( ! parserCache.TryGetValue( input, out pointer ) ) return null;
+            if ( ! parserCache.TryGetValue( input, out pointer ) ) return false;
          } finally {
             parserCacheLock.ReleaseLock();
          }
-         if ( pointer.Target == null ) return null;
-         if ( result != null ) Log( ActivityTracing, "Cache Hit Member: {0}", input );
-         return (MemberInfo) pointer.Target;
+         if ( pointer.Target == null ) return false;
+         Log( ActivityTracing, "Cache Hit Member: {0}", input );
+         result = (MemberInfo) pointer.Target;
+         return result != null;
       }
 
       // ============ Internal Implementation ============
@@ -210,8 +210,7 @@ namespace Sheepy.Reflector {
  
       private Type GetType ( MemberPart member ) {
          string name = member.ToString();
-         Type result = CheckTypeCache( name );
-         if ( result != null ) return result;
+         if ( CheckTypeCache( name, out Type result ) ) return result;
 
          result = GetTypeNoCache( name );
          if ( result != null && UseCache ) lock( typeCache ) {
