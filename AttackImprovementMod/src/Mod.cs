@@ -118,7 +118,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static Logger ModLog = BattleMod.BTML_LOG;
 
       public static void Trace ( object message = null, params object[] args ) { ModLog.Trace( message, args ); }
-      public static void Vocal ( object message = null, params object[] args ) { ModLog.Vocal( message, args ); }
+      public static void Verbo ( object message = null, params object[] args ) { ModLog.Verbo( message, args ); }
       public static void Log   ( object message = null, params object[] args ) { ModLog.Info( message, args ); }
       public static void Warn  ( object message = null, params object[] args ) { ModLog.Warn( message, args ); }
       public static bool Error ( object message = null, params object[] args ) { ModLog.Error( message, args ); return true; }

@@ -67,18 +67,18 @@ namespace Sheepy.CSUtils {
 
       public void Log ( SourceLevels level, object message, params object[] args ) {
          if ( ( level & LogLevel ) != level ) return;
-         LogEntry entry = new LogEntry(){ time = DateTime.Now, level = level, message = message, args = args };
-         if ( queue == null ) lock ( this ) {
-            WriteLog( entry );
-         } else lock ( queue ) {
+         LogEntry entry = message == null ? null : new LogEntry(){ time = DateTime.Now, level = level, message = message, args = args };
+         if ( queue != null ) lock ( queue ) {
             if ( worker == null ) throw new InvalidOperationException( "Logger already disposed." );
             queue.Add( entry );
             Monitor.Pulse( queue );
+         } else lock ( this ) {
+            OutputLog( entry );
          }
       }
 
       public void Trace ( object message = null, params object[] args ) { Log( SourceLevels.ActivityTracing, message, args ); }
-      public void Vocal ( object message = null, params object[] args ) { Log( SourceLevels.Verbose, message, args ); }
+      public void Verbo ( object message = null, params object[] args ) { Log( SourceLevels.Verbose, message, args ); }
       public void Info  ( object message = null, params object[] args ) { Log( SourceLevels.Information, message, args ); }
       public void Warn  ( object message = null, params object[] args ) { Log( SourceLevels.Warning, message, args ); }
       public void Error ( object message = null, params object[] args ) { Log( SourceLevels.Error, message, args ); }
@@ -104,34 +104,55 @@ namespace Sheepy.CSUtils {
                queue.Clear();
             }
             if ( entries.Length > 0 )
-               WriteLog( entries );
+               OutputLog( entries );
          } while ( true );
       }
 
-      protected virtual void WriteLog ( params LogEntry[] entries ) {
+      private void OutputLog ( params LogEntry[] entries ) {
          if ( entries.Length <= 0 ) return;
          StringBuilder buf = new StringBuilder();
          lock ( this ) { // Not expecting settings to change frequently. Lock outside format loop for higher throughput.
             foreach ( LogEntry line in entries ) {
-               string txt = line.message?.ToString();
+               string txt = line?.message?.ToString();
                if ( ! String.IsNullOrEmpty( txt ) ) try {
-                  if ( line.message is Exception ex && IgnoreDuplicateExceptions ) {
-                     if ( exceptions == null ) exceptions = new HashSet<string>();
-                     if ( exceptions.Contains( txt ) ) return;
-                     exceptions.Add( txt );
-                  }
-                  if ( ! String.IsNullOrEmpty( TimeFormat ) )
-                     buf.Append( line.time.ToString( TimeFormat ) );
-                  if ( LevelText != null )
-                     buf.Append( LevelText( line.level ) );
-                  buf.Append( Prefix );
-                  if ( line.args != null && line.args.Length > 0 && txt != null )
-                     txt = string.Format( txt, line.args );
-                  buf.Append( txt ).Append( Postfix );
+                  if ( SkipMessage( line, txt ) ) continue;
+                  FormatMessage( buf, line, txt );
                } catch ( Exception ex ) { Console.Error.WriteLine( ex ); }
-               buf.Append( Environment.NewLine ); // Null or empty message = insert blank new line
+               NewLine( buf ); // Null or empty message = insert blank new line
             }
          }
+         OutputLog( buf );
+      }
+
+      // Override to control which message get logged
+      protected virtual bool SkipMessage ( LogEntry line, string txt ) {
+         if ( line.message is Exception ex && IgnoreDuplicateExceptions ) {
+            if ( exceptions == null ) exceptions = new HashSet<string>();
+            if ( exceptions.Contains( txt ) ) return true;
+            exceptions.Add( txt );
+         }
+         return false;
+      }
+
+      // Override to change line/entry format
+      protected virtual void FormatMessage ( StringBuilder buf, LogEntry line, string txt ) {
+         if ( ! String.IsNullOrEmpty( TimeFormat ) )
+            buf.Append( line.time.ToString( TimeFormat ) );
+         if ( LevelText != null )
+            buf.Append( LevelText( line.level ) );
+         buf.Append( Prefix );
+         if ( line.args != null && line.args.Length > 0 && txt != null )
+            txt = string.Format( txt, line.args );
+         buf.Append( txt ).Append( Postfix );
+      }
+
+      // Called after every entry, even null or empty
+      protected virtual void NewLine ( StringBuilder buf, LogEntry line ) {
+         buf.Append( Environment.NewLine );
+      }
+
+      // Override to change log output, e.g. to console, system event log, or development environment
+      protected virtual void OutputLog ( StringBuilder buf ) {
          try {
             File.AppendAllText( LogFile, buf.ToString() );
          } catch ( Exception ex ) {
