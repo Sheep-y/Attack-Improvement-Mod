@@ -26,6 +26,7 @@ namespace Sheepy.CSUtils {
          if ( level <= SourceLevels.Verbose  ) return "FINE "; return "TRAC ";
       };
       protected string _TimeFormat = "hh:mm:ss.ffff ", _Prefix = null, _Postfix = null;
+      protected List<Func<LogEntry,bool>> _Filters = null;
       protected bool _IgnoreDuplicateExceptions = true;
 
       public struct LogEntry { public DateTime time; public SourceLevels level; public object message; public object[] args; }
@@ -79,9 +80,26 @@ namespace Sheepy.CSUtils {
             queue.Add( entry );
             Monitor.Pulse( queue );
          } else lock ( queue ) {
-            OutputLog( entry );
+            OutputLog( _Filters, entry );
          }
       }
+
+      // Each filter may modify the line, and may return false to exclude an input line from logging.
+      // First input is unformatted log line, second input is log entry.
+      public bool AddFilter ( Func<LogEntry,bool> filter ) { lock( queue ) {
+         if ( filter == null ) return false;
+         if ( _Filters == null ) _Filters = new List<Func<LogEntry,bool>>();
+         else if ( _Filters.Contains( filter ) ) return false;
+         _Filters.Add( filter );
+         return true;
+      } }
+
+      public bool RemoveFilter ( Func<LogEntry,bool> filter ) { lock( queue ) {
+         if ( filter == null || _Filters == null ) return false;
+         bool result = _Filters.Remove( filter );
+         if ( result && _Filters.Count <= 0 ) _Filters = null;
+         return result;
+      } }
 
       public void Trace ( object message = null, params object[] args ) { Log( SourceLevels.ActivityTracing, message, args ); }
       public void Verbo ( object message = null, params object[] args ) { Log( SourceLevels.Verbose, message, args ); }
@@ -109,27 +127,32 @@ namespace Sheepy.CSUtils {
       }
 
       public void Flush () {
+         Func<LogEntry,bool>[] filters;
          LogEntry[] entries;
          lock ( queue ) {
+            filters = _Filters?.ToArray();
             entries = queue.ToArray();
             queue.Clear();
          }
          if ( entries.Length > 0 )
-            OutputLog( entries );
+            OutputLog( filters, entries );
       }
 
-      private void OutputLog ( params LogEntry[] entries ) {
+      private void OutputLog ( IEnumerable<Func<LogEntry,bool>> filters, params LogEntry[] entries ) {
          if ( entries.Length <= 0 ) return;
          StringBuilder buf = new StringBuilder();
          lock ( exceptions ) { // Not expecting settings to change frequently. Lock outside format loop for higher throughput.
-            foreach ( LogEntry line in entries ) {
+            foreach ( LogEntry line in entries ) try {
+               if ( filters != null ) foreach ( Func<LogEntry,bool> filter in filters ) try {
+                  if ( ! filter( line ) ) continue;
+               } catch ( Exception ) { }
                string txt = line.message?.ToString();
-               if ( ! String.IsNullOrEmpty( txt ) ) try {
+               if ( ! String.IsNullOrEmpty( txt ) ) {
                   if ( ! AllowMessagePass( line, txt ) ) continue;
                   FormatMessage( buf, line, txt );
-               } catch ( Exception ex ) { Console.Error.WriteLine( ex ); }
+               }
                NewLine( buf, line ); // Null or empty message = insert blank new line.
-            }
+            } catch ( Exception ex ) { Console.Error.WriteLine( ex ); }
          }
          OutputLog( buf );
       }
