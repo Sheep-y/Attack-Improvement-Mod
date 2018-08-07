@@ -12,11 +12,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class ModifierList : BattleModModule {
 
       public override void CombatStartsOnce () {
+         if ( Settings.RangedAccuracyFactors != null || Settings.MeleeAccuracyFactors != null )
+            Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );
+
+         if ( Settings.RangedAccuracyFactors != null ) {
+            InitRangedModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
+            if ( MeleeModifiers.Count > 0 ) {
+               Patch( typeof( ToHit ), "GetAllModifiers", new Type[]{ typeof( AbstractActor ), typeof( Weapon ), typeof( ICombatant ), typeof( Vector3 ), typeof( Vector3 ), typeof( LineOfFireLevel ), typeof( bool ) }, "OverrideRangedModifiers", null );
+               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", NonPublic, typeof( ICombatant ), "OverrideRangedToolTips", null );
+            }
+         }
          if ( Settings.MeleeAccuracyFactors != null ) {
             InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
-            if ( Modifiers.Count > 0 ) {
+            if ( MeleeModifiers.Count > 0 ) {
                contemplatingDFA = typeof( CombatHUDWeaponSlot ).GetMethod( "contemplatingDFA", NonPublic | Instance );
-               Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );
+               if ( contemplatingDFA == null ) Warn( "CombatHUDWeaponSlot.contemplatingDFA not found, DFA will be regarded as normal melee." );
                Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
                Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "OverrideMeleeToolTips", null );
             }
@@ -31,7 +41,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          HalfMaxMeleeVerticalOffset = con.MaxMeleeVerticalOffset / 2;
       }
 
-      // ============ Melee Modifiers ============
+      // ============ Common ============
 
       public struct AttackModifier {
          public string DisplayName;
@@ -44,7 +54,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public AttackModifier SetName  ( string penalty, string bonus ) { DisplayName = Value >= 0 ? penalty : bonus; return this; }
       }
 
-      private static List<Func<AttackModifier>> Modifiers = new List<Func<AttackModifier>>();
+      private static List<Func<AttackModifier>> RangedModifiers, MeleeModifiers;
       private static CombatHUDTooltipHoverElement tip;
       private static string thisModifier;
 
@@ -55,7 +65,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public  static Weapon AttackWeapon { get; private set; }
       public  static Vector3 AttackPos { get; private set; }
 
-
       private static void SaveStates ( Mech attacker, ICombatant target, Weapon weapon, MeleeAttackType type ) {
          They = target;
          Us = attacker;
@@ -63,6 +72,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          AttackWeapon = weapon;
          thisModifier = "(init)";
       }
+
+      // ============ Ranged ============
+
+      internal static void InitRangedModifiers ( string[] factors ) {
+         RangedModifiers = new List<Func<AttackModifier>>();
+         HashSet<string> Factors = new HashSet<string>();
+         foreach ( string e in factors ) Factors.Add( e.Trim().ToLower() );
+         foreach ( string e in Factors ) try {
+            Func<AttackModifier> factor = GetMeleeModifierFactor( e ); // TODO
+            if ( factor == null )
+               Warn( "Unknown accuracy component \"{0}\"", e );
+            else
+               RangedModifiers.Add( factor );
+         } catch ( Exception ex ) { Error( ex ); }
+         Info( "Ranged modifiers: " + Join( ",", Factors ) );
+      }
+
+      // ============ Melee ============
 
       public static Func<AttackModifier> GetMeleeModifierFactor ( string factorId ) {
          switch ( factorId ) {
@@ -149,6 +176,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       internal static void InitMeleeModifiers ( string[] factors ) {
+         MeleeModifiers = new List<Func<AttackModifier>>();
          HashSet<string> Factors = new HashSet<string>();
          foreach ( string e in factors ) Factors.Add( e.Trim().ToLower() );
          foreach ( string e in Factors ) try {
@@ -156,7 +184,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( factor == null )
                Warn( "Unknown accuracy component \"{0}\"", e );
             else
-               Modifiers.Add( factor );
+               MeleeModifiers.Add( factor );
          } catch ( Exception ex ) { Error( ex ); }
          Info( "Melee and DFA modifiers: " + Join( ",", Factors ) );
       }
@@ -169,10 +197,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          tip = slot.ToolTipHoverElement;
          thisModifier = "(Init)";
          AttackPos = HUD.SelectionHandler.ActiveState.PreviewPos;
-         bool isDFA = (bool) contemplatingDFA.Invoke( slot, new object[]{ target } );
+         bool isDFA = (bool) contemplatingDFA?.Invoke( slot, new object[]{ target } );
          SaveStates( HUD.SelectedActor as Mech, target, slot.DisplayedWeapon, isDFA ? MeleeAttackType.DFA : MeleeAttackType.Punch );
          int TotalModifiers = 0;
-         foreach ( var modifier in Modifiers ) {
+         foreach ( var modifier in MeleeModifiers ) {
             AttackModifier mod = modifier();
             thisModifier = mod.DisplayName;
             TotalModifiers += AddToolTipDetail( mod );
@@ -196,7 +224,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisModifier = "(Init)";
          SaveStates( attacker, target, weapon, meleeAttackType );
          int modifiers = 0;
-         foreach ( var modifier in Modifiers ) {
+         foreach ( var modifier in MeleeModifiers ) {
             AttackModifier mod = modifier();
             thisModifier = mod.DisplayName;
             modifiers += Mathf.RoundToInt( mod.Value );
