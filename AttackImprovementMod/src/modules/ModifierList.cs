@@ -2,7 +2,6 @@
 using BattleTech;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static System.Reflection.BindingFlags;
@@ -159,7 +158,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Modifiers.Add( factor );
          } catch ( Exception ex ) { Error( ex ); }
-         Info( "Melee and DFA modifiers: " + Join( ",", Factors.ToArray() ) );
+         Info( "Melee and DFA modifiers: " + Join( ",", Factors ) );
       }
 
       private static MethodInfo contemplatingDFA;

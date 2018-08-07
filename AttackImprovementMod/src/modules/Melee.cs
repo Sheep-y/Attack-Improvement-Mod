@@ -2,13 +2,11 @@
 using BattleTech;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using UnityEngine;
-using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
+   using static System.Reflection.BindingFlags;
 
    public class Melee : BattleModModule {
 
@@ -21,7 +19,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), "OverrideMeleeDestinations", null );
          /*
          if ( Settings.AllowDFACalledShotVehicle ) {
-            Patch( typeof( SelectionStateJump ), "SetMeleeDest", BindingFlags.NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
+            Patch( typeof( SelectionStateJump ), "SetMeleeDest", NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
          }
          */
       }

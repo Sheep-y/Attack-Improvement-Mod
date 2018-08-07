@@ -364,12 +364,12 @@ namespace Sheepy.BattleTechMod {
             .ToString();
       }
 
-      public static string Join<T> ( string separator, T[] array, Func<T,string> formatter = null ) {
-         if ( array == null ) return string.Empty;
+      public static string Join<T> ( string separator, IEnumerable<T> list, Func<T,string> formatter = null ) {
+         if ( list == null ) return string.Empty;
          StringBuilder result = new StringBuilder();
-         for ( int i = 0, len = array.Length ; i < len ; i++ ) {
-            if ( i > 0 ) result.Append( separator );
-            result.Append( formatter == null ? array[i]?.ToString() : formatter( array[i] ) );
+         foreach ( T e in list ) {
+            if ( result.Length > 0 ) result.Append( separator );
+            result.Append( formatter == null ? e?.ToString() : formatter( e ) );
          }
          return result.ToString();
       }
