@@ -45,6 +45,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
 #pragma warning disable CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
+         MigrateColors( settings.LOSMeleeColor      , ref settings.LOSMeleeColors       );
+         MigrateColors( settings.LOSClearColor      , ref settings.LOSClearColors       );
+         MigrateColors( settings.LOSBlockedPreColor , ref settings.LOSBlockedPreColors  );
+         MigrateColors( settings.LOSBlockedPostColor, ref settings.LOSBlockedPostColors );
+         MigrateColors( settings.LOSIndirectColor   , ref settings.LOSIndirectColors    );
+         if ( settings.LOSNoAttackColor != null && settings.LOSNoAttackColors == null)
+            settings.LOSNoAttackColors = settings.LOSNoAttackColor;
          if ( settings.PersistentLog != null )
             settings.AttackLogArchiveMaxMB = settings.PersistentLog == false ? 4 : 128;
 
@@ -86,6 +93,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "AttackLogArchiveMaxMB", ref Settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
 
          return settings;
+      }
+
+      private void MigrateColors ( string old, ref string now ) {
+         if ( old == null || now == null ) return;
+         int pos = now.IndexOf( ',' );
+         if ( pos < 0 ) return;
+         now = old + now.Substring( pos );
       }
 
       /* Changes that we don't want to write back to settings.json */
