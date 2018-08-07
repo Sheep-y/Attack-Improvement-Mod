@@ -69,7 +69,7 @@ namespace Sheepy.Reflector {
          if ( CheckParserCache( normalised, out MemberInfo cached ) )
             return InfoToProxy<T>( cached );
 
-         Log( Trace, "Reflecting {0}", normalised );
+         Log( ActivityTracing, "Reflecting {0}", normalised );
          TextParser state = new TextParser( normalised );
          MemberPart parsed = MatchMember( state );
          if ( ! state.IsEmpty ) parsed.Parameters = MatchMemberList( '(', state, ')' )?.ToArray();
@@ -85,7 +85,7 @@ namespace Sheepy.Reflector {
          string normalised = Regex.Replace( member, "\\s+", "" );
          if ( CheckTypeCache( normalised, out Type cached ) ) return cached;
 
-         Log( Trace, "Finding Type {0}", normalised );
+         Log( ActivityTracing, "Finding Type {0}", normalised );
          TextParser state = new TextParser( normalised );
          MemberPart parsed = MatchMember( state );
          if ( state.IsEmpty ) return GetType( parsed );
@@ -197,7 +197,7 @@ namespace Sheepy.Reflector {
 
       private List<MemberPart> MatchMemberList ( TextParser state ) {
          List<MemberPart> result = new List<MemberPart>();
-         Member nextMatch;
+         MemberPart nextMatch;
          do {
             nextMatch = MatchMember( state );
             if ( nextMatch == null ) break;
