@@ -1,10 +1,13 @@
 ﻿using BattleTech;
 using Harmony;
 using Sheepy.Logging;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Reflection;
 using System.Text;
-using System;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
@@ -15,7 +18,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static Logger ROLL_LOG;
 
       private static bool LogShot, LogLocation, LogDamage, LogCritical;
-      private static bool PersistentLog = false;
       private static string Separator = ",";
 
       private static readonly Type AttackType = typeof( AttackDirector.AttackSequence );
@@ -30,7 +32,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStartsOnce () {
          if ( Settings.AttackLogLevel == null ) return;
-         PersistentLog = Settings.PersistentLog;
 
          switch ( Settings.AttackLogFormat.Trim().ToLower() ) {
             default:
@@ -104,26 +105,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void InitLog () {
+         Info( "Init logger" );
          ROLL_LOG = new Logger( ModLogDir + "Log_Attack." + Settings.AttackLogFormat ){ LevelText = null, TimeFormat = null };
          idGenerator = new Random();
          thisSequenceId = GetNewId();
-
-         if ( ! PersistentLog )
-            ROLL_LOG.Delete();
+         ArchiveOldAttackLog();
 
          if ( ! ROLL_LOG.Exists() ) {
             StringBuilder logBuffer = new StringBuilder();
-            logBuffer.Append( String.Join( Separator, new string[]{ "Time", "Actor", "Pilot", "Unit", "Target", "Pilot", "Unit", "Combat Id", "Round", "Phase", "Attack Id", "Direction", "Range" } ) );
-            if ( LogShot || PersistentLog ) {
-               logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Weapon", "Weapon Template", "Weapon Id", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
-               if ( LogLocation || PersistentLog )
-                  logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Location Roll", "Head", "CT", "LT", "RT", "LA", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
-               logBuffer.Append( Separator ).Append( "Hit Location" );
-            }
-            if ( LogDamage || PersistentLog )
-               logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Damage", "Stops At", "From Armor", "To Armor", "From HP", "To HP" } ) );
-            if ( LogCritical || PersistentLog )
-               logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
+            logBuffer.Append( String.Join( Separator, new string[]{ "Log v2.1", "Actor", "Pilot", "Unit", "Target", "Pilot", "Unit", "Combat Id", "Round", "Phase", "Attack Id", "Direction", "Range" } ) );
+            // LogShot
+            logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Weapon", "Weapon Template", "Weapon Id", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
+            // LogLocation
+            logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Location Roll", "Head", "CT", "LT", "RT", "LA", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
+            // LogShot (cont.)
+            logBuffer.Append( Separator ).Append( "Hit Location" );
+            // LogDamage
+            logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Damage", "Stops At", "From Armor", "To Armor", "From HP", "To HP" } ) );
+            // LogCritical
+            logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
             log.Add( logBuffer.ToString() );
             WriteRollLog( null );
          }
@@ -208,6 +208,47 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             teamName += who.GetPilot()?.Callsign ?? ( who as AbstractActor )?.Nickname ?? who.DisplayName;
          teamName += Separator;
          return teamName + who.DisplayName + Separator;
+      }
+
+      public static void ArchiveOldAttackLog () {
+         // First, rename existing log to clear the way for this launch
+         if ( ROLL_LOG.Exists() ) try {
+            string from = ROLL_LOG.LogFile;
+            FileInfo info = new FileInfo( from );
+            if ( info.Length > 500 ) {
+               string to = ModLogDir + "Log_Attack." + info.LastWriteTimeUtc.ToString("s").Replace(':','-') + Path.GetExtension( from );
+               Info( "Archiving attack log to {1}", from, to );
+               File.Move( from, to );
+            } else {
+               Info( "Deleting old Log_Attack because it is empty: {0}", from );
+               ROLL_LOG.Delete();
+            }
+         } catch ( Exception ex ) { Error( ex ); }
+
+         ThreadPool.QueueUserWorkItem( ( state ) => { TryRun( ModLog, ClearOldLogs ); } );
+      }
+
+      public static void ClearOldLogs () {
+         FileInfo[] oldLogs = Directory.GetFiles( ModLogDir )
+            .Where( e => e.Contains( "Log_Attack.20" ) )
+            .Select( e => new FileInfo( e ) )
+            .OrderBy( e => e.LastWriteTimeUtc )
+            .ToArray();
+
+         long cap = Settings.AttackLogArchiveMaxMB * 1024L * 1024L,
+               sum = oldLogs.Select( e => e.Length ).Sum();
+         Info( "Background: Found {0} old logs totalling {1:#,###} bytes. Cap is {2:#,###}.", oldLogs.Length, sum, cap );
+         if ( sum <= cap ) return;
+
+         int deleted = 0;
+         foreach ( FileInfo f in oldLogs ) try {
+            Verbo( "Background: Deleting {0}", f.Name );
+            f.Delete();
+            deleted++;
+            sum -= f.Length;
+            if ( sum <= cap || sum <= 0 ) break;
+         } catch ( Exception e ) { Error( e ); }
+         Info( "Background: {0} old logs deleted.", deleted );
       }
 
       // ============ Attack Log ============

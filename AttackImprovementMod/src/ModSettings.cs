@@ -8,7 +8,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "User Interfaces" ) ]
       //
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Fix Multi-Target cancelling so that you can cancel target by target without leaving MT mode.  Default true.",
         "You can still quickly switch out of Multi-Target by pressing another action." } ) ]
       public bool FixMultiTargetBackout = true;
@@ -59,7 +59,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public float LOSWidth = 2f;
       public float LOSWidthBlocked = 1.5f;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Make obstruction marker bigger or smaller by multiplying its height and width.  Default 1.5.",
         "Set to 1 to use game default, or 0 to hide the marker." } ) ]
       public float LOSMarkerBlockedMultiplier = 1.5f;
@@ -74,7 +74,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool LOSBlockedPreDotted  = false;
       public bool LOSBlockedPostDotted = false;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
       "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to null to leave alone.",
       "The colour orders are Front, Left, Right, Back, Prone.  Set to empty string to use game default." }  ) ]
       public string LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00";
@@ -98,7 +98,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Enable Vehicle Called Shot, which the game did not implement fully. Default true." ) ]
       public bool FixVehicleCalledShot = true;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Did you know you can called shot the head of headshot immune boss?",
         "You can do that before any headshot immune unit has been attacked.  But it won't have any effect.  Default true." } ) ]
       public bool FixBossHeadCalledShotDisplay = true;
@@ -106,12 +106,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Enable clustering effect for called shots against mechs.  Default true." ) ]
       public bool CalledShotUseClustering = true;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.",
         "Default is 0.33 to counter the effect of CalledShotClusterStrength." } ) ]
       public float MechCalledShotMultiplier = 0.33f;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.",
         "Default is 0.75 to balance vehicle's lower number of locations." } ) ]
       public float VehicleCalledShotMultiplier = 0.75f;
@@ -122,7 +122,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Override called shot percentage display of vehicle locations to show modded shot distribution. Default true." ) ]
       public bool ShowRealVehicleCalledShotChance = true;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Format of called shot location percentages, in C# String.Format syntax.",
         "Use \"{0:0.0}%\" to *always* show one decimal, or \"{0:0.#}%\" for *up to* one decimal. Default is \"\" to leave alone." } ) ]
       public string CalledChanceFormat = "";
@@ -140,7 +140,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       //[ JsonComment( "Fix potential target height discrepancy between modifier breakdown and total accuracy.  Default true." ) ]
       //public bool FixModifierTargetHeight = true;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Step of hit chance.  Game default is 0.05, or 5%.  Hit chance is always rounded down.",
         "Default 0 to remove hit chance step, so that odd gunnery stats can enjoy their +2.5% hit chance." } ) ]
       public float HitChanceStep = 0;
@@ -151,7 +151,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Modify base melee hit chance.  -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
       public float MeleeHitChanceModifier = 0f;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.",
         "Note that 100% hit chance (max) may still miss if roll correction is enabled." } ) ]
       public float MaxFinalHitChance = 0.95f;
@@ -160,14 +160,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Make hit chance modifier has diminishing return rather than simple add and subtract.  Default false." ) ]
       public bool DiminishingHitChanceModifier = false;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Diminishing Bonus: 2-Base^(Bonus/Divisor).  Default 2-0.8^(Bonus/6) and caps at +16.",
         "Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit" } ) ]
       public double DiminishingBonusPowerBase = 0.8f;
       public double DiminishingBonusPowerDivisor = 6f;
       public int DiminishingBonusMax = 16;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Diminishing Penalty: Base^(Penalty/Divisor).  Default 0.8^(Penalty/3.3) and caps at +32.",
         "Example: +6 Penalty @ 80% Base ToHit == 67% x 0.8 == 53% Hit" } ) ]
       public double DiminishingPenaltyPowerBase = 0.8f;
@@ -178,17 +178,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "To Hit Rolls" ) ]
       //
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Increase or decrease roll correction strength.  0 to disable roll correction, 1 is original strength, max is 2 for double strength.",
         "Default is 0.5 for less correction." } ) ]
       public float RollCorrectionStrength = 0.5f;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Set miss streak breaker threshold.  Only attacks with hit rate above the threshold will add to streak breaker.",
         "Default is 0.5, same as game default.  Set to 1 to disable miss streak breaker." } ) ]
       public float MissStreakBreakerThreshold = 0.5f;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Set miss streak breaker divider.  Set to negative integer or zero to make it a constant bonus, e.g. -5 = 5% bonus per miss.",
         "Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.",
         "Default is 5, same as game default." } ) ]
@@ -200,7 +200,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show corrected hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker.  Default false." ) ]
       public bool ShowCorrectedHitChance = false;
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Format of called shot location percentages, in C# String.Format syntax.",
         "Game default is \"{0:0}%\". Use \"{0:0.0}%\" to *always* show one decimal, or \"{0:0.#}%\" for *up to* one decimal.",
         "Default is \"\", which will use \"{0:0.#}%\" if HitChanceStep is 0 and DiminishingHitChanceModifier is false, otherwise leave alone." } ) ]
@@ -227,7 +227,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool AllowDFACalledShotVehicle = true;
       /**/
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order will be followed, and letter case does not matter.",
         "Default \"DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfWalked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy\".",
         "Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain." } ) ]
@@ -256,7 +256,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Logging" ) ]
       //
 
-      [ JsonComment( new String[]{
+      [ JsonComment( new string[]{
         "Log attack info to \"Log_Attack.txt\", for copy and paste to Excel to make it human readable.",
         "Setting can be \"None\", \"Attack\", \"Shot\", \"Location\", \"Damage\", \"Critical\", or \"All\", from simplest to heaviest.  Default \"None\".",
         "\"All\" is currently same as \"Critical\", but more levels may be added in future.  Letter case does not matter." } ) ]
@@ -265,8 +265,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Format of attack log.  Can be \"csv\", \"tsv\", or \"txt\" (same as tsv). Default \"csv\"." ) ]
       public string AttackLogFormat = "csv";
 
-      [ JsonComment( "If true, don't clear attack log when the game launches." ) ]
-      public bool PersistentLog = false;
+      [ JsonComment( new string[] {
+        "How many old attack log to keep.  Logs are archived on game launch, if attack log is enabled." +
+        "Default is 4 for 4MB.  Set to 0 to not keep any old logs." }  ) ]
+      public int AttackLogArchiveMaxMB = 4;
 
       [ JsonComment( "Location of mod log and roll log.  Default is \"\" to put them in mod folder.  Relative path would be relative to BATTLETECH exe." ) ]
       public string LogFolder = "";
@@ -283,6 +285,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string LOSIndirectColor = null;
       [ Obsolete( "[v2.0] Default empty. Replaced by LOSNoAttackColors." ) ]
       public string LOSNoAttackColor = null;
+      [ Obsolete( "[v2.0] Default false. Replaced by AttackLogArchiveMaxMB." ) ]
+      public bool? PersistentLog = false;
 
       [ Obsolete( "[v2.0-rc] Default true.  Replaced by ShowUnderArmourDamage." ) ]
       public bool? PaperDollDivulgeUnderskinDamage = null;

@@ -38,7 +38,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowCorrectedHitChance", null );
             }
          } else if ( Settings.ShowCorrectedHitChance ) {
-            Log( "ShowCorrectedHitChance auto-disabled because roll Correction is disabled." );
+            Info( "ShowCorrectedHitChance auto-disabled because roll Correction is disabled." );
             Settings.ShowCorrectedHitChance = false;
          }
 
@@ -79,7 +79,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Warn( "Cannot find AttackDirector.AttackSequence.UseWeightedHitNumbers. Roll correction not disabled." );
          } else if ( correctionCache != null )
-            Log( "Combat starts with {0} reverse roll correction cached from previous battles.", correctionCache.Count );
+            Info( "Combat starts with {0} reverse roll correction cached from previous battles.", correctionCache.Count );
       }
 
       // ============ UTILS ============

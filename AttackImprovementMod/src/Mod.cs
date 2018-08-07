@@ -16,7 +16,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          LoadSettings( ref Settings, SanitizeSettings );
          NormaliseSettings();
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
-         Log();
+         Info();
 
          Add( new UserInterface(){ Name = "User Interface" } );
          Add( new LineOfSight(){ Name = "Line of Fire" } );
@@ -31,7 +31,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void GameStarts () {
-         Log( "Detected Mods: " + Join( ", ", BattleMod.GetModList() ) );
+         Info( "Detected Mods: " + Join( ", ", BattleMod.GetModList() ) );
       }
 
       private ModSettings SanitizeSettings ( ModSettings settings ) {
@@ -45,6 +45,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
 #pragma warning disable CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
+         if ( settings.PersistentLog != null )
+            settings.AttackLogArchiveMaxMB = settings.PersistentLog == false ? 4 : 128;
+
          settings.ShowUnderArmourDamage = settings.PaperDollDivulgeUnderskinDamage.GetValueOrDefault( settings.ShowUnderArmourDamage );
          settings.KillZeroHpLocation = settings.FixNonIntegerDamage.GetValueOrDefault( settings.KillZeroHpLocation );
 
@@ -78,11 +81,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
          RangeCheck( "MissStreakBreakerThreshold", ref Settings.MissStreakBreakerThreshold, 0f, 1f );
          RangeCheck( "MissStreakBreakerDivider", ref Settings.MissStreakBreakerDivider, -100f, 100f );
-         
-         if ( ! settings.PersistentLog ) {
-            // In version 1.0, I thought we may need to keep two logs: attack/location rolls and critical rolls. They are now merged, and the old log may be removed.
-            new Logger( LogDir + "Log_AttackRoll.txt" ).Delete();
-         }
+
+         // Is 1TB a reasonable limit of how many logs to keep?
+         RangeCheck( "AttackLogArchiveMaxMB", ref Settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
 
          return settings;
       }
@@ -119,7 +120,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void Trace ( object message = null, params object[] args ) { ModLog.Trace( message, args ); }
       public static void Verbo ( object message = null, params object[] args ) { ModLog.Verbo( message, args ); }
-      public static void Log   ( object message = null, params object[] args ) { ModLog.Info( message, args ); }
+      public static void Info  ( object message = null, params object[] args ) { ModLog.Info( message, args ); }
       public static void Warn  ( object message = null, params object[] args ) { ModLog.Warn( message, args ); }
       public static bool Error ( object message = null, params object[] args ) { ModLog.Error( message, args ); return true; }
    }

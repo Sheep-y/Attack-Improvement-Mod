@@ -75,8 +75,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( inactive != null && inactive.Length > i )
                DirectionMarkerColors[ i ] = Parse( inactive[ i ] );
          }
-         Log( "Active directional marker = " + Join( ", ", DirectionMarkerActiveColors ) );
-         Log( "Inactive directional marker = " + Join( ", ", DirectionMarkerActiveColors ) );
+         Info( "Active directional marker = " + Join( ", ", DirectionMarkerActiveColors ) );
+         Info( "Inactive directional marker = " + Join( ", ", DirectionMarkerActiveColors ) );
       }
 
       public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) {

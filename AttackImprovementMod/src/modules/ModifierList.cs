@@ -159,7 +159,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Modifiers.Add( factor );
          } catch ( Exception ex ) { Error( ex ); }
-         Log( "Melee and DFA modifiers: " + Join( ",", Factors.ToArray() ) );
+         Info( "Melee and DFA modifiers: " + Join( ",", Factors.ToArray() ) );
       }
 
       private static MethodInfo contemplatingDFA;

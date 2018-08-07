@@ -110,6 +110,7 @@ namespace Sheepy.BattleTechMod {
          } );
          if ( sanitise != null )
             TryRun( () => config = sanitise( config ) );
+
          string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
          Logger.Info( "WARNING: Do NOT change settings here. This is just a log." );
          Logger.Info( "Loaded Settings: " + sanitised );

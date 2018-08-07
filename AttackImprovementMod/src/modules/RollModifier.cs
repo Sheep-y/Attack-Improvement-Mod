@@ -68,7 +68,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             lastMod = mod;
          }
          steppingModifier = mods.ToArray();
-         Log( "Stepping ToHit Multipliers\t" + Join( "\t", steppingModifier ) );
+         Info( "Stepping ToHit Multipliers\t" + Join( "\t", steppingModifier ) );
       }
 
       internal static float GetSteppedModifier ( float modifier ) {
@@ -91,8 +91,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( Settings.DiminishingBonusPowerBase, (double) i / Settings.DiminishingBonusPowerDivisor ) );
          for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
             diminishingPenalty[ i-1 ] = (float) Math.Pow( Settings.DiminishingPenaltyPowerBase, (double) i / Settings.DiminishingPenaltyPowerDivisor );
-         Log( "Diminishing hit% multipliers (bonus)\t" + Join( "\t", diminishingBonus ) );
-         Log( "Diminishing hit% multipliers (penalty)\t" + Join( "\t", diminishingPenalty ) );
+         Info( "Diminishing hit% multipliers (bonus)\t" + Join( "\t", diminishingBonus ) );
+         Info( "Diminishing hit% multipliers (penalty)\t" + Join( "\t", diminishingPenalty ) );
       }
 
       // ============ Fixes ============
