@@ -1,5 +1,5 @@
 ﻿using System;
-using Sheepy.CSUtils;
+using Sheepy.Logging;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
