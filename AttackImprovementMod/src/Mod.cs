@@ -67,7 +67,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          // Add SelfTerrainMelee and spacing to 2.0 default
          if ( settings.MeleeAccuracyFactors == "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy" )
-            settings.MeleeAccuracyFactors = "DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Walked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy";
+            settings.MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Walked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy";
          else if ( settings.MeleeAccuracyFactors.ToLower().Contains( "selfwalked" ) )
             settings.MeleeAccuracyFactors = Regex.Replace( settings.MeleeAccuracyFactors, "SelfWalked", "Walked", RegexOptions.IgnoreCase );
 
@@ -86,6 +86,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          RangeCheck( "MechCalledShotMultiplier", ref Settings.MechCalledShotMultiplier, 0f, 1024f );
          RangeCheck( "VehicleCalledShotMultiplier", ref Settings.VehicleCalledShotMultiplier, 0f, 1024f );
+
+         RangeCheck( "ToHitMechFromFront", ref Settings.ToHitMechFromFront, -20, 20 );
+         RangeCheck( "ToHitMechFromSide" , ref Settings.ToHitMechFromSide , -20, 20 );
+         RangeCheck( "ToHitMechFromRear" , ref Settings.ToHitMechFromRear , -20, 20 );
+         RangeCheck( "ToHitVehicleFromFront", ref Settings.ToHitVehicleFromFront, -20, 20 );
+         RangeCheck( "ToHitVehicleFromSide" , ref Settings.ToHitVehicleFromSide , -20, 20 );
+         RangeCheck( "ToHitVehicleFromRear" , ref Settings.ToHitVehicleFromRear , -20, 20 );
 
          RangeCheck( "HitChanceStep", ref Settings.HitChanceStep, 0f, 1f );
          RangeCheck( "BaseHitChanceModifier", ref Settings.BaseHitChanceModifier, -10f, 10f );

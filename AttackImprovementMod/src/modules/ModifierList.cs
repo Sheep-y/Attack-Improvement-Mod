@@ -93,6 +93,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static Func<AttackModifier> GetCommonModifierFactor ( string factorId ) {
          switch ( factorId ) {
+         case "direction":
+            return () => {
+               AttackDirection dir = Combat.HitLocation.GetAttackDirection( AttackPos, Target );
+               if ( Target is Mech mech ) {
+                  if ( mech.IsProne ) return new AttackModifier(); // Prone is another modifier
+                  if ( dir == AttackDirection.FromFront ) return new AttackModifier( "FRONT ATTACK", Settings.ToHitMechFromFront );
+                  if ( dir == AttackDirection.FromLeft || dir == AttackDirection.FromRight ) return new AttackModifier( "SIDE ATTACK" , Settings.ToHitMechFromSide );
+                  if ( dir == AttackDirection.FromBack ) return new AttackModifier( "REAR ATTACK", Settings.ToHitMechFromRear );
+               } else if ( Target is Vehicle vehicle ) {
+                  if ( dir == AttackDirection.FromFront ) return new AttackModifier( "FRONT ATTACK", Settings.ToHitVehicleFromFront );
+                  if ( dir == AttackDirection.FromLeft || dir == AttackDirection.FromRight ) return new AttackModifier( "SIDE ATTACK" , Settings.ToHitVehicleFromSide );
+                  if ( dir == AttackDirection.FromBack ) return new AttackModifier( "REAR ATTACK", Settings.ToHitVehicleFromRear );
+               }
+               return new AttackModifier();
+            };
+
          case "inspired":
             return () => new AttackModifier( "INSPIRED", Math.Min( 0f, Hit.GetAttackerAccuracyModifier( Attacker ) ) );
 
@@ -202,11 +218,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                float modifier = Hit.GetRangeModifier( AttackWeapon, AttackPos, TargetPos );
                AttackModifier result = new AttackModifier( modifier );
                float range = Vector3.Distance( AttackPos, TargetPos );
-               if ( range < AttackWeapon.MinRange ) return result.SetName( $"MIN RANGE (<{AttackWeapon.MinRange})" );
-               if ( range < AttackWeapon.ShortRange ) return result.SetName( $"SHORT RANGE ({AttackWeapon.MinRange}-{AttackWeapon.ShortRange})" );
-               if ( range < AttackWeapon.MediumRange ) return result.SetName( $"MEDIUM RANGE ({AttackWeapon.ShortRange}-{AttackWeapon.MediumRange})" );
-               if ( range < AttackWeapon.LongRange ) return result.SetName( $"LONG RANGE ({AttackWeapon.MediumRange}-{AttackWeapon.LongRange})" );
-               if ( range < AttackWeapon.MaxRange ) return result.SetName( $"MAX RANGE ({AttackWeapon.LongRange}-{AttackWeapon.MaxRange})" );
+               if ( range < AttackWeapon.MinRange ) return result.SetName( $"MIN RANGE (<{AttackWeapon.MinRange}m)" );
+               if ( range < AttackWeapon.ShortRange ) return result.SetName( $"SHORT RANGE ({AttackWeapon.MinRange}-{AttackWeapon.ShortRange}m)" );
+               if ( range < AttackWeapon.MediumRange ) return result.SetName( $"MEDIUM RANGE ({AttackWeapon.ShortRange}-{AttackWeapon.MediumRange}m)" );
+               if ( range < AttackWeapon.LongRange ) return result.SetName( $"LONG RANGE ({AttackWeapon.MediumRange}-{AttackWeapon.LongRange}m)" );
+               if ( range < AttackWeapon.MaxRange ) return result.SetName( $"MAX RANGE ({AttackWeapon.LongRange}-{AttackWeapon.MaxRange}m)" );
                return result.SetName( $"OUT OF RANGE ({AttackWeapon.MaxRange}+)" );
             };
 
