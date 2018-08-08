@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using Sheepy.Logging;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
@@ -31,6 +32,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void GameStarts () {
+         ModLog.LogLevel = System.Diagnostics.SourceLevels.Verbose;
          Info( "Detected Mods: " + Join( ", ", BattleMod.GetModList() ) );
       }
 
@@ -62,6 +64,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             settings.LOSWidth = settings.LOSWidthMultiplier.GetValueOrDefault( 2f );
          if ( settings.LOSWidthBlockedMultiplier != null && settings.LOSWidthBlockedMultiplier != 3f )
             settings.LOSWidthBlocked = settings.LOSWidthBlockedMultiplier.GetValueOrDefault( 3f ) * 0.75f;
+
+         // Add SelfTerrainMelee and spacing to 2.0 default
+         if ( settings.MeleeAccuracyFactors == "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy" )
+            settings.MeleeAccuracyFactors = "DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Walked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy";
+         else if ( settings.MeleeAccuracyFactors.ToLower().Contains( "selfwalked" ) )
+            settings.MeleeAccuracyFactors = Regex.Replace( settings.MeleeAccuracyFactors, "SelfWalked", "Walked", RegexOptions.IgnoreCase );
 
          settings.ShowCorrectedHitChance = settings.ShowRealWeaponHitChance.GetValueOrDefault( settings.ShowCorrectedHitChance );
          if ( settings.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )

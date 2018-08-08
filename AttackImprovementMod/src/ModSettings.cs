@@ -133,15 +133,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "Specify set of hit modifiers of ranged attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
-        "Default \"ArmMounted, Height, Inspired, LocationDamage, Obstruction, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SelfWalked, SensorImpaired, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, WeaponAccuracy, WeaponDamage\".",
+        "Default \"ArmMounted, Height, Indirect, Inspired, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage\".",
         "You can remove some options or replace SelfTerrain and TargetTerrain with SelfTerrainMelee and TargetTerrainMelee." } ) ]
-      public string RangedAccuracyFactors = "ArmMounted, Height, Inspired, Obstruction, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SelfWalked, SensorImpaired, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, WeaponAccuracy, WeaponDamage";
+      public string RangedAccuracyFactors = "ArmMounted, Height, Indirect, Inspired, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
 
       [ JsonComment( new string[]{
         "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
-        "Default \"DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, SelfWalked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy\".",
+        "Default \"DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy\".",
         "Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain." } ) ]
-      public string MeleeAccuracyFactors = "DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, SelfWalked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy";
+      public string MeleeAccuracyFactors = "DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
 
       //
        [ JsonSection( "To Hit Modifiers" ) ]

@@ -78,7 +78,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       internal static HashSet<string> InitModifiers ( List<Func<AttackModifier>> list, Func<string,Func<AttackModifier>> mapper, string[] factors ) {
-         list = new List<Func<AttackModifier>>();
          HashSet<string> Factors = new HashSet<string>();
          foreach ( string e in factors ) Factors.Add( e.Trim().ToLower() );
          foreach ( string e in Factors ) try {
@@ -112,9 +111,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "selfterrainmelee" :
             return () => new AttackModifier( "TERRAIN", Hit.GetSelfTerrainModifier( AttackPos, true ) );
 
-         case "selfwalked" :
-            return () => new AttackModifier( "ATTACK AFTER MOVE", Hit.GetSelfSpeedModifier( Attacker ) );
-
          case "sensorimpaired":
             return () => new AttackModifier( "SENSOR IMPAIRED", Math.Max( 0f, Hit.GetAttackerAccuracyModifier( Attacker ) ) );
 
@@ -132,6 +128,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          case "targetterrainmelee" : // Need to be different (an extra space) to avoid key collision
             return () => new AttackModifier( "TARGET TERRAIN ", Hit.GetTargetTerrainModifier( Target, TargetPos, true ) );
+
+         case "walked" :
+            return () => new AttackModifier( "MOVED", Hit.GetSelfSpeedModifier( Attacker ) );
 
          case "weaponaccuracy" :
             return () => new AttackModifier( "WEAPON ACCURACY", Hit.GetWeaponAccuracyModifier( Attacker, AttackWeapon ) );
@@ -190,7 +189,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static void InitRangedModifiers ( string[] factors ) {
          RangedModifiers = new List<Func<AttackModifier>>();
          HashSet<string> Factors = InitModifiers( RangedModifiers, GetRangedModifierFactor, factors );
-         Info( "Ranged modifiers: " + Join( ",", Factors ) );
+         Info( "Ranged modifiers ({0}): {1}", RangedModifiers.Count, Join( ",", Factors ) );
       }
 
       public static Func<AttackModifier> GetRangedModifierFactor ( string factorId ) {
@@ -220,10 +219,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "locationdamage" :
             return () => {
                if ( Attacker is Mech mech ) {
-                  string location = Mech.GetAbbreviatedChassisLocation( (ChassisLocations)AttackWeapon.Location );
+                  string location = Mech.GetAbbreviatedChassisLocation( (ChassisLocations) AttackWeapon.Location );
                   return new AttackModifier( $"{location} DAMAGED", MechStructureRules.GetToHitModifierLocationDamage( mech, AttackWeapon ) );
                } else
-                  return new AttackModifier( "LOCATION DAMAGED", Hit.GetSelfDamageModifier( Attacker, AttackWeapon ) );
+                  return new AttackModifier( "CHASSIS DAMAGED", Hit.GetSelfDamageModifier( Attacker, AttackWeapon ) );
             };
 
          case "obstruction" :
@@ -275,14 +274,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       } }
 
       // ============ Melee ============
-      
+
       private static MethodInfo contemplatingDFA;
       public  static MeleeAttackType AttackType { get; private set; }
 
       internal static void InitMeleeModifiers ( string[] factors ) {
          MeleeModifiers = new List<Func<AttackModifier>>();
          HashSet<string> Factors = InitModifiers( MeleeModifiers, GetMeleeModifierFactor, factors );
-         Info( "Melee and DFA modifiers: " + Join( ",", Factors ) );
+         Info( "Melee and DFA modifiers ({0}): {1}", MeleeModifiers.Count, Join( ",", Factors ) );
       }
 
       public static Func<AttackModifier> GetMeleeModifierFactor ( string factorId ) {
