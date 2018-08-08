@@ -217,10 +217,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "indirect" :
             return () => new AttackModifier( "INDIRECT", Hit.GetTargetDirectFireModifier( Target, LineOfFire < LineOfFireLevel.LOFObstructed && AttackWeapon.IndirectFireCapable ) );
 
+         case "locationdamage" :
+            return () => {
+               if ( Attacker is Mech mech ) {
+                  string location = Mech.GetAbbreviatedChassisLocation( (ChassisLocations)AttackWeapon.Location );
+                  return new AttackModifier( $"{location} DAMAGED", MechStructureRules.GetToHitModifierLocationDamage( mech, AttackWeapon ) );
+               } else
+                  return new AttackModifier( "LOCATION DAMAGED", Hit.GetSelfDamageModifier( Attacker, AttackWeapon ) );
+            };
+
          case "obstruction" :
             return () => new AttackModifier( "OBSTRUCTED", Hit.GetCoverModifier( Attacker, Target, LineOfFire ) );
 
-         case "precisestrike":
+         case "precision":
             return () => new AttackModifier( CombatConstants.CombatUIConstants.MoraleAttackDescription.Name, Hit.GetMoraleAttackModifier( Target, IsMoraleAttack ) );
 
          case "targetevasion" :
@@ -231,6 +240,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          case "targetshutdown" :
             return () => new AttackModifier( "TARGET SHUTDOWN", Hit.GetTargetShutdownModifier( Target, false ) );
+
+         case "weapondamage" :
+            return () => {
+               AttackModifier result = new AttackModifier( "WEAPON DAMAGED" );
+               if ( ! ( Attacker is Mech mech ) ) return result;
+               return result.SetValue( MechStructureRules.GetToHitModifierWeaponDamage( mech, AttackWeapon ) );
+            };
          }
          return null;
       }
