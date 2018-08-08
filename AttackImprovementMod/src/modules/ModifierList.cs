@@ -139,6 +139,39 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return null;
       }
 
+      public static void SetToolTips ( CombatHUDWeaponSlot slot, List<Func<AttackModifier>> factors ) { try {
+         AttackPos = HUD.SelectionHandler.ActiveState.PreviewPos;
+         tip = slot.ToolTipHoverElement;
+         thisModifier = "(Init)";
+         int TotalModifiers = 0;
+         foreach ( var modifier in factors ) {
+            AttackModifier mod = modifier();
+            thisModifier = mod.DisplayName;
+            TotalModifiers += AddToolTipDetail( mod );
+         }
+         if ( TotalModifiers < 0 && ! CombatConstants.ResolutionConstants.AllowTotalNegativeModifier )
+            TotalModifiers = 0;
+         tip.BasicModifierInt = TotalModifiers;
+      } catch ( Exception ) {
+         // Reset before giving up
+         tip?.DebuffStrings.Clear();
+         tip?.BuffStrings.Clear();
+         throw;
+      } }
+
+      public static float SumModifiers ( List<Func<AttackModifier>> factors ) {
+         thisModifier = "(Init)";
+         int TotalModifiers = 0;
+         foreach ( var modifier in factors ) {
+            AttackModifier mod = modifier();
+            thisModifier = mod.DisplayName;
+            TotalModifiers += Mathf.RoundToInt( mod.Value );
+         }
+         if ( TotalModifiers < 0 && ! CombatConstants.ResolutionConstants.AllowTotalNegativeModifier )
+            return 0;
+         return TotalModifiers;
+      }
+
       private static int AddToolTipDetail( AttackModifier tooltip ) {
          int mod = Mathf.RoundToInt( tooltip.Value );
          if ( mod == 0 ) return 0;
@@ -169,8 +202,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return () => { 
                float modifier = Hit.GetRangeModifier( AttackWeapon, AttackPos, TargetPos );
                AttackModifier result = new AttackModifier( modifier );
-      float range = Vector3.Distance( AttackPos, TargetPos );
-      if ( range < AttackWeapon.MinRange ) return result.SetName( $"MIN RANGE (<{AttackWeapon.MinRange})" );
+               float range = Vector3.Distance( AttackPos, TargetPos );
+               if ( range < AttackWeapon.MinRange ) return result.SetName( $"MIN RANGE (<{AttackWeapon.MinRange})" );
                if ( range < AttackWeapon.ShortRange ) return result.SetName( $"SHORT RANGE ({AttackWeapon.MinRange}-{AttackWeapon.ShortRange})" );
                if ( range < AttackWeapon.MediumRange ) return result.SetName( $"MEDIUM RANGE ({AttackWeapon.ShortRange}-{AttackWeapon.MediumRange})" );
                if ( range < AttackWeapon.LongRange ) return result.SetName( $"LONG RANGE ({AttackWeapon.MediumRange}-{AttackWeapon.LongRange})" );
@@ -205,40 +238,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideRangedToolTips ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          CombatHUDWeaponSlot slot = __instance;
-         tip = slot.ToolTipHoverElement;
-         thisModifier = "(Init)";
-         AttackPos = HUD.SelectionHandler.ActiveState.PreviewPos;
          LineOfFire = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( target as AbstractActor ).LOFLevel;
          IsMoraleAttack = HUD.SelectionHandler.ActiveState.SelectionType == SelectionType.FireMorale;
-         SaveStates( HUD.SelectedActor as Mech, target, slot.DisplayedWeapon );
-         int TotalModifiers = 0;
-         foreach ( var modifier in RangedModifiers ) {
-            AttackModifier mod = modifier();
-            thisModifier = mod.DisplayName;
-            TotalModifiers += AddToolTipDetail( mod );
-         }
-         tip.BasicModifierInt = TotalModifiers; //Mathf.RoundToInt( Combat.ToHit.GetAllMeleeModifiers( us, they, they.CurrentPosition, attackType ) );
+         SaveStates( HUD.SelectedActor, target, slot.DisplayedWeapon );
+         SetToolTips( slot, RangedModifiers );
          return false;
       } catch ( Exception ex ) {
-         // Reset before giving up
-         tip?.DebuffStrings.Clear();
-         tip?.BuffStrings.Clear();
          return Error( new ApplicationException( "Error in the ranged modifier *after* '" + thisModifier + "'", ex ) );
       } }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideRangedModifiers ( ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot ) { try {
-         thisModifier = "(Init)";
+         LineOfFire = lofLevel;
+         IsMoraleAttack = isCalledShot;
          SaveStates( attacker, target, weapon );
-         int modifiers = 0;
-         foreach ( var modifier in RangedModifiers ) {
-            AttackModifier mod = modifier();
-            thisModifier = mod.DisplayName;
-            modifiers += Mathf.RoundToInt( mod.Value );
-         }
-         if ( modifiers < 0 && ! CombatConstants.ResolutionConstants.AllowTotalNegativeModifier )
-            modifiers = 0;
-         __result = modifiers;
+         __result = SumModifiers( RangedModifiers );
          return false;
       } catch ( Exception ex ) {
          return Error( new ApplicationException( "Error in the ranged modifier *after* '" + thisModifier + "'", ex ) );
@@ -303,24 +317,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideMeleeToolTips ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          CombatHUDWeaponSlot slot = __instance;
-         tip = slot.ToolTipHoverElement;
-         thisModifier = "(Init)";
-         AttackPos = HUD.SelectionHandler.ActiveState.PreviewPos;
          bool isDFA = (bool) contemplatingDFA?.Invoke( slot, new object[]{ target } );
          AttackType = isDFA ? MeleeAttackType.DFA : MeleeAttackType.Punch;
-         SaveStates( HUD.SelectedActor as Mech, target, slot.DisplayedWeapon );
-         int TotalModifiers = 0;
-         foreach ( var modifier in MeleeModifiers ) {
-            AttackModifier mod = modifier();
-            thisModifier = mod.DisplayName;
-            TotalModifiers += AddToolTipDetail( mod );
-         }
-         tip.BasicModifierInt = TotalModifiers; //Mathf.RoundToInt( Combat.ToHit.GetAllMeleeModifiers( us, they, they.CurrentPosition, attackType ) );
+         SaveStates( HUD.SelectedActor, target, slot.DisplayedWeapon );
+         SetToolTips( __instance, MeleeModifiers );
          return false;
       } catch ( Exception ex ) {
-         // Reset before giving up
-         tip?.DebuffStrings.Clear();
-         tip?.BuffStrings.Clear();
          return Error( new ApplicationException( "Error in the melee modifier *after* '" + thisModifier + "'", ex ) );
       } }
 
@@ -328,17 +330,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static bool OverrideMeleeModifiers ( ref float __result, Mech attacker, ICombatant target, Vector3 targetPosition, MeleeAttackType meleeAttackType ) { try {
          AttackType = meleeAttackType;
          Weapon weapon = ( meleeAttackType == MeleeAttackType.DFA ) ? attacker.DFAWeapon : attacker.MeleeWeapon;
-         thisModifier = "(Init)";
          SaveStates( attacker, target, weapon );
-         int modifiers = 0;
-         foreach ( var modifier in MeleeModifiers ) {
-            AttackModifier mod = modifier();
-            thisModifier = mod.DisplayName;
-            modifiers += Mathf.RoundToInt( mod.Value );
-         }
-         if ( modifiers < 0 && ! CombatConstants.ResolutionConstants.AllowTotalNegativeModifier )
-            modifiers = 0;
-         __result = modifiers;
+         __result = SumModifiers( MeleeModifiers );
          return false;
       } catch ( Exception ex ) {
          return Error( new ApplicationException( "Error in the melee modifier *after* '" + thisModifier + "'", ex ) );
