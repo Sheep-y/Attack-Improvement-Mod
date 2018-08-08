@@ -13,7 +13,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class LineOfSight : BattleModModule {
 
       public override void CombatStartsOnce () {
-         if ( Settings.DirectionMarkerActiveColors != null || Settings.DirectionMarkerColors != null ) {
+         if ( Settings.FacingMarkerPlayerColors != null || Settings.FacingMarkerEnemyColors != null || Settings.FacingMarkerTargetColors != null ) {
             SetColors = typeof( AttackDirectionIndicator ).GetMethod( "SetColors", NonPublic | Instance );
             if ( SetColors == null ) {
                Warn( "Cannot find AttackDirectionIndicator.SetColors, direction marker colors not patched." );
@@ -60,23 +60,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static MethodInfo SetColors;
       private static Color[] OrigDirectionMarkerColors; // [ Active #FFFFFF4B, Inactive #F8441464 ]
-      private static Color?[] DirectionMarkerColors, DirectionMarkerActiveColors;
+      private static Color?[] FacingMarkerPlayerColors, FacingMarkerEnemyColors, FacingMarkerTargetColors;
       
       private static void InitDirectionColors () {
-         DirectionMarkerColors = new Color?[ LOSDirectionCount ];
-         DirectionMarkerActiveColors = new Color?[ LOSDirectionCount ];
+         FacingMarkerPlayerColors = new Color?[ LOSDirectionCount ];
+         FacingMarkerEnemyColors  = new Color?[ LOSDirectionCount ];
+         FacingMarkerTargetColors = new Color?[ LOSDirectionCount ];
 
-         string[] active = Settings.DirectionMarkerActiveColors?.Split( ',' ).Select( e => e.Trim() ).ToArray();
-         string[] inactive =     Settings.DirectionMarkerColors?.Split( ',' ).Select( e => e.Trim() ).ToArray();
+         string[] player = Settings.FacingMarkerPlayerColors?.Split( ',' ).Select( e => e.Trim() ).ToArray();
+         string[] enemy  = Settings.FacingMarkerEnemyColors ?.Split( ',' ).Select( e => e.Trim() ).ToArray();
+         string[] active = Settings.FacingMarkerTargetColors?.Split( ',' ).Select( e => e.Trim() ).ToArray();
 
          for ( int i = 0 ; i < LOSDirectionCount ; i++ ) {
+            if ( player != null && player.Length > i )
+               FacingMarkerPlayerColors[ i ] = Parse( player[ i ] );
+            if ( player != null && enemy.Length > i )
+               FacingMarkerEnemyColors [ i ] = Parse( enemy [ i ] );
             if ( active != null && active.Length > i )
-               DirectionMarkerActiveColors[ i ] = Parse( active[ i ] );
-            if ( inactive != null && inactive.Length > i )
-               DirectionMarkerColors[ i ] = Parse( inactive[ i ] );
+               FacingMarkerTargetColors[ i ] = Parse( active[ i ] );
          }
-         Info( "Active directional marker = " + Join( ", ", DirectionMarkerActiveColors ) );
-         Info( "Inactive directional marker = " + Join( ", ", DirectionMarkerActiveColors ) );
+         Info( "Player directional marker = " + Join( ", ", FacingMarkerPlayerColors ) );
+         Info( "Enemy  directional marker = " + Join( ", ", FacingMarkerEnemyColors  ) );
+         Info( "Target directional marker = " + Join( ", ", FacingMarkerTargetColors ) );
       }
 
       public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) {
@@ -88,18 +93,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          AttackDirectionIndicator me =  __instance;
 			if ( me.Owner.IsDead ) return;
          Color orig = me.ColorInactive;
+         Color?[] activeColors = __instance.Owner?.team?.IsFriendly( Combat.LocalPlayerTeam ) ?? false ? FacingMarkerPlayerColors : FacingMarkerEnemyColors;
          object[] colors;
          if ( direction != AttackDirection.ToProne && direction != AttackDirection.FromTop ) {
-            colors = new object[]{ DirectionMarkerColors?[0] ?? orig, DirectionMarkerColors?[1] ?? orig,
-                                   DirectionMarkerColors?[2] ?? orig, DirectionMarkerColors?[3] ?? orig };
+            colors = new object[]{ activeColors?[0] ?? orig, activeColors?[1] ?? orig, activeColors?[2] ?? orig, activeColors?[3] ?? orig };
             if ( direction != AttackDirection.None ) {
                int dirIndex = Math.Max( 0, Math.Min( (int) direction - 1, LOSDirectionCount-1 ) );
-               colors[ dirIndex ] = DirectionMarkerActiveColors?[ dirIndex ] ?? me.ColorActive;
+               colors[ dirIndex ] = FacingMarkerTargetColors?[ dirIndex ] ?? me.ColorActive;
                //Log( $"Direction {direction}, Index {dirIndex}, Color {colors[ dirIndex ]}" );
             }
          } else {
             FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( me.Owner );
-            orig = info.HasLOF ? ( DirectionMarkerActiveColors[4] ?? me.ColorActive ) : ( DirectionMarkerColors[4] ?? me.ColorInactive );
+            orig = info.HasLOF ? ( FacingMarkerTargetColors[4] ?? me.ColorActive ) : ( activeColors[4] ?? me.ColorInactive );
             colors = new object[]{ orig, orig, orig, orig };
          }
          SetColors.Invoke( __instance, colors );

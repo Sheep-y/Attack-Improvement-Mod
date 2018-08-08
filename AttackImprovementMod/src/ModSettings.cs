@@ -87,9 +87,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
 
-      [ JsonComment( "Change marker colour of the direction indicator. Directions are Front, Left, Right, Back, Prone." ) ]
-      public string DirectionMarkerColors = "#FFFF,#CCFF,#CCFF,#BFBF,#FFBF";
-      public string DirectionMarkerActiveColors = "#F41F,#F41F,#F41F,#F41F,#F41F";
+      [ JsonComment( "Change marker colour of the facing indicator. Colorus are for Front, Left, Right, Back, Prone." ) ]
+      public string FacingMarkerPlayerColors = "#FFFF,#CCFF,#CCFF,#BFBF,#FFBF";
+      public string FacingMarkerEnemyColors  = "#FFFF,#CCFF,#CCFF,#FBBF,#FFBF";
+      public string FacingMarkerTargetColors = "#F41F,#F41F,#F41F,#F41F,#F41F";
 
       //
        [ JsonSection( "Called Shots" ) ]

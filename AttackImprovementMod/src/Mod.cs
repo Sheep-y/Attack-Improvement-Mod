@@ -126,8 +126,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NullIfEmpty( ref Settings.LOSIndirectColors );
          NullIfEmpty( ref Settings.LOSNoAttackColors );
 
-         NullIfEmpty( ref Settings.DirectionMarkerColors );
-         NullIfEmpty( ref Settings.DirectionMarkerActiveColors );
+         NullIfEmpty( ref Settings.FacingMarkerPlayerColors );
+         NullIfEmpty( ref Settings.FacingMarkerEnemyColors  );
+         NullIfEmpty( ref Settings.FacingMarkerTargetColors );
 
          NullIfEmpty( ref Settings.CalledChanceFormat );
          NullIfEmpty( ref Settings.HitChanceFormat );
