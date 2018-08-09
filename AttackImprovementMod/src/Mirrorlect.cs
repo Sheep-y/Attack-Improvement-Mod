@@ -379,12 +379,15 @@ namespace Sheepy.Reflector {
 
    public class TextParser {
       public string original, text;
+      //public int pos = 0;
       public TextParser ( string txt ) { original = text = txt; if ( txt == null ) throw new ArgumentNullException(); }
 
-      public char? Next { get => IsEmpty ? null : text?[0]; }
+      public char? Prev { get => original != null && pos > 0 ? original[pos-1] : null; }
+      //public char? Next { get => IsEmpty ? null : text?[0]; }
       public int Length { get => text.Length; }
       public bool IsEmpty { get => text.Length <= 0; }
       public void MustBeEmpty { if ( ! IsEmpty ) Unexpected(); }
+
       public string TakeTill ( params char[] chr ) {
          int pos = text.IndexOfAny( chr );
          if ( pos == 0 ) return String.Empty;
@@ -394,16 +397,18 @@ namespace Sheepy.Reflector {
          if ( IsEmpty || text[0] != chr ) Error( $"'{chr}' expected" );
          return Advance( 1 );
       }
+
       public FormatException Error ( string message ) { throw new FormatException( message + " in " + original.Substring( 0, original.Length - text.Length ) + "λ" + text ); }
       public FormatException Unexpected () { throw Error( $"Unexpected '{Next}'" ); }
 
       public string Consume ( int len ) { // No length check
          string result = text.Substring( 0, len );
-         text = text.Substring( len );
+         Advance( len );
          return result;
       }
       public TextParser Advance ( int len = 1 ) { // No length check
          text = text.Substring( len );
+         //pos += len;
          return this;
       }
    }
