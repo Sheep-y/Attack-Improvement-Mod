@@ -89,7 +89,7 @@ namespace Sheepy.Reflector {
          } );
       }
 
-      public MemberPart Parse<T> ( string member ) { try {
+      public MemberPart Parse<T> ( string member ) {
          string normalised = Regex.Replace( member, "\\s+", "" );
          return Safeguard( normalised, "Parse", ( text, state ) => {
             MemberPart parsed = MatchMember( state );
@@ -98,13 +98,14 @@ namespace Sheepy.Reflector {
          } );
       }
 
-      private static R Safeguard<T,R> ( string input, string action, Func<string,TextParser,R> action ) { try {
-         Log( ActivityTracing, "{0} {1}", action, normalised );
-         R parsed = action( state );
+      private R Safeguard<R> ( string input, string actionName, Func<string,TextParser,R> action ) { try {
+         Log( ActivityTracing, "{0} {1}", actionName, input );
+         TextParser state = new TextParser( input );
+         R parsed = action( input, state );
          state.MustBeEmpty();
          return parsed;
       } catch ( Exception ex ) {
-         Log( Error, "Cannot {0} {1}: {2}", action.ToLower(), member, ex );
+         Log( Error, "Cannot {0} {1}: {2}", actionName.ToLower(), input, ex );
          return default(R);
       } }
 
@@ -335,7 +336,7 @@ namespace Sheepy.Reflector {
       public override void SetValue( object subject, T value, params object[] index ) { GetValue( subject, index ); }
    }
 
-   internal class MemberPart {
+   public class MemberPart {
       private MemberPart _Parent;
       private string _MemberName, _ToString;
       private MemberPart[] _GenericTypes, _Parameters;
@@ -382,11 +383,11 @@ namespace Sheepy.Reflector {
       //public int pos = 0;
       public TextParser ( string txt ) { original = text = txt; if ( txt == null ) throw new ArgumentNullException(); }
 
-      public char? Prev { get => original != null && pos > 0 ? original[pos-1] : null; }
-      //public char? Next { get => IsEmpty ? null : text?[0]; }
+      //public char? Prev { get => original != null && pos > 0 ? original[pos-1] : null; }
+      public char? Next { get => IsEmpty ? null : text?[0]; }
       public int Length { get => text.Length; }
       public bool IsEmpty { get => text.Length <= 0; }
-      public void MustBeEmpty { if ( ! IsEmpty ) Unexpected(); }
+      public void MustBeEmpty() { if ( ! IsEmpty ) Unexpected(); }
 
       public string TakeTill ( params char[] chr ) {
          int pos = text.IndexOfAny( chr );
