@@ -64,35 +64,48 @@ namespace Sheepy.Reflector {
 
       public static MemberProxy<T> Reflect<T> ( string member ) { return Instance.Get<T>( member ); }
 
-      public MemberProxy<T> Get<T> ( string member ) { try {
+      public MemberProxy<T> Get<T> ( string member ) {
          string normalised = Regex.Replace( member, "\\s+", "" );
          if ( CheckParserCache( normalised, out MemberInfo cached ) )
             return InfoToProxy<T>( cached );
 
-         Log( ActivityTracing, "Reflecting {0}", normalised );
-         TextParser state = new TextParser( normalised );
-         MemberPart parsed = MatchMember( state );
-         if ( ! state.IsEmpty ) parsed.Parameters = MatchMemberList( '(', state, ')' )?.ToArray();
-         MemberProxy<T> result = PartToProxy<T>( parsed );
-         SaveCache( normalised, result?.Member );
-         return result;
-      } catch ( Exception ex ) {
-         Log( Error, "Cannot find {0}: {1}", member, ex );
-         return null;
-      } }
+         return Safeguard( normalised, "Find", ( text, state ) => {
+            MemberPart parsed = MatchMember( state );
+            state.MustBeEmpty();
+            MemberProxy<T> result = PartToProxy<T>( parsed );
+            SaveCache( text, result?.Member );
+            return result;
+         } );
+      }
 
-      public Type GetType ( string member ) { try {
+      public Type GetType ( string member ) {
          string normalised = Regex.Replace( member, "\\s+", "" );
          if ( CheckTypeCache( normalised, out Type cached ) ) return cached;
 
-         Log( ActivityTracing, "Finding Type {0}", normalised );
-         TextParser state = new TextParser( normalised );
-         MemberPart parsed = MatchMember( state );
-         if ( state.IsEmpty ) return GetType( parsed );
-         throw state.Error( $"Unexpected '{state.Next}'" );
+         return Safeguard( normalised, "Find Type", ( text, state ) => {
+            MemberPart parsed = MatchMember( state );
+            state.MustBeEmpty();
+            return GetType( parsed );
+         } );
+      }
+
+      public MemberPart Parse<T> ( string member ) { try {
+         string normalised = Regex.Replace( member, "\\s+", "" );
+         return Safeguard( normalised, "Parse", ( text, state ) => {
+            MemberPart parsed = MatchMember( state );
+            state.MustBeEmpty();
+            return parsed;
+         } );
+      }
+
+      private static R Safeguard<T,R> ( string input, string action, Func<string,TextParser,R> action ) { try {
+         Log( ActivityTracing, "{0} {1}", action, normalised );
+         R parsed = action( state );
+         state.MustBeEmpty();
+         return parsed;
       } catch ( Exception ex ) {
-         Log( Error, "Cannot find {0}: {1}", member, ex );
-         return null;
+         Log( Error, "Cannot {0} {1}: {2}", action.ToLower(), member, ex );
+         return default(R);
       } }
 
       // ============ Caching System ============
@@ -181,6 +194,7 @@ namespace Sheepy.Reflector {
             if ( fullpart.Length <= 0 ) break;
             lastMember = new MemberPart(){ MemberName = fullpart, Parent = lastMember };
             if ( state.Next == '<' ) lastMember.GenericTypes = MatchMemberList( '<', state, '>' )?.ToArray();
+            if ( state.Next == '(' ) lastMember.Parameters = MatchMemberList( '(', state, ')' )?.ToArray();
             if ( state.IsEmpty || state.Next != '.' ) break;
             state.Advance();
          } while ( true );
@@ -370,6 +384,7 @@ namespace Sheepy.Reflector {
       public char? Next { get => IsEmpty ? null : text?[0]; }
       public int Length { get => text.Length; }
       public bool IsEmpty { get => text.Length <= 0; }
+      public void MustBeEmpty { if ( ! IsEmpty ) Unexpected(); }
       public string TakeTill ( params char[] chr ) {
          int pos = text.IndexOfAny( chr );
          if ( pos == 0 ) return String.Empty;
@@ -380,6 +395,7 @@ namespace Sheepy.Reflector {
          return Advance( 1 );
       }
       public FormatException Error ( string message ) { throw new FormatException( message + " in " + original.Substring( 0, original.Length - text.Length ) + "λ" + text ); }
+      public FormatException Unexpected () { throw Error( $"Unexpected '{Next}'" ); }
 
       public string Consume ( int len ) { // No length check
          string result = text.Substring( 0, len );
