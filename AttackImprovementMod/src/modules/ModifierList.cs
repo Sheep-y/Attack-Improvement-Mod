@@ -66,8 +66,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public  static Vector3 TargetPos { get; private set; }
 
       private static void SaveStates ( AbstractActor attacker, ICombatant target, Weapon weapon ) {
-         Target = target;
          Attacker = attacker;
+         Target = target;
          AttackWeapon = weapon;
          thisModifier = "(init)";
       }
@@ -230,7 +230,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return () => new AttackModifier( "HEIGHT", Hit.GetHeightModifier( AttackPos.y, TargetPos.y ) );
 
          case "indirect" :
-            return () => new AttackModifier( "INDIRECT", Hit.GetTargetDirectFireModifier( Target, LineOfFire < LineOfFireLevel.LOFObstructed && AttackWeapon.IndirectFireCapable ) );
+            return () => new AttackModifier( "INDIRECT FIRE", Hit.GetIndirectModifier( Attacker, LineOfFire < LineOfFireLevel.LOFObstructed && AttackWeapon.IndirectFireCapable ) );
 
          case "locationdamage" :
             return () => {
@@ -255,6 +255,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          case "targetshutdown" :
             return () => new AttackModifier( "TARGET SHUTDOWN", Hit.GetTargetShutdownModifier( Target, false ) );
+
+         case "sensorlock" :
+            return () => new AttackModifier( "SENSOR LOCK", Hit.GetTargetDirectFireModifier( Target, LineOfFire < LineOfFireLevel.LOFObstructed && AttackWeapon.IndirectFireCapable) );
 
          case "weapondamage" :
             return () => {

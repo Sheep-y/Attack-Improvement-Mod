@@ -79,8 +79,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       "The colour orders are Front, Left, Right, Back, Prone.  Set to empty string to use game default." }  ) ]
       public string LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00";
       public string LOSClearColors = "#F00,#0FF,#0FF,#0F8,#F00";
-      public string LOSBlockedPreColors  = "#D0F,#D8F,#D8F,#DF8,#D0F";
-      public string LOSBlockedPostColors = "#C8E,#BBF,#BBF,#BFB,#D0F";
+      public string LOSBlockedPreColors  = "#D0F,#D0F,#D0F,#D0F,#D0F";
+      public string LOSBlockedPostColors = "#C8E,#C8E,#C8E,#C8E,#C8E";
       public string LOSIndirectColors = "#F00,#0FF,#0FF,#0F8,#F00";
       public string LOSNoAttackColors = null;
 
@@ -134,9 +134,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "Specify set of hit modifiers of ranged attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
-        "Default \"ArmMounted, Direction, Height, Indirect, Inspired, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage\".",
+        "Default \"ArmMounted, Direction, Height, Indirect, Inspired, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage\".",
         "You can remove some options or replace SelfTerrain and TargetTerrain with SelfTerrainMelee and TargetTerrainMelee." } ) ]
-      public string RangedAccuracyFactors = "ArmMounted, Direction, Height, Indirect, Inspired, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
+      public string RangedAccuracyFactors = "ArmMounted, Direction, Height, Indirect, Inspired, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
 
       [ JsonComment( new string[]{
         "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
