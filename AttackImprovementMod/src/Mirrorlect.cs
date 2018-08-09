@@ -115,9 +115,9 @@ namespace Sheepy.Reflector {
          return this;
       }
 
-      public MemberInfo SaveCache ( string input, MemberInfo item ) {
+      private MemberInfo SaveCache ( string input, MemberInfo item ) {
          if ( item == null || ! UseCache ) return item;
-         Log( Verbose, "Caching parser result {0}", input );
+         Log( Verbose, "Caching MemberInfo {0}", input );
          try {
             parserCacheLock.AcquireWriterLock( CacheTimeoutMS );
             parserCache[ input ] = new WeakReference( item );
@@ -127,9 +127,9 @@ namespace Sheepy.Reflector {
          return item;
       }
 
-      public Type SaveCache ( string input, Type item ) {
+      private Type SaveCache ( string input, Type item ) {
          if ( item == null || ! UseCache ) return item;
-         Log( Verbose, "Caching type result {0}", input );
+         Log( Verbose, "Caching Type {0}", input );
          try {
             typeCacheLock.AcquireWriterLock( CacheTimeoutMS );
             typeCache[ input ] = item;
@@ -322,13 +322,22 @@ namespace Sheepy.Reflector {
    }
 
    internal class MemberPart {
-      public MemberPart Parent;
-      public string MemberName;
-      public MemberPart[] GenericTypes;
-      public MemberPart[] Parameters;
+      private MemberPart _Parent;
+      private string _MemberName, _ToString;
+      private MemberPart[] _GenericTypes, _Parameters;
 
-      public StringBuilder ToString ( StringBuilder buf ) {
-         if ( Parent != null ) buf.Append( Parent ).Append( '.' );
+      public MemberPart Parent { get => _Parent; set { ClearToStringCache(); _Parent = value; } } // TODO: If we can fix Parent or MemberName we can simplify the code
+      public string MemberName { get => _MemberName; set { ClearToStringCache(); _MemberName = value; } }
+      public MemberPart[] GenericTypes { get => _GenericTypes; set { ClearToStringCache(); _GenericTypes = value; } }
+      public MemberPart[] Parameters   { get => _Parameters  ; set { ClearToStringCache(); _Parameters = value; } }
+
+      private void ClearToStringCache () { _ToString = null; }
+
+      public StringBuilder ToString ( StringBuilder buffer ) {
+         if ( Parent != null ) buffer.Append( Parent ).Append( '.' );
+         if ( GenericTypes == null && Parameters == null ) return buffer.Append( _MemberName );
+         if ( _ToString != null ) return buffer.Append( _ToString );
+         StringBuilder buf = new StringBuilder();
          buf.Append( MemberName );
          if ( GenericTypes != null ) {
             buf.Append( '<' );
@@ -346,7 +355,8 @@ namespace Sheepy.Reflector {
             }
             buf.Append( ')' );
          }
-         return buf;
+         _ToString = buf.ToString();
+         return buffer.Append( _ToString );
       }
       public override string ToString () {
          return ToString( new StringBuilder() ).ToString();
