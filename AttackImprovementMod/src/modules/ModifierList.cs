@@ -112,9 +112,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "inspired":
             return () => new AttackModifier( "INSPIRED", Math.Min( 0f, Hit.GetAttackerAccuracyModifier( Attacker ) ) );
 
-         case "refire":
-            return () => new AttackModifier( "RE-ATTACK", Hit.GetRefireModifier( AttackWeapon ) );
-
          case "selfheat" :
             return () => new AttackModifier( "OVERHEAT", Hit.GetHeatModifier( Attacker ) );
 
@@ -247,6 +244,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "precision":
             return () => new AttackModifier( CombatConstants.CombatUIConstants.MoraleAttackDescription.Name, Hit.GetMoraleAttackModifier( Target, IsMoraleAttack ) );
 
+         case "refire":
+            return () => new AttackModifier( "RECOIL", Hit.GetRefireModifier( AttackWeapon ) );
+
          case "targetevasion" :
             return () => new AttackModifier( "TARGET MOVED", Hit.GetTargetSpeedModifier( Target, AttackWeapon ) );
 
@@ -329,6 +329,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          case "obstruction" :
             return () => new AttackModifier( "OBSTRUCTED", Hit.GetCoverModifier( Attacker, Target, Combat.LOS.GetLineOfFire( Attacker, AttackPos, Target, TargetPos, Target.CurrentRotation, out Vector3 collision ) ) );
+
+         case "refire":
+            return () => new AttackModifier( "RE-ATTACK", Hit.GetRefireModifier( AttackWeapon ) );
 
          case "selfchassis" :
             return () => new AttackModifier( Hit.GetMeleeChassisToHitModifier( Attacker, AttackType ) ).SetName( "CHASSIS PENALTY", "CHASSIS BONUS" );
