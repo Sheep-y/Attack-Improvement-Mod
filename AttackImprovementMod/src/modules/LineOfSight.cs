@@ -79,9 +79,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( active != null && active.Length > i )
                FacingMarkerTargetColors[ i ] = Parse( active[ i ] );
          }
-         Info( "Player directional marker = " + Join( ", ", FacingMarkerPlayerColors ) );
-         Info( "Enemy  directional marker = " + Join( ", ", FacingMarkerEnemyColors  ) );
-         Info( "Target directional marker = " + Join( ", ", FacingMarkerTargetColors ) );
+         Info( "Player direction marker = " + Join( ", ", FacingMarkerPlayerColors.Select( e => ColorUtility.ToHtmlStringRGBA(e.GetValueOrDefault() ) ) ) );
+         Info( "Enemy  direction marker = " + Join( ", ", FacingMarkerEnemyColors .Select( e => ColorUtility.ToHtmlStringRGBA(e.GetValueOrDefault() ) ) ) );
+         Info( "Target direction marker = " + Join( ", ", FacingMarkerTargetColors.Select( e => ColorUtility.ToHtmlStringRGBA(e.GetValueOrDefault() ) ) ) );
       }
 
       public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) {

@@ -13,9 +13,57 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class UserInterface : BattleModModule {
 
-      public override void CombatStartsOnce () {
+      private static Color friendArmorBar = new Color( 0, 128, 255, 191 );
 
-         if ( Settings.FixPaperDollRearStructure || Settings.ShowUnderArmourDamage ) TryRun( Logger, () => {
+      private static HashSet<CombatHUDPipBar> FriendlyBar = new HashSet<CombatHUDPipBar>();
+
+      public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
+         if ( FriendlyBar.Contains( __instance ) ) {
+            // Triggered by ??? > CombatHUDLifeBarPips.Update > CombatHUDLifeBarPips.ShowCurrent
+            shownColor = friendArmorBar;
+         } else {
+            if ( ! isFriend || ! ( __instance is CombatHUDLifeBarPips hpBar ) ) return;
+            if ( hpBar.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
+            FriendlyBar.Add( __instance );
+            Info( shownColor );
+            shownColor = friendArmorBar;
+         }
+         //Info( "{0}, current {1}, shown {2}, hidden {3}, locked {4}", __instance.GetType(), current, shownColor, hiddenColor, lockedColor );
+      }
+
+      private static bool isFriend;
+
+      public static void SetIFF1 ( CombatHUDMechCallout __instance ) {
+         isFriend = __instance.DisplayedActor?.team?.IsFriendly( BattleTechGame?.Combat.LocalPlayerTeam ) ?? false;
+         Info( "IsFriend1? {0}", isFriend );
+      }
+
+      public static void SetIFF2 ( CombatHUDActorInfo __instance ) {
+         isFriend = __instance.DisplayedCombatant?.team?.IsFriendly( BattleTechGame?.Combat.LocalPlayerTeam ) ?? false;
+         Info( "IsFriend2? {0}", isFriend );
+      }
+
+      public static void SetIFF3 ( HUDMechArmorReadout __instance ) {
+         isFriend = __instance.DisplayedMech?.team?.IsFriendly( BattleTechGame?.Combat.LocalPlayerTeam ) ?? false;
+         Info( "IsFriend3? {0}", isFriend );
+      }
+
+      public static void ResetIFF () {
+         isFriend = false;
+      }
+
+      public static void Trace () { Info( Logging.Logger.Stacktrace ); }
+
+      public override void GameStartsOnce () {
+         //Patch( typeof( CombatHUDLifeBarPips ), "ShowNewSummary", new Type[]{ typeof(float), typeof(float), typeof(float), typeof(bool) }, "Trace", null );
+         Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
+         //Patch( typeof( HUDMechArmorReadout ), "ResetArmorStructureBars", NonPublic, "SetIFF3", "ResetIFF" );
+         //Patch( typeof( CombatHUDMechCallout ), "RefreshInfo", NonPublic, "SetIFF1", "ResetIFF" );
+         Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetIFF2", "ResetIFF" );
+      }
+
+      public override void CombatStartsOnce () {
+         if ( Settings.FixPaperDollRearStructure || Settings.ShowUnderArmourDamage ) TryRun( Log, () => {
             outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
             armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
             structureProp = typeof( HUDMechArmorReadout ).GetProperty( "structureCached", NonPublic | Instance );
@@ -41,7 +89,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          if ( Settings.FixMultiTargetBackout ) {
-            TryRun( Logger, () => {
+            TryRun( Log, () => {
                targetedCombatant = typeof( SelectionState ).GetField( "targetedCombatant", NonPublic | Instance );
                weaponTargetIndices = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
                RemoveTargetedCombatant = typeof( SelectionStateFireMulti ).GetMethod( "RemoveTargetedCombatant", NonPublic | Instance );

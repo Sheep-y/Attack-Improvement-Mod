@@ -29,12 +29,12 @@ namespace Sheepy.BattleTechMod {
          ReadBasicModInfo();
       }
 
-      public void Start () { Logger log = Logger; Start( ref log ); }
+      public void Start () { Logger log = Log; Start( ref log ); }
       public void Start ( ref Logger log ) {
          CurrentMod = this;
          TryRun( Setup ); // May be overloaded
-         if ( log != Logger ) 
-            log = Logger;
+         if ( log != Log ) 
+            log = Log;
          Add( this );
          PatchBattleMods();
          CurrentMod = null;
@@ -46,7 +46,7 @@ namespace Sheepy.BattleTechMod {
          get { return _LogDir; }
          protected set {
             _LogDir = value;
-            Logger = new Logger( GetLogFile() );
+            Log = new Logger( GetLogFile() );
          }
       }
       public HarmonyInstance harmony { get; internal set; }
@@ -66,13 +66,13 @@ namespace Sheepy.BattleTechMod {
 #pragma warning restore CS0649
 
       // Fill in blanks with Assembly values, then read from mod.json
-      private void ReadBasicModInfo () { TryRun( Logger, () => {
+      private void ReadBasicModInfo () { TryRun( Log, () => {
          Assembly file = GetType().Assembly;
          Id = GetType().Namespace;
          Name = file.GetName().Name;
          BaseDir = Path.GetDirectoryName( file.Location ) + "/"; 
          string mod_info_file = BaseDir + "mod.json";
-         if ( File.Exists( mod_info_file ) ) TryRun( Logger, () => {
+         if ( File.Exists( mod_info_file ) ) TryRun( Log, () => {
             ModInfo info = JsonConvert.DeserializeObject<ModInfo>( File.ReadAllText( mod_info_file ) );
             if ( ! string.IsNullOrEmpty( info.Name ) )
                Name = info.Name;
@@ -84,9 +84,9 @@ namespace Sheepy.BattleTechMod {
 
       // Override this method to override Namd, Id, or Logger. Remember to call this base method!
       protected virtual void Setup () {
-         Logger.Delete();
-         Logger.Info( "{0:yyyy-MM-dd} Loading {1} Version {2} @ {3}", DateTime.Now, Name, Version, BaseDir );
-         Logger.Info( "Game Version {0}" + Environment.NewLine, VersionInfo.ProductVersion );
+         Log.Delete();
+         Log.Info( "{0:yyyy-MM-dd} Loading {1} Version {2} @ {3}", DateTime.Now, Name, Version, BaseDir );
+         Log.Info( "Game Version {0}" + Environment.NewLine, VersionInfo.ProductVersion );
       }
 
       public static string Idify ( string text ) { return Join( string.Empty, new Regex( "\\W+" ).Split( text ), UppercaseFirst ); }
@@ -101,7 +101,7 @@ namespace Sheepy.BattleTechMod {
          Settings config = settings;
          if ( File.Exists( file ) ) TryRun( () => {
             fileText = File.ReadAllText( file );
-            if ( fileText.Contains( "\"Name\"" ) && fileText.Contains( "\"DLL\"" ) && fileText.Contains( "\"Settings\"" ) ) TryRun( Logger, () => {
+            if ( fileText.Contains( "\"Name\"" ) && fileText.Contains( "\"DLL\"" ) && fileText.Contains( "\"Settings\"" ) ) TryRun( Log, () => {
                JObject modInfo = JObject.Parse( fileText );
                if ( modInfo.TryGetValue( "Settings", out JToken embedded ) )
                   fileText = embedded.ToString( Formatting.None );
@@ -112,12 +112,12 @@ namespace Sheepy.BattleTechMod {
             TryRun( () => config = sanitise( config ) );
 
          string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
-         Logger.Info( "WARNING: Do NOT change settings here. This is just a log." );
-         Logger.Info( "Loaded Settings: " + sanitised );
-         Logger.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
+         Log.Info( "WARNING: Do NOT change settings here. This is just a log." );
+         Log.Info( "Loaded Settings: " + sanitised );
+         Log.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
          string commented = BattleJsonContract.FormatSettingJsonText( settings.GetType(), sanitised );
          if ( commented != fileText ) { // Can be triggered by comment or field updates, not necessary sanitisation.
-            Logger.Info( "Updating " + file );
+            Log.Info( "Updating " + file );
             SaveSettings( commented );
          }
          settings = config;
@@ -128,7 +128,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       private void SaveSettings ( string settings ) {
-         TryRun( Logger, () => File.WriteAllText( BaseDir + "settings.json", settings ) );
+         TryRun( Log, () => File.WriteAllText( BaseDir + "settings.json", settings ) );
       }
 
       // ============ Execution ============
@@ -142,7 +142,7 @@ namespace Sheepy.BattleTechMod {
             if ( module != this )
                if ( module.Id == Id ) module.Id += "." + Idify( module.Name );
             list.Add( module );
-            TryRun( Logger, module.ModStarts );
+            TryRun( Log, module.ModStarts );
          }
          return this;
       }
@@ -195,7 +195,7 @@ namespace Sheepy.BattleTechMod {
             foreach ( BattleModModule module in mod.Value ) try {
                task( module );
             } catch ( Exception ex ) { 
-               mod.Key.Logger.Error( ex ); 
+               mod.Key.Log.Error( ex ); 
             }
          }
       }
@@ -262,7 +262,7 @@ namespace Sheepy.BattleTechMod {
             if ( Mod == null )
                throw new ApplicationException( "Mod module should be created in BattleMod.ModStart()." );
             Id = Mod.Id;
-            Logger = Mod.Logger;
+            Log = Mod.Log;
          }
       }
 
@@ -270,7 +270,7 @@ namespace Sheepy.BattleTechMod {
       public string Name { get; protected internal set; } = "Module";
       
       private Logger _Logger;
-      protected Logger Logger {
+      protected Logger Log {
          get { return _Logger ?? BattleMod.BTML_LOG; }
          set { _Logger = value; }
       }
@@ -282,7 +282,7 @@ namespace Sheepy.BattleTechMod {
          if ( method == null ) return null;
          MethodInfo mi = GetType().GetMethod( method, Static | Public | NonPublic );
          if ( mi == null ) {
-            Logger.Error( "Cannot find patch method " + method );
+            Log.Error( "Cannot find patch method " + method );
             return null;
          }
          return new HarmonyMethod( mi );
@@ -320,7 +320,7 @@ namespace Sheepy.BattleTechMod {
                patched = patchedClass.GetMethod( patchedMethod, flags, null, parameterTypes, null );
          } catch ( Exception e ) { ex = e; }
          if ( patched == null ) {
-            Logger.Error( "Cannot find {0}.{1}(...) to patch {2}", patchedClass.Name, patchedMethod, ex );
+            Log.Error( "Cannot find {0}.{1}(...) to patch {2}", patchedClass.Name, patchedMethod, ex );
             return;
          }
          Patch( patched, prefix, postfix );
@@ -339,13 +339,13 @@ namespace Sheepy.BattleTechMod {
       protected void Patch ( MethodBase patched, HarmonyMethod prefix, HarmonyMethod postfix ) {
          string pre = prefix?.method?.Name, post = postfix?.method?.Name;
          if ( patched == null ) {
-            Logger.Error( "Method not found. Cannot patch [ {0} : {1} ]", pre, post );
+            Log.Error( "Method not found. Cannot patch [ {0} : {1} ]", pre, post );
             return;
          }
          if ( Mod.harmony == null )
             Mod.harmony = HarmonyInstance.Create( Id );
          Mod.harmony.Patch( patched, prefix, postfix );
-         Logger.Verbo( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
+         Log.Verbo( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
       }
 
       // ============ UTILS ============

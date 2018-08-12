@@ -39,11 +39,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private ModSettings SanitizeSettings ( ModSettings settings ) {
          // Switch log folder if specified
          if ( ! String.IsNullOrEmpty( settings.LogFolder ) && settings.LogFolder != LogDir ) {
-            Logger.Delete();
+            Log.Delete();
             if ( ! settings.LogFolder.EndsWith( "/" ) && ! settings.LogFolder.EndsWith( "\\" ) )
                settings.LogFolder += "/";
             LogDir = settings.LogFolder;
-            Logger.Info( "{2} {0} Version {1} In {3}\r\n", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
+            Log.Info( "{2} {0} Version {1} In {3}\r\n", Name, Version, DateTime.Now.ToString( "s" ), BaseDir );
          }
 
 #pragma warning disable CS0618 // Disable "this is obsolete" warnings since we must read them to upgrade them.
