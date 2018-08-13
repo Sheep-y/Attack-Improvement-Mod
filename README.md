@@ -31,9 +31,11 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Vehicle Called Shot fixed.
 * Damaged Structure Display fixed and enhanced.
 * Grey Head Disease fixed.
-* Line of Fire fixed and stylised.
+* Line of Fire fixed and stylised by type and direction.
+* Colouring facing ring and floating armour bar.
 * Multi-Target Back Out fixed.
 * Make sure 0 HP means dead, never zombie.
+* Show ammo count in paper doll hover.
 * Show Heat and Stability Numbers, including cooldown overhead.
 * Show Base Hit Chance in accuracy modifier popup.
 * (Optional) Show Mech Tonnage.
@@ -48,10 +50,12 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Allow Net Bonus Hit modifiers.
 * Allow Negative Height Modifier.
 * Remove Melee Positon Cap.
+* Ammo Loader AI that balance ammo usage for less explosion.
+* Auto Jettsion useless ammo.
 
 ## Other Adjustables ##
 
-* Tabular Attack Log that can be copied and pasted to Excel.
+* Tabular Attack Log that can be opened directly in Excel.
 * Adjustable Roll Correction Strength, default halved.
 * Adjustable Miss Streak Breaker.
 * Adjustable Base Hit Chance.
