@@ -35,6 +35,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool ShowAmmoInTooltip = true;
       public bool ShowEnemyAmmoInTooltip = false;
 
+      [ JsonComment( "Set armour colour of floating bar of Player / Enemy / Ally.  Default \"cyan\" for player, \"teal\" for ally.  Set to empty to not change." ) ]
+      public string FloatingArmorColourPlayer = "cyan";
+      public string FloatingArmorColourEnemy = "";
+      public string FloatingArmorColourAlly = "teal";
+
       /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
       public bool FixHeatPrediction = true;
 

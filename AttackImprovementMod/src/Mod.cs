@@ -119,6 +119,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       /* Changes that we don't want to write back to settings.json */
       private void NormaliseSettings () {
+         NullIfEmpty( ref Settings.FloatingArmorColourPlayer );
+         NullIfEmpty( ref Settings.FloatingArmorColourEnemy );
+         NullIfEmpty( ref Settings.FloatingArmorColourAlly );
+
          NullIfEmpty( ref Settings.LOSMeleeColors );
          NullIfEmpty( ref Settings.LOSClearColors );
          NullIfEmpty( ref Settings.LOSBlockedPreColors );
@@ -141,6 +145,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( TrueIfFriend == TrueIfFoe ) return TrueIfFriend;
          bool isFriend = subject.team.IsFriendly( Combat.LocalPlayerTeam );
          return isFriend == TrueIfFriend; // Same as ( isFriend && TrueIfFriend ) || ( ! isFriend && TrueIfFoe );
+      }
+
+      // ============ Utils ============
+
+      public static UnityEngine.Color? ParseColour ( string htmlColour ) {
+         if ( htmlColour == "" || htmlColour == null ) return null;
+         if ( UnityEngine.ColorUtility.TryParseHtmlString( htmlColour, out UnityEngine.Color result ) )
+            return result;
+         Error( "Cannot parse \"" + htmlColour + "\" as colour." );
+         return null;
       }
 
       // ============ Logging ============

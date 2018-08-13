@@ -73,11 +73,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          for ( int i = 0 ; i < LOSDirectionCount ; i++ ) {
             if ( player != null && player.Length > i )
-               FacingMarkerPlayerColors[ i ] = Parse( player[ i ] );
+               FacingMarkerPlayerColors[ i ] = ParseColour( player[ i ] );
             if ( player != null && enemy.Length > i )
-               FacingMarkerEnemyColors [ i ] = Parse( enemy [ i ] );
+               FacingMarkerEnemyColors [ i ] = ParseColour( enemy [ i ] );
             if ( active != null && active.Length > i )
-               FacingMarkerTargetColors[ i ] = Parse( active[ i ] );
+               FacingMarkerTargetColors[ i ] = ParseColour( active[ i ] );
          }
          Info( "Player direction marker = " + Join( ", ", FacingMarkerPlayerColors.Select( e => ColorUtility.ToHtmlStringRGBA(e.GetValueOrDefault() ) ) ) );
          Info( "Enemy  direction marker = " + Join( ", ", FacingMarkerEnemyColors .Select( e => ColorUtility.ToHtmlStringRGBA(e.GetValueOrDefault() ) ) ) );
@@ -172,7 +172,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Color?[] colors = new Color?[ LOSDirectionCount ];
             for ( int i = 0 ; i < LOSDirectionCount ; i++ )
                if ( colorList.Count > i )
-                  colors[ i ] = Parse( colorList[ i ] );
+                  colors[ i ] = ParseColour( colorList[ i ] );
             if ( colors.Any( e => e != null ) )
                parsedColor.Add( line, colors );
          }
@@ -265,14 +265,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       // ============ UTILS ============
-
-      public static Color? Parse ( string htmlColour ) {
-         if ( htmlColour == "" || htmlColour == null ) return null;
-         if ( ColorUtility.TryParseHtmlString( htmlColour, out Color result ) )
-            return result;
-         Error( "Cannot parse \"" + htmlColour + "\" as colour." );
-         return null;
-      }
 
       private static Material[] NewMat ( Line line ) {
          string name = line.ToString();
