@@ -22,6 +22,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          FloatingArmorColourEnemy = ParseColour( Settings.FloatingArmorColourEnemy );
          FloatingArmorColourAlly = ParseColour( Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColourPlayer != null || FloatingArmorColourEnemy != null || FloatingArmorColourAlly != null ) {
+            BarOwners = new Dictionary<WeakReference, ICombatant>();
             Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetPipBarOwner", "ResetPipBarOwner" );
          }
@@ -105,6 +106,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStarts () {
          if ( Settings.ShowHeatAndStab )
             targetDisplay = HUD.TargetingComputer?.ActorInfo?.DetailsDisplay;
+      }
+
+      public override void CombatEnds () {
+         BarOwners = null;
       }
 
       // ============ Paper Doll ============
@@ -371,7 +376,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Floating Nameplate ============
 
-      private static Dictionary<WeakReference, ICombatant> BarOwners = new Dictionary<WeakReference, ICombatant>();
+      private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
       private static Team thisBarOwner;
 
       public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
@@ -379,13 +384,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( thisBarOwner != null ) {
             owner = thisBarOwner;
             BarOwners.Add( __instance, owner );
-         } else {
-            foreach ( var pair in BarOwners )
-               if ( ReferenceEquals( pair.Key.Target, __instance ) ) {
-                  owner = pair.Value;
-                  break;
-               }
-         }
+         } else
+            BarOwners.TryGetValue( __instnace, out owner );
          Team team = owner?.team;
          if ( team == null || ! ( __instance is CombatHUDLifeBarPips hpBar ) || hpBar.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
 

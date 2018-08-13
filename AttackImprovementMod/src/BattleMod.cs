@@ -154,6 +154,7 @@ namespace Sheepy.BattleTechMod {
          Patch( typeof( UnityGameInstance ).GetMethod( "InitUserSettings", Instance | NonPublic ), null, typeof( BattleMod ).GetMethod( "RunGameStarts", Static | NonPublic ) );
          Patch( typeof( SimGameState ).GetMethod( "Init" ), null, typeof( BattleMod ).GetMethod( "RunCampaignStarts", Static | NonPublic ) );
          Patch( typeof( CombatHUD ).GetMethod( "Init", new Type[]{ typeof( CombatGameState ) } ), null, typeof( BattleMod ).GetMethod( "RunCombatStarts", Static | NonPublic ) );
+         Patch( typeof( CombatHUD ).GetMethod( "OnCombatGameDestroyed", null, typeof( BattleMod ).GetMethod( "RunCombatEnds", Static | NonPublic ) );
          GameStartPatched = true;
       }
 
@@ -189,7 +190,11 @@ namespace Sheepy.BattleTechMod {
          }
          CallAllModules( module => module.CombatStarts() );
       }
-      
+
+      private static void RunCombatEnds ( CombatHUD __instance ) {
+         CallAllModules( module => module.CombatEnds() );
+      }
+
       private static void CallAllModules ( Action<BattleModModule> task ) {
          foreach ( var mod in modules ) {
             foreach ( BattleModModule module in mod.Value ) try {
@@ -249,6 +254,7 @@ namespace Sheepy.BattleTechMod {
       public virtual void CampaignStarts () {}
       public virtual void CombatStartsOnce () {}
       public virtual void CombatStarts () {}
+      public virtual void CombatEnds () {}
 
       protected BattleMod Mod { get; private set; }
 
