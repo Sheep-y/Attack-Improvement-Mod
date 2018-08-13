@@ -13,53 +13,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class UserInterface : BattleModModule {
 
-      private static Color friendArmorBar = new Color( 0, 128, 255, 191 );
-
-      private static HashSet<CombatHUDPipBar> FriendlyBar = new HashSet<CombatHUDPipBar>();
-
-      public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
-         if ( FriendlyBar.Contains( __instance ) ) {
-            // Triggered by ??? > CombatHUDLifeBarPips.Update > CombatHUDLifeBarPips.ShowCurrent
-            shownColor = friendArmorBar;
-         } else {
-            if ( ! isFriend || ! ( __instance is CombatHUDLifeBarPips hpBar ) ) return;
-            if ( hpBar.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
-            FriendlyBar.Add( __instance );
-            Info( shownColor );
-            shownColor = friendArmorBar;
-         }
-         //Info( "{0}, current {1}, shown {2}, hidden {3}, locked {4}", __instance.GetType(), current, shownColor, hiddenColor, lockedColor );
-      }
-
-      private static bool isFriend;
-
-      public static void SetIFF1 ( CombatHUDMechCallout __instance ) {
-         isFriend = __instance.DisplayedActor?.team?.IsFriendly( BattleTechGame?.Combat.LocalPlayerTeam ) ?? false;
-         Info( "IsFriend1? {0}", isFriend );
-      }
-
-      public static void SetIFF2 ( CombatHUDActorInfo __instance ) {
-         isFriend = __instance.DisplayedCombatant?.team?.IsFriendly( BattleTechGame?.Combat.LocalPlayerTeam ) ?? false;
-         Info( "IsFriend2? {0}", isFriend );
-      }
-
-      public static void SetIFF3 ( HUDMechArmorReadout __instance ) {
-         isFriend = __instance.DisplayedMech?.team?.IsFriendly( BattleTechGame?.Combat.LocalPlayerTeam ) ?? false;
-         Info( "IsFriend3? {0}", isFriend );
-      }
-
-      public static void ResetIFF () {
-         isFriend = false;
-      }
-
-      public static void Trace () { Info( Logging.Logger.Stacktrace ); }
+      private static Color? FloatingArmorColourPlayer;
+      private static Color? FloatingArmorColourEnemy;
+      private static Color? FloatingArmorColourAlly;
 
       public override void GameStartsOnce () {
-         //Patch( typeof( CombatHUDLifeBarPips ), "ShowNewSummary", new Type[]{ typeof(float), typeof(float), typeof(float), typeof(bool) }, "Trace", null );
-         Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
-         //Patch( typeof( HUDMechArmorReadout ), "ResetArmorStructureBars", NonPublic, "SetIFF3", "ResetIFF" );
-         //Patch( typeof( CombatHUDMechCallout ), "RefreshInfo", NonPublic, "SetIFF1", "ResetIFF" );
-         Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetIFF2", "ResetIFF" );
+         FloatingArmorColourPlayer = ParseColour( Settings.FloatingArmorColourPlayer );
+         FloatingArmorColourEnemy = ParseColour( Settings.FloatingArmorColourEnemy );
+         FloatingArmorColourAlly = ParseColour( Settings.FloatingArmorColourAlly );
+         if ( FloatingArmorColourPlayer != null || FloatingArmorColourEnemy != null || FloatingArmorColourAlly != null ) {
+            Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
+            Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetPipBarTeam", "ResetPipBarTeam" );
+         }
       }
 
       public override void CombatStartsOnce () {
@@ -402,6 +367,46 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( !needRefresh ) return;
          __instance?.ActorInfo?.DetailsDisplay?.RefreshInfo();
          needRefresh = false;
+      }
+
+      // ============ Floating Nameplate ============
+
+      private static Dictionary<WeakReference, Team> BarTeams = new Dictionary<WeakReference, Team>();
+      private static Team thisBarTeam;
+
+      public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
+         Team team = null;
+         if ( thisBarTeam != null ) {
+            team = thisBarTeam;
+         } else {
+            foreach ( var pair in BarTeams )
+               if ( ReferenceEquals( pair.Key.Target, __instance ) ) {
+                  team = pair.Value;
+                  break;
+               }
+         }
+         if ( team == null || ! ( __instance is CombatHUDLifeBarPips hpBar ) || hpBar.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
+
+         if ( team.IsLocalPlayer ) {
+            if ( FloatingArmorColourPlayer != null )
+               shownColor = FloatingArmorColourPlayer.GetValueOrDefault();
+
+         } else if ( team.IsEnemy( BattleTechGame?.Combat?.LocalPlayerTeam ) ) {
+            if ( FloatingArmorColourEnemy != null )
+               shownColor = FloatingArmorColourEnemy.GetValueOrDefault();
+
+         } else if ( team.IsFriendly( BattleTechGame?.Combat?.LocalPlayerTeam ) ) {
+            if ( FloatingArmorColourAlly != null )
+               shownColor = FloatingArmorColourAlly.GetValueOrDefault();
+         }
+      }
+
+      public static void SetPipBarTeam ( CombatHUDActorInfo __instance ) {
+         thisBarTeam = __instance.DisplayedCombatant?.team;
+      }
+
+      public static void ResetPipBarTeam () {
+         thisBarTeam = null;
       }
 
       // ============ Pathing ============
