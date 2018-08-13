@@ -33,8 +33,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( prefixVehicle )
             Patch( typeof( Mech ), "GetLongArmorLocation", Static, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
          if ( Settings.FixHitDistribution ) {
-            Patch( MechGetHit, "OverrideMechCalledShot", null );
-            Patch( VehicleGetHit, "OverrideVehicleCalledShot", null );
+            ScaledMechHitTables = new Dictionary<Dictionary<ArmorLocation, int>, Dictionary<ArmorLocation, int>>();
+            ScaledVehicleHitTables = new Dictionary<Dictionary<VehicleChassisLocations, int>, Dictionary<VehicleChassisLocations, int>>();
+            Patch( MechGetHit, "ScaleMechHitTable", null );
+            Patch( VehicleGetHit, "ScaleVehicleHitTable", null );
          }
 
          if ( Settings.FixGreyHeadDisease )
@@ -56,7 +58,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static bool ClusterChanceNeverMultiplyHead = true;
       private static float ClusterChanceOriginalLocationMultiplier = 1f;
-      private static Dictionary< Dictionary<ArmorLocation, int>, int > HeadHitWeights;
+      private static Dictionary<Dictionary<ArmorLocation, int>, int> HeadHitWeights;
 
       public override void CombatStarts () {
          ClusterChanceNeverMultiplyHead = CombatConstants.ToHit.ClusterChanceNeverMultiplyHead;
@@ -70,6 +72,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                HeadHitWeights.Add( hitTable, head );
             }
          }
+      }
+
+      public override void CombatEnds () {
+         HeadHitWeights = null;
+         ScaledMechHitTables = null;
+         ScaledVehicleHitTables = null;
       }
 
       // ============ UTILS ============
@@ -93,6 +101,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Called Shot ============
 
+      private static Dictionary<Dictionary<ArmorLocation, int>, Dictionary<ArmorLocation, int>> ScaledMechHitTables;
+      private static Dictionary<Dictionary<VehicleChassisLocations, int>, Dictionary<VehicleChassisLocations, int>> ScaledVehicleHitTables;
+
       public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
          if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None ) {
@@ -109,21 +120,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideMechCalledShot ( ref ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) { try {
-         __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
-         return false;
+      public static void ScaleMechHitTable ( ref Dictionary<ArmorLocation, int> hitTable ) { try {
+         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) {
+            scaled = ScaleHitTable( hitTable, new Dictionary<ArmorLocation, int>(8) );
+            ScaledMechHitTables.Add( hitTable, scaled );
+         }
+         hitTable = scaled;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static void PrefixVehicleCalledShot ( VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideVehicleCalledShot ( ref VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) { try {
-         __result = GetHitLocationFixed( hitTable, randomRoll, bonusLocation, bonusLocationMultiplier );
-         return false;
+      public static void ScaleVehicleHitTable ( ref Dictionary<VehicleChassisLocations, int> hitTable ) { try {
+         if ( ! ScaledVehicleHitTables.TryGetValue( hitTable, out Dictionary<VehicleChassisLocations, int> scaled ) {
+            scaled = ScaleHitTable( hitTable, new Dictionary<VehicleChassisLocations, int>(8) );
+            ScaledVehicleHitTables.Add( hitTable, scaled );
+         }
+         hitTable = scaled;
       }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      public static void ScaleHitTable <T> ( Dictionary<T, int> input, Dictionary<T, int> output ) {
+         foreach ( var pair in input ) output.Add( pair.Key, pair.value *= SCALE );
+      }
 
       // ============ GetHitLocation ============
 
@@ -136,24 +155,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return totalWeight;
       }
 
-      public static T GetHitLocationFixed<T> ( Dictionary<T, int> hitTable, float roll, T bonusLocation, float bonusLocationMultiplier ) {
-         int totalWeight = SumWeight( hitTable, bonusLocation, bonusLocationMultiplier, SCALE );
-         int goal = (int)( roll * (double)totalWeight ), i = 0;
-         foreach ( KeyValuePair<T, int> location in hitTable ) {
-            if ( location.Value <= 0 ) continue;
-            if ( location.Key.Equals( bonusLocation ) )
-               i += (int)( (float) location.Value * bonusLocationMultiplier * SCALE );
-            else
-               i += location.Value * SCALE;
-            if ( i > goal )
-               return location.Key;
-         }
-         throw new ApplicationException( "No valid hit location. Enable logging to see hitTable." );
-      }
-
       // Not the most efficient fix since it is called per shot - same as the bugged head removal code - but this is dead simple
       public static void FixGreyHeadDisease ( Dictionary<ArmorLocation, int> hitTable ) {
-         // Re-attach missing head after hit location is rolled 
+         // Re-attach missing head after hit location is rolled
          if ( ! hitTable.ContainsKey( Head ) && HeadHitWeights.ContainsKey( hitTable ) )
             hitTable.Add( Head, HeadHitWeights[ hitTable ] );
       }
