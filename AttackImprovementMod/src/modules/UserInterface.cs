@@ -23,7 +23,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          FloatingArmorColourAlly = ParseColour( Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColourPlayer != null || FloatingArmorColourEnemy != null || FloatingArmorColourAlly != null ) {
             Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
-            Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetPipBarTeam", "ResetPipBarTeam" );
+            Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetPipBarOwner", "ResetPipBarOwner" );
          }
       }
 
@@ -371,42 +371,41 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Floating Nameplate ============
 
-      private static Dictionary<WeakReference, Team> BarTeams = new Dictionary<WeakReference, Team>();
-      private static Team thisBarTeam;
+      private static Dictionary<WeakReference, ICombatant> BarOwners = new Dictionary<WeakReference, ICombatant>();
+      private static Team thisBarOwner;
 
       public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
-         Team team = null;
-         if ( thisBarTeam != null ) {
-            team = thisBarTeam;
+         Owner owner = null;
+         if ( thisBarOwner != null ) {
+            owner = thisBarOwner;
+            BarOwners.Add( __instance, owner );
          } else {
-            foreach ( var pair in BarTeams )
+            foreach ( var pair in BarOwners )
                if ( ReferenceEquals( pair.Key.Target, __instance ) ) {
-                  team = pair.Value;
+                  owner = pair.Value;
                   break;
                }
          }
+         Team team = owner?.team;
          if ( team == null || ! ( __instance is CombatHUDLifeBarPips hpBar ) || hpBar.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
 
-         if ( team.IsLocalPlayer ) {
-            if ( FloatingArmorColourPlayer != null )
-               shownColor = FloatingArmorColourPlayer.GetValueOrDefault();
+         if ( FloatingArmorColourPlayer != null && team.IsLocalPlayer ) {
+            shownColor = FloatingArmorColourPlayer.GetValueOrDefault();
 
-         } else if ( team.IsEnemy( BattleTechGame?.Combat?.LocalPlayerTeam ) ) {
-            if ( FloatingArmorColourEnemy != null )
-               shownColor = FloatingArmorColourEnemy.GetValueOrDefault();
+         } else if ( FloatingArmorColourEnemy != null && team.IsEnemy( BattleTechGame?.Combat?.LocalPlayerTeam ) ) {
+            shownColor = FloatingArmorColourEnemy.GetValueOrDefault();
 
-         } else if ( team.IsFriendly( BattleTechGame?.Combat?.LocalPlayerTeam ) ) {
-            if ( FloatingArmorColourAlly != null )
-               shownColor = FloatingArmorColourAlly.GetValueOrDefault();
+         } else if ( FloatingArmorColourAlly != null && team.IsFriendly( BattleTechGame?.Combat?.LocalPlayerTeam ) ) {
+            shownColor = FloatingArmorColourAlly.GetValueOrDefault();
          }
       }
 
-      public static void SetPipBarTeam ( CombatHUDActorInfo __instance ) {
-         thisBarTeam = __instance.DisplayedCombatant?.team;
+      public static void SetPipBarOwner ( CombatHUDActorInfo __instance ) {
+         thisBarOwner = __instance.DisplayedCombatant;
       }
 
-      public static void ResetPipBarTeam () {
-         thisBarTeam = null;
+      public static void ResetPipBarOwner () {
+         thisBarOwner = null;
       }
 
       // ============ Pathing ============
