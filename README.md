@@ -94,6 +94,15 @@ These settings can be changed in `settings.json`.
 ## User Interface Settings
 
 
+**Colour Floating Armour Bars**
+
+>  Setting: `FloatingArmorColourPlayer`  (color string, default "cyan")<br>
+>  Setting: `FloatingArmorColourEnemy`  (color string, default "")<br>
+>  Setting: `FloatingArmorColourAlly`  (color string, default "teal")<br>
+>
+>  When non-empty, change colour of armour bars floating above field units, making it easier to tell friends from foes.
+
+
 **Fix Rear Structure Display**
 
 > Setting: `FixPaperDollRearStructure`  (true/false, default true)
@@ -158,8 +167,9 @@ These settings can be changed in `settings.json`.
 > Setting: `LOSWidthBlocked`  (0 to 10, default 1.5, game default 0.75)
 >
 > Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
->
-> When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
+<br>
+
+> When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
 
 
 **Styles and Colours Targeting Lines**
@@ -170,12 +180,12 @@ These settings can be changed in `settings.json`.
 > Setting: `LOSClearDotted`  (default false)<br>
 > Setting: `LOSBlockedPreDotted`   (default false)<br>
 > Setting: `LOSBlockedPostDotted`  (default false)<br>
-> Setting: `LOSMeleeColor`  (default "")<br>
-> Setting: `LOSClearColor`  (default "")<br>
-> Setting: `LOSBlockedPreColor`   (default "#D0F")<br>
-> Setting: `LOSBlockedPostColor`  (default "#C8E")<br>
-> Setting: `LOSIndirectColor`  (default "")<br>
-> Setting: `LOSNoAttackColor`  (default "")
+> Setting: `LOSMeleeColors`  (default "")<br>
+> Setting: `LOSClearColors`  (default "")<br>
+> Setting: `LOSBlockedPreColors`   (default "#D0F")<br>
+> Setting: `LOSBlockedPostColors`  (default "#C8E")<br>
+> Setting: `LOSIndirectColors`  (default "")<br>
+> Setting: `LOSNoAttackColors`  (default "")<br>
 >
 > Set the colour and style of various targeting lines.
 > Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.
@@ -183,7 +193,20 @@ These settings can be changed in `settings.json`.
 > Colours are either empty or in HTML hash syntax.  For example `"#F00"` = red, `"#0F0"` = green, `"#00F"` = blue, `"#FFF"` = white, `"#888"` = grey, `"#000"` = black.
 > Four parts means RGBA, while three parts mean full opacity RGB.  Supports full and short form. e.g. #28B = #2288BB = #2288BBFF.
 >
-> When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
+> Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in order.
+> If less colours are specified than direction, the missing directions will use the last colour.
+> For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
+>
+> When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
+
+
+**Colours Facing Rings**
+
+> Setting: `FacingMarkerPlayerColors`  (default "#FFFF,#CCFF,#CCFF,#BFBF,#FFBF")<br>
+> Setting: `FacingMarkerEnemyColors`  (default "#FFFF,#CCFF,#CCFF,#FBBF,#FFBF")<br>
+> Setting: `FacingMarkerTargetColors`  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br>
+>
+> When non-empty, change the colours of each arc for friends, foes, and targeted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.
 
 
 **Change Widths of Obstruction Marker**
@@ -557,9 +580,10 @@ but because the code that determine hit distribution is not designed for fractio
 > Set the format and extension of attack log.  Default is csv which can be opened directly by Excel.
 <br>
 
-> Setting: `PersistentLog`  (true/false, default false)
+> Setting: `AttackLogArchiveMaxMB`  (0 to 1 million, default 4)
 >
-> When set to false, the attack log will auto-clear on launch.
+> When the game first enter combat every launch, old attack log is archived through rename.
+> Then log exceeding this size limit will be deleted in the background.
 <br>
 
 > Setting: `LogFolder`  (string, default "")
