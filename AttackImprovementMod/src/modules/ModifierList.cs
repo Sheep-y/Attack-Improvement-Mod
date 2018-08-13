@@ -215,12 +215,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                float modifier = Hit.GetRangeModifier( AttackWeapon, AttackPos, TargetPos );
                AttackModifier result = new AttackModifier( modifier );
                float range = Vector3.Distance( AttackPos, TargetPos );
-               if ( range < AttackWeapon.MinRange ) return result.SetName( $"MIN RANGE (<{AttackWeapon.MinRange}m)" );
-               if ( range < AttackWeapon.ShortRange ) return result.SetName( $"SHORT RANGE ({AttackWeapon.MinRange}-{AttackWeapon.ShortRange}m)" );
-               if ( range < AttackWeapon.MediumRange ) return result.SetName( $"MEDIUM RANGE ({AttackWeapon.ShortRange}-{AttackWeapon.MediumRange}m)" );
-               if ( range < AttackWeapon.LongRange ) return result.SetName( $"LONG RANGE ({AttackWeapon.MediumRange}-{AttackWeapon.LongRange}m)" );
-               if ( range < AttackWeapon.MaxRange ) return result.SetName( $"MAX RANGE ({AttackWeapon.LongRange}-{AttackWeapon.MaxRange}m)" );
-               return result.SetName( $"OUT OF RANGE ({AttackWeapon.MaxRange}+)" );
+               if ( range < AttackWeapon.MinRange ) return result.SetName( $"MIN RANGE (<{range}m)" );
+               if ( range < AttackWeapon.ShortRange ) return result.SetName( $"SHORT RANGE ({range}m)" );
+               if ( range < AttackWeapon.MediumRange ) return result.SetName( $"MEDIUM RANGE ({range}m)" );
+               if ( range < AttackWeapon.LongRange ) return result.SetName( $"LONG RANGE ({range}m)" );
+               if ( range < AttackWeapon.MaxRange ) return result.SetName( $"MAX RANGE ({range}m)" );
+               return result.SetName( $"OUT OF RANGE ({range}m)" );
             };
 
          case "height":
