@@ -22,7 +22,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          FloatingArmorColourEnemy = ParseColour( Settings.FloatingArmorColourEnemy );
          FloatingArmorColourAlly = ParseColour( Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColourPlayer != null || FloatingArmorColourEnemy != null || FloatingArmorColourAlly != null ) {
-            BarOwners = new Dictionary<WeakReference, ICombatant>();
+            BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
             Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetPipBarOwner", "ResetPipBarOwner" );
          }

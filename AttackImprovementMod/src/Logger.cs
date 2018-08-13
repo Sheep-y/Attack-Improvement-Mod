@@ -29,7 +29,7 @@ namespace Sheepy.Logging {
       protected List<Func<LogEntry,bool>> _Filters = null;
       protected bool _IgnoreDuplicateExceptions = true;
 
-      public struct LogEntry { public DateTime time; public SourceLevels level; public object message; public object[] args; }
+      public class LogEntry { public DateTime time; public SourceLevels level; public object message; public object[] args; }
 
       // Worker states locked by queue which is private.
       private HashSet<string> exceptions = new HashSet<string>(); // Double as public get/set lock object
