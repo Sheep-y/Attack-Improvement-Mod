@@ -75,9 +75,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatEnds () {
-         HeadHitWeights = null;
-         ScaledMechHitTables = null;
-         ScaledVehicleHitTables = null;
+         HeadHitWeights?.Clear();
+         ScaledMechHitTables?.Clear();
+         ScaledVehicleHitTables?.Clear();
       }
 
       // ============ UTILS ============
@@ -121,10 +121,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ScaleMechHitTable ( ref Dictionary<ArmorLocation, int> hitTable ) { try {
-         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) ) {
-            ScaleHitTable( hitTable, new Dictionary<ArmorLocation, int>(8) );
-            ScaledMechHitTables.Add( hitTable, scaled );
-         }
+         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) )
+            ScaledMechHitTables.Add( hitTable, scaled = ScaleHitTable( hitTable ) );
          hitTable = scaled;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
@@ -133,15 +131,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ScaleVehicleHitTable ( ref Dictionary<VehicleChassisLocations, int> hitTable ) { try {
-         if ( ! ScaledVehicleHitTables.TryGetValue( hitTable, out Dictionary<VehicleChassisLocations, int> scaled ) ) {
-            ScaleHitTable( hitTable, new Dictionary<VehicleChassisLocations, int>(8) );
-            ScaledVehicleHitTables.Add( hitTable, scaled );
-         }
+         if ( ! ScaledVehicleHitTables.TryGetValue( hitTable, out Dictionary<VehicleChassisLocations, int> scaled ) )
+            ScaledVehicleHitTables.Add( hitTable, scaled = ScaleHitTable( hitTable ) );
          hitTable = scaled;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void ScaleHitTable <T> ( Dictionary<T, int> input, Dictionary<T, int> output ) {
+      public static Dictionary<T, int> ScaleHitTable <T> ( Dictionary<T, int> input ) {
+         Dictionary<T, int> output = new Dictionary<T, int>( input.Count );
          foreach ( var pair in input ) output.Add( pair.Key, pair.Value * SCALE );
+         return output;
       }
 
       // ============ GetHitLocation ============

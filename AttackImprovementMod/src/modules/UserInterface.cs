@@ -22,7 +22,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          FloatingArmorColourEnemy = ParseColour( Settings.FloatingArmorColourEnemy );
          FloatingArmorColourAlly = ParseColour( Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColourPlayer != null || FloatingArmorColourEnemy != null || FloatingArmorColourAlly != null ) {
-            BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
+            BarOwners = new Dictionary<WeakReference, ICombatant>();
             Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetPipBarOwner", "ResetPipBarOwner" );
          }
@@ -109,7 +109,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatEnds () {
-         BarOwners = null;
+         BarOwners?.Clear();
       }
 
       // ============ Paper Doll ============
@@ -376,18 +376,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Floating Nameplate ============
 
-      private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
+      private static Dictionary<WeakReference, ICombatant> BarOwners;
       private static ICombatant thisBarOwner;
 
       public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
+         if ( ! ( __instance is CombatHUDLifeBarPips me ) || me.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
+
          ICombatant owner = null;
          if ( thisBarOwner != null ) {
             owner = thisBarOwner;
-            BarOwners.Add( __instance, owner );
-         } else
-            BarOwners.TryGetValue( __instance, out owner );
+            BarOwners.Add( new WeakReference( __instance ), owner );
+         } else {
+            foreach ( var pair in BarOwners )
+               if ( ReferenceEquals( pair.Key.Target, __instance ) ) {
+                  owner = pair.Value;
+                  break;
+               }
+         }
          Team team = owner?.team;
-         if ( team == null || ! ( __instance is CombatHUDLifeBarPips hpBar ) || hpBar.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
+         if ( team == null || owner.IsDead ) return;
 
          if ( FloatingArmorColourPlayer != null && team.IsLocalPlayer ) {
             shownColor = FloatingArmorColourPlayer.GetValueOrDefault();
