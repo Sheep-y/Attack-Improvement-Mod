@@ -56,14 +56,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.FixMultiTargetBackout ) {
             TryRun( Log, () => {
-               targetedCombatant = typeof( SelectionState ).GetField( "targetedCombatant", NonPublic | Instance );
                weaponTargetIndices = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
                RemoveTargetedCombatant = typeof( SelectionStateFireMulti ).GetMethod( "RemoveTargetedCombatant", NonPublic | Instance );
                ClearTargetedActor = typeof( SelectionStateFireMulti ).GetMethod( "ClearTargetedActor", NonPublic | Instance | FlattenHierarchy );
             } );
 
-            if ( targetedCombatant == null )
-               Warn( "Cannot find SelectionState.targetedCombatant. MultiTarget backup may triggers target lock sound effect." );
             if ( ClearTargetedActor == null )
                Warn( "Cannot find SelectionStateFireMulti.ClearTargetedActor. MultiTarget backout may be slightly inconsistent." );
             if ( RemoveTargetedCombatant == null )
@@ -247,13 +244,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
-      private static FieldInfo targetedCombatant;
       private static PropertyInfo weaponTargetIndices;
       private static MethodInfo RemoveTargetedCombatant, ClearTargetedActor;
       private static readonly object[] RemoveTargetParams = new object[]{ null, false };
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideMultiTargetBackout ( SelectionStateFireMulti __instance ) { try {
+      public static bool OverrideMultiTargetBackout ( SelectionStateFireMulti __instance, ref ICombatant ___targetedCombatant ) { try {
          SelectionStateFireMulti me = __instance;
          List<ICombatant> allTargets = me.AllTargetedCombatants;
          int count = allTargets.Count;
@@ -264,8 +260,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             // Try one of the reflection ways to set new target
             if ( newTarget == null && ClearTargetedActor != null )
                ClearTargetedActor.Invoke( me, null ); // Hide fire button
-            else if ( targetedCombatant != null )
-               targetedCombatant.SetValue( me, newTarget ); // Skip soft lock sound
+            else if ( ___targetedCombatant != null )
+               ___targetedCombatant = newTarget; // Skip soft lock sound
             else
                me.SetTargetedCombatant( newTarget );
             // The only line that is same as old!

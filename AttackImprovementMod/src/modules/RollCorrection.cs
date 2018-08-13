@@ -44,13 +44,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) && ! TrueRNG ) {
             if ( Settings.MissStreakBreakerThreshold == 1f || Settings.MissStreakBreakerDivider == 0f )
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "BypassMissStreakBreaker", null );
-            else {
-               StreakBreakingValueProp = typeof( Team ).GetField( "streakBreakingValue", NonPublic | Instance );
-               if ( StreakBreakingValueProp != null )
-                  Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
-               else
-                  Error( "Can't find Team.streakBreakingValue. Miss Streak Breaker cannot be patched. (Can instead try to disable it.)" );
-            }
+            else
+               Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
          }
 
          if ( Settings.HitChanceFormat != null )
@@ -118,12 +113,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
-      private static FieldInfo StreakBreakingValueProp = null;
-
       [ HarmonyPriority( Priority.Low ) ]
-      public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded ) { try {
+      public static bool OverrideMissStreakBreaker ( Team __instance, float targetValue, bool succeeded, ref float ___streakBreakingValue ) { try {
          if ( succeeded ) {
-            StreakBreakingValueProp.SetValue( __instance, 0f );
+            ___streakBreakingValue = 0f;
 
          } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
             float mod;
@@ -131,7 +124,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                mod = ( targetValue - Settings.MissStreakBreakerThreshold ) / Settings.MissStreakBreakerDivider;
             else
                mod = - Settings.MissStreakBreakerDivider;
-            StreakBreakingValueProp.SetValue( __instance, __instance.StreakBreakingValue + mod );
+            ___streakBreakingValue += mod;
          }
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
