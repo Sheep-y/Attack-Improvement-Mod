@@ -49,7 +49,7 @@ namespace Sheepy.BattleTechMod {
             Log = new Logger( GetLogFile() );
          }
       }
-      public HarmonyInstance harmony { get; internal set; }
+      public HarmonyInstance ModHarmony { get; internal set; }
 
       // ============ Setup ============
 
@@ -154,7 +154,7 @@ namespace Sheepy.BattleTechMod {
          Patch( typeof( UnityGameInstance ).GetMethod( "InitUserSettings", Instance | NonPublic ), null, typeof( BattleMod ).GetMethod( "RunGameStarts", Static | NonPublic ) );
          Patch( typeof( SimGameState ).GetMethod( "Init" ), null, typeof( BattleMod ).GetMethod( "RunCampaignStarts", Static | NonPublic ) );
          Patch( typeof( CombatHUD ).GetMethod( "Init", new Type[]{ typeof( CombatGameState ) } ), null, typeof( BattleMod ).GetMethod( "RunCombatStarts", Static | NonPublic ) );
-         Patch( typeof( CombatHUD ).GetMethod( "OnCombatGameDestroyed", null, typeof( BattleMod ).GetMethod( "RunCombatEnds", Static | NonPublic ) );
+         Patch( typeof( CombatHUD ).GetMethod( "OnCombatGameDestroyed", new Type[]{} ), null, typeof( BattleMod ).GetMethod( "RunCombatEnds", Static | NonPublic ) );
          GameStartPatched = true;
       }
 
@@ -348,9 +348,9 @@ namespace Sheepy.BattleTechMod {
             Log.Error( "Method not found. Cannot patch [ {0} : {1} ]", pre, post );
             return;
          }
-         if ( Mod.harmony == null )
-            Mod.harmony = HarmonyInstance.Create( Id );
-         Mod.harmony.Patch( patched, prefix, postfix );
+         if ( Mod.ModHarmony == null )
+            Mod.ModHarmony = HarmonyInstance.Create( Id );
+         Mod.ModHarmony.Patch( patched, prefix, postfix );
          Log.Verbo( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
       }
 

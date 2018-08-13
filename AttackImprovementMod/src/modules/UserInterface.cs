@@ -377,15 +377,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Floating Nameplate ============
 
       private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
-      private static Team thisBarOwner;
+      private static ICombatant thisBarOwner;
 
       public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
-         Owner owner = null;
+         ICombatant owner = null;
          if ( thisBarOwner != null ) {
             owner = thisBarOwner;
             BarOwners.Add( __instance, owner );
          } else
-            BarOwners.TryGetValue( __instnace, out owner );
+            BarOwners.TryGetValue( __instance, out owner );
          Team team = owner?.team;
          if ( team == null || ! ( __instance is CombatHUDLifeBarPips hpBar ) || hpBar.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
 

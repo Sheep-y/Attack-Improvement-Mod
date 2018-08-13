@@ -121,27 +121,27 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ScaleMechHitTable ( ref Dictionary<ArmorLocation, int> hitTable ) { try {
-         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) {
-            scaled = ScaleHitTable( hitTable, new Dictionary<ArmorLocation, int>(8) );
+         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) ) {
+            ScaleHitTable( hitTable, new Dictionary<ArmorLocation, int>(8) );
             ScaledMechHitTables.Add( hitTable, scaled );
          }
          hitTable = scaled;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void PrefixVehicleCalledShot ( VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ScaleVehicleHitTable ( ref Dictionary<VehicleChassisLocations, int> hitTable ) { try {
-         if ( ! ScaledVehicleHitTables.TryGetValue( hitTable, out Dictionary<VehicleChassisLocations, int> scaled ) {
-            scaled = ScaleHitTable( hitTable, new Dictionary<VehicleChassisLocations, int>(8) );
+         if ( ! ScaledVehicleHitTables.TryGetValue( hitTable, out Dictionary<VehicleChassisLocations, int> scaled ) ) {
+            ScaleHitTable( hitTable, new Dictionary<VehicleChassisLocations, int>(8) );
             ScaledVehicleHitTables.Add( hitTable, scaled );
          }
          hitTable = scaled;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ScaleHitTable <T> ( Dictionary<T, int> input, Dictionary<T, int> output ) {
-         foreach ( var pair in input ) output.Add( pair.Key, pair.value *= SCALE );
+         foreach ( var pair in input ) output.Add( pair.Key, pair.Value * SCALE );
       }
 
       // ============ GetHitLocation ============

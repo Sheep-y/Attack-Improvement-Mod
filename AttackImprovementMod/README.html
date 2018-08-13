@@ -195,6 +195,16 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>Not sure why the game didn't do this.  When set to true, armour of damaged location will have a striped pattern instead of solid.</p>
 </blockquote>
 
+<p><strong>Colour Floating Armor Bars</strong></p>
+
+<blockquote>
+  <p>Setting: <code>FloatingArmorColourPlayer</code>  (color string, default "cyan")<br>
+  Setting: <code>FloatingArmorColourEnemy</code>  (color string, default "")<br>
+  Setting: <code>FloatingArmorColourAlly</code>  (color string, default "teal")<br></p>
+
+  <p>When non-empty, change colour of armor bars floating above field units, making it easier to tell friends from foes.</p>
+</blockquote>
+
 <p><strong>Show Heat and Stability Numbers</strong></p>
 
 <blockquote>
@@ -248,7 +258,7 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   
   <p>Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.</p>
   
-  <p>When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.</p>
+  <p>When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.</p>
 </blockquote>
 
 <p><strong>Styles and Colours Targeting Lines</strong></p>
@@ -260,20 +270,32 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   Setting: <code>LOSClearDotted</code>  (default false)<br>
   Setting: <code>LOSBlockedPreDotted</code>   (default false)<br>
   Setting: <code>LOSBlockedPostDotted</code>  (default false)<br>
-  Setting: <code>LOSMeleeColor</code>  (default "")<br>
-  Setting: <code>LOSClearColor</code>  (default "")<br>
-  Setting: <code>LOSBlockedPreColor</code>   (default "#D0F")<br>
-  Setting: <code>LOSBlockedPostColor</code>  (default "#C8E")<br>
-  Setting: <code>LOSIndirectColor</code>  (default "")<br>
-  Setting: <code>LOSNoAttackColor</code>  (default "")</p>
+  Setting: <code>LOSMeleeColors</code>  (default "")<br>
+  Setting: <code>LOSClearColors</code>  (default "")<br>
+  Setting: <code>LOSBlockedPreColors</code>   (default "#D0F")<br>
+  Setting: <code>LOSBlockedPostColore</code>  (default "#C8E")<br>
+  Setting: <code>LOSIndirectColors</code>  (default "")<br>
+  Setting: <code>LOSNoAttackColors</code>  (default "")</p>
   
   <p>Set the colour and style of various targeting lines.
   Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.</p>
   
   <p>Colours are either empty or in HTML hash syntax.  For example <code>"#F00"</code> = red, <code>"#0F0"</code> = green, <code>"#00F"</code> = blue, <code>"#FFF"</code> = white, <code>"#888"</code> = grey, <code>"#000"</code> = black.
   Four parts means RGBA, while three parts mean full opacity RGB.  Supports full and short form. e.g. #28B = #2288BB = #2288BBFF.</p>
-  
-  <p>When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.</p>
+
+  <p>Colours and only colours can also vary by attack direction, separated by comma. The directions are Front, Left, Right, Rear, and Prone, in order. If less colours are specified than direction, the missing directions will use the last colour. For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.</p>
+
+  <p>When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.</p>
+</blockquote>
+
+<p><strong>Colours Facing Rings</strong></p>
+
+<blockquote>
+  <p>Setting: <code>FacingMarkerPlayerColors</code>  (default "#FFFF,#CCFF,#CCFF,#BFBF,#FFBF")<br>
+  Setting: <code>FacingMarkerEnemyColors</code>  (default "#FFFF,#CCFF,#CCFF,#FBBF,#FFBF")<br>
+  Setting: <code>FacingMarkerTargetColors</code>  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br></p>
+
+  <p>When non-empty, change the colours of each arc for friends, foes, and targetted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.</p>
 </blockquote>
 
 <p><strong>Change Widths of Obstruction Marker</strong></p>
@@ -667,15 +689,17 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>Set the format and extension of attack log.  Default is csv which can be opened directly by Excel.
   <br></p>
   
-  <p>Setting: <code>PersistentLog</code>  (true/false, default false)</p>
+  <p>Setting: <code>AttackLogArchiveMaxMB</code>  (0 to 1 million, default 4)</p>
   
-  <p>When set to false, the attack log will auto-clear on launch.
+  <p>When the game first enter combat every launch, old attack log is archived through rename, then log exceeding this size limit will be deleted in the background.
   <br></p>
   
   <p>Setting: <code>LogFolder</code>  (string, default "")</p>
   
-  <p>Set path of mod log and attack log.  Default is empty which will use mod folder.</p>
+  <p>Set path of mod log and attack log.  Default is empty which will use mod folder.  If relative, path would be relative to BATTLETECH exe.</p>
 </blockquote>
+
+
 
 <h1 id="compatibilities">Compatibilities</h1>
 
@@ -698,6 +722,8 @@ AIM will disable its own adjustable roll correction and miss streak breaker.</p>
 <p>The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.</p>
 
 <p>You can also check the mod log (<code>BATTLETECH\Mods\AttackImprovementMod\Log_AIMAttackImprovementMod.log</code>), BTML log (<code>BATTLETECH\Mods\*.log</code>), and the game's own log (<code>BATTLETECH\</code>).  The keyword is "Exception".  It is almost always followed by lots of code.  If you see <em>any</em> exception with "AttackImprovementMod" in the code below it, please <a href="https://github.com/Sheep-y/Attack-Improvement-Mod/issues/new">file an issue</a> and attach the log.</p>
+
+
 
 <h1 id="thestoryofaim">The Story of AIM</h1>
 
