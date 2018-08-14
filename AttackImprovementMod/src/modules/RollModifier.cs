@@ -171,8 +171,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void Preview_SelfSpeedModifier ( ref float __result, AbstractActor attacker ) {
          if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasMovedThisRound ) return;
          SelectionState state = HUD?.SelectionHandler?.ActiveState;
-         if ( state == null || ! ( state is SelectionStateMove move ) || ( state is SelectionStateSprint ) ) return;
-         float movement = Vector3.Distance( mech.CurrentPosition, move.PreviewPos );
+         if ( state == null || ! ( state is SelectionStateMoveBase ) ) return;
+         float movement = Vector3.Distance( mech.CurrentPosition, state.PreviewPos );
          if ( movement <= 10 ) return;
          switch ( mech.weightClass ) {
             case WeightClass.LIGHT : __result = CombatConstants.ToHit.ToHitSelfWalkLight; break;
@@ -196,12 +196,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             movement = attacker.DistMovedThisRound;
          } else {
             SelectionState state = HUD?.SelectionHandler?.ActiveState;
-            if ( state != null && state is SelectionStateJump jump ) {
-               movement = Vector3.Distance( attacker.CurrentPosition, jump.PreviewPos );
-            }
+            if ( state != null && state is SelectionStateJump jump )
+               movement = 100; // Vector3.Distance( attacker.CurrentPosition, jump.PreviewPos );
          }
          if ( movement < 0 ) return 0;
-         return Settings.ToHitSelfJumped + Settings.ToHitSelfJumpedPerMeter * movement;
+         return Settings.ToHitSelfJumped;
       }
    }
 }

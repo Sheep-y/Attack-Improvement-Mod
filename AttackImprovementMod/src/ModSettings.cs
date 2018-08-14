@@ -158,11 +158,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int ToHitVehicleFromSide = -1;
       public int ToHitVehicleFromRear = -2;
 
-      [ JsonComment( "Constant hit modifier after jumping any distance.  Effective only if \"Jumped\" is in the modifier factor list(s).  Default 0.5." ) ]
-      public float ToHitSelfJumped = 0.5f;
-
-      [ JsonComment( "Dynamic hit modifier multiplied by jumping distance, rounded.  Effective only if \"Jumped\" is in the modifier factor list(s).  Default 0.01, or +1 per 100 meters." ) ]
-      public float ToHitSelfJumpedPerMeter = 0.01f;
+      [ JsonComment( "Hit modifier after jumping, added on top of movement modifier (if any).  Effective only if \"Jumped\" is in the modifier factor list(s).  Default 2." ) ]
+      public int ToHitSelfJumped = 2;
 
       //
        [ JsonSection( "Net To Hit Modifiers" ) ]
