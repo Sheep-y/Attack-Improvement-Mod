@@ -19,6 +19,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( BattleTech.Building ), "DamageBuilding", NonPublic, null, "FixZombieBuilding" );
          }
 
+         if ( Settings.SkipCritingDeadMech ) 
+            Patch( typeof( Mech ), "CheckForCrit", NonPublic, "Skip_CheckForCrit", null );
+
          if ( Settings.BalanceAmmoConsumption || Settings.BalanceEnemyAmmoConsumption ) {
             nonCenter = new List<ChassisLocations> { ChassisLocations.LeftTorso, ChassisLocations.RightTorso,
                ChassisLocations.LeftArm, ChassisLocations.RightArm, ChassisLocations.LeftLeg, ChassisLocations.RightLeg };
@@ -76,6 +79,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( newHP >= 1 || newHP <= 0 ) return;
          Info( "Upgrading damage dealt to {1} by {2} to kill zombie {0}", type, name, newHP );
          totalDamage += newHP + 0.001f;
+      }
+
+      // ============ Crit ============
+
+      public static bool Skip_CheckForCrit ( Mech __instance ) {
+         if ( __instance.IsFlaggedForDeath || __instance.IsDead ) return false;
+         return true;
       }
 
       // ============ Balanced Ammo Load ============

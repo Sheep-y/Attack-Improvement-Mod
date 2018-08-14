@@ -93,10 +93,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int ArcLinePoints = 48;
 
       [ JsonComment( "Change marker colour of the facing indicator. Colorus are for Front, Left, Right, Back, Prone." ) ]
-      //public string FacingMarkerPlayerColors = "#FFFF,#AAFD,#AAFD,#BFBF,#FFBF";
-      //public string FacingMarkerEnemyColors  = "#FFFF,#AAFD,#AAFD,#FBBF,#FFBF";
-      public string FacingMarkerPlayerColors = "#FFFF,#CFCF,#CFCF,#AFAD,#FF8F";
-      public string FacingMarkerEnemyColors  = "#FFFF,#FCCF,#FCCF,#FAAD,#FF8F";
+      //public string FacingMarkerPlayerColors = "#FFFF,#AAFD,#AAFD,#BFBF,#FFBF"; // Darker sides and green back
+      //public string FacingMarkerEnemyColors  = "#FFFF,#AAFD,#AAFD,#FBBF,#FFBF"; // Darker sides and red back
+      public string FacingMarkerPlayerColors = "#FFFF,#CFCF,#CFCF,#AFAF,#FF8F";
+      public string FacingMarkerEnemyColors  = "#FFFF,#FCCF,#FCCF,#FAAF,#FF8F";
       public string FacingMarkerTargetColors = "#F41F,#F41F,#F41F,#F41F,#F41F";
 
       //
@@ -272,6 +272,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       //
       [ JsonSection( "Hit Resolution" ) ]
       //
+
+      [ JsonComment( "Skip critical checks if target is dead.  Default true." ) ]
+      public bool SkipCritingDeadMech = true;
 
       [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends." ) ]
       public bool BalanceAmmoConsumption = true;
