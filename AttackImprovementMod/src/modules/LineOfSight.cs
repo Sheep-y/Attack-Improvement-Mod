@@ -298,7 +298,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             s.x *= origWidth / width;
             newMat.mainTextureScale = s;
          }
-         //Log( "Created {0} {1}, Color {2} = {3}", newMat.name, dotted ? "Dotted":"Solid", color, newColour );
+         //Verbo( "Created {0} {1}, Color {2} = {3}", newMat.name, dotted ? "Dotted":"Solid", color, newColour );
          return newMat;
       }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
@@ -312,7 +312,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = lineColor;
             me.LOSUnlockedTarget.a *= 0.8f;
          }
-         //Log( $"Swapped to {matIndex} {dirIndex} {newMat.name}" );
+         //Verbo( $"Swapped to {matIndex} {dirIndex} {newMat.name}" );
          return RestoreMat = true;
       }
 
