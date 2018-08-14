@@ -93,8 +93,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int ArcLinePoints = 48;
 
       [ JsonComment( "Change marker colour of the facing indicator. Colorus are for Front, Left, Right, Back, Prone." ) ]
-      public string FacingMarkerPlayerColors = "#FFFF,#CCFF,#CCFF,#BFBF,#FFBF";
-      public string FacingMarkerEnemyColors  = "#FFFF,#CCFF,#CCFF,#FBBF,#FFBF";
+      //public string FacingMarkerPlayerColors = "#FFFF,#AAFD,#AAFD,#BFBF,#FFBF";
+      //public string FacingMarkerEnemyColors  = "#FFFF,#AAFD,#AAFD,#FBBF,#FFBF";
+      public string FacingMarkerPlayerColors = "#FFFF,#CFCF,#CFCF,#AFAD,#FF8F";
+      public string FacingMarkerEnemyColors  = "#FFFF,#FCCF,#FCCF,#FAAD,#FF8F";
       public string FacingMarkerTargetColors = "#F41F,#F41F,#F41F,#F41F,#F41F";
 
       //
@@ -158,8 +160,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int ToHitVehicleFromSide = -1;
       public int ToHitVehicleFromRear = -2;
 
-      [ JsonComment( "Hit modifier after jumping, added on top of movement modifier (if any).  Effective only if \"Jumped\" is in the modifier factor list(s).  Default 2." ) ]
-      public int ToHitSelfJumped = 2;
+      [ JsonComment( "Hit modifier after jumping, added on top of movement modifier (if any).  Effective only if \"Jumped\" is in the modifier factor list(s).  Default 0." ) ]
+      public int ToHitSelfJumped = 0;
 
       //
        [ JsonSection( "Net To Hit Modifiers" ) ]
