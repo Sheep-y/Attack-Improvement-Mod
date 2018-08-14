@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using BattleTech.UI;
    using static Mod;
 
    public class RollModifier : BattleModModule {
@@ -35,6 +36,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                diminishingPenalty = new float[ Settings.DiminishingPenaltyMax ];
                FillDiminishingModifiers();
             }
+         }
+
+         if ( Settings.FixSelfSpeedModifierPreview ) {
+            Patch( ToHitType, "GetSelfSpeedModifier", new Type[]{ typeof( AbstractActor ) }, null, "Preview_SelfSpeedModifier" );
+            Patch( ToHitType, "GetSelfSprintedModifier", new Type[]{ typeof( AbstractActor ) }, null, "Preview_SelfSprintedModifier" );
          }
       }
 
@@ -157,6 +163,31 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if      ( chance >= Settings.MaxFinalHitChance ) return Settings.MaxFinalHitChance;
          else if ( chance <= Settings.MinFinalHitChance ) return Settings.MinFinalHitChance;
          return chance;
+      }
+
+      // ============ Previews ============
+
+      // Set self walked modifier when previewing movement
+      public static void Preview_SelfSpeedModifier ( ref float __result, AbstractActor attacker ) {
+         if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasMovedThisRound ) return;
+         SelectionState state = HUD?.SelectionHandler?.ActiveState;
+         if ( state == null || ! ( state is SelectionStateMove move ) || ( state is SelectionStateSprint ) ) return;
+         float movement = Vector3.Distance( mech.CurrentPosition, move.PreviewPos );
+         if ( movement <= 10 ) return;
+         switch ( mech.weightClass ) {
+            case WeightClass.LIGHT : __result = CombatConstants.ToHit.ToHitSelfWalkLight; break;
+            case WeightClass.MEDIUM : __result = CombatConstants.ToHit.ToHitSelfWalkMedium; break;
+            case WeightClass.HEAVY   : __result = CombatConstants.ToHit.ToHitSelfWalkHeavy; break;
+            case WeightClass.ASSAULT  : __result = CombatConstants.ToHit.ToHitSelfWalkAssault; break;
+         }
+      }
+
+      // Set self sprint modifier when previewing movement
+      public static void Preview_SelfSprintedModifier ( ref float __result, AbstractActor attacker ) {
+         if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasSprintedThisRound ) return;
+         SelectionState state = HUD?.SelectionHandler?.ActiveState;
+         if ( state == null || ! ( state is SelectionStateSprint sprint ) ) return;
+         __result = CombatConstants.ToHit.ToHitSelfSprinted;
       }
    }
 }

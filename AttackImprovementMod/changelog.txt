@@ -10,6 +10,7 @@ CHANGE LOG
 * New: Balanced ammo usage to reduce chance of ammo explosion.
 * New: Auto Jettsion Ammo when they are useless.
 * New: Customise list and order of ranged attack modifiers, fixing inconsistency.
+* New: Factor in self movement accuracy modifier during movement plan.
 * New: Directional attack modifier - get accuracy bonus for attacking from side or rear.
 * New: Attack Log now logs Round and Phase.
 * Mod: New logging code that formats and write logs in the background and will not cause the game to lag.

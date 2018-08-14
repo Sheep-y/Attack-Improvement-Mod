@@ -139,8 +139,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "targetterrain" :
             return () => new AttackModifier( "TARGET TERRAIN", Hit.GetTargetTerrainModifier( Target, TargetPos, false ) );
 
-         case "targetterrainmelee" : // Need to be different (an extra space) to avoid key collision
-            return () => new AttackModifier( "TARGET TERRAIN ", Hit.GetTargetTerrainModifier( Target, TargetPos, true ) );
+         case "targetterrainmelee" :
+            return () => new AttackModifier( "TARGET TERRAIN", Hit.GetTargetTerrainModifier( Target, TargetPos, true ) );
 
          case "walked" :
             return () => new AttackModifier( "MOVED", Hit.GetSelfSpeedModifier( Attacker ) );

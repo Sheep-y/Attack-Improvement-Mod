@@ -225,8 +225,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default is 5, same as game default." } ) ]
       public float MissStreakBreakerDivider = 5f;
 
+      //
+       [ JsonSection( "Modifiers Preview" ) ]
+      //
+
       [ JsonComment( "Display base hit chance in weapon mouseover hint.  Default true." ) ]
       public bool ShowBaseHitchance = true;
+
+      [ JsonComment( "Apply self moved modifier during preview, before the move actually take place.  Default true." ) ]
+      public bool FixSelfSpeedModifierPreview = true;
 
       [ JsonComment( "Show corrected hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker.  Default false." ) ]
       public bool ShowCorrectedHitChance = false;
@@ -236,7 +243,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Game default is \"{0:0}%\". Use \"{0:0.0}%\" to *always* show one decimal, or \"{0:0.#}%\" for *up to* one decimal.",
         "Default is \"\", which will use \"{0:0.#}%\" if HitChanceStep is 0 and DiminishingHitChanceModifier is false, otherwise leave alone." } ) ]
       public string HitChanceFormat = "";
-
       //
       [ JsonSection( "Melee and DFA" ) ]
       //
@@ -285,7 +291,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Log attack info to \"Log_Attack.txt\", for copy and paste to Excel to make it human readable.",
         "Setting can be \"None\", \"Attack\", \"Shot\", \"Location\", \"Damage\", \"Critical\", or \"All\", from simplest to heaviest.  Default \"None\".",
         "\"All\" is currently same as \"Critical\", but more levels may be added in future.  Letter case does not matter." } ) ]
-      public string AttackLogLevel = "None";
+      public string AttackLogLevel = "All";
 
       [ JsonComment( "Format of attack log.  Can be \"csv\", \"tsv\", or \"txt\" (same as tsv). Default \"csv\"." ) ]
       public string AttackLogFormat = "csv";
