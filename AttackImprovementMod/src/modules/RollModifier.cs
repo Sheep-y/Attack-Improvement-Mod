@@ -189,5 +189,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( state == null || ! ( state is SelectionStateSprint sprint ) ) return;
          __result = CombatConstants.ToHit.ToHitSelfSprinted;
       }
+
+      public static float GetJumpedModifier ( AbstractActor attacker ) {
+         float movement = -1;
+         if ( attacker.JumpedLastRound ) {
+            movement = attacker.DistMovedThisRound;
+         } else {
+            SelectionState state = HUD?.SelectionHandler?.ActiveState;
+            if ( state != null && state is SelectionStateJump jump ) {
+               movement = Vector3.Distance( attacker.CurrentPosition, jump.PreviewPos );
+            }
+         }
+         if ( movement < 0 ) return 0;
+         return Settings.ToHitSelfJumped + Settings.ToHitSelfJumpedPerMeter * movement;
+      }
    }
 }

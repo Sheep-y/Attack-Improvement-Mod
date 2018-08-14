@@ -134,20 +134,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string CalledChanceFormat = "";
 
       //
-       [ JsonSection( "To Hit Modifier List" ) ]
+       [ JsonSection( "To Hit Modifiers" ) ]
       //
 
       [ JsonComment( new string[]{
         "Specify set of hit modifiers of ranged attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
-        "Default \"ArmMounted, Direction, Height, Indirect, Inspired, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage\".",
+        "Default \"ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage\".",
         "You can remove some options or replace SelfTerrain and TargetTerrain with SelfTerrainMelee and TargetTerrainMelee." } ) ]
-      public string RangedAccuracyFactors = "ArmMounted, Direction, Height, Indirect, Inspired, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
+      public string RangedAccuracyFactors = "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
 
       [ JsonComment( new string[]{
         "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
-        "Default \"Direction, DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy\".",
+        "Default \"Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy\".",
         "Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain." } ) ]
-      public string MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
+      public string MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
 
 
       [ JsonComment( "Directional to hit modifiers.  Effective only if \"Direction\" is in the modifier factor list(s).  Default front 0, side -1, back -2." ) ]
@@ -158,8 +158,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int ToHitVehicleFromSide = -1;
       public int ToHitVehicleFromRear = -2;
 
+      [ JsonComment( "Constant hit modifier after jumping any distance.  Effective only if \"Jumped\" is in the modifier factor list(s).  Default 0.5." ) ]
+      public float ToHitSelfJumped = 0.5f;
+
+      [ JsonComment( "Dynamic hit modifier multiplied by jumping distance, rounded.  Effective only if \"Jumped\" is in the modifier factor list(s).  Default 0.01, or +1 per 100 meters." ) ]
+      public float ToHitSelfJumpedPerMeter = 0.01f;
+
       //
-       [ JsonSection( "To Hit Modifiers" ) ]
+       [ JsonSection( "Net To Hit Modifiers" ) ]
       //
 
       [ JsonComment( "Allow bonus total modifier to increase hit chance.  Default true." ) ]

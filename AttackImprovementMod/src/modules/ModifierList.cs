@@ -112,6 +112,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "inspired":
             return () => new AttackModifier( "INSPIRED", Math.Min( 0f, Hit.GetAttackerAccuracyModifier( Attacker ) ) );
 
+         case "jumped" :
+            return () => new AttackModifier( "JUMPED", RollModifier.GetJumpedModifier( Attacker ) );
+
          case "selfheat" :
             return () => new AttackModifier( "OVERHEAT", Hit.GetHeatModifier( Attacker ) );
 

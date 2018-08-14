@@ -67,7 +67,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          // Add SelfTerrainMelee and spacing to 2.0 default
          if ( settings.MeleeAccuracyFactors == "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy" )
-            settings.MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Walked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy";
+            settings.MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
          else if ( settings.MeleeAccuracyFactors.ToLower().Contains( "selfwalked" ) )
             settings.MeleeAccuracyFactors = Regex.Replace( settings.MeleeAccuracyFactors, "SelfWalked", "Walked", RegexOptions.IgnoreCase );
 
