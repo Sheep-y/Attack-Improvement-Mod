@@ -9,6 +9,7 @@ CHANGE LOG
 * New: Customise list and order of ranged attack modifiers.
 * New: Directional attack modifier - get accuracy bonus for attacking from side or rear.
 * New: Factor in self movement accuracy modifier during movement plan.
+* New: After-Jump to-hit modifier.
 * New: Show ammo count in paper doll tooltip.
 * New: Balanced ammo usage to reduce chance of ammo explosion.
 * New: Auto Jettsion Ammo when they are useless.

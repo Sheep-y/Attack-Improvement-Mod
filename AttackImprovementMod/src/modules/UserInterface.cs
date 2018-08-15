@@ -5,11 +5,11 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static ChassisLocations;
    using static Mod;
+   using static System.Reflection.BindingFlags;
 
    public class UserInterface : BattleModModule {
 
@@ -22,7 +22,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          FloatingArmorColourEnemy = ParseColour( Settings.FloatingArmorColourEnemy );
          FloatingArmorColourAlly = ParseColour( Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColourPlayer != null || FloatingArmorColourEnemy != null || FloatingArmorColourAlly != null ) {
-            BarOwners = new Dictionary<WeakReference, ICombatant>();
+            BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
             Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetPipBarOwner", "ResetPipBarOwner" );
          }
@@ -372,7 +372,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Floating Nameplate ============
 
-      private static Dictionary<WeakReference, ICombatant> BarOwners;
+      private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
       private static ICombatant thisBarOwner;
 
       public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
@@ -381,13 +381,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          ICombatant owner = null;
          if ( thisBarOwner != null ) {
             owner = thisBarOwner;
-            BarOwners.Add( new WeakReference( __instance ), owner );
+            BarOwners[ __instance ] = owner;
          } else {
-            foreach ( var pair in BarOwners )
-               if ( ReferenceEquals( pair.Key.Target, __instance ) ) {
-                  owner = pair.Value;
-                  break;
-               }
+            if ( ! BarOwners.TryGetValue( __instance, out owner ) )
+               return;
          }
          Team team = owner?.team;
          if ( team == null || owner.IsDead ) return;

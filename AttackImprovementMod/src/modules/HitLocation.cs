@@ -63,14 +63,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStarts () {
          ClusterChanceNeverMultiplyHead = CombatConstants.ToHit.ClusterChanceNeverMultiplyHead;
          ClusterChanceOriginalLocationMultiplier = CombatConstants.ToHit.ClusterChanceOriginalLocationMultiplier;
-         if ( HeadHitWeights == null ) {
-            HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
-            foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
-               if ( direction == AttackDirection.None ) continue;
-               Dictionary<ArmorLocation, int> hitTable = Combat.HitLocation.GetMechHitTable( direction );
-               if ( ! hitTable.TryGetValue( Head, out int head ) || head == 0 ) continue;
-               HeadHitWeights.Add( hitTable, head );
-            }
+         if ( Settings.FixGreyHeadDisease ) {
+            if ( HeadHitWeights == null )
+               HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
+            if ( HeadHitWeights.Count <= 0 )
+               foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
+                  if ( direction == AttackDirection.None ) continue;
+                  Dictionary<ArmorLocation, int> hitTable = Combat.HitLocation.GetMechHitTable( direction );
+                  if ( ! hitTable.TryGetValue( Head, out int head ) || head == 0 ) continue;
+                  HeadHitWeights.Add( hitTable, head );
+               }
          }
       }
 
