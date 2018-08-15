@@ -7,8 +7,8 @@ using System.Reflection;
 using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using static ChassisLocations;
    using static Mod;
+   using static ChassisLocations;
    using static System.Reflection.BindingFlags;
 
    public class UserInterface : BattleModModule {

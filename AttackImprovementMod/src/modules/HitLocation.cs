@@ -1,8 +1,9 @@
 using BattleTech.UI;
 using BattleTech;
-using System.Collections.Generic;
-using System.Reflection;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine.EventSystems;
 using UnityEngine;
 
@@ -39,8 +40,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( VehicleGetHit, "ScaleVehicleHitTable", null );
          }
 
-         if ( Settings.FixGreyHeadDisease )
+         if ( Settings.FixGreyHeadDisease ) {
+            HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
             Patch( MechGetHit, null, "FixGreyHeadDisease" );
+         }
 
          if ( Settings.FixVehicleCalledShot ) {
             // Store popup location
@@ -63,16 +66,36 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStarts () {
          ClusterChanceNeverMultiplyHead = CombatConstants.ToHit.ClusterChanceNeverMultiplyHead;
          ClusterChanceOriginalLocationMultiplier = CombatConstants.ToHit.ClusterChanceOriginalLocationMultiplier;
+
+         if ( Settings.FixHitDistribution ) {
+            foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
+               if ( direction == AttackDirection.None ) continue;
+               Dictionary<VehicleChassisLocations, int> hitTableV = Combat.HitLocation.GetVehicleHitTable( direction );
+               ScaledVehicleHitTables.Add( hitTableV, ScaleHitTable( hitTableV ) );
+               Dictionary<ArmorLocation, int> hitTableM = Combat.HitLocation.GetMechHitTable( direction );
+               ScaledMechHitTables.Add( hitTableM, ScaleHitTable( hitTableM ) );
+               foreach ( ArmorLocation armor in Enum.GetValues( typeof( ArmorLocation ) ) ) {
+                  if ( armor == None || armor == Invalid ) continue;
+                  Dictionary<ArmorLocation, int> hitTableC = CombatConstants.GetMechClusterTable( armor, direction );
+                  ScaledMechHitTables.Add( hitTableC, ScaleHitTable( hitTableC ) );
+               }
+            }
+         }
+
          if ( Settings.FixGreyHeadDisease ) {
-            if ( HeadHitWeights == null )
-               HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
-            if ( HeadHitWeights.Count <= 0 )
+            List<Dictionary<ArmorLocation, int>> hitTables;
+            if ( Settings.FixHitDistribution ) 
+               hitTables = ScaledMechHitTables.Values.ToList();
+            else {
+               hitTables = new List<Dictionary<ArmorLocation, int>>();
                foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
                   if ( direction == AttackDirection.None ) continue;
-                  Dictionary<ArmorLocation, int> hitTable = Combat.HitLocation.GetMechHitTable( direction );
-                  if ( ! hitTable.TryGetValue( Head, out int head ) || head == 0 ) continue;
-                  HeadHitWeights.Add( hitTable, head );
+                  hitTables.Add( Combat.HitLocation.GetMechHitTable( direction ) );
                }
+            }
+            foreach ( Dictionary<ArmorLocation, int> hitTable in hitTables )
+               if ( hitTable.TryGetValue( Head, out int head ) && head > 0 )
+                  HeadHitWeights.Add( hitTable, head );
          }
       }
 
