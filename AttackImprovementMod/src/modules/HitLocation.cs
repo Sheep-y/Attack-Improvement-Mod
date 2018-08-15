@@ -70,15 +70,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.FixHitDistribution ) {
             foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
                if ( direction == AttackDirection.None ) continue;
-               Dictionary<VehicleChassisLocations, int> hitTableV = Combat.HitLocation.GetVehicleHitTable( direction );
-               ScaledVehicleHitTables.Add( hitTableV, ScaleHitTable( hitTableV ) );
+               if ( direction != AttackDirection.ToProne ) {
+                  Dictionary<VehicleChassisLocations, int> hitTableV = Combat.HitLocation.GetVehicleHitTable( direction );
+                  ScaledVehicleHitTables.Add( hitTableV, ScaleHitTable( hitTableV ) );
+               }
                Dictionary<ArmorLocation, int> hitTableM = Combat.HitLocation.GetMechHitTable( direction );
                ScaledMechHitTables.Add( hitTableM, ScaleHitTable( hitTableM ) );
-               foreach ( ArmorLocation armor in Enum.GetValues( typeof( ArmorLocation ) ) ) {
-                  if ( armor == None || armor == Invalid ) continue;
-                  Dictionary<ArmorLocation, int> hitTableC = CombatConstants.GetMechClusterTable( armor, direction );
-                  ScaledMechHitTables.Add( hitTableC, ScaleHitTable( hitTableC ) );
-               }
+               if ( direction != AttackDirection.FromArtillery )
+                  foreach ( ArmorLocation armor in hitTableM.Keys ) {
+                     if ( hitTableM[ armor ] <= 0 ) continue;
+                     Dictionary<ArmorLocation, int> hitTableC = CombatConstants.GetMechClusterTable( armor, direction );
+                     ScaledMechHitTables.Add( hitTableC, ScaleHitTable( hitTableC ) );
+                  }
             }
          }
 
@@ -146,8 +149,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ScaleMechHitTable ( ref Dictionary<ArmorLocation, int> hitTable ) { try {
-         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) )
+         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) ) {
             ScaledMechHitTables.Add( hitTable, scaled = ScaleHitTable( hitTable ) );
+            Warn( "New unscaled hit table [{0}]", Join( ",", hitTable.Select( e => e.Key+"="+e.Value ) ) );
+            if ( Settings.FixGreyHeadDisease && scaled.TryGetValue( Head, out int head ) && head > 0 )
+               HeadHitWeights.Add( scaled, head ); // Would be too late if head is already removed, thus the warning
+         }
          hitTable = scaled;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
