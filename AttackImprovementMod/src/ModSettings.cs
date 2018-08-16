@@ -136,21 +136,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string CalledChanceFormat = "";
 
       //
-       [ JsonSection( "To Hit Modifiers" ) ]
+       [ JsonSection( "Individual To Hit Modifiers" ) ]
       //
 
-      [ JsonComment( new string[]{
-        "Specify set of hit modifiers of ranged attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
-        "Default \"ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage\".",
-        "You can remove some options or replace SelfTerrain and TargetTerrain with SelfTerrainMelee and TargetTerrainMelee." } ) ]
-      public string RangedAccuracyFactors = "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
+      [ JsonComment( "Modify base weapon hit chance.  -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
+      public decimal BaseHitChanceModifier = 0;
 
-      [ JsonComment( new string[]{
-        "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
-        "Default \"Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy\".",
-        "Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain." } ) ]
-      public string MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
+      [ JsonComment( "Modify base melee hit chance.  -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
+      public decimal MeleeHitChanceModifier = 0;
 
+      [ JsonComment( "Allow attacks from low ground to high ground to incur accuracy penalty.  Default true." ) ]
+      public bool AllowLowElevationPenalty = true;
 
       [ JsonComment( "Directional to hit modifiers.  Effective only if \"Direction\" is in the modifier factor list(s).  Default front 0, side -1, back -2." ) ]
       public int ToHitMechFromFront = 0;
@@ -170,9 +166,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Allow bonus total modifier to increase hit chance.  Default true." ) ]
       public bool AllowNetBonusModifier = true;
 
-      [ JsonComment( "Allow attacks from low ground to high ground to incur accuracy penalty.  Default true." ) ]
-      public bool AllowLowElevationPenalty = true;
-
       //[ JsonComment( "Fix potential target height discrepancy between modifier breakdown and total accuracy.  Default true." ) ]
       //public bool FixModifierTargetHeight = true;
 
@@ -181,19 +174,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default 0 to remove hit chance step, so that odd gunnery stats can enjoy their +2.5% hit chance." } ) ]
       public decimal HitChanceStep = 0;
 
-      [ JsonComment( "Modify base weapon hit chance.  -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
-      public decimal BaseHitChanceModifier = 0;
-
-      [ JsonComment( "Modify base melee hit chance.  -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
-      public decimal MeleeHitChanceModifier = 0;
-
       [ JsonComment( new string[]{
         "Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.",
         "Note that 100% hit chance (max) may still miss if roll correction is enabled." } ) ]
       public decimal MaxFinalHitChance = 0.95m;
-      public decimal MinFinalHitChance = 0.05m;
-
-      [ JsonComment( "Make hit chance modifier has diminishing return rather than simple add and subtract.  Default false." ) ]
+      public decimal MinFinalHitChance = 0.05m;      [ JsonComment( "Make hit chance modifier has diminishing return rather than simple add and subtract.  Default false." ) ]
       public bool DiminishingHitChanceModifier = false;
 
       [ JsonComment( new string[]{
@@ -209,6 +194,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public decimal DiminishingPenaltyPowerBase = 0.8m;
       public decimal DiminishingPenaltyPowerDivisor = 3.3m;
       public int DiminishingPenaltyMax = 32;
+
+      [ JsonComment( new string[]{
+        "Specify set of hit modifiers of ranged attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
+        "Default \"ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage\".",
+        "You can remove some options or replace SelfTerrain and TargetTerrain with SelfTerrainMelee and TargetTerrainMelee." } ) ]
+      public string RangedAccuracyFactors = "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
+
+      [ JsonComment( new string[]{
+        "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
+        "Default \"Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy\".",
+        "Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain." } ) ]
+      public string MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
+
+
 
       //
       [ JsonSection( "To Hit Rolls" ) ]

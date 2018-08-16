@@ -9,13 +9,16 @@ For BATTLETECH 1.1.2
   * [Targeting Line Settings](#targeting-line-settings)
   * [Called Shot Settings](#called-shot-settings)
   * [Melee and DFA Settings](#melee-and-dfa-settings)
-  * [Hit Modifier Settings](#hit-modifier-settings)
+  * [Individual Modifier Settings](#individual-modifier-settings)
+  * [Net Hit Modifier Settings](#net-hit-modifier-settings)
   * [Hit Roll Settings](#hit-roll-settings)
+  * [Hit Chance Preview Settings](#hit-chance-preview-settings)
   * [Hit Resolution Settings](#hit-resolution-settings)
   * [Attack Log Settings](#attack-log-settings)
 - [Compatibilities](#compatibilities)
 - [The Story of AIM](#the-story-of-aim)
 - [Learn to Mod](#learn-to-mod)
+- [Credits](#credits)
 
 
 AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as fixing vehicle called shot, improves targeting lines, tune down roll correction, show heat and stability numbers, and a detailed attack log.  The default settings aims to not deviate too far from vanilla.
@@ -35,10 +38,10 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Coloured facing ring and floating armour bar.
 * Multi-Target Back Out fixed.
 * Make sure 0 HP means dead, never zombie.
-* Show ammo count in paper doll hover.
-* Show Heat and Stability Numbers, including cooldown overhead.
+* Show Ammo Count in paper doll hover.
+* Show Heat and Stability Numbers.
 * Show Base Hit Chance in accuracy modifier popup.
-* Post-Move To-Hit Penalties (Move + Jump/Sprint) are now factored in action preview.
+* Post-Move To-Hit Penalties (default none) factored in action preview.
 * (Optional) Show Mech Tonnage.
 * (Optional) Show Corrected Hit chance and Called Shot Chance.
 
@@ -47,7 +50,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Unlock Hit Chance Stepping to make odd piloting useful.
 * Called Shots cluster around called mech location.
 * Precise Hit Distribution that improves SRM and MG called shot.
-* More Melee Modifiers, which fixes the absent of stood up penalty.
+* More Melee Modifiers, and fixes the absent of stood up penalty.
 * Directional Attack Bonus.
 * Allow Net Bonus Hit modifiers.
 * Allow Negative Height Modifier.
@@ -340,67 +343,8 @@ These settings can be changed in `settings.json`.
 > When enabled, free player units from standing still when target is already in melee range.  Auto-disable to avoid conflict when MeleeMover is used.
 
 
-**Change Melee Modifiers**
-
-> Setting: `MeleeAccuracyFactors`  (comma separated value)
->
-> A list of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order will be followed, and letter case does not matter.
->
-> Since this feature will override both mouseover display and actual modifier calculation, this will fix the bug that SelfStoodUp is displayed in mouseover but not counted in modifier.
->
-> Default is "DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfWalked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy".
->
-> Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, and TargetTerrain.
->
-> **ArmMounted** - Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle. <br>
-> **DFA** - Apply DFA penalty if attack is DFA. <br>
-> **Height** - Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position. <br>
-> **Inspired** - Apply inspired bonus. <br>
-> **Obstruction** - Apply obstructed penalty. <br>
-> **Refire** - Apply refire penalty.  Which should be 0 by default but can be changed in weapon data files. <br>
-> **SelfChassis** - Apply chassis modifier. <br>
-> **SelfHeat** - Apply overheat penalty. <br>
-> **SelfStoodUp** - Apply stood up penalty. <br>
-> **SelfTerrain** - Apply self terrain penalty as if this is a ranged attack. <br>
-> **SelfWalked** - Apply self walked penalty, default 0 but can be changed in game configuration file. <br>
-> **SensorImpaired** - Apply sensor impaired penalty. <br>
-> **Sprint** - Apply sprint penalty. <br>
-> **TargetEffect** - Apply target effect penalty such as gyro. <br>
-> **TargetEvasion** - Apply target evasion penalty.  Melee attacks ignore up to 4 evasion by default. <br>
-> **TargetProne** - Apply target prone penalty. <br>
-> **TargetShutdown** - Apply target shutdown bonus. <br>
-> **TargetSize** - Apply target size penalty. <br>
-> **TargetTerrain** - Apply target terrain's modifier as if this is a ranged attack. <br>
-> **TargetTerrainMelee** - Apply target terrain's melee modifier. <br>
-> **WeaponAccuracy** - Apply weapon accuracy modifier. <br>
-
-
 
 ## Individual Modifier Settings
-
-**Directional Modifier**
-
-> Setting: `ToHitMechFromFront`  (, default 0)<br>
-> Setting: `ToHitMechFromSide`  (, default -1)<br>
-> Setting: `ToHitMechFromRear`  (, default -2)<br>
-> Setting: `ToHitVehicleFromFront`  (, default 0)<br>
-> Setting: `ToHitVehicleFromSide`  (, default -1)<br>
-> Setting: `ToHitVehicleFromRear`  (, default -2)<br>
->
-> Determine the modifier for attacking from side or rear.
-> Effective only if "Ditection" is in the modifier lists.
-
-
-## Net Hit Modifier Settings
-
-**Allow Net Bonus Modifier**
-
-> Setting: `AllowNetBonusModifier`  (true/false, default true)
->
-> When set to true, total modifier of an attack can be a net bonus that increases the hit chance beyond the attacker's base hit chance (but still subjects to 95% cap unless lifted by the `MaxFinalHitChance` settings).
-> Game default is false.
->
-> When the net modifier is a bonus, it will use the same handling as penalty but reversed: first 10 modifiers are ±5% each, and subsequence modifiers are ±2.5% each.
 
 
 **Allow Height Diff Penalty**
@@ -418,6 +362,40 @@ These settings can be changed in `settings.json`.
 >
 > Increase or decrease base hit chance of ranged/melee attacks.
 > e.g. -0.05 to lower base accuracy by 5%, 0.1 to increase it 10%.
+
+
+**Directional Modifier**
+
+> Setting: `ToHitMechFromFront`  (-20 to 20, default 0)<br>
+> Setting: `ToHitMechFromSide`  (-20 to 20, default -1)<br>
+> Setting: `ToHitMechFromRear`  (-20 to 20, default -2)<br>
+> Setting: `ToHitVehicleFromFront`  (-20 to 20, default 0)<br>
+> Setting: `ToHitVehicleFromSide`  (-20 to 20, default -1)<br>
+> Setting: `ToHitVehicleFromRear`  (-20 to 20, default -2)<br>
+>
+> Determine the modifier for attacking from side or rear.
+> Effective only if "Ditection" is in the modifier lists.
+
+
+**Jumped Modifier**
+
+> Settings: `ToHitSelfJumped` (-20 to 20, default 0)
+>
+> The game has self moved modifier and self sprint modifier in CombatGameConstants.json, but not self jumped modifier.
+> You may set it with this mod if you want to.
+
+
+
+## Net Hit Modifier Settings
+
+**Allow Net Bonus Modifier**
+
+> Setting: `AllowNetBonusModifier`  (true/false, default true)
+>
+> When set to true, total modifier of an attack can be a net bonus that increases the hit chance beyond the attacker's base hit chance (but still subjects to 95% cap unless lifted by the `MaxFinalHitChance` settings).
+> Game default is false.
+>
+> When the net modifier is a bonus, it will use the same handling as penalty but reversed: first 10 modifiers are ±5% each, and subsequence modifiers are ±2.5% each.
 
 
 **Unlock Modifier Stepping and Range**
@@ -463,6 +441,54 @@ These settings can be changed in `settings.json`.
 > The modifiers are pre-calculated to run faster.  These settings determine how many results are cached.  Modifiers beyond the max will be regarded as same as max.
 
 
+**Change Modifiers List**
+
+> Setting: `RangedAccuracyFactors`  (comma separated value)<br>
+> Setting: `MeleeAccuracyFactors`  (comma separated value)<br>
+>
+> A list of hit modifiers of ranged / melee and DFA attacks.  Leave empty to keep unchanged.  Order and letter case does not matter.
+>
+> Since this feature will override both mouseover display and actual modifier calculation, this will fix the bug that SelfStoodUp is displayed in melee mouseover but not counted in melee modifier.
+>
+> Ranged default is "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage".
+> Melee default is "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy".
+>
+> Options:<br>
+> **ArmMounted** - (Ranged) Apply arm mounted modifier if weapon is mounted on an arm. (Melee) Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle. <br>
+> **Direction** - Apply bonus if attack is made from the target's side or rear. <br>
+> **DFA** - (Melee) Apply DFA penalty if attack is DFA. <br>
+> **Height** - (Ranged) Apply height modifier.  (Melee) Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position. <br>
+> **Indirect** - (Ranged) Apply indirect fire penalty. <br>
+> **Inspired** - Apply inspired bonus. <br>
+> **Jumped** - Apply jumped penalty after jump, if any. <br>
+> **LocationDamage** - (Ranged) Apply location damage penalty, if any. <br>
+> **Obstruction** - Apply obstructed penalty. <br>
+> **Precision** - (Ranged) Apply Precision Strike bonus. <br>
+> **Range** - (Ranged) Apply range penalty. <br>
+> **Refire** - Apply refire penalty.  (Melee) Should be 0 by default but can be changed in weapon data files. <br>
+> **SelfChassis** - (Melee) Apply chassis modifier. <br>
+> **SelfHeat** - Apply overheat penalty. <br>
+> **SelfStoodUp** - Apply stood up penalty. <br>
+> **SelfTerrain** - Apply self terrain penalty as if this is a ranged attack. <br>
+> **SensorImpaired** - Apply sensor impaired penalty. <br>
+> **SensorLock** - Apply sensor lock bonus. <br>
+> **Sprint** - Apply sprint penalty, if somehow you can attack after sprint. <br>
+> **TargetEffect** - Apply target effect penalty such as gyro. <br>
+> **TargetEvasion** - Apply target evasion penalty.  Melee attacks ignore up to 4 evasion by default. <br>
+> **TargetProne** - Apply target prone penalty. <br>
+> **TargetShutdown** - Apply target shutdown bonus. <br>
+> **TargetSize** - Apply target size penalty. <br>
+> **TargetTerrain** - Apply target terrain's ranged penalty. <br>
+> **TargetTerrainMelee** - Apply target terrain's melee penalty. <br>
+> **Walked** - Apply self walked penalty, default 0 but can be changed in game configuration file. <br>
+> **WeaponAccuracy** - Apply weapon accuracy, TTS, and mod bonus. <br>
+> **WeaponDamage** - (Ranged) Apply weapon damaged penalty.
+>
+> The modifier system is designed to be moddable.
+> Patch `ModifierList.GetCommonModifierFactor`, `ModifierList..GetRangedModifierFactor`, and/or `ModifierList.GetMeleeModifierFactor` to add new modifiers.
+
+
+
 ## Hit Roll Settings
 
 **Adjust Roll Correction**
@@ -498,16 +524,18 @@ These settings can be changed in `settings.json`.
 > Set this setting to zero or negative integer to replace it with a constant value.  For example -5 means each triggering miss adds 5% bonus, and -100 will make sure the next shot always hit.
 
 
-**Format Hit Chance** (default "")
 
-> Setting: `HitChanceFormat`  (free string, default "")
+## Hit Chance Preview Settings
+
+
+> Setting: `ShowBaseHitchance`  (true/false, default true)
 >
-> Use Microsoft C# [String.Format](https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2008/0c899ak8(v=vs.90) syntax to format weapon hit chances.
+> Show the mechwarrior's base hit chance in modifier tooltip.
+
+
+> Setting: `FixSelfSpeedModifierPreview`  (true/false, default true)
 >
-> Set to "{0:0.0}%" to always show one decimal, or "{0:0.00}%" for two decimals.
-> When empty AND HitChanceStep is 0, will use "{0:0.#}%" to optionally show hit chance to one decimal point.
->
-> Replace the old "ShowDecimalHitChance" setting in mod version 1.0.
+> If moved/sprint/jumped modifier is non-zero, this mod can patch the game to factor them in during action planning.
 
 
 (Advanced) **Show Corrected Hit Chance**
@@ -521,8 +549,21 @@ These settings can be changed in `settings.json`.
 > If the "Real Hit Chance" mod is detected, this settings will be switched to on and overrides that mods.
 
 
+**Format Hit Chance** (default "")
+
+> Setting: `HitChanceFormat`  (free string, default "")
+>
+> Use Microsoft C# [String.Format](https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2008/0c899ak8(v=vs.90) syntax to format weapon hit chances.
+>
+> Set to "{0:0.0}%" to always show one decimal, or "{0:0.00}%" for two decimals.
+> When empty AND HitChanceStep is 0, will use "{0:0.#}%" to optionally show hit chance to one decimal point.
+>
+> Replace the old "ShowDecimalHitChance" setting in mod version 1.0.
+
+
 
 ## Hit Resolution Settings
+
 
 **Skip Criting the Dead Mech**
 
@@ -531,7 +572,6 @@ These settings can be changed in `settings.json`.
 > When true, critical hits are not rolled for dead units.
 > This is mainly designed to prevent crit messages from flooding over cause of death.
 > It will also slightly increase salvaged components.
-
 
 
 **Balance Ammo Consumption**
@@ -584,7 +624,7 @@ but because the code that determine hit distribution is not designed for fractio
 
 (Advanced) **Attack Log**
 
-> Setting: `AttackLogLevel`  ("None", "Attack", "Shot", "Location", "Damage", "Critical", or "All", default "None")
+> Setting: `AttackLogLevel`  ("None", "Attack", "Shot", "Location", "Damage", "Critical", or "All", default "All")
 >
 > When not None, the mod will writes to an attack log in the mod's folder, called Log_Attack.txt.
 >
@@ -605,6 +645,9 @@ but because the code that determine hit distribution is not designed for fractio
 > Crit is determined in yet another phase, so the log code is *very fun* to write.
 >
 > **All** - same as Critical for now.  More info may be added in the future, though I am not sure I wouldn't go crazy.  Would you believe logging is the most complicated feature of this mod?
+>
+> Default AttackLogLevel was None in mod version 2.0, but mod 2.1 switched to a multi-thread logging system so it now defaults to All.
+
 
 (Advanced) **Log Options**
 

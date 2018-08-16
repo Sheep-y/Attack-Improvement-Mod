@@ -87,16 +87,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "MechCalledShotMultiplier", ref Settings.MechCalledShotMultiplier, 0, 1024 );
          RangeCheck( "VehicleCalledShotMultiplier", ref Settings.VehicleCalledShotMultiplier, 0, 1024 );
 
+         RangeCheck( "BaseHitChanceModifier", ref Settings.BaseHitChanceModifier, -10, 10 );
+         RangeCheck( "MeleeHitChanceModifier", ref Settings.MeleeHitChanceModifier, -10, 10 );
          RangeCheck( "ToHitMechFromFront", ref Settings.ToHitMechFromFront, -20, 20 );
          RangeCheck( "ToHitMechFromSide" , ref Settings.ToHitMechFromSide , -20, 20 );
          RangeCheck( "ToHitMechFromRear" , ref Settings.ToHitMechFromRear , -20, 20 );
          RangeCheck( "ToHitVehicleFromFront", ref Settings.ToHitVehicleFromFront, -20, 20 );
          RangeCheck( "ToHitVehicleFromSide" , ref Settings.ToHitVehicleFromSide , -20, 20 );
          RangeCheck( "ToHitVehicleFromRear" , ref Settings.ToHitVehicleFromRear , -20, 20 );
+         RangeCheck( "ToHitSelfJumped", ref Settings.ToHitSelfJumped, -20, 20 );
 
          RangeCheck( "HitChanceStep", ref Settings.HitChanceStep, 0, 1 );
-         RangeCheck( "BaseHitChanceModifier", ref Settings.BaseHitChanceModifier, -10, 10 );
-         RangeCheck( "MeleeHitChanceModifier", ref Settings.MeleeHitChanceModifier, -10, 10 );
          RangeCheck( "MaxFinalHitChance", ref Settings.MaxFinalHitChance, 0.1m, 1 );
          RangeCheck( "MinFinalHitChance", ref Settings.MinFinalHitChance, 0, 1 );
 
