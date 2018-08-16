@@ -91,7 +91,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          int local = TryGet( hitTable, location ) * scale;
          if ( location == targetedLocation )
-            local = (int)( (float) local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
+            local = (int)( local * FixMultiplier( targetedLocation, ActorCalledShotBonus ) );
 
          __result = FineTuneAndFormat( hitTable, location, local, Settings.ShowRealMechCalledShotChance );
          return false;

@@ -181,7 +181,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          foreach ( int weight in hitTable.Values ) totalWeight += weight;
          totalWeight *= SCALE;
          if ( bonusLocationMultiplier != 1 && hitTable.ContainsKey( bonusLocation ) )
-            totalWeight += (int)( (float) hitTable[ bonusLocation ] * ( bonusLocationMultiplier - 1 ) * SCALE );
+            totalWeight += (int)( hitTable[ bonusLocation ] * ( bonusLocationMultiplier - 1 ) * SCALE );
          return totalWeight;
       }
 

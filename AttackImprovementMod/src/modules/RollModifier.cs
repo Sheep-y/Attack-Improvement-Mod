@@ -86,17 +86,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             int level = Levels[ i ];
             if ( mod < level ) continue;
             int modInLevel = Mathf.Min( mod - level, lastLevel - level );
-            result -= (float)modInLevel * values[ i ];
+            result -= modInLevel * values[ i ];
             lastLevel = level;
          }
          return result;
       }
 
       private static void FillDiminishingModifiers () {
+         double bonusBase = (double) Settings.DiminishingBonusPowerBase, bonusDiv = (double) Settings.DiminishingBonusPowerDivisor;
+         double penaltyBase = (double) Settings.DiminishingPenaltyPowerBase, penaltyDiv = (double) Settings.DiminishingPenaltyPowerDivisor;
          for ( int i = 1 ; i <= Settings.DiminishingBonusMax ; i++ )
-            diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( (double) Settings.DiminishingBonusPowerBase, i / (double) Settings.DiminishingBonusPowerDivisor ) );
+            diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( bonusBase, i / bonusDiv ) );
          for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
-            diminishingPenalty[ i-1 ] = (float) Math.Pow( (double) Settings.DiminishingPenaltyPowerBase, i / (double) Settings.DiminishingPenaltyPowerDivisor );
+            diminishingPenalty[ i-1 ] = (float) Math.Pow( penaltyBase, i / penaltyDiv );
          Info( "Diminishing hit% multipliers (bonus)\t" + Join( "\t", diminishingBonus ) );
          Info( "Diminishing hit% multipliers (penalty)\t" + Join( "\t", diminishingPenalty ) );
       }
