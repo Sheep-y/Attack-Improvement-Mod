@@ -38,7 +38,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          Type Indicator = typeof( WeaponRangeIndicators );
 
-         if ( Settings.LOSWidth != 1f || Settings.LOSWidthBlocked != 0.75f || Settings.LOSMarkerBlockedMultiplier != 1f )
+         if ( Settings.LOSWidth != 1 || Settings.LOSWidthBlocked != 0.75m || Settings.LOSMarkerBlockedMultiplier != 1 )
             Patch( Indicator, "Init", null, "ResizeLOS" );
 
          if ( LinesChanged ) {
@@ -117,7 +117,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ResizeLOS ( WeaponRangeIndicators __instance ) { try {
          WeaponRangeIndicators me = __instance;
 
-         float width = Settings.LOSWidth;
+         float width = (float) Settings.LOSWidth;
          if ( width > 0f && me.LOSWidthBegin != width ) {
             //Log( "Setting default LOS width to {0}", width );
             // Scale solid line width
@@ -134,12 +134,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
 
-         width = Settings.LOSWidthBlocked;
+         width = (float) Settings.LOSWidthBlocked;
          if ( width > 0f && me.LOSWidthBlocked != width )
             me.LOSWidthBlocked = width;
          //Log( "LOS widths, normal = {0}, post-blocked = {1}", me.LOSWidthBegin, me.LOSWidthBlocked );
 
-         width = Settings.LOSMarkerBlockedMultiplier;
+         width = (float) Settings.LOSMarkerBlockedMultiplier;
          if ( width != 1f && ! losTextureScaled ) {
             //Log( "Scaling LOS block marker by {0}", width );
             Vector3 zoom = me.CoverTemplate.transform.localScale;
@@ -292,7 +292,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Material newMat = new Material( dotted ? Dotted : Solid ) { name = name, color = newColour };
 
          // Blocked Post scale need to be override if normal width is not same as blocked width
-         float width = Settings.LOSWidthBlocked, origWidth = Settings.LOSWidth <= 0 ? 1 : Settings.LOSWidth;
+         float width = (float) Settings.LOSWidthBlocked, origWidth = (float) Settings.LOSWidth <= 0 ? 1 : (float) Settings.LOSWidth;
          if ( name.StartsWith( "BlockedPost" ) && dotted && origWidth != width ) {
             Vector2 s = newMat.mainTextureScale;
             s.x *= origWidth / width;

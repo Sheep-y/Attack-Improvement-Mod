@@ -97,7 +97,7 @@ namespace Sheepy.BattleTechMod {
 
       // Load settings from settings.json, call SanitizeSettings, and create/overwrite it if the content is different.
       protected virtual void LoadSettings <Settings> ( ref Settings settings, Func<Settings,Settings> sanitise = null ) {
-         string file = BaseDir + "settings.json", fileText = String.Empty;
+         string file = BaseDir + "settings.json", fileText = string.Empty;
          Settings config = settings;
          if ( File.Exists( file ) ) TryRun( () => {
             fileText = File.ReadAllText( file );
@@ -416,27 +416,27 @@ namespace Sheepy.BattleTechMod {
       }
 
       public static int RangeCheck ( string name, ref int val, int min, int max ) {
-         float v = val;
+         decimal v = val;
          RangeCheck( name, ref v, min, min, max, max );
-         return val = Mathf.RoundToInt( v );
+         return val = (int) Math.Round( v );
       }
 
-      public static float RangeCheck ( string name, ref float val, float min, float max ) {
+      public static decimal RangeCheck ( string name, ref decimal val, decimal min, decimal max ) {
          return RangeCheck( name, ref val, min, min, max, max );
       }
 
-      public static float RangeCheck ( string name, ref float val, float shownMin, float realMin, float realMax, float shownMax ) {
+      public static decimal RangeCheck ( string name, ref decimal val, decimal shownMin, decimal realMin, decimal realMax, decimal shownMax ) {
          if ( realMin > realMax || shownMin > shownMax )
             BattleMod.BTML_LOG.Error( "Incorrect range check params on " + name );
-         float orig = val;
+         decimal orig = val;
          if ( val < realMin )
             val = realMin;
          else if ( val > realMax )
             val = realMax;
          if ( orig < shownMin && orig > shownMax ) {
             string message = "Warning: " + name + " must be ";
-            if ( shownMin > float.MinValue )
-               if ( shownMax < float.MaxValue )
+            if ( shownMin > decimal.MinValue )
+               if ( shownMax < decimal.MaxValue )
                   message += " between " + shownMin + " and " + shownMax;
                else
                   message += " >= " + shownMin;

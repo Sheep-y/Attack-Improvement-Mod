@@ -23,8 +23,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering;
 
-         bool prefixMech    = Settings.MechCalledShotMultiplier    != 1.0f || Settings.CalledShotUseClustering,
-              prefixVehicle = Settings.VehicleCalledShotMultiplier != 1.0f || Settings.FixVehicleCalledShot;
+         bool prefixMech    = Settings.MechCalledShotMultiplier    != 1 || Settings.CalledShotUseClustering,
+              prefixVehicle = Settings.VehicleCalledShotMultiplier != 1 || Settings.FixVehicleCalledShot;
          MethodInfo MechGetHit    = AttackLog.GetHitLocation( typeof( ArmorLocation ) ),
                     VehicleGetHit = AttackLog.GetHitLocation( typeof( VehicleChassisLocations ) );
          if ( prefixMech )
@@ -112,8 +112,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static float FixMultiplier ( ArmorLocation location, float multiplier ) {
          if ( location == None ) return 0;
-         if ( Settings.MechCalledShotMultiplier != 1.0f )
-            multiplier *= Settings.MechCalledShotMultiplier;
+         if ( Settings.MechCalledShotMultiplier != 1 )
+            multiplier *= (float) Settings.MechCalledShotMultiplier;
          if ( location == Head && CallShotClustered && ClusterChanceNeverMultiplyHead )
             return multiplier * ClusterChanceOriginalLocationMultiplier;
          return multiplier;
@@ -121,8 +121,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static float FixMultiplier ( VehicleChassisLocations location, float multiplier ) {
          if ( location == VehicleChassisLocations.None ) return 0;
-         if ( Settings.VehicleCalledShotMultiplier != 1.0f )
-            multiplier *= Settings.VehicleCalledShotMultiplier;
+         if ( Settings.VehicleCalledShotMultiplier != 1 )
+            multiplier *= (float) Settings.VehicleCalledShotMultiplier;
          // ClusterChanceNeverMultiplyHead does not apply to Vehicle
          return multiplier;
       }

@@ -149,7 +149,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void WriteRollLog ( AttackDirector __instance ) {
          if ( __instance != null && __instance.IsAnyAttackSequenceActive )
             return; // Defer if Multi-Target is not finished
-         ROLL_LOG.Info( String.Join( Environment.NewLine, log.ToArray() ) );
+         ROLL_LOG.Info( string.Join( Environment.NewLine, log.ToArray() ) );
          log.Clear();
          hitList?.Clear();
          hitMap?.Clear();

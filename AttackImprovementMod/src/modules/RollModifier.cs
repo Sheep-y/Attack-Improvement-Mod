@@ -13,9 +13,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Type ToHitType = typeof( ToHit );
          if ( Settings.AllowNetBonusModifier && ! Settings.DiminishingHitChanceModifier )
             Patch( ToHitType, "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );
-         if ( Settings.BaseHitChanceModifier != 0f )
+         if ( Settings.BaseHitChanceModifier != 0 )
             Patch( ToHitType, "GetBaseToHitChance", new Type[]{ typeof( AbstractActor ) }, null, "ModifyBaseHitChance" );
-         if ( Settings.MeleeHitChanceModifier != 0f )
+         if ( Settings.MeleeHitChanceModifier != 0 )
             Patch( ToHitType, "GetBaseMeleeToHitChance", new Type[]{ typeof( Mech ) }, null, "ModifyBaseMeleeHitChance" );
          /*
          if ( Settings.FixModifierTargetHeight ) {
@@ -27,7 +27,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Patch( ToHitType, "GetHeightModifier", "LogHeightModifier", null );
          */
 
-         if ( Settings.HitChanceStep != 0.05f || Settings.MaxFinalHitChance != 0.95f || Settings.MinFinalHitChance != 0.05f || Settings.DiminishingHitChanceModifier ) {
+         if ( Settings.HitChanceStep != 0.05m || Settings.MaxFinalHitChance != 0.95m || Settings.MinFinalHitChance != 0.05m || Settings.DiminishingHitChanceModifier ) {
             if ( ! Settings.DiminishingHitChanceModifier )
                Patch( ToHitType, "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceStepNClamp", null );
             else {
@@ -94,9 +94,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static void FillDiminishingModifiers () {
          for ( int i = 1 ; i <= Settings.DiminishingBonusMax ; i++ )
-            diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( Settings.DiminishingBonusPowerBase, (double) i / Settings.DiminishingBonusPowerDivisor ) );
+            diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( (double) Settings.DiminishingBonusPowerBase, i / (double) Settings.DiminishingBonusPowerDivisor ) );
          for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
-            diminishingPenalty[ i-1 ] = (float) Math.Pow( Settings.DiminishingPenaltyPowerBase, (double) i / Settings.DiminishingPenaltyPowerDivisor );
+            diminishingPenalty[ i-1 ] = (float) Math.Pow( (double) Settings.DiminishingPenaltyPowerBase, i / (double) Settings.DiminishingPenaltyPowerDivisor );
          Info( "Diminishing hit% multipliers (bonus)\t" + Join( "\t", diminishingBonus ) );
          Info( "Diminishing hit% multipliers (penalty)\t" + Join( "\t", diminishingPenalty ) );
       }
@@ -104,11 +104,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Fixes ============
 
       public static void ModifyBaseHitChance ( ref float __result ) {
-         __result += Settings.BaseHitChanceModifier;
+         __result += (float) Settings.BaseHitChanceModifier;
       }
 
       public static void ModifyBaseMeleeHitChance ( ref float __result ) {
-         __result += Settings.MeleeHitChanceModifier;
+         __result += (float) Settings.MeleeHitChanceModifier;
       }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
@@ -150,7 +150,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static float StepHitChance( float chance ) {
-         float step = Settings.HitChanceStep;
+         float step = (float) Settings.HitChanceStep;
          if ( step > 0f ) {
             chance += step/2f;
             chance -= chance % step;
@@ -160,8 +160,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static float ClampHitChance( float chance ) {
          chance = StepHitChance( chance );
-         if      ( chance >= Settings.MaxFinalHitChance ) return Settings.MaxFinalHitChance;
-         else if ( chance <= Settings.MinFinalHitChance ) return Settings.MinFinalHitChance;
+         if      ( chance >= (float) Settings.MaxFinalHitChance ) return (float) Settings.MaxFinalHitChance;
+         else if ( chance <= (float) Settings.MinFinalHitChance ) return (float) Settings.MinFinalHitChance;
          return chance;
       }
 

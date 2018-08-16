@@ -60,10 +60,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          settings.ShowUnderArmourDamage = settings.PaperDollDivulgeUnderskinDamage.GetValueOrDefault( settings.ShowUnderArmourDamage );
          settings.KillZeroHpLocation = settings.FixNonIntegerDamage.GetValueOrDefault( settings.KillZeroHpLocation );
 
-         if ( settings.LOSWidthMultiplier != null && settings.LOSWidthMultiplier != 2f )
-            settings.LOSWidth = settings.LOSWidthMultiplier.GetValueOrDefault( 2f );
-         if ( settings.LOSWidthBlockedMultiplier != null && settings.LOSWidthBlockedMultiplier != 3f )
-            settings.LOSWidthBlocked = settings.LOSWidthBlockedMultiplier.GetValueOrDefault( 3f ) * 0.75f;
+         if ( settings.LOSWidthMultiplier != null && settings.LOSWidthMultiplier != 2 )
+            settings.LOSWidth = settings.LOSWidthMultiplier.GetValueOrDefault( 2 );
+         if ( settings.LOSWidthBlockedMultiplier != null && settings.LOSWidthBlockedMultiplier != 3 )
+            settings.LOSWidthBlocked = settings.LOSWidthBlockedMultiplier.GetValueOrDefault( 3 ) * 0.75m;
 
          // Add SelfTerrainMelee and spacing to 2.0 default
          if ( settings.MeleeAccuracyFactors == "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy" )
@@ -79,13 +79,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             settings.AttackLogLevel = "All";
 #pragma warning restore CS0618
 
-         RangeCheck( "LOSWidth", ref Settings.LOSWidth, 0f, 10f );
-         RangeCheck( "LOSWidthBlocked", ref Settings.LOSWidthBlocked, 0f, 10f );
-         RangeCheck( "LOSMarkerBlockedMultiplier", ref Settings.LOSMarkerBlockedMultiplier, 0f, 10f );
+         RangeCheck( "LOSWidth", ref Settings.LOSWidth, 0, 10 );
+         RangeCheck( "LOSWidthBlocked", ref Settings.LOSWidthBlocked, 0, 10 );
+         RangeCheck( "LOSMarkerBlockedMultiplier", ref Settings.LOSMarkerBlockedMultiplier, 0, 10 );
          RangeCheck( "ArcLineSegments", ref Settings.ArcLinePoints, 1, 1000 );
 
-         RangeCheck( "MechCalledShotMultiplier", ref Settings.MechCalledShotMultiplier, 0f, 1024f );
-         RangeCheck( "VehicleCalledShotMultiplier", ref Settings.VehicleCalledShotMultiplier, 0f, 1024f );
+         RangeCheck( "MechCalledShotMultiplier", ref Settings.MechCalledShotMultiplier, 0, 1024 );
+         RangeCheck( "VehicleCalledShotMultiplier", ref Settings.VehicleCalledShotMultiplier, 0, 1024 );
 
          RangeCheck( "ToHitMechFromFront", ref Settings.ToHitMechFromFront, -20, 20 );
          RangeCheck( "ToHitMechFromSide" , ref Settings.ToHitMechFromSide , -20, 20 );
@@ -94,15 +94,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "ToHitVehicleFromSide" , ref Settings.ToHitVehicleFromSide , -20, 20 );
          RangeCheck( "ToHitVehicleFromRear" , ref Settings.ToHitVehicleFromRear , -20, 20 );
 
-         RangeCheck( "HitChanceStep", ref Settings.HitChanceStep, 0f, 1f );
-         RangeCheck( "BaseHitChanceModifier", ref Settings.BaseHitChanceModifier, -10f, 10f );
-         RangeCheck( "MeleeHitChanceModifier", ref Settings.MeleeHitChanceModifier, -10f, 10f );
-         RangeCheck( "MaxFinalHitChance", ref Settings.MaxFinalHitChance, 0.1f, 1f );
-         RangeCheck( "MinFinalHitChance", ref Settings.MinFinalHitChance, 0f, 1f );
+         RangeCheck( "HitChanceStep", ref Settings.HitChanceStep, 0, 1 );
+         RangeCheck( "BaseHitChanceModifier", ref Settings.BaseHitChanceModifier, -10, 10 );
+         RangeCheck( "MeleeHitChanceModifier", ref Settings.MeleeHitChanceModifier, -10, 10 );
+         RangeCheck( "MaxFinalHitChance", ref Settings.MaxFinalHitChance, 0.1m, 1 );
+         RangeCheck( "MinFinalHitChance", ref Settings.MinFinalHitChance, 0, 1 );
 
-         RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0f, 0f, 1.999f, 2f );
-         RangeCheck( "MissStreakBreakerThreshold", ref Settings.MissStreakBreakerThreshold, 0f, 1f );
-         RangeCheck( "MissStreakBreakerDivider", ref Settings.MissStreakBreakerDivider, -100f, 100f );
+         RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0, 0, 1.999m, 2 );
+         RangeCheck( "MissStreakBreakerThreshold", ref Settings.MissStreakBreakerThreshold, 0, 1 );
+         RangeCheck( "MissStreakBreakerDivider", ref Settings.MissStreakBreakerDivider, -100, 100 );
 
          // Is 1TB a reasonable limit of how many logs to keep?
          RangeCheck( "AttackLogArchiveMaxMB", ref Settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
@@ -117,6 +117,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                if ( ! original.Contains( "jumped" ) ) Settings.MeleeAccuracyFactors += ", Jumped";
                if ( ! original.Contains( "selfterrainmelee" ) ) Settings.MeleeAccuracyFactors += ", SelfTerrainMelee";
             }
+            if ( Settings.DiminishingBonusPowerBase == 0.800000011920929m ) Settings.DiminishingBonusPowerBase = 0.8m;
+            if ( Settings.DiminishingPenaltyPowerBase == 0.800000011920929m ) Settings.DiminishingPenaltyPowerBase = 0.8m;
+            if ( Settings.DiminishingPenaltyPowerDivisor == 3.2999999523162842m ) Settings.DiminishingPenaltyPowerDivisor = 3.3m;
          }
          Settings.SettingVersion = 2_001_000;
 

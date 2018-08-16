@@ -27,10 +27,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Settings.ShowCorrectedHitChance = true;
          }
 
-         NoRollCorrection = Settings.RollCorrectionStrength == 0f;
+         NoRollCorrection = Settings.RollCorrectionStrength == 0;
 
          if ( ! NoRollCorrection && ! TrueRNG ) {
-            if ( Settings.RollCorrectionStrength != 1f )
+            if ( Settings.RollCorrectionStrength != 1 )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
             if ( Settings.ShowCorrectedHitChance ) {
                correctionCache = new Dictionary<float, float>(20);
@@ -41,8 +41,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Settings.ShowCorrectedHitChance = false;
          }
 
-         if ( ( Settings.MissStreakBreakerThreshold != 0.5f || Settings.MissStreakBreakerDivider != 5f ) && ! TrueRNG ) {
-            if ( Settings.MissStreakBreakerThreshold == 1f || Settings.MissStreakBreakerDivider == 0f )
+         if ( ( Settings.MissStreakBreakerThreshold != 0.5m || Settings.MissStreakBreakerDivider != 5 ) && ! TrueRNG ) {
+            if ( Settings.MissStreakBreakerThreshold == 1 || Settings.MissStreakBreakerDivider == 0 )
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "BypassMissStreakBreaker", null );
             else
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
@@ -50,11 +50,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.HitChanceFormat != null )
             WeaponHitChanceFormat = Settings.HitChanceFormat;
-         else if ( Settings.HitChanceStep == 0f && ! Settings.DiminishingHitChanceModifier )
+         else if ( Settings.HitChanceStep == 0 && ! Settings.DiminishingHitChanceModifier )
             WeaponHitChanceFormat = "{0:0.#}%";
 
-         bool HitChanceFormatChanged = Settings.HitChanceFormat != null || ( Settings.HitChanceStep == 0f && Settings.HitChanceFormat != "{0:0}%" );
-         if ( HitChanceFormatChanged || Settings.ShowCorrectedHitChance || Settings.MinFinalHitChance < 0.05f || Settings.MaxFinalHitChance > 0.95f ) {
+         bool HitChanceFormatChanged = Settings.HitChanceFormat != null || ( Settings.HitChanceStep == 0 && Settings.HitChanceFormat != "{0:0}%" );
+         if ( HitChanceFormatChanged || Settings.ShowCorrectedHitChance || Settings.MinFinalHitChance < 0.05m || Settings.MaxFinalHitChance > 0.95m ) {
             HitChance = typeof( CombatHUDWeaponSlot ).GetMethod( "set_HitChance", Instance | NonPublic );
             Refresh = typeof( CombatHUDWeaponSlot ).GetMethod( "RefreshNonHighlighted", Instance | NonPublic );
             Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "OverrideDisplayedHitChance", null );
@@ -101,7 +101,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.Low ) ]
       public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) { try {
-         roll = CorrectRoll( roll, Settings.RollCorrectionStrength );
+         roll = CorrectRoll( roll, (float) Settings.RollCorrectionStrength );
          if ( team != null )
             roll -= team.StreakBreakingValue;
          __result = roll;
@@ -118,12 +118,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( succeeded ) {
             ___streakBreakingValue = 0f;
 
-         } else if ( targetValue > Settings.MissStreakBreakerThreshold ) {
+         } else if ( targetValue > (float) Settings.MissStreakBreakerThreshold ) {
             float mod;
             if ( Settings.MissStreakBreakerDivider > 0 )
-               mod = ( targetValue - Settings.MissStreakBreakerThreshold ) / Settings.MissStreakBreakerDivider;
+               mod = ( targetValue - (float) Settings.MissStreakBreakerThreshold ) / (float) Settings.MissStreakBreakerDivider;
             else
-               mod = - Settings.MissStreakBreakerDivider;
+               mod = - (float) Settings.MissStreakBreakerDivider;
             ___streakBreakingValue += mod;
          }
          return false;
@@ -133,7 +133,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ShowCorrectedHitChance ( ref float chance ) { try {
          chance = Mathf.Clamp( chance, 0f, 1f );
          if ( ! correctionCache.TryGetValue( chance, out float corrected ) )
-            correctionCache.Add( chance, corrected = ReverseRollCorrection( chance, Settings.RollCorrectionStrength ) );
+            correctionCache.Add( chance, corrected = ReverseRollCorrection( chance, (float) Settings.RollCorrectionStrength ) );
          chance = corrected;
       }                 catch ( Exception ex ) { Error( ex ); } }
 

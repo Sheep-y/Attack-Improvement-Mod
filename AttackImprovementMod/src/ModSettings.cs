@@ -61,13 +61,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       //
 
       [ JsonComment( "Make lines wider or thinner.  Default 2 and 1.5 times of game default.  Set to 0 to not mess with it." ) ]
-      public float LOSWidth = 2f;
-      public float LOSWidthBlocked = 1.5f;
+      public decimal LOSWidth = 2;
+      public decimal LOSWidthBlocked = 1.5m;
 
       [ JsonComment( new string[]{
         "Make obstruction marker bigger or smaller by multiplying its height and width.  Default 1.5.",
         "Set to 1 to use game default, or 0 to hide the marker." } ) ]
-      public float LOSMarkerBlockedMultiplier = 1.5f;
+      public decimal LOSMarkerBlockedMultiplier = 1.5m;
 
       [ JsonComment( "Controls whether indirect attack lines / can't attack lines are dotted.  Default both true." ) ]
       public bool LOSIndirectDotted = true;
@@ -117,12 +117,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( new string[]{
         "Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.",
         "Default is 0.33 to counter the effect of CalledShotClusterStrength." } ) ]
-      public float MechCalledShotMultiplier = 0.33f;
+      public decimal MechCalledShotMultiplier = 0.33m;
 
       [ JsonComment( new string[]{
         "Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.",
         "Default is 0.75 to balance vehicle's lower number of locations." } ) ]
-      public float VehicleCalledShotMultiplier = 0.75f;
+      public decimal VehicleCalledShotMultiplier = 0.75m;
 
       [ JsonComment( "Override called shot percentage display of mech locations to show modded shot distribution. Default true." ) ]
       public bool ShowRealMechCalledShotChance = true;
@@ -179,19 +179,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( new string[]{
         "Step of hit chance.  Game default is 0.05, or 5%.  Hit chance is always rounded down.",
         "Default 0 to remove hit chance step, so that odd gunnery stats can enjoy their +2.5% hit chance." } ) ]
-      public float HitChanceStep = 0;
+      public decimal HitChanceStep = 0;
 
       [ JsonComment( "Modify base weapon hit chance.  -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
-      public float BaseHitChanceModifier = 0f;
+      public decimal BaseHitChanceModifier = 0;
 
       [ JsonComment( "Modify base melee hit chance.  -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc.  Default 0." ) ]
-      public float MeleeHitChanceModifier = 0f;
+      public decimal MeleeHitChanceModifier = 0;
 
       [ JsonComment( new string[]{
         "Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.",
         "Note that 100% hit chance (max) may still miss if roll correction is enabled." } ) ]
-      public float MaxFinalHitChance = 0.95f;
-      public float MinFinalHitChance = 0.05f;
+      public decimal MaxFinalHitChance = 0.95m;
+      public decimal MinFinalHitChance = 0.05m;
 
       [ JsonComment( "Make hit chance modifier has diminishing return rather than simple add and subtract.  Default false." ) ]
       public bool DiminishingHitChanceModifier = false;
@@ -199,15 +199,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( new string[]{
         "Diminishing Bonus: 2-Base^(Bonus/Divisor).  Default 2-0.8^(Bonus/6) and caps at +16.",
         "Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit" } ) ]
-      public double DiminishingBonusPowerBase = 0.8f;
-      public double DiminishingBonusPowerDivisor = 6f;
+      public decimal DiminishingBonusPowerBase = 0.8m;
+      public decimal DiminishingBonusPowerDivisor = 6m;
       public int DiminishingBonusMax = 16;
 
       [ JsonComment( new string[]{
         "Diminishing Penalty: Base^(Penalty/Divisor).  Default 0.8^(Penalty/3.3) and caps at +32.",
         "Example: +6 Penalty @ 80% Base ToHit == 67% x 0.8 == 53% Hit" } ) ]
-      public double DiminishingPenaltyPowerBase = 0.8f;
-      public double DiminishingPenaltyPowerDivisor = 3.3f;
+      public decimal DiminishingPenaltyPowerBase = 0.8m;
+      public decimal DiminishingPenaltyPowerDivisor = 3.3m;
       public int DiminishingPenaltyMax = 32;
 
       //
@@ -217,18 +217,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( new string[]{
         "Increase or decrease roll correction strength.  0 to disable roll correction, 1 is original strength, max is 2 for double strength.",
         "Default is 0.5 for less correction." } ) ]
-      public float RollCorrectionStrength = 0.5f;
+      public decimal RollCorrectionStrength = 0.5m;
 
       [ JsonComment( new string[]{
         "Set miss streak breaker threshold.  Only attacks with hit rate above the threshold will add to streak breaker.",
         "Default is 0.5, same as game default.  Set to 1 to disable miss streak breaker." } ) ]
-      public float MissStreakBreakerThreshold = 0.5f;
+      public decimal MissStreakBreakerThreshold = 0.5m;
 
       [ JsonComment( new string[]{
         "Set miss streak breaker divider.  Set to negative integer or zero to make it a constant bonus, e.g. -5 = 5% bonus per miss.",
         "Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.",
         "Default is 5, same as game default." } ) ]
-      public float MissStreakBreakerDivider = 5f;
+      public decimal MissStreakBreakerDivider = 5;
 
       //
        [ JsonSection( "Modifiers Preview" ) ]
@@ -335,9 +335,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ Obsolete( "[v2.0-rc] Default true.  Replaced by KillZeroHpLocation." ) ]
       public bool? FixNonIntegerDamage = null;
       [ Obsolete( "[v2.0-20170712] Default 2.  Replaced by LOSWidth." ) ]
-      public float? LOSWidthMultiplier = null;
+      public decimal? LOSWidthMultiplier = null;
       [ Obsolete( "[v2.0-20170712] Default 3.  Replaced by LOSWidthBlocked." ) ]
-      public float? LOSWidthBlockedMultiplier = null;
+      public decimal? LOSWidthBlockedMultiplier = null;
 
       [ Obsolete( "[v1.0] Default false.  Renamed to ShowCorrectedHitChance." ) ]
       public bool? ShowRealWeaponHitChance = null;
