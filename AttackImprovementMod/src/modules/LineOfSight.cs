@@ -118,7 +118,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          WeaponRangeIndicators me = __instance;
 
          float width = (float) Settings.LOSWidth;
-         if ( width > 0f && me.LOSWidthBegin != width ) {
+         if ( width > 0 && me.LOSWidthBegin != width ) {
             //Log( "Setting default LOS width to {0}", width );
             // Scale solid line width
             me.LOSWidthBegin = width;
@@ -135,12 +135,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          width = (float) Settings.LOSWidthBlocked;
-         if ( width > 0f && me.LOSWidthBlocked != width )
+         if ( width > 0 && me.LOSWidthBlocked != width )
             me.LOSWidthBlocked = width;
          //Log( "LOS widths, normal = {0}, post-blocked = {1}", me.LOSWidthBegin, me.LOSWidthBlocked );
 
          width = (float) Settings.LOSMarkerBlockedMultiplier;
-         if ( width != 1f && ! losTextureScaled ) {
+         if ( width != 1 && ! losTextureScaled ) {
             //Log( "Scaling LOS block marker by {0}", width );
             Vector3 zoom = me.CoverTemplate.transform.localScale;
             zoom.x *= width;
@@ -292,7 +292,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Material newMat = new Material( dotted ? Dotted : Solid ) { name = name, color = newColour };
 
          // Blocked Post scale need to be override if normal width is not same as blocked width
-         float width = (float) Settings.LOSWidthBlocked, origWidth = (float) Settings.LOSWidth <= 0 ? 1 : (float) Settings.LOSWidth;
+         float width = (float) Settings.LOSWidthBlocked, origWidth = Settings.LOSWidth <= 0 ? 1 : (float) Settings.LOSWidth;
          if ( name.StartsWith( "BlockedPost" ) && dotted && origWidth != width ) {
             Vector2 s = newMat.mainTextureScale;
             s.x *= origWidth / width;

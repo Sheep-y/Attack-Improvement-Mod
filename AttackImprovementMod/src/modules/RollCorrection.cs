@@ -17,6 +17,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<float, float> correctionCache;
       private static string WeaponHitChanceFormat = "{0:0}%";
 
+      private static float RollCorrectionStrength, MissStreakBreakerThreshold, MissStreakBreakerDivider;
+
       public override void CombatStartsOnce () {
          if ( BattleMod.FoundMod( "Battletech.realitymachina.NoCorrections", "NoCorrectedRoll.InitClass" ) ) {
             BattleMod.BTML_LOG.Warn( Mod.Name + " detected realitymachina's True RNG (NoCorrections) mod, roll correction and streak breaker disabled." );
@@ -27,10 +29,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Settings.ShowCorrectedHitChance = true;
          }
 
-         NoRollCorrection = Settings.RollCorrectionStrength == 0;
+         RollCorrectionStrength = (float) Settings.RollCorrectionStrength;
+         MissStreakBreakerThreshold = (float) Settings.MissStreakBreakerThreshold;
+         MissStreakBreakerDivider = (float) Settings.MissStreakBreakerDivider;
+         NoRollCorrection = RollCorrectionStrength == 0;
 
          if ( ! NoRollCorrection && ! TrueRNG ) {
-            if ( Settings.RollCorrectionStrength != 1 )
+            if ( RollCorrectionStrength != 1 )
                Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
             if ( Settings.ShowCorrectedHitChance ) {
                correctionCache = new Dictionary<float, float>(20);
@@ -41,8 +46,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Settings.ShowCorrectedHitChance = false;
          }
 
-         if ( ( Settings.MissStreakBreakerThreshold != 0.5m || Settings.MissStreakBreakerDivider != 5 ) && ! TrueRNG ) {
-            if ( Settings.MissStreakBreakerThreshold == 1 || Settings.MissStreakBreakerDivider == 0 )
+         if ( ( MissStreakBreakerThreshold != 0.5f || MissStreakBreakerDivider != 5 ) && ! TrueRNG ) {
+            if ( MissStreakBreakerThreshold == 1 || MissStreakBreakerDivider == 0 )
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "BypassMissStreakBreaker", null );
             else
                Patch( typeof( Team ), "ProcessRandomRoll", new Type[]{ typeof( float ), typeof( bool ) }, "OverrideMissStreakBreaker", null );
@@ -101,7 +106,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.Low ) ]
       public static bool OverrideRollCorrection ( ref float __result, float roll, Team team ) { try {
-         roll = CorrectRoll( roll, (float) Settings.RollCorrectionStrength );
+         roll = CorrectRoll( roll, RollCorrectionStrength );
          if ( team != null )
             roll -= team.StreakBreakingValue;
          __result = roll;
@@ -118,12 +123,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( succeeded ) {
             ___streakBreakingValue = 0f;
 
-         } else if ( targetValue > (float) Settings.MissStreakBreakerThreshold ) {
+         } else if ( targetValue > MissStreakBreakerThreshold ) {
             float mod;
-            if ( Settings.MissStreakBreakerDivider > 0 )
-               mod = ( targetValue - (float) Settings.MissStreakBreakerThreshold ) / (float) Settings.MissStreakBreakerDivider;
+            if ( MissStreakBreakerDivider > 0 )
+               mod = ( targetValue - MissStreakBreakerThreshold ) / MissStreakBreakerDivider;
             else
-               mod = - (float) Settings.MissStreakBreakerDivider;
+               mod = - MissStreakBreakerDivider;
             ___streakBreakingValue += mod;
          }
          return false;
@@ -133,7 +138,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ShowCorrectedHitChance ( ref float chance ) { try {
          chance = Mathf.Clamp( chance, 0f, 1f );
          if ( ! correctionCache.TryGetValue( chance, out float corrected ) )
-            correctionCache.Add( chance, corrected = ReverseRollCorrection( chance, (float) Settings.RollCorrectionStrength ) );
+            correctionCache.Add( chance, corrected = ReverseRollCorrection( chance, RollCorrectionStrength ) );
          chance = corrected;
       }                 catch ( Exception ex ) { Error( ex ); } }
 

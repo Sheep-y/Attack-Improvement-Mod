@@ -42,10 +42,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static void CheckReverseNaN ( float count ) {
          float block = 2f/5f, add = count*block, max = 100000;
          for ( int i = 0 ; i <= max ; i++ ) {
-            float strength = add + ((float)i)*block/max;
+            float strength = add + i*block/max;
             if ( strength > 1.9999f ) continue;
             for ( int j = 0 ; j <= 10000 ; j++ ) {
-               float acc = ((float)j)/10000f, corrected = RollCorrection.ReverseRollCorrection( acc, strength );
+               float acc = j/10000f, corrected = RollCorrection.ReverseRollCorrection( acc, strength );
                if ( float.IsNaN( corrected ) ) Console.WriteLine( corrected + " = " + acc + ", " + strength );
             }
          }

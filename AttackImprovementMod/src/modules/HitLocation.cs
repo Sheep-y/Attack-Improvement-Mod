@@ -19,12 +19,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static bool CallShotClustered = false; // True if clustering is enabled, OR is game is ver 1.0.4 or before
 
+      private static float MechCalledShotMultiplier, VehicleCalledShotMultiplier;
+
       public override void CombatStartsOnce () {
          scale = Settings.FixHitDistribution ? SCALE : 1;
          CallShotClustered = Settings.CalledShotUseClustering;
+         MechCalledShotMultiplier = (float) Settings.MechCalledShotMultiplier;
+         VehicleCalledShotMultiplier = (float) Settings.VehicleCalledShotMultiplier;
 
-         bool prefixMech    = Settings.MechCalledShotMultiplier    != 1 || Settings.CalledShotUseClustering,
-              prefixVehicle = Settings.VehicleCalledShotMultiplier != 1 || Settings.FixVehicleCalledShot;
+         bool prefixMech    = MechCalledShotMultiplier    != 1 || Settings.CalledShotUseClustering,
+              prefixVehicle = VehicleCalledShotMultiplier != 1 || Settings.FixVehicleCalledShot;
          MethodInfo MechGetHit    = AttackLog.GetHitLocation( typeof( ArmorLocation ) ),
                     VehicleGetHit = AttackLog.GetHitLocation( typeof( VehicleChassisLocations ) );
          if ( prefixMech )
@@ -112,8 +116,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static float FixMultiplier ( ArmorLocation location, float multiplier ) {
          if ( location == None ) return 0;
-         if ( Settings.MechCalledShotMultiplier != 1 )
-            multiplier *= (float) Settings.MechCalledShotMultiplier;
+         if ( MechCalledShotMultiplier != 1 )
+            multiplier *= MechCalledShotMultiplier;
          if ( location == Head && CallShotClustered && ClusterChanceNeverMultiplyHead )
             return multiplier * ClusterChanceOriginalLocationMultiplier;
          return multiplier;
@@ -121,8 +125,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static float FixMultiplier ( VehicleChassisLocations location, float multiplier ) {
          if ( location == VehicleChassisLocations.None ) return 0;
-         if ( Settings.VehicleCalledShotMultiplier != 1 )
-            multiplier *= (float) Settings.VehicleCalledShotMultiplier;
+         if ( VehicleCalledShotMultiplier != 1 )
+            multiplier *= VehicleCalledShotMultiplier;
          // ClusterChanceNeverMultiplyHead does not apply to Vehicle
          return multiplier;
       }

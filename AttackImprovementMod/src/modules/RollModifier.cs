@@ -9,13 +9,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class RollModifier : BattleModModule {
 
+      private static float BaseHitChanceModifier, MeleeHitChanceModifier, HitChanceStep, MaxFinalHitChance, MinFinalHitChance;
+
       public override void CombatStartsOnce () {
+         BaseHitChanceModifier = (float) Settings.BaseHitChanceModifier;
+         MeleeHitChanceModifier = (float) Settings.MeleeHitChanceModifier;
+         HitChanceStep = (float) Settings.HitChanceStep;
+         MaxFinalHitChance = (float) Settings.MaxFinalHitChance;
+         MinFinalHitChance = (float) Settings.MinFinalHitChance;
+
          Type ToHitType = typeof( ToHit );
          if ( Settings.AllowNetBonusModifier && ! Settings.DiminishingHitChanceModifier )
             Patch( ToHitType, "GetSteppedValue", new Type[]{ typeof( float ), typeof( float ) }, "ProcessNetBonusModifier", null );
-         if ( Settings.BaseHitChanceModifier != 0 )
+         if ( BaseHitChanceModifier != 0 )
             Patch( ToHitType, "GetBaseToHitChance", new Type[]{ typeof( AbstractActor ) }, null, "ModifyBaseHitChance" );
-         if ( Settings.MeleeHitChanceModifier != 0 )
+         if ( MeleeHitChanceModifier != 0 )
             Patch( ToHitType, "GetBaseMeleeToHitChance", new Type[]{ typeof( Mech ) }, null, "ModifyBaseMeleeHitChance" );
          /*
          if ( Settings.FixModifierTargetHeight ) {
@@ -106,11 +114,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Fixes ============
 
       public static void ModifyBaseHitChance ( ref float __result ) {
-         __result += (float) Settings.BaseHitChanceModifier;
+         __result += BaseHitChanceModifier;
       }
 
       public static void ModifyBaseMeleeHitChance ( ref float __result ) {
-         __result += (float) Settings.MeleeHitChanceModifier;
+         __result += MeleeHitChanceModifier;
       }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
@@ -138,7 +146,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideHitChanceDiminishing ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) { try {
-         // A pretty intense routine that AI use to evaluate attacks, try catch disabled.
+         // A pretty intense routine that AI use to evaluate attacks
          int mod = Mathf.RoundToInt( totalModifiers );
          if ( mod < 0 ) {
             mod = Math.Min( Settings.DiminishingBonusMax, -mod );
@@ -152,7 +160,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static float StepHitChance( float chance ) {
-         float step = (float) Settings.HitChanceStep;
+         float step = HitChanceStep;
          if ( step > 0f ) {
             chance += step/2f;
             chance -= chance % step;
@@ -162,8 +170,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static float ClampHitChance( float chance ) {
          chance = StepHitChance( chance );
-         if      ( chance >= (float) Settings.MaxFinalHitChance ) return (float) Settings.MaxFinalHitChance;
-         else if ( chance <= (float) Settings.MinFinalHitChance ) return (float) Settings.MinFinalHitChance;
+         if      ( chance >= MaxFinalHitChance ) return MaxFinalHitChance;
+         else if ( chance <= MinFinalHitChance ) return MinFinalHitChance;
          return chance;
       }
 
