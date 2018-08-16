@@ -9,7 +9,7 @@ namespace Sheepy.Logging {
    public class Logger : IDisposable {
       public Logger ( string file ) : this( file, 1000 ) { }
       public Logger ( string file, int writeDelay ) {
-         if ( String.IsNullOrEmpty( file ) ) throw new NullReferenceException();
+         if ( string.IsNullOrEmpty( file ) ) throw new NullReferenceException();
          LogFile = file.Trim();
          if ( writeDelay < 0 ) return;
          this.writeDelay = writeDelay;
@@ -147,7 +147,7 @@ namespace Sheepy.Logging {
                   if ( ! filter( line ) ) continue;
                } catch ( Exception ) { }
                string txt = line.message?.ToString();
-               if ( ! String.IsNullOrEmpty( txt ) ) {
+               if ( ! string.IsNullOrEmpty( txt ) ) {
                   if ( ! AllowMessagePass( line, txt ) ) continue;
                   FormatMessage( buf, line, txt );
                }
@@ -168,7 +168,7 @@ namespace Sheepy.Logging {
 
       // Override to change line/entry format.
       protected virtual void FormatMessage ( StringBuilder buf, LogEntry line, string txt ) {
-         if ( ! String.IsNullOrEmpty( _TimeFormat ) )
+         if ( ! string.IsNullOrEmpty( _TimeFormat ) )
             buf.Append( line.time.ToString( _TimeFormat ) );
          if ( _LevelText != null )
             buf.Append( _LevelText( line.level ) );

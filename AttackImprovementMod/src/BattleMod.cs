@@ -455,13 +455,13 @@ namespace Sheepy.BattleTechMod {
    [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonSection : Attribute {
       public string Section;
-      public JsonSection ( string section ) { Section = section ?? String.Empty; }
+      public JsonSection ( string section ) { Section = section ?? string.Empty; }
    }
 
    [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonComment : Attribute {
       public string[] Comments;
-      public JsonComment ( string comment ) { Comments = comment?.Split( '\n' ) ?? new string[]{ String.Empty }; }
+      public JsonComment ( string comment ) { Comments = comment?.Split( '\n' ) ?? new string[]{ string.Empty }; }
       public JsonComment ( string[] comments ) { Comments = comments ?? new string[]{}; }
    }
 

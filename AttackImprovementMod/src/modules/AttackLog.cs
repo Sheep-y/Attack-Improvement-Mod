@@ -28,7 +28,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static readonly Type TurtType = typeof( Turret );
       private static readonly Type BuldType = typeof( BattleTech.Building );
 
-      private static string thisCombatId = String.Empty;
+      private static string thisCombatId = string.Empty;
 
       public override void CombatStartsOnce () {
          if ( Settings.AttackLogLevel == null ) return;
@@ -113,17 +113,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( ! ROLL_LOG.Exists() ) {
             StringBuilder logBuffer = new StringBuilder();
-            logBuffer.Append( String.Join( Separator, new string[]{ "Log v2.1", "Actor", "Pilot", "Unit", "Target", "Pilot", "Unit", "Combat Id", "Round", "Phase", "Attack Id", "Direction", "Range" } ) );
+            logBuffer.Append( string.Join( Separator, new string[]{ "Log v2.1", "Actor", "Pilot", "Unit", "Target", "Pilot", "Unit", "Combat Id", "Round", "Phase", "Attack Id", "Direction", "Range" } ) );
             // LogShot
-            logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Weapon", "Weapon Template", "Weapon Id", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
+            logBuffer.Append( Separator ).Append( string.Join( Separator, new string[]{ "Weapon", "Weapon Template", "Weapon Id", "Hit Roll", "Corrected", "Streak", "Final", "Hit%" } ) );
             // LogLocation
-            logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Location Roll", "Head", "CT", "LT", "RT", "LA", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
+            logBuffer.Append( Separator ).Append( string.Join( Separator, new string[]{ "Location Roll", "Head", "CT", "LT", "RT", "LA", "RA", "LL", "RL", "Called Part", "Called Multiplier" } ) );
             // LogShot (cont.)
             logBuffer.Append( Separator ).Append( "Hit Location" );
             // LogDamage
-            logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Damage", "Stops At", "From Armor", "To Armor", "From HP", "To HP" } ) );
+            logBuffer.Append( Separator ).Append( string.Join( Separator, new string[]{ "Damage", "Stops At", "From Armor", "To Armor", "From HP", "To HP" } ) );
             // LogCritical
-            logBuffer.Append( Separator ).Append( String.Join( Separator, new string[]{ "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
+            logBuffer.Append( Separator ).Append( string.Join( Separator, new string[]{ "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
             log.Add( logBuffer.ToString() );
             WriteRollLog( null );
          }

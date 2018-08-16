@@ -80,14 +80,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool LOSBlockedPostDotted = false;
 
       [ JsonComment( new string[]{
-      "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to null to leave alone.",
+      "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to empty to leave alone.",
       "The colour orders are Front, Left, Right, Back, Prone.  Set to empty string to use game default." }  ) ]
       public string LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00";
       public string LOSClearColors = "#F00,#0FF,#0FF,#0F8,#F00";
       public string LOSBlockedPreColors  = "#D0F,#D0F,#D0F,#D0F,#D0F";
       public string LOSBlockedPostColors = "#C8E,#C8E,#C8E,#C8E,#C8E";
       public string LOSIndirectColors = "#F00,#0FF,#0FF,#0F8,#F00";
-      public string LOSNoAttackColors = null;
+      public string LOSNoAttackColors = "";
 
       [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
@@ -143,7 +143,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Specify set of hit modifiers of ranged attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
         "Default \"ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage\".",
         "You can remove some options or replace SelfTerrain and TargetTerrain with SelfTerrainMelee and TargetTerrainMelee." } ) ]
-      public string RangedAccuracyFactors = "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
+      public string RangedAccuracyFactors = "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage";
 
       [ JsonComment( new string[]{
         "Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.",
@@ -311,6 +311,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( "Location of mod log and roll log.  Default is \"\" to put them in mod folder.  Relative path would be relative to BATTLETECH exe." ) ]
       public string LogFolder = "";
+
+      [ JsonComment( "Used to determine which settings should be updated and how.  Please do not change." ) ]
+      public int? SettingVersion = null;
 
       [ Obsolete( "[v2.0] Default empty. Replaced by LOSMeleeColors." ) ]
       public string LOSMeleeColor = null;

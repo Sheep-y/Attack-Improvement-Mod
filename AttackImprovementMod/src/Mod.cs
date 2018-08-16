@@ -38,7 +38,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private ModSettings SanitizeSettings ( ModSettings settings ) {
          // Switch log folder if specified
-         if ( ! String.IsNullOrEmpty( settings.LogFolder ) && settings.LogFolder != LogDir ) {
+         if ( ! string.IsNullOrEmpty( settings.LogFolder ) && settings.LogFolder != LogDir ) {
             Log.Delete();
             if ( ! settings.LogFolder.EndsWith( "/" ) && ! settings.LogFolder.EndsWith( "\\" ) )
                settings.LogFolder += "/";
@@ -107,11 +107,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          // Is 1TB a reasonable limit of how many logs to keep?
          RangeCheck( "AttackLogArchiveMaxMB", ref Settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
 
+         if ( Settings.SettingVersion == null ) Settings.SettingVersion = 0;
+         if ( Settings.SettingVersion < 2_001_000 ) { // Pre-2.1.0
+            Settings.AttackLogLevel = "All"; // Log is now enabled by default with new background logger
+            string original = settings.MeleeAccuracyFactors.ToLower();
+            if ( ! string.IsNullOrEmpty( original ) ) { // Update customised melee modifiers
+               if ( original.Contains( "selfwalked" ) ) Settings.MeleeAccuracyFactors = original.Replace( "selfwalked", "walked" );
+               if ( ! original.Contains( "direction" ) ) Settings.MeleeAccuracyFactors += ", Direction";
+               if ( ! original.Contains( "jumped" ) ) Settings.MeleeAccuracyFactors += ", Jumped";
+               if ( ! original.Contains( "selfterrainmelee" ) ) Settings.MeleeAccuracyFactors += ", SelfTerrainMelee";
+            }
+         }
+         Settings.SettingVersion = 2_001_000;
+
          return settings;
       }
 
       private void MigrateColors ( string old, ref string now ) {
-         if ( old == null || now == null ) return;
+         if ( string.IsNullOrEmpty( old ) || now == null ) return;
          int pos = now.IndexOf( ',' );
          if ( pos < 0 ) return;
          now = old + now.Substring( pos );

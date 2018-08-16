@@ -16,7 +16,7 @@ namespace Sheepy.Reflector {
    public class Mirrorlect {
 
       public volatile Action<SourceLevels,string,object[]> Logger = ( level, msg, args ) => {
-         if ( level <= Warning ) Console.WriteLine( String.Format( msg, args ) );
+         if ( level <= Warning ) Console.WriteLine( string.Format( msg, args ) );
       };
 
       public volatile bool UseCache = true;
@@ -391,7 +391,7 @@ namespace Sheepy.Reflector {
 
       public string TakeTill ( params char[] chr ) {
          int pos = text.IndexOfAny( chr );
-         if ( pos == 0 ) return String.Empty;
+         if ( pos == 0 ) return string.Empty;
          return Consume( pos < 0 ? Length : pos );
       }
       public TextParser Take ( char chr ) {
