@@ -114,19 +114,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          List<AmmunitionBox> boxes = me.ammoBoxes.Where( e => e.CurrentAmmo > 0 ).ToList();
          if ( boxes.Count > 0 ) {
-            if ( me.ammoBoxes.Any( e => e.CurrentAmmo > e.AmmoCapacity / 2 ) ) {
-               //Log( $"Draw up to {needAmmo} ammo for {me.UIName} prioritising explosion control." );
-               // Step 1: Draw from bins that can be immediately reduced to half immediately or almost immediately.
-               ByExplosion = SortAmmoBoxByExplosion( mech, boxes, ByExplosion );
-               needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, needAmmo );
-               needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, needAmmo*2 );
-               // Step 2: Minimise explosion chance - CT > H > LT=RT > LA=RA > LL=RR
-               needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, Int32.MaxValue );
-               if ( needAmmo <= 0 ) return false;
+            if ( boxes.Count > 1 ) {
+               if ( me.ammoBoxes.Any( e => e.CurrentAmmo > e.AmmoCapacity / 2 ) ) {
+                  //Log( $"Draw up to {needAmmo} ammo for {me.UIName} prioritising explosion control." );
+                  // Step 1: Draw from bins that can be immediately reduced to half immediately or almost immediately.
+                  ByExplosion = SortAmmoBoxByExplosion( mech, boxes, ByExplosion );
+                  needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, needAmmo );
+                  needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, needAmmo*2 );
+                  // Step 2: Minimise explosion chance - CT > H > LT=RT > LA=RA > LL=RR
+                  needAmmo -= TryGetHalfAmmo( me, boxes, stackItemUID, needAmmo, Int32.MaxValue );
+                  if ( needAmmo <= 0 ) return false;
+               }
+               // Step 3: Spend ammo from weakest locations - LA=RA=LL=RR=LT=RT > CT > H
+               //Log( $"Draw up to {needAmmo} ammo for {me.UIName} prioritising lost risk." );
+               ByRisk = SortAmmoBoxByRisk( mech, boxes, ByRisk );
             }
-            // Step 3: Spend ammo from weakest locations - LA=RA=LL=RR=LT=RT > CT > H
-            //Log( $"Draw up to {needAmmo} ammo for {me.UIName} prioritising lost risk." );
-            ByRisk = SortAmmoBoxByRisk( mech, boxes, ByRisk );
             needAmmo -= TryGetAmmo( me, boxes, stackItemUID, needAmmo );
          }
          __result = me.ShotsWhenFired - needAmmo;
@@ -264,8 +266,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( maxDraw <= 0 ) return 0;
          int needAmmo = maxDraw;
          foreach ( AmmunitionBox box in boxes ) {
-            int spare = box.CurrentAmmo - Math.Ceiling( box.AmmoCapacity / 2f ) - 1;
-            if ( spare < 0 || spare > threshold ) continue;
+            int ammo = box.CurrentAmmo, spare = ammo - (int) Math.Ceiling( box.AmmoCapacity / 2f ) - 1;
+            if ( spare <= 0 || spare > threshold ) continue;
             needAmmo -= SubtractAmmo( box, me.uid, stackItemUID, Math.Min( needAmmo, spare ) );
             if ( needAmmo <= 0 ) return maxDraw;
          }
@@ -276,6 +278,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          int needAmmo = maxDraw;
          foreach ( AmmunitionBox box in boxes ) {
             int ammo = box.CurrentAmmo, drawn = Math.Min( needAmmo, ammo );
+            if ( ammo <= 0 ) continue;
             if ( ammo > drawn )
                SubtractAmmo( box, weapon.uid, stackItemUID, drawn );
             else
