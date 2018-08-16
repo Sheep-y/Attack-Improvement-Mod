@@ -12,7 +12,7 @@ CHANGE LOG
 * New: After-Jump to-hit modifier.
 * New: Show ammo count in paper doll tooltip.
 * New: Balanced ammo usage to reduce chance of ammo explosion.
-* New: Auto Jettsion Ammo when they are useless.
+* New: Auto Jettison Ammo when they are useless.
 * New: Skip crit roll on dead units.
 * New: Attack Log now logs Round and Phase.
 * Mod: New logging code that formats and write logs in the background and will not cause the game to lag.

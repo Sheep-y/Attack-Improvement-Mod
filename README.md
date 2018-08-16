@@ -32,12 +32,13 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Damaged Structure Display fixed and enhanced.
 * Grey Head Disease fixed.
 * Line of Fire fixed and stylised by type and direction.
-* Colouring facing ring and floating armour bar.
+* Coloured facing ring and floating armour bar.
 * Multi-Target Back Out fixed.
 * Make sure 0 HP means dead, never zombie.
 * Show ammo count in paper doll hover.
 * Show Heat and Stability Numbers, including cooldown overhead.
 * Show Base Hit Chance in accuracy modifier popup.
+* Post-Move To-Hit Penalties (Move + Jump/Sprint) are now factored in action preview.
 * (Optional) Show Mech Tonnage.
 * (Optional) Show Corrected Hit chance and Called Shot Chance.
 
@@ -47,15 +48,18 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Called Shots cluster around called mech location.
 * Precise Hit Distribution that improves SRM and MG called shot.
 * More Melee Modifiers, which fixes the absent of stood up penalty.
+* Directional Attack Bonus.
 * Allow Net Bonus Hit modifiers.
 * Allow Negative Height Modifier.
-* Remove Melee Positon Cap.
+* Remove Melee Position Cap.
 * Ammo Loader AI that balance ammo usage for less explosion.
-* Auto Jettsion useless ammo.
+* Auto Jettison useless ammo.
+* Skip Criting the Dead Mechs.
 
 ## Other Adjustables ##
 
 * Tabular Attack Log that can be opened directly in Excel.
+* Old Attack Log are archived and auto-deleted.
 * Adjustable Roll Correction Strength, default halved.
 * Adjustable Miss Streak Breaker.
 * Adjustable Base Hit Chance.
@@ -372,7 +376,22 @@ These settings can be changed in `settings.json`.
 
 
 
-## Hit Modifier Settings
+## Individual Modifier Settings
+
+**Directional Modifier**
+
+> Setting: `ToHitMechFromFront`  (, default 0)<br>
+> Setting: `ToHitMechFromSide`  (, default -1)<br>
+> Setting: `ToHitMechFromRear`  (, default -2)<br>
+> Setting: `ToHitVehicleFromFront`  (, default 0)<br>
+> Setting: `ToHitVehicleFromSide`  (, default -1)<br>
+> Setting: `ToHitVehicleFromRear`  (, default -2)<br>
+>
+> Determine the modifier for attacking from side or rear.
+> Effective only if "Ditection" is in the modifier lists.
+
+
+## Net Hit Modifier Settings
 
 **Allow Net Bonus Modifier**
 
@@ -504,6 +523,16 @@ These settings can be changed in `settings.json`.
 
 
 ## Hit Resolution Settings
+
+**Skip Criting the Dead Mech**
+
+> Setting: `SkipCritingDeadMech`  (true/false, default true)<br>
+>
+> When true, critical hits are not rolled for dead units.
+> This is mainly designed to prevent crit messages from flooding over cause of death.
+> It will also slightly increase salvaged components.
+
+
 
 **Balance Ammo Consumption**
 
