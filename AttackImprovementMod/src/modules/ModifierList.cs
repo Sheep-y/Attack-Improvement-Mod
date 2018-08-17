@@ -12,6 +12,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class ModifierList : BattleModModule {
 
       public override void CombatStartsOnce () {
+         if ( BattleMod.FoundMod( "io.github.guetler.CBTMovement" ) ) // Don't log to BTML unless we're sure CBTMovement is nonzero
+            Warn( "CBTMovement detected.  Both jump modifier will apply; please make sure either is zero. (AIM modfiier is factored in preview; CBT Movement does not.)" );
+
          if ( Settings.RangedAccuracyFactors != null || Settings.MeleeAccuracyFactors != null )
             Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );
 
