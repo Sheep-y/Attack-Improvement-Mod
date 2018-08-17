@@ -17,7 +17,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          LoadSettings( ref Settings, SanitizeSettings );
          NormaliseSettings();
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
-         Info();
 
          Add( new UserInterface(){ Name = "User Interface" } );
          Add( new LineOfSight(){ Name = "Line of Fire" } );
@@ -36,7 +35,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Info( "Detected Mods: " + Join( ", ", BattleMod.GetModList() ) );
       }
 
-      private ModSettings SanitizeSettings ( ModSettings settings ) {
+      private void SanitizeSettings ( ModSettings settings ) {
          // Switch log folder if specified
          if ( ! string.IsNullOrEmpty( settings.LogFolder ) && settings.LogFolder != LogDir ) {
             Log.Delete();
@@ -79,52 +78,51 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             settings.AttackLogLevel = "All";
 #pragma warning restore CS0618
 
-         RangeCheck( "LOSWidth", ref Settings.LOSWidth, 0, 10 );
-         RangeCheck( "LOSWidthBlocked", ref Settings.LOSWidthBlocked, 0, 10 );
-         RangeCheck( "LOSMarkerBlockedMultiplier", ref Settings.LOSMarkerBlockedMultiplier, 0, 10 );
-         RangeCheck( "ArcLineSegments", ref Settings.ArcLinePoints, 1, 1000 );
+         RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
+         RangeCheck( "LOSWidthBlocked", ref settings.LOSWidthBlocked, 0, 10 );
+         RangeCheck( "LOSMarkerBlockedMultiplier", ref settings.LOSMarkerBlockedMultiplier, 0, 10 );
+         RangeCheck( "ArcLineSegments", ref settings.ArcLinePoints, 1, 1000 );
 
-         RangeCheck( "MechCalledShotMultiplier", ref Settings.MechCalledShotMultiplier, 0, 1024 );
-         RangeCheck( "VehicleCalledShotMultiplier", ref Settings.VehicleCalledShotMultiplier, 0, 1024 );
+         RangeCheck( "MechCalledShotMultiplier", ref settings.MechCalledShotMultiplier, 0, 1024 );
+         RangeCheck( "VehicleCalledShotMultiplier", ref settings.VehicleCalledShotMultiplier, 0, 1024 );
 
-         RangeCheck( "BaseHitChanceModifier", ref Settings.BaseHitChanceModifier, -10, 10 );
-         RangeCheck( "MeleeHitChanceModifier", ref Settings.MeleeHitChanceModifier, -10, 10 );
-         RangeCheck( "ToHitMechFromFront", ref Settings.ToHitMechFromFront, -20, 20 );
-         RangeCheck( "ToHitMechFromSide" , ref Settings.ToHitMechFromSide , -20, 20 );
-         RangeCheck( "ToHitMechFromRear" , ref Settings.ToHitMechFromRear , -20, 20 );
-         RangeCheck( "ToHitVehicleFromFront", ref Settings.ToHitVehicleFromFront, -20, 20 );
-         RangeCheck( "ToHitVehicleFromSide" , ref Settings.ToHitVehicleFromSide , -20, 20 );
-         RangeCheck( "ToHitVehicleFromRear" , ref Settings.ToHitVehicleFromRear , -20, 20 );
-         RangeCheck( "ToHitSelfJumped", ref Settings.ToHitSelfJumped, -20, 20 );
+         RangeCheck( "BaseHitChanceModifier", ref settings.BaseHitChanceModifier, -10, 10 );
+         RangeCheck( "MeleeHitChanceModifier", ref settings.MeleeHitChanceModifier, -10, 10 );
+         RangeCheck( "ToHitMechFromFront", ref settings.ToHitMechFromFront, -20, 20 );
+         RangeCheck( "ToHitMechFromSide" , ref settings.ToHitMechFromSide , -20, 20 );
+         RangeCheck( "ToHitMechFromRear" , ref settings.ToHitMechFromRear , -20, 20 );
+         RangeCheck( "ToHitVehicleFromFront", ref settings.ToHitVehicleFromFront, -20, 20 );
+         RangeCheck( "ToHitVehicleFromSide" , ref settings.ToHitVehicleFromSide , -20, 20 );
+         RangeCheck( "ToHitVehicleFromRear" , ref settings.ToHitVehicleFromRear , -20, 20 );
+         RangeCheck( "ToHitSelfJumped", ref settings.ToHitSelfJumped, -20, 20 );
 
-         RangeCheck( "HitChanceStep", ref Settings.HitChanceStep, 0, 1 );
-         RangeCheck( "MaxFinalHitChance", ref Settings.MaxFinalHitChance, 0.1m, 1 );
-         RangeCheck( "MinFinalHitChance", ref Settings.MinFinalHitChance, 0, 1 );
+         RangeCheck( "HitChanceStep", ref settings.HitChanceStep, 0, 1 );
+         RangeCheck( "MaxFinalHitChance", ref settings.MaxFinalHitChance, 0.1m, 1 );
+         RangeCheck( "MinFinalHitChance", ref settings.MinFinalHitChance, 0, 1 );
 
-         RangeCheck( "RollCorrectionStrength", ref Settings.RollCorrectionStrength, 0, 0, 1.999m, 2 );
-         RangeCheck( "MissStreakBreakerThreshold", ref Settings.MissStreakBreakerThreshold, 0, 1 );
-         RangeCheck( "MissStreakBreakerDivider", ref Settings.MissStreakBreakerDivider, -100, 100 );
+         RangeCheck( "RollCorrectionStrength", ref settings.RollCorrectionStrength, 0, 0, 1.999m, 2 );
+         RangeCheck( "MissStreakBreakerThreshold", ref settings.MissStreakBreakerThreshold, 0, 1 );
+         RangeCheck( "MissStreakBreakerDivider", ref settings.MissStreakBreakerDivider, -100, 100 );
 
          // Is 1TB a reasonable limit of how many logs to keep?
-         RangeCheck( "AttackLogArchiveMaxMB", ref Settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
-
-         if ( Settings.SettingVersion == null ) Settings.SettingVersion = 0;
-         if ( Settings.SettingVersion < 2_001_000 ) { // Pre-2.1.0
-            Settings.AttackLogLevel = "All"; // Log is now enabled by default with new background logger
+         RangeCheck( "AttackLogArchiveMaxMB", ref settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
+         
+         if ( settings.SettingVersion == null ) settings.SettingVersion = 0;
+         if ( settings.SettingVersion < 2_001_000 ) { // Pre-2.1.0
+            Info( "Upgrading settings to 2.1" );
+            settings.AttackLogLevel = "All"; // Log is now enabled by default with new background logger
             string original = settings.MeleeAccuracyFactors.ToLower();
             if ( ! string.IsNullOrEmpty( original ) ) { // Update customised melee modifiers
-               if ( original.Contains( "selfwalked" ) ) Settings.MeleeAccuracyFactors = original.Replace( "selfwalked", "walked" );
-               if ( ! original.Contains( "direction" ) ) Settings.MeleeAccuracyFactors += ", Direction";
-               if ( ! original.Contains( "jumped" ) ) Settings.MeleeAccuracyFactors += ", Jumped";
-               if ( ! original.Contains( "selfterrainmelee" ) ) Settings.MeleeAccuracyFactors += ", SelfTerrainMelee";
+               if ( original.Contains( "selfwalked" ) ) settings.MeleeAccuracyFactors = original.Replace( "selfwalked", "walked" );
+               if ( ! original.Contains( "direction" ) ) settings.MeleeAccuracyFactors += ", Direction";
+               if ( ! original.Contains( "jumped" ) ) settings.MeleeAccuracyFactors += ", Jumped";
+               if ( ! original.Contains( "selfterrainmelee" ) ) settings.MeleeAccuracyFactors += ", SelfTerrainMelee";
             }
-            if ( Settings.DiminishingBonusPowerBase == 0.800000011920929m ) Settings.DiminishingBonusPowerBase = 0.8m;
-            if ( Settings.DiminishingPenaltyPowerBase == 0.800000011920929m ) Settings.DiminishingPenaltyPowerBase = 0.8m;
-            if ( Settings.DiminishingPenaltyPowerDivisor == 3.2999999523162842m ) Settings.DiminishingPenaltyPowerDivisor = 3.3m;
+            if ( (float) settings.DiminishingBonusPowerBase == 0.8f ) settings.DiminishingBonusPowerBase = 0.8m;
+            if ( (float) settings.DiminishingPenaltyPowerBase == 0.8f ) settings.DiminishingPenaltyPowerBase = 0.8m;
+            if ( (float) settings.DiminishingPenaltyPowerDivisor == 3.3f) settings.DiminishingPenaltyPowerDivisor = 3.3m;
          }
-         Settings.SettingVersion = 2_001_000;
-
-         return settings;
+         settings.SettingVersion = 2_001_000;
       }
 
       private void MigrateColors ( string old, ref string now ) {

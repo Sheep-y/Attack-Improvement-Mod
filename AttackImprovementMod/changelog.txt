@@ -19,6 +19,7 @@ CHANGE LOG
 * Mod: Attack logs are now automatically archived, with a total size limit also managed in the background.
 * Fix: Hit Location fix now modifies hit tables instead of totally overwriting GetHitLocation.
 * Fix: A few resources are now cleared on combat end to reduce memory leak.
+* Fix: Precise settings to kill imperfect conversion such as 0.800000011920929 and 3.2999999523162842.
 
 2018-07-27 AIM Version 2.0 for BATTLETECH 1.1.2
 

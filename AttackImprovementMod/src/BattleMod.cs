@@ -4,10 +4,12 @@ using Harmony;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using Sheepy.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -15,7 +17,6 @@ using UnityEngine;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod {
-   using Sheepy.Logging;
 
    public abstract class BattleMod : BattleModModule {
 
@@ -96,7 +97,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       // Load settings from settings.json, call SanitizeSettings, and create/overwrite it if the content is different.
-      protected virtual void LoadSettings <Settings> ( ref Settings settings, Func<Settings,Settings> sanitise = null ) {
+      protected virtual void LoadSettings <Settings> ( ref Settings settings, Action<Settings> sanitise = null ) {
          string file = BaseDir + "settings.json", fileText = string.Empty;
          Settings config = settings;
          if ( File.Exists( file ) ) TryRun( () => {
@@ -109,17 +110,21 @@ namespace Sheepy.BattleTechMod {
             config = JsonConvert.DeserializeObject<Settings>( fileText );
          } );
          if ( sanitise != null )
-            TryRun( () => config = sanitise( config ) );
+            TryRun( () => sanitise( config ) );
 
-         string sanitised = JsonConvert.SerializeObject( config, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
-         Log.Info( "WARNING: Do NOT change settings here. This is just a log." );
-         Log.Info( "Loaded Settings: " + sanitised );
-         Log.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
-         string commented = BattleJsonContract.FormatSettingJsonText( settings.GetType(), sanitised );
-         if ( commented != fileText ) { // Can be triggered by comment or field updates, not necessary sanitisation.
-            Log.Info( "Updating " + file );
-            SaveSettings( commented );
-         }
+         ThreadPool.QueueUserWorkItem( ( obj ) => {
+            string sanitised;
+            sanitised = JsonConvert.SerializeObject( obj, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
+            sanitised = Regex.Replace( sanitised, @"(?<=\d\.\d+)0+(?=,\r?\n)", "" );
+            Log.Info( "WARNING: Do NOT change settings here. This is just a log." );
+            Log.Info( "Loaded Settings: " + sanitised );
+            Log.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
+            string commented = BattleJsonContract.FormatSettingJsonText( obj.GetType(), sanitised );
+            if ( commented != fileText ) { // Can be triggered by comment or field updates, not necessary sanitisation.
+               Log.Info( "Background: Updating " + file );
+               SaveSettings( commented );
+            }
+         }, typeof( object ).GetMethod( "MemberwiseClone", NonPublic | Instance ).Invoke( config, null ) );
          settings = config;
       }
 
