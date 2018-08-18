@@ -54,7 +54,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( settings.LOSNoAttackColor != null && settings.LOSNoAttackColors == null)
             settings.LOSNoAttackColors = settings.LOSNoAttackColor;
          if ( settings.PersistentLog != null )
-            settings.AttackLogArchiveMaxMB = settings.PersistentLog == false ? 4 : 128;
+            settings.AttackLogArchiveMaxMB = settings.PersistentLog == false ? 4 : 64;
 
          settings.ShowUnderArmourDamage = settings.PaperDollDivulgeUnderskinDamage.GetValueOrDefault( settings.ShowUnderArmourDamage );
          settings.KillZeroHpLocation = settings.FixNonIntegerDamage.GetValueOrDefault( settings.KillZeroHpLocation );
@@ -110,7 +110,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( settings.SettingVersion == null ) settings.SettingVersion = 0;
          if ( settings.SettingVersion < 2_001_000 ) { // Pre-2.1.0
             Info( "Upgrading settings to 2.1" );
-            settings.AttackLogLevel = "All"; // Log is now enabled by default with new background logger
+            if ( settings.LOSMeleeColors == string.Empty) settings.LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00",
+            if ( settings.LOSClearColors == string.Empty) settings.LOSClearColors = "#F00,#0FF,#0FF,#0F8,#F00",
+            if ( settings.LOSIndirectColors == string.Empty) settings.LOSIndirectColors = "#F00,#0FF,#0FF,#0F8,#F00",
             string original = settings.MeleeAccuracyFactors.ToLower();
             if ( ! string.IsNullOrEmpty( original ) ) { // Update customised melee modifiers
                if ( original.Contains( "selfwalked" ) ) settings.MeleeAccuracyFactors = original.Replace( "selfwalked", "walked" );
@@ -121,12 +123,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( (float) settings.DiminishingBonusPowerBase == 0.8f ) settings.DiminishingBonusPowerBase = 0.8m;
             if ( (float) settings.DiminishingPenaltyPowerBase == 0.8f ) settings.DiminishingPenaltyPowerBase = 0.8m;
             if ( (float) settings.DiminishingPenaltyPowerDivisor == 3.3f) settings.DiminishingPenaltyPowerDivisor = 3.3m;
+            settings.AttackLogLevel = "All"; // Log is now enabled by default with new background logger
+            settings.SettingVersion = 2_001_000;
          }
-         settings.SettingVersion = 2_001_000;
       }
 
       private void MigrateColors ( string old, ref string now ) {
-         if ( string.IsNullOrEmpty( old ) || now == null ) return;
+         if ( old == null ) return;
+         if ( old == string.Empty ) now = "";
+         if ( string.IsNullOrEmpty( now ) ) return;
          int pos = now.IndexOf( ',' );
          if ( pos < 0 ) return;
          now = old + now.Substring( pos );
