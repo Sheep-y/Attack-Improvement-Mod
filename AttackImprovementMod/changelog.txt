@@ -1,6 +1,6 @@
 CHANGE LOG
 
-??? AIM Version 2.1 for BATTLETECH 1.1.2
+2018-08-18 AIM Version 2.1 for BATTLETECH 1.1.2
 
 * Big: Remove support code for game version 1.1.1 and before.
 * New: Change Line of Fire colours by attack direction.
