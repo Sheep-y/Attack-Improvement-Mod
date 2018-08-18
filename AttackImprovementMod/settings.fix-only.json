@@ -9,6 +9,10 @@
 
   "FixMultiTargetBackout": true,
 
+  /* Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game. */
+
+  "FixGreyHeadDisease": true,
+
   /* Fix the bug that rear paper doll is incorrectly showing front structure.  Default true. */
 
   "FixPaperDollRearStructure": true,
@@ -29,19 +33,30 @@
 
   "FixLosPreviewHeight": true,
 
+  /* Show ammo count in the list of components when you mouseover the paper doll.  Default true for friends. */
+
+  "ShowAmmoInTooltip": false,
+  "ShowEnemyAmmoInTooltip": false,
+
+  /* Set armour colour of floating bar of Player / Enemy / Ally.  Default "cyan" for player, "teal" for ally.  Set to empty to not change. */
+
+  "FloatingArmorColourPlayer": "",
+  "FloatingArmorColourEnemy": "",
+  "FloatingArmorColourAlly": "",
+
   //
   // Line of Sight
   //
 
   /* Make lines wider or thinner.  Default 2 and 1.5 times of game default.  Set to 0 to not mess with it. */
 
-  "LOSWidth": 1,
+  "LOSWidth": 1.0,
   "LOSWidthBlocked": 0.75,
 
   /* Make obstruction marker bigger or smaller by multiplying its height and width.  Default 1.5.
    * Set to 1 to use game default, or 0 to hide the marker. */
 
-  "LOSMarkerBlockedMultiplier": 1,
+  "LOSMarkerBlockedMultiplier": 1.0,
 
   /* Controls whether indirect attack lines / can't attack lines are dotted.  Default both true. */
 
@@ -56,18 +71,24 @@
   "LOSBlockedPostDotted": false,
 
   /* Change fire line colour (html syntax). "#FF0000" is red, "#00FF00" is green etc.  Set to empty to leave alone.
-   * Default "#D0F" for blocked pre, "#C8E" for blocked post, and empty for the rest.  Supports RGB and RGBA. */
+   * The colour orders are Front, Left, Right, Back, Prone.  Set to empty string to use game default. */
 
-  "LOSMeleeColor": "",
-  "LOSClearColor": "",
-  "LOSBlockedPreColor": "",
-  "LOSBlockedPostColor": "",
-  "LOSIndirectColor": "",
-  "LOSNoAttackColor": "",
+  "LOSMeleeColors": "",
+  "LOSClearColors": "",
+  "LOSBlockedPreColors": "",
+  "LOSBlockedPostColors": "",
+  "LOSIndirectColors": "",
+  "LOSNoAttackColors": "",
 
   /* Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve. */
 
   "ArcLinePoints": 18,
+
+  /* Change marker colour of the facing indicator. Colorus are for Front, Left, Right, Back, Prone. */
+
+  "FacingMarkerPlayerColors": "",
+  "FacingMarkerEnemyColors": "",
+  "FacingMarkerTargetColors": "",
 
   //
   // Called Shots
@@ -78,8 +99,7 @@
   "FixVehicleCalledShot": true,
 
   /* Did you know you can called shot the head of headshot immune boss?
-   * You can do that before any headshot immune unit has been attacked (not necessary an enemy).  And, surprise, it won't have any effect!
-   * Default true.  Disable to give yourself the false hope of headshoting the boss, provided FixGreyHeadDisease is true. */
+   * You can do that before any headshot immune unit has been attacked.  But it won't have any effect.  Default true. */
 
   "FixBossHeadCalledShotDisplay": true,
 
@@ -90,12 +110,12 @@
   /* Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.
    * Default is 0.33 to counter the effect of CalledShotClusterStrength. */
 
-  "MechCalledShotMultiplier": 1,
+  "MechCalledShotMultiplier": 1.0,
 
   /* Increase or decrease called shot multiplier against mech.  0 to disable called shot, 1 is original strength.
    * Default is 0.75 to balance vehicle's lower number of locations. */
 
-  "VehicleCalledShotMultiplier": 1,
+  "VehicleCalledShotMultiplier": 1.0,
 
   /* Override called shot percentage display of mech locations to show modded shot distribution. Default true. */
 
@@ -111,29 +131,46 @@
   "CalledChanceFormat": "",
 
   //
-  // To Hit Modifiers
+  // Individual To Hit Modifiers
+  //
+
+  /* Modify base weapon hit chance.  -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc.  Default 0. */
+
+  "BaseHitChanceModifier": 0.0,
+
+  /* Modify base melee hit chance.  -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc.  Default 0. */
+
+  "MeleeHitChanceModifier": 0.0,
+
+  /* Allow attacks from low ground to high ground to incur accuracy penalty.  Default true. */
+
+  "AllowLowElevationPenalty": false,
+
+  /* Directional to hit modifiers.  Effective only if "Direction" is in the modifier factor list(s).  Default front 0, side -1, back -2. */
+
+  "ToHitMechFromFront": 0,
+  "ToHitMechFromSide": 0,
+  "ToHitMechFromRear": 0,
+  "ToHitVehicleFromFront": 0,
+  "ToHitVehicleFromSide": 0,
+  "ToHitVehicleFromRear": 0,
+
+  /* Hit modifier after jumping, added on top of movement modifier (if any).  Effective only if "Jumped" is in the modifier factor list(s).  Default 0. */
+
+  "ToHitSelfJumped": 0,
+
+  //
+  // Net To Hit Modifiers
   //
 
   /* Allow bonus total modifier to increase hit chance.  Default true. */
 
   "AllowNetBonusModifier": false,
 
-  /* Allow attacks from low ground to high ground to incur accuracy penalty.  Default true. */
-
-  "AllowLowElevationPenalty": false,
-
   /* Step of hit chance.  Game default is 0.05, or 5%.  Hit chance is always rounded down.
    * Default 0 to remove hit chance step, so that odd gunnery stats can enjoy their +2.5% hit chance. */
 
   "HitChanceStep": 0.05,
-
-  /* Modify base weapon hit chance.  -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc.  Default 0. */
-
-  "BaseHitChanceModifier": 0,
-
-  /* Modify base melee hit chance.  -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc.  Default 0. */
-
-  "MeleeHitChanceModifier": 0,
 
   /* Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.
    * Note that 100% hit chance (max) may still miss if roll correction is enabled. */
@@ -159,6 +196,18 @@
   "DiminishingPenaltyPowerDivisor": 3.3,
   "DiminishingPenaltyMax": 32,
 
+  /* Specify set of hit modifiers of ranged attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.
+   * Default "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage".
+   * You can remove some options or replace SelfTerrain and TargetTerrain with SelfTerrainMelee and TargetTerrainMelee. */
+
+  "RangedAccuracyFactors": "",
+
+  /* Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.
+   * Default "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy".
+   * Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain. */
+
+  "MeleeAccuracyFactors": "DFA, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy",
+
   //
   // To Hit Rolls
   //
@@ -166,7 +215,7 @@
   /* Increase or decrease roll correction strength.  0 to disable roll correction, 1 is original strength, max is 2 for double strength.
    * Default is 0.5 for less correction. */
 
-  "RollCorrectionStrength": 1,
+  "RollCorrectionStrength": 1.0,
 
   /* Set miss streak breaker threshold.  Only attacks with hit rate above the threshold will add to streak breaker.
    * Default is 0.5, same as game default.  Set to 1 to disable miss streak breaker. */
@@ -179,9 +228,17 @@
 
   "MissStreakBreakerDivider": 5.0,
 
+  //
+  // Modifiers Preview
+  //
+
   /* Display base hit chance in weapon mouseover hint.  Default true. */
 
-  "ShowBaseHitchance": false,
+  "ShowBaseHitchance": true,
+
+  /* Apply self moved modifier during preview, before the move actually take place.  Default true. */
+
+  "FixSelfSpeedModifierPreview": true,
 
   /* Show corrected hit chance in weapon panel, instead of original (fake) hit chance, before streak breaker.  Default false. */
 
@@ -192,18 +249,6 @@
    * Default is "", which will use "{0:0.#}%" if HitChanceStep is 0 and DiminishingHitChanceModifier is false, otherwise leave alone. */
 
   "HitChanceFormat": "",
-
-  //
-  // Hit Locations
-  //
-
-  /* Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below. */
-
-  "FixHitDistribution": true,
-
-  /* Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game. */
-
-  "FixGreyHeadDisease": true,
 
   //
   // Melee and DFA
@@ -218,15 +263,27 @@
 
   "UnlockMeleePositioning": false,
 
-  /* Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order will be followed, and letter case does not matter.
-   * Default "DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfWalked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy".
-   * Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain. */
-
-  "MeleeAccuracyFactors": "DFA, SelfChassis, SelfHeat, SelfStoodUp, SelfWalked, Sprint, TargetEffect, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy",
-
   //
-  // Damage
+  // Hit Resolution
   //
+
+  /* Skip critical checks if target is dead.  Default true. */
+
+  "SkipCritingDeadMech": false,
+
+  /* Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends. */
+
+  "BalanceAmmoConsumption": false,
+  "BalanceEnemyAmmoConsumption": false,
+
+  /* When an ammo is useless, such as because the weapon is destroyed, eject the ammo at end of turn if not prone.  Default true for friends. */
+
+  "AutoJettisonAmmo": false,
+  "AutoJettisonEnemyAmmo": false,
+
+  /* Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below. */
+
+  "FixHitDistribution": true,
 
   /* If a location would become a zombie part with zero hp, make sure it is destroyed instead. Default true. */
 
@@ -240,17 +297,21 @@
    * Setting can be "None", "Attack", "Shot", "Location", "Damage", "Critical", or "All", from simplest to heaviest.  Default "None".
    * "All" is currently same as "Critical", but more levels may be added in future.  Letter case does not matter. */
 
-  "AttackLogLevel": "None",
+  "AttackLogLevel": "All",
 
-   /* Format of attack log.  Can be "csv", "tsv", or "txt" (same as tsv). Default "csv". */
+  /* Format of attack log.  Can be "csv", "tsv", or "txt" (same as tsv). Default "csv". */
 
   "AttackLogFormat": "csv",
 
-  /* If true, don't clear attack log when the game launches. */
+  /* How many old attack log to keep.  Logs are archived on game launch, if attack log is enabled.Default is 4 for 4MB.  Set to 0 to not keep any old logs. */
 
-  "PersistentLog": false,
+  "AttackLogArchiveMaxMB": 4,
 
   /* Location of mod log and roll log.  Default is "" to put them in mod folder.  Relative path would be relative to BATTLETECH exe. */
 
-  "LogFolder": ""
+  "LogFolder": "",
+
+  /* Used to determine which settings should be updated and how.  Please do not change. */
+
+  "SettingVersion": 2001000
 }
