@@ -157,6 +157,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NullIfEmpty( ref Settings.CalledChanceFormat );
          NullIfEmpty( ref Settings.HitChanceFormat );
 
+         NullIfEmpty( ref Settings.RangedAccuracyFactors );
          NullIfEmpty( ref Settings.MeleeAccuracyFactors );
          NullIfEmpty( ref Settings.AttackLogLevel );
       }
