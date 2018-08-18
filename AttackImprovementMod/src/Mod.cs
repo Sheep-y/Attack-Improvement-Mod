@@ -110,9 +110,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( settings.SettingVersion == null ) settings.SettingVersion = 0;
          if ( settings.SettingVersion < 2_001_000 ) { // Pre-2.1.0
             Info( "Upgrading settings to 2.1" );
-            if ( settings.LOSMeleeColors == string.Empty) settings.LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00",
-            if ( settings.LOSClearColors == string.Empty) settings.LOSClearColors = "#F00,#0FF,#0FF,#0F8,#F00",
-            if ( settings.LOSIndirectColors == string.Empty) settings.LOSIndirectColors = "#F00,#0FF,#0FF,#0F8,#F00",
+            if ( settings.LOSMeleeColors == string.Empty) settings.LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00";
+            if ( settings.LOSClearColors == string.Empty) settings.LOSClearColors = "#F00,#0FF,#0FF,#0F8,#F00";
+            if ( settings.LOSIndirectColors == string.Empty) settings.LOSIndirectColors = "#F00,#0FF,#0FF,#0F8,#F00";
             string original = settings.MeleeAccuracyFactors.ToLower();
             if ( ! string.IsNullOrEmpty( original ) ) { // Update customised melee modifiers
                if ( original.Contains( "selfwalked" ) ) settings.MeleeAccuracyFactors = original.Replace( "selfwalked", "walked" );

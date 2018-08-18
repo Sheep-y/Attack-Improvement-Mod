@@ -89,15 +89,17 @@ When the mod is first loaded by the game, it will try to read settings.json and 
 Some configurations are bundled with the mod.  You may copy or rename a setting to `settings.json` to apply it.
 
 * `settings.default.json` - Out of box default.
-* `settings.spartan.json` - Enable diminishing modifier, more melee modifiers, more info display, and disables roll correction and streak breaker.
-* `settings.fix-only.json` - Only enable game fixes for an enhanced vanilla experience.  No clustered called shot or hit chance stepping unlock.
-* `settings.log-only.json` - Disable all features except attack log, which is enabled in full.
+* `settings.spartan.json` - Enable diminishing modifier, more melee modifiers, more info display, enemy ammo balancing and jettison, and disables roll correction and streak breaker.
+* `settings.fix-only.json` - Only enable game fixes for a bug-free vanilla experience.  Enhancements need to be enabled manually.
+* `settings.log-only.json` - Disable all features except attack log, which is also enabled in other presets but this has a higher archive cap.
 
-Note that `settings.json` is auto-managed.  Old settings will be upgraded and removed, out of range settings will be corrected, and the formats and comments are fixed.  You can only change setting values, which may be written back to the file in a standard computerised form.
+Note that `settings.json` is auto-managed.  Old settings will be upgraded and removed, out of range settings will be corrected, and the formats and comments are fixed.  You can only change setting values.
 
-Unlike many simpler mods, this mod is designed to run as fast as it can be, so don't worry about performance.  Disabled features won't slow down the game and does not modify any code.
+Unlike many simpler mods, this mod is designed to run as fast as it can be, so don't worry about performance.
+Disabled features won't slow down the game and does not modify any code, and normally slow features are usually cached or optimised.
 
-Because of high number of features and flexibility, bugs may be found.  Please report them on [GitHub](https://github.com/Sheep-y/Attack-Improvement-Mod/issues) or [Nexus](https://www.nexusmods.com/battletech/mods/242?tab=bugs).
+Because of high number of features and flexibility, bugs may slip through tests.
+Please report them on [GitHub](https://github.com/Sheep-y/Attack-Improvement-Mod/issues) or [Nexus](https://www.nexusmods.com/battletech/mods/242?tab=bugs).
 
 
 # Settings
