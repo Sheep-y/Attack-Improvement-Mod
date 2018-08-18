@@ -30,7 +30,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 </script>
 <body>
 
-<h1 id="aimattackimprovementmod21development">AIM - Attack Improvement Mod 2.1 Development</h1>
+<h1 id="aimattackimprovementmod21development">AIM - Attack Improvement Mod 2.1 </h1>
 
 <p>For BATTLETECH 1.1.2</p>
 
@@ -53,9 +53,13 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 <li><a href="#meleeanddfasettings">Melee and DFA Settings</a></li>
 
-<li><a href="#hitmodifiersettings">Hit Modifier Settings</a></li>
+<li><a href="#individualmodifiersettings">Individual Modifier Settings</a></li>
+
+<li><a href="#nethitmodifiersettings">Net Hit Modifier Settings</a></li>
 
 <li><a href="#hitrollsettings">Hit Roll Settings</a></li>
+
+<li><a href="#hitchancepreviewsettings">Hit Chance Preview Settings</a></li>
 
 <li><a href="#hitresolutionsettings">Hit Resolution Settings</a></li>
 
@@ -67,6 +71,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <li><a href="#thestoryofaim">The Story of AIM</a></li>
 
 <li><a href="#learntomod">Learn to Mod</a></li>
+
+<li><a href="#credits">Credits</a></li>
 </ul>
 
 <p>AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as fixing vehicle called shot, improves targeting lines, tune down roll correction, show heat and stability numbers, and a detailed attack log.  The default settings aims to not deviate too far from vanilla.</p>
@@ -86,15 +92,21 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 <li>Grey Head Disease fixed.</li>
 
-<li>Line of Fire fixed and stylised.</li>
+<li>Line of Fire fixed and stylised by type and direction.</li>
+
+<li>Coloured facing ring and floating armour bar.</li>
 
 <li>Multi-Target Back Out fixed.</li>
 
 <li>Make sure 0 HP means dead, never zombie.</li>
 
-<li>Show Heat and Stability Numbers, including cooldown overhead.</li>
+<li>Show Ammo Count in paper doll hover.</li>
+
+<li>Show Heat and Stability Numbers.</li>
 
 <li>Show Base Hit Chance in accuracy modifier popup.</li>
+
+<li>Post-Move To-Hit Penalties (default none) factored in action preview.</li>
 
 <li>(Optional) Show Mech Tonnage.</li>
 
@@ -110,19 +122,29 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 <li>Precise Hit Distribution that improves SRM and MG called shot.</li>
 
-<li>More Melee Modifiers, which fixes the absent of stood up penalty.</li>
+<li>More Melee Modifiers, and fixes the absent of stood up penalty.</li>
+
+<li>Directional Attack Bonus.</li>
 
 <li>Allow Net Bonus Hit modifiers.</li>
 
 <li>Allow Negative Height Modifier.</li>
 
-<li>Remove Melee Positon Cap.</li>
+<li>Remove Melee Position Cap.</li>
+
+<li>Ammo Loader AI that balance ammo usage for less explosion.</li>
+
+<li>Auto Jettison useless ammo.</li>
+
+<li>Skip Criting the Dead Mechs.</li>
 </ul>
 
 <h2 id="otheradjustables">Other Adjustables</h2>
 
 <ul>
-<li>Tabular Attack Log that can be copied and pasted to Excel.</li>
+<li>Tabular Attack Log that can be opened directly in Excel.</li>
+
+<li>Old Attack Log are archived and auto-deleted.</li>
 
 <li>Adjustable Roll Correction Strength, default halved.</li>
 
@@ -171,11 +193,23 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
 
 <p>Unlike many simpler mods, this mod is designed to run as fast as it can be, so don't worry about performance.  Disabled features won't slow down the game and does not modify any code.</p>
 
+<p>Because of high number of features and flexibility, bugs may be found.  Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod/issues">GitHub</a> or <a href="https://www.nexusmods.com/battletech/mods/242?tab=bugs">Nexus</a>.</p>
+
 <h1 id="settings">Settings</h1>
 
 <p>These settings can be changed in <code>settings.json</code>.</p>
 
 <h2 id="userinterfacesettings">User Interface Settings</h2>
+
+<p><strong>Colour Floating Armour Bars</strong></p>
+
+<blockquote>
+  <p>Setting: <code>FloatingArmorColourPlayer</code>  (color string, default "cyan")<br>
+   Setting: <code>FloatingArmorColourEnemy</code>  (color string, default "")<br>
+   Setting: <code>FloatingArmorColourAlly</code>  (color string, default "teal")<br></p>
+  
+  <p>When non-empty, change colour of armour bars floating above field units, making it easier to tell friends from foes.</p>
+</blockquote>
 
 <p><strong>Fix Rear Structure Display</strong></p>
 
@@ -193,16 +227,6 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>Setting: <code>ShowUnderArmourDamage</code>  (true/false, default true)</p>
   
   <p>Not sure why the game didn't do this.  When set to true, armour of damaged location will have a striped pattern instead of solid.</p>
-</blockquote>
-
-<p><strong>Colour Floating Armor Bars</strong></p>
-
-<blockquote>
-  <p>Setting: <code>FloatingArmorColourPlayer</code>  (color string, default "cyan")<br>
-  Setting: <code>FloatingArmorColourEnemy</code>  (color string, default "")<br>
-  Setting: <code>FloatingArmorColourAlly</code>  (color string, default "teal")<br></p>
-
-  <p>When non-empty, change colour of armor bars floating above field units, making it easier to tell friends from foes.</p>
 </blockquote>
 
 <p><strong>Show Heat and Stability Numbers</strong></p>
@@ -256,7 +280,8 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   
   <p>Setting: <code>LOSWidthBlocked</code>  (0 to 10, default 1.5, game default 0.75)</p>
   
-  <p>Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.</p>
+  <p>Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
+  <br></p>
   
   <p>When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.</p>
 </blockquote>
@@ -273,18 +298,20 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   Setting: <code>LOSMeleeColors</code>  (default "")<br>
   Setting: <code>LOSClearColors</code>  (default "")<br>
   Setting: <code>LOSBlockedPreColors</code>   (default "#D0F")<br>
-  Setting: <code>LOSBlockedPostColore</code>  (default "#C8E")<br>
+  Setting: <code>LOSBlockedPostColors</code>  (default "#C8E")<br>
   Setting: <code>LOSIndirectColors</code>  (default "")<br>
-  Setting: <code>LOSNoAttackColors</code>  (default "")</p>
+  Setting: <code>LOSNoAttackColors</code>  (default "")<br></p>
   
   <p>Set the colour and style of various targeting lines.
   Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.</p>
   
   <p>Colours are either empty or in HTML hash syntax.  For example <code>"#F00"</code> = red, <code>"#0F0"</code> = green, <code>"#00F"</code> = blue, <code>"#FFF"</code> = white, <code>"#888"</code> = grey, <code>"#000"</code> = black.
   Four parts means RGBA, while three parts mean full opacity RGB.  Supports full and short form. e.g. #28B = #2288BB = #2288BBFF.</p>
-
-  <p>Colours and only colours can also vary by attack direction, separated by comma. The directions are Front, Left, Right, Rear, and Prone, in order. If less colours are specified than direction, the missing directions will use the last colour. For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.</p>
-
+  
+  <p>Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in order.
+  If less colours are specified than direction, the missing directions will use the last colour.
+  For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.</p>
+  
   <p>When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.</p>
 </blockquote>
 
@@ -294,8 +321,8 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>Setting: <code>FacingMarkerPlayerColors</code>  (default "#FFFF,#CCFF,#CCFF,#BFBF,#FFBF")<br>
   Setting: <code>FacingMarkerEnemyColors</code>  (default "#FFFF,#CCFF,#CCFF,#FBBF,#FFBF")<br>
   Setting: <code>FacingMarkerTargetColors</code>  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br></p>
-
-  <p>When non-empty, change the colours of each arc for friends, foes, and targetted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.</p>
+  
+  <p>When non-empty, change the colours of each arc for friends, foes, and targeted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.</p>
 </blockquote>
 
 <p><strong>Change Widths of Obstruction Marker</strong></p>
@@ -426,54 +453,7 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>When enabled, free player units from standing still when target is already in melee range.  Auto-disable to avoid conflict when MeleeMover is used.</p>
 </blockquote>
 
-<p><strong>Change Melee Modifiers</strong></p>
-
-<blockquote>
-  <p>Setting: <code>MeleeAccuracyFactors</code>  (comma separated value)</p>
-  
-  <p>A list of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order will be followed, and letter case does not matter.</p>
-  
-  <p>Since this feature will override both mouseover display and actual modifier calculation, this will fix the bug that SelfStoodUp is displayed in mouseover but not counted in modifier.</p>
-  
-  <p>Default is "DFA, Height, Inspired, SelfChassis, SelfHeat, SelfStoodUp, SelfWalked, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, WeaponAccuracy".</p>
-  
-  <p>Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, and TargetTerrain.</p>
-  
-  <p><strong>ArmMounted</strong> - Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle. <br>
-  <strong>DFA</strong> - Apply DFA penalty if attack is DFA. <br>
-  <strong>Height</strong> - Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position. <br>
-  <strong>Inspired</strong> - Apply inspired bonus. <br>
-  <strong>Obstruction</strong> - Apply obstructed penalty. <br>
-  <strong>Refire</strong> - Apply refire penalty.  Which should be 0 by default but can be changed in weapon data files. <br>
-  <strong>SelfChassis</strong> - Apply chassis modifier. <br>
-  <strong>SelfHeat</strong> - Apply overheat penalty. <br>
-  <strong>SelfStoodUp</strong> - Apply stood up penalty. <br>
-  <strong>SelfTerrain</strong> - Apply self terrain penalty as if this is a ranged attack. <br>
-  <strong>SelfWalked</strong> - Apply self walked penalty, default 0 but can be changed in game configuration file. <br>
-  <strong>SensorImpaired</strong> - Apply sensor impaired penalty. <br>
-  <strong>Sprint</strong> - Apply sprint penalty. <br>
-  <strong>TargetEffect</strong> - Apply target effect penalty such as gyro. <br>
-  <strong>TargetEvasion</strong> - Apply target evasion penalty. For melee, this ignores the WeaponCategoryIsAffectedByEvasive and WeaponIsAffectedByEvasive settings. By default, Melee attacks ignore up to 4 evasions. <br>
-  <strong>TargetProne</strong> - Apply target prone penalty. <br>
-  <strong>TargetShutdown</strong> - Apply target shutdown bonus. <br>
-  <strong>TargetSize</strong> - Apply target size penalty. <br>
-  <strong>TargetTerrain</strong> - Apply target terrain's modifier as if this is a ranged attack. <br>
-  <strong>TargetTerrainMelee</strong> - Apply target terrain's melee modifier. <br>
-  <strong>WeaponAccuracy</strong> - Apply weapon accuracy modifier. <br></p>
-</blockquote>
-
-<h2 id="hitmodifiersettings">Hit Modifier Settings</h2>
-
-<p><strong>Allow Net Bonus Modifier</strong></p>
-
-<blockquote>
-  <p>Setting: <code>AllowNetBonusModifier</code>  (true/false, default true)</p>
-  
-  <p>When set to true, total modifier of an attack can be a net bonus that increases the hit chance beyond the attacker's base hit chance (but still subjects to 95% cap unless lifted by the <code>MaxFinalHitChance</code> settings).
-  Game default is false.</p>
-  
-  <p>When the net modifier is a bonus, it will use the same handling as penalty but reversed: first 10 modifiers are ±5% each, and subsequence modifiers are ±2.5% each.</p>
-</blockquote>
+<h2 id="individualmodifiersettings">Individual Modifier Settings</h2>
 
 <p><strong>Allow Height Diff Penalty</strong></p>
 
@@ -492,6 +472,42 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   
   <p>Increase or decrease base hit chance of ranged/melee attacks.
   e.g. -0.05 to lower base accuracy by 5%, 0.1 to increase it 10%.</p>
+</blockquote>
+
+<p><strong>Directional Modifier</strong></p>
+
+<blockquote>
+  <p>Setting: <code>ToHitMechFromFront</code>  (-20 to 20, default 0)<br>
+  Setting: <code>ToHitMechFromSide</code>  (-20 to 20, default -1)<br>
+  Setting: <code>ToHitMechFromRear</code>  (-20 to 20, default -2)<br>
+  Setting: <code>ToHitVehicleFromFront</code>  (-20 to 20, default 0)<br>
+  Setting: <code>ToHitVehicleFromSide</code>  (-20 to 20, default -1)<br>
+  Setting: <code>ToHitVehicleFromRear</code>  (-20 to 20, default -2)<br></p>
+  
+  <p>Determine the modifier for attacking from side or rear.
+  Effective only if "Ditection" is in the modifier lists.</p>
+</blockquote>
+
+<p><strong>Jumped Modifier</strong></p>
+
+<blockquote>
+  <p>Settings: <code>ToHitSelfJumped</code> (-20 to 20, default 0)</p>
+  
+  <p>The game has self moved modifier and self sprint modifier in CombatGameConstants.json, but not self jumped modifier.
+  You may set it with this mod if you want to.</p>
+</blockquote>
+
+<h2 id="nethitmodifiersettings">Net Hit Modifier Settings</h2>
+
+<p><strong>Allow Net Bonus Modifier</strong></p>
+
+<blockquote>
+  <p>Setting: <code>AllowNetBonusModifier</code>  (true/false, default true)</p>
+  
+  <p>When set to true, total modifier of an attack can be a net bonus that increases the hit chance beyond the attacker's base hit chance (but still subjects to 95% cap unless lifted by the <code>MaxFinalHitChance</code> settings).
+  Game default is false.</p>
+  
+  <p>When the net modifier is a bonus, it will use the same handling as penalty but reversed: first 10 modifiers are ±5% each, and subsequence modifiers are ±2.5% each.</p>
 </blockquote>
 
 <p><strong>Unlock Modifier Stepping and Range</strong></p>
@@ -539,6 +555,54 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>The modifiers are pre-calculated to run faster.  These settings determine how many results are cached.  Modifiers beyond the max will be regarded as same as max.</p>
 </blockquote>
 
+<p><strong>Change Modifiers List</strong></p>
+
+<blockquote>
+  <p>Setting: <code>RangedAccuracyFactors</code>  (comma separated value)<br>
+  Setting: <code>MeleeAccuracyFactors</code>  (comma separated value)<br></p>
+  
+  <p>A list of hit modifiers of ranged / melee and DFA attacks.  Leave empty to keep unchanged.  Order and letter case does not matter.</p>
+  
+  <p>Since this feature will override both mouseover display and actual modifier calculation, this will fix the bug that SelfStoodUp is displayed in melee mouseover but not counted in melee modifier.</p>
+  
+  <p>Ranged default is "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage".
+  Melee default is "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy".</p>
+  
+  <p>Options:<br>
+  <strong>ArmMounted</strong> - (Ranged) Apply arm mounted modifier if weapon is mounted on an arm. (Melee) Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle. <br>
+  <strong>Direction</strong> - Apply bonus if attack is made from the target's side or rear. <br>
+  <strong>DFA</strong> - (Melee) Apply DFA penalty if attack is DFA. <br>
+  <strong>Height</strong> - (Ranged) Apply height modifier.  (Melee) Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position. <br>
+  <strong>Indirect</strong> - (Ranged) Apply indirect fire penalty. <br>
+  <strong>Inspired</strong> - Apply inspired bonus. <br>
+  <strong>Jumped</strong> - Apply jumped penalty after jump, if any. <br>
+  <strong>LocationDamage</strong> - (Ranged) Apply location damage penalty, if any. <br>
+  <strong>Obstruction</strong> - Apply obstructed penalty. <br>
+  <strong>Precision</strong> - (Ranged) Apply Precision Strike bonus. <br>
+  <strong>Range</strong> - (Ranged) Apply range penalty. <br>
+  <strong>Refire</strong> - Apply refire penalty.  (Melee) Should be 0 by default but can be changed in weapon data files. <br>
+  <strong>SelfChassis</strong> - (Melee) Apply chassis modifier. <br>
+  <strong>SelfHeat</strong> - Apply overheat penalty. <br>
+  <strong>SelfStoodUp</strong> - Apply stood up penalty. <br>
+  <strong>SelfTerrain</strong> - Apply self terrain penalty as if this is a ranged attack. <br>
+  <strong>SensorImpaired</strong> - Apply sensor impaired penalty. <br>
+  <strong>SensorLock</strong> - Apply sensor lock bonus. <br>
+  <strong>Sprint</strong> - Apply sprint penalty, if somehow you can attack after sprint. <br>
+  <strong>TargetEffect</strong> - Apply target effect penalty such as gyro. <br>
+  <strong>TargetEvasion</strong> - Apply target evasion penalty.  Melee attacks ignore up to 4 evasion by default. <br>
+  <strong>TargetProne</strong> - Apply target prone penalty. <br>
+  <strong>TargetShutdown</strong> - Apply target shutdown bonus. <br>
+  <strong>TargetSize</strong> - Apply target size penalty. <br>
+  <strong>TargetTerrain</strong> - Apply target terrain's ranged penalty. <br>
+  <strong>TargetTerrainMelee</strong> - Apply target terrain's melee penalty. <br>
+  <strong>Walked</strong> - Apply self walked penalty, default 0 but can be changed in game configuration file. <br>
+  <strong>WeaponAccuracy</strong> - Apply weapon accuracy, TTS, and mod bonus. <br>
+  <strong>WeaponDamage</strong> - (Ranged) Apply weapon damaged penalty.</p>
+  
+  <p>The modifier system is designed to be moddable.
+  Patch <code>ModifierList.GetCommonModifierFactor</code>, <code>ModifierList..GetRangedModifierFactor</code>, and/or <code>ModifierList.GetMeleeModifierFactor</code> to add new modifiers.</p>
+</blockquote>
+
 <h2 id="hitrollsettings">Hit Roll Settings</h2>
 
 <p><strong>Adjust Roll Correction</strong></p>
@@ -577,17 +641,16 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>Set this setting to zero or negative integer to replace it with a constant value.  For example -5 means each triggering miss adds 5% bonus, and -100 will make sure the next shot always hit.</p>
 </blockquote>
 
-<p><strong>Format Hit Chance</strong> (default "")</p>
+<h2 id="hitchancepreviewsettings">Hit Chance Preview Settings</h2>
 
 <blockquote>
-  <p>Setting: <code>HitChanceFormat</code>  (free string, default "")</p>
+  <p>Setting: <code>ShowBaseHitchance</code>  (true/false, default true)</p>
   
-  <p>Use Microsoft C# <a href="https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2008/0c899ak8(v=vs.90">String.Format</a> syntax to format weapon hit chances.</p>
+  <p>Show the mechwarrior's base hit chance in modifier tooltip.</p>
   
-  <p>Set to "{0:0.0}%" to always show one decimal, or "{0:0.00}%" for two decimals.
-  When empty AND HitChanceStep is 0, will use "{0:0.#}%" to optionally show hit chance to one decimal point.</p>
+  <p>Setting: <code>FixSelfSpeedModifierPreview</code>  (true/false, default true)</p>
   
-  <p>Replace the old "ShowDecimalHitChance" setting in mod version 1.0.</p>
+  <p>If moved/sprint/jumped modifier is non-zero, this mod can patch the game to factor them in during action planning.</p>
 </blockquote>
 
 <p>(Advanced) <strong>Show Corrected Hit Chance</strong></p>
@@ -602,7 +665,30 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   If the "Real Hit Chance" mod is detected, this settings will be switched to on and overrides that mods.</p>
 </blockquote>
 
+<p><strong>Format Hit Chance</strong> (default "")</p>
+
+<blockquote>
+  <p>Setting: <code>HitChanceFormat</code>  (free string, default "")</p>
+  
+  <p>Use Microsoft C# <a href="https://docs.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-2008/0c899ak8(v=vs.90">String.Format</a> syntax to format weapon hit chances.</p>
+  
+  <p>Set to "{0:0.0}%" to always show one decimal, or "{0:0.00}%" for two decimals.
+  When empty AND HitChanceStep is 0, will use "{0:0.#}%" to optionally show hit chance to one decimal point.</p>
+  
+  <p>Replace the old "ShowDecimalHitChance" setting in mod version 1.0.</p>
+</blockquote>
+
 <h2 id="hitresolutionsettings">Hit Resolution Settings</h2>
+
+<p><strong>Skip Criting the Dead Mech</strong></p>
+
+<blockquote>
+  <p>Setting: <code>SkipCritingDeadMech</code>  (true/false, default true)<br></p>
+  
+  <p>When true, critical hits are not rolled for dead units.
+  This is mainly designed to prevent crit messages from flooding over cause of death.
+  It will also slightly increase salvaged components.</p>
+</blockquote>
 
 <p><strong>Balance Ammo Consumption</strong></p>
 
@@ -613,7 +699,7 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>When set to true, mechs will draw ammo in an intelligent way to minimise chance of ammo explosion.
   After that is done, the AI will then minimise risk of losing ammo to crits and destroyed locations.</p>
   
-  <p>The AI is pretty smart, but it can't shift ammo, so spreading ammo around will help it does its job faster.</p>
+  <p>The AI is pretty smart, but it can't shift ammo, so manually spreading ammo around can help it does its job.</p>
 </blockquote>
 
 <p><strong>Auto Jettison Ammo</strong></p>
@@ -622,11 +708,12 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   <p>Setting: <code>AutoJettisonAmmo</code>  (true/false, default true)<br>
   Setting: <code>AutoJettisonEnemyAmmo</code>  (true/false, default false)</p>
   
-  <p>When set to true, mechs will jettison useless ammo at end of its turn, if the mech has not moved, is not prone, and is not shutdown.
+  <p>When set to true, mechs will jettison useless ammo at end of its turn,
+  provided it has not moved, is not prone, and is not shutdown.
   (The jettison doors are at the rear, so no prone jettisons.)</p>
   
-  <p>This can happen if all weapons that use that kind of ammo is destroyed mid-fight,
-  or the mech could be deployed with new ammo installed but not the weapon yet.
+  <p>This can happens if all weapons that use that kind of ammo are destroyed mid-fight,
+  or if the mech was deployed with new ammo installed but not the weapon yet.
   Jettisoning the ammo will make sure they won't explode when hit.</p>
 </blockquote>
 
@@ -658,7 +745,7 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
 <p>(Advanced) <strong>Attack Log</strong></p>
 
 <blockquote>
-  <p>Setting: <code>AttackLogLevel</code>  ("None", "Attack", "Shot", "Location", "Damage", "Critical", or "All", default "None")</p>
+  <p>Setting: <code>AttackLogLevel</code>  ("None", "Attack", "Shot", "Location", "Damage", "Critical", or "All", default "All")</p>
   
   <p>When not None, the mod will writes to an attack log in the mod's folder, called Log_Attack.txt.</p>
   
@@ -679,6 +766,8 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   Crit is determined in yet another phase, so the log code is <em>very fun</em> to write.</p>
   
   <p><strong>All</strong> - same as Critical for now.  More info may be added in the future, though I am not sure I wouldn't go crazy.  Would you believe logging is the most complicated feature of this mod?</p>
+  
+  <p>Default AttackLogLevel was None in mod version 2.0, but mod 2.1 switched to a multi-thread logging system so it now defaults to All.</p>
 </blockquote>
 
 <p>(Advanced) <strong>Log Options</strong></p>
@@ -691,15 +780,14 @@ Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old 
   
   <p>Setting: <code>AttackLogArchiveMaxMB</code>  (0 to 1 million, default 4)</p>
   
-  <p>When the game first enter combat every launch, old attack log is archived through rename, then log exceeding this size limit will be deleted in the background.
+  <p>When the game first enter combat every launch, old attack log is archived through rename.
+  Then log exceeding this size limit will be deleted in the background.
   <br></p>
   
   <p>Setting: <code>LogFolder</code>  (string, default "")</p>
   
-  <p>Set path of mod log and attack log.  Default is empty which will use mod folder.  If relative, path would be relative to BATTLETECH exe.</p>
+  <p>Set path of mod log and attack log.  Default is empty which will use mod folder.</p>
 </blockquote>
-
-
 
 <h1 id="compatibilities">Compatibilities</h1>
 
@@ -719,11 +807,12 @@ AIM will enable corrected hit chance display and overrides this mod, since it do
 <p><strong><a href="https://www.nexusmods.com/battletech/mods/100">True RNG Hit Rolls</a></strong>
 AIM will disable its own adjustable roll correction and miss streak breaker.</p>
 
+<p><strong><a href="https://github.com/McFistyBuns/CBTMovement">CBT Movement</a></strong>
+AIM will log a warning that jumping modifier feature is duplicated and one of them should be zero.</p>
+
 <p>The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.</p>
 
 <p>You can also check the mod log (<code>BATTLETECH\Mods\AttackImprovementMod\Log_AIMAttackImprovementMod.log</code>), BTML log (<code>BATTLETECH\Mods\*.log</code>), and the game's own log (<code>BATTLETECH\</code>).  The keyword is "Exception".  It is almost always followed by lots of code.  If you see <em>any</em> exception with "AttackImprovementMod" in the code below it, please <a href="https://github.com/Sheep-y/Attack-Improvement-Mod/issues/new">file an issue</a> and attach the log.</p>
-
-
 
 <h1 id="thestoryofaim">The Story of AIM</h1>
 

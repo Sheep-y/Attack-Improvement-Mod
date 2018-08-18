@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 2.1 Development #
+# AIM - Attack Improvement Mod 2.1 #
 For BATTLETECH 1.1.2
 
 - [Features Overview](#features-overview)
@@ -96,6 +96,9 @@ Some configurations are bundled with the mod.  You may copy or rename a setting 
 Note that `settings.json` is auto-managed.  Old settings will be upgraded and removed, out of range settings will be corrected, and the formats and comments are fixed.  You can only change setting values, which may be written back to the file in a standard computerised form.
 
 Unlike many simpler mods, this mod is designed to run as fast as it can be, so don't worry about performance.  Disabled features won't slow down the game and does not modify any code.
+
+Because of high number of features and flexibility, bugs may be found.  Please report them on [GitHub](https://github.com/Sheep-y/Attack-Improvement-Mod/issues) or [Nexus](https://www.nexusmods.com/battletech/mods/242?tab=bugs).
+
 
 # Settings
 
@@ -685,6 +688,9 @@ AIM will enable corrected hit chance display and overrides this mod, since it do
 
 **[True RNG Hit Rolls](https://www.nexusmods.com/battletech/mods/100)**
 AIM will disable its own adjustable roll correction and miss streak breaker.
+
+**[CBT Movement](https://github.com/McFistyBuns/CBTMovement)**
+AIM will log a warning that jumping modifier feature is duplicated and one of them should be zero.
 
 The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.
 
