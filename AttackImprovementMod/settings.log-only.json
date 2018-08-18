@@ -203,7 +203,7 @@
   "RangedAccuracyFactors": "",
 
   /* Specify set of hit modifiers of melee and DFA attacks. Leave empty to keep it unchanged.  Order and letter case does not matter.
-   * Default "DFA, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy".
+   * Default "DFA, Direction, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy".
    * Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain. */
 
   "MeleeAccuracyFactors": "",
@@ -305,7 +305,7 @@
 
   /* How many old attack log to keep.  Logs are archived on game launch, if attack log is enabled.Default is 4 for 4MB.  Set to 0 to not keep any old logs. */
 
-  "AttackLogArchiveMaxMB": 64,
+  "AttackLogArchiveMaxMB": 4,
 
   /* Location of mod log and roll log.  Default is "" to put them in mod folder.  Relative path would be relative to BATTLETECH exe. */
 
