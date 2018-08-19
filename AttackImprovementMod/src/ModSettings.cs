@@ -207,8 +207,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Other options are ArmMounted, Obstruction, Refire, SelfTerrain, SensorImpaired, TargetTerrain." } ) ]
       public string MeleeAccuracyFactors = "DFA, Direction, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
 
-
-
       //
       [ JsonSection( "To Hit Rolls" ) ]
       //
@@ -247,6 +245,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Game default is \"{0:0}%\". Use \"{0:0.0}%\" to *always* show one decimal, or \"{0:0.#}%\" for *up to* one decimal.",
         "Default is \"\", which will use \"{0:0.#}%\" if HitChanceStep is 0 and DiminishingHitChanceModifier is false, otherwise leave alone." } ) ]
       public string HitChanceFormat = "";
+
       //
       [ JsonSection( "Melee and DFA" ) ]
       //
@@ -267,6 +266,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       /* [ JsonComment( "Allow DFA called shot on vehicles." ) ]
       public bool AllowDFACalledShotVehicle = true;
       /**/
+
 
       //
       [ JsonSection( "Hit Resolution" ) ]
