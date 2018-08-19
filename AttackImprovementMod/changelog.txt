@@ -4,11 +4,11 @@ CHANGE LOG
 
 * Big: Remove support code for game version 1.1.1 and before.
 * New: Change Line of Fire colours by attack direction.
-* New: Change arc colour of facing indicators.
-* New: Change color of floating armor bar.
-* New: Customise list and order of ranged attack modifiers.
-* New: Directional attack modifier - get accuracy bonus for attacking from side or rear.
-* New: Factor in self movement accuracy modifier during movement plan.
+* New: Change Facing Indicators colours.
+* New: Change Floating Armor Bar colours.
+* New: Customise list and order of ranged attack modifiers. (melee modifiers already done in 2.0)
+* New: Directional Attack Modifier - get accuracy bonus for attacking from side or rear.
+* New: Factor in self movement accuracy modifier during action plan.
 * New: After-Jump to-hit modifier.
 * New: Show ammo count in paper doll tooltip.
 * New: Balanced ammo usage to reduce chance of ammo explosion.
