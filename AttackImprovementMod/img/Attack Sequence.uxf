@@ -5,7 +5,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>310</x>
-      <y>550</y>
+      <y>660</y>
       <w>150</w>
       <h>30</h>
     </coordinates>
@@ -16,7 +16,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>260</x>
-      <y>610</y>
+      <y>720</y>
       <w>240</w>
       <h>30</h>
     </coordinates>
@@ -27,7 +27,7 @@
     <id>UMLNote</id>
     <coordinates>
       <x>60</x>
-      <y>500</y>
+      <y>610</y>
       <w>200</w>
       <h>80</h>
     </coordinates>
@@ -42,7 +42,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>90</x>
-      <y>610</y>
+      <y>720</y>
       <w>160</w>
       <h>30</h>
     </coordinates>
@@ -56,7 +56,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>50</x>
-      <y>10</y>
+      <y>120</y>
       <w>270</w>
       <h>30</h>
     </coordinates>
@@ -67,7 +67,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>10</x>
-      <y>50</y>
+      <y>160</y>
       <w>270</w>
       <h>30</h>
     </coordinates>
@@ -78,7 +78,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>350</x>
-      <y>50</y>
+      <y>160</y>
       <w>270</w>
       <h>30</h>
     </coordinates>
@@ -89,7 +89,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>380</x>
-      <y>10</y>
+      <y>120</y>
       <w>280</w>
       <h>30</h>
     </coordinates>
@@ -100,7 +100,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>510</x>
-      <y>110</y>
+      <y>220</y>
       <w>160</w>
       <h>30</h>
     </coordinates>
@@ -111,7 +111,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>40</x>
-      <y>110</y>
+      <y>220</y>
       <w>180</w>
       <h>30</h>
     </coordinates>
@@ -122,7 +122,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>270</x>
-      <y>110</y>
+      <y>220</y>
       <w>180</w>
       <h>30</h>
     </coordinates>
@@ -133,7 +133,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>290</x>
-      <y>190</y>
+      <y>300</y>
       <w>140</w>
       <h>30</h>
     </coordinates>
@@ -144,7 +144,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>290</x>
-      <y>30</y>
+      <y>140</y>
       <w>30</w>
       <h>100</h>
     </coordinates>
@@ -155,7 +155,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>120</x>
-      <y>70</y>
+      <y>180</y>
       <w>30</w>
       <h>60</h>
     </coordinates>
@@ -166,7 +166,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>530</x>
-      <y>70</y>
+      <y>180</y>
       <w>30</w>
       <h>60</h>
     </coordinates>
@@ -177,7 +177,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>630</x>
-      <y>30</y>
+      <y>140</y>
       <w>30</w>
       <h>100</h>
     </coordinates>
@@ -188,7 +188,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>350</x>
-      <y>130</y>
+      <y>240</y>
       <w>30</w>
       <h>80</h>
     </coordinates>
@@ -199,7 +199,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>350</x>
-      <y>130</y>
+      <y>240</y>
       <w>260</w>
       <h>50</h>
     </coordinates>
@@ -210,7 +210,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>120</x>
-      <y>130</y>
+      <y>240</y>
       <w>260</w>
       <h>50</h>
     </coordinates>
@@ -221,7 +221,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>480</x>
-      <y>350</y>
+      <y>460</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -232,7 +232,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>80</x>
-      <y>270</y>
+      <y>380</y>
       <w>180</w>
       <h>30</h>
     </coordinates>
@@ -243,7 +243,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>270</x>
-      <y>270</y>
+      <y>380</y>
       <w>180</w>
       <h>30</h>
     </coordinates>
@@ -254,7 +254,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>120</x>
-      <y>350</y>
+      <y>460</y>
       <w>290</w>
       <h>30</h>
     </coordinates>
@@ -265,7 +265,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>350</x>
-      <y>210</y>
+      <y>320</y>
       <w>30</w>
       <h>80</h>
     </coordinates>
@@ -276,7 +276,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>160</x>
-      <y>230</y>
+      <y>340</y>
       <w>220</w>
       <h>60</h>
     </coordinates>
@@ -287,7 +287,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>350</x>
-      <y>230</y>
+      <y>340</y>
       <w>240</w>
       <h>140</h>
     </coordinates>
@@ -298,7 +298,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>160</x>
-      <y>290</y>
+      <y>400</y>
       <w>120</w>
       <h>80</h>
     </coordinates>
@@ -309,7 +309,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>250</x>
-      <y>290</y>
+      <y>400</y>
       <w>130</w>
       <h>50</h>
     </coordinates>
@@ -320,7 +320,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>400</x>
-      <y>350</y>
+      <y>460</y>
       <w>100</w>
       <h>30</h>
     </coordinates>
@@ -331,7 +331,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>360</x>
-      <y>410</y>
+      <y>520</y>
       <w>300</w>
       <h>30</h>
     </coordinates>
@@ -342,7 +342,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>340</x>
-      <y>490</y>
+      <y>600</y>
       <w>260</w>
       <h>30</h>
     </coordinates>
@@ -353,7 +353,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>530</x>
-      <y>370</y>
+      <y>480</y>
       <w>30</w>
       <h>60</h>
     </coordinates>
@@ -364,7 +364,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>470</x>
-      <y>430</y>
+      <y>540</y>
       <w>30</w>
       <h>80</h>
     </coordinates>
@@ -375,7 +375,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>400</x>
-      <y>510</y>
+      <y>620</y>
       <w>30</w>
       <h>60</h>
     </coordinates>
@@ -386,7 +386,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>370</x>
-      <y>570</y>
+      <y>680</y>
       <w>30</w>
       <h>60</h>
     </coordinates>
@@ -397,7 +397,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>160</x>
-      <y>570</y>
+      <y>680</y>
       <w>30</w>
       <h>60</h>
     </coordinates>
@@ -408,7 +408,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>130</x>
-      <y>770</y>
+      <y>880</y>
       <w>220</w>
       <h>30</h>
     </coordinates>
@@ -419,7 +419,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>480</x>
-      <y>770</y>
+      <y>880</y>
       <w>160</w>
       <h>30</h>
     </coordinates>
@@ -430,7 +430,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>340</x>
-      <y>840</y>
+      <y>950</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -441,7 +441,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>340</x>
-      <y>890</y>
+      <y>1000</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -452,7 +452,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>600</x>
-      <y>840</y>
+      <y>950</y>
       <w>230</w>
       <h>30</h>
     </coordinates>
@@ -463,7 +463,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>600</x>
-      <y>890</y>
+      <y>1000</y>
       <w>230</w>
       <h>30</h>
     </coordinates>
@@ -474,7 +474,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>310</x>
-      <y>630</y>
+      <y>740</y>
       <w>30</w>
       <h>160</h>
     </coordinates>
@@ -485,7 +485,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>340</x>
-      <y>770</y>
+      <y>880</y>
       <w>160</w>
       <h>30</h>
     </coordinates>
@@ -496,7 +496,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>520</x>
-      <y>790</y>
+      <y>900</y>
       <w>60</w>
       <h>80</h>
     </coordinates>
@@ -507,7 +507,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>560</x>
-      <y>790</y>
+      <y>900</y>
       <w>60</w>
       <h>80</h>
     </coordinates>
@@ -518,7 +518,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>560</x>
-      <y>840</y>
+      <y>950</y>
       <w>60</w>
       <h>80</h>
     </coordinates>
@@ -529,7 +529,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>520</x>
-      <y>840</y>
+      <y>950</y>
       <w>60</w>
       <h>80</h>
     </coordinates>
@@ -540,7 +540,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>330</x>
-      <y>970</y>
+      <y>1080</y>
       <w>240</w>
       <h>30</h>
     </coordinates>
@@ -551,7 +551,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>330</x>
-      <y>1040</y>
+      <y>1150</y>
       <w>240</w>
       <h>30</h>
     </coordinates>
@@ -562,7 +562,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>60</x>
-      <y>970</y>
+      <y>1080</y>
       <w>230</w>
       <h>30</h>
     </coordinates>
@@ -576,7 +576,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>60</x>
-      <y>1040</y>
+      <y>1150</y>
       <w>230</w>
       <h>30</h>
     </coordinates>
@@ -590,7 +590,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>290</x>
-      <y>790</y>
+      <y>900</y>
       <w>60</w>
       <h>210</h>
     </coordinates>
@@ -601,7 +601,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>290</x>
-      <y>970</y>
+      <y>1080</y>
       <w>60</w>
       <h>100</h>
     </coordinates>
@@ -612,7 +612,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLNote</id>
     <coordinates>
       <x>110</x>
-      <y>890</y>
+      <y>1000</y>
       <w>120</w>
       <h>50</h>
     </coordinates>
@@ -625,7 +625,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>160</x>
-      <y>930</y>
+      <y>1040</y>
       <w>30</w>
       <h>60</h>
     </coordinates>
@@ -636,7 +636,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>160</x>
-      <y>990</y>
+      <y>1100</y>
       <w>30</w>
       <h>70</h>
     </coordinates>
@@ -647,7 +647,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>820</x>
-      <y>1010</y>
+      <y>1120</y>
       <w>240</w>
       <h>30</h>
     </coordinates>
@@ -658,7 +658,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>780</x>
-      <y>1610</y>
+      <y>1720</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -669,7 +669,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>820</x>
-      <y>970</y>
+      <y>1080</y>
       <w>180</w>
       <h>30</h>
     </coordinates>
@@ -683,7 +683,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>870</x>
-      <y>1050</y>
+      <y>1160</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -697,7 +697,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>560</x>
-      <y>970</y>
+      <y>1080</y>
       <w>280</w>
       <h>70</h>
     </coordinates>
@@ -708,7 +708,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>560</x>
-      <y>1010</y>
+      <y>1120</y>
       <w>280</w>
       <h>60</h>
     </coordinates>
@@ -719,7 +719,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLNote</id>
     <coordinates>
       <x>960</x>
-      <y>900</y>
+      <y>1010</y>
       <w>140</w>
       <h>50</h>
     </coordinates>
@@ -729,21 +729,10 @@ bg=yellow</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>970</x>
-      <y>940</y>
-      <w>30</w>
-      <h>50</h>
-    </coordinates>
-    <panel_attributes>lt=.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;30.0</additional_attributes>
-  </element>
-  <element>
     <id>UMLNote</id>
     <coordinates>
       <x>860</x>
-      <y>1100</y>
+      <y>1210</y>
       <w>240</w>
       <h>50</h>
     </coordinates>
@@ -756,7 +745,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>1010</x>
-      <y>1070</y>
+      <y>1180</y>
       <w>30</w>
       <h>50</h>
     </coordinates>
@@ -767,31 +756,31 @@ bg=yellow</panel_attributes>
     <id>UMLPackage</id>
     <coordinates>
       <x>40</x>
-      <y>440</y>
+      <y>550</y>
       <w>660</w>
       <h>240</h>
     </coordinates>
     <panel_attributes>Log Level: Attack
-fg=blue</panel_attributes>
+fg=red</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLPackage</id>
     <coordinates>
       <x>40</x>
-      <y>710</y>
+      <y>820</y>
       <w>1080</w>
-      <h>510</h>
+      <h>460</h>
     </coordinates>
     <panel_attributes>Log Level: Shot
-fg=blue</panel_attributes>
+fg=red</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>520</x>
-      <y>990</y>
+      <y>1100</y>
       <w>370</w>
       <h>640</h>
     </coordinates>
@@ -802,7 +791,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>520</x>
-      <y>1060</y>
+      <y>1170</y>
       <w>370</w>
       <h>260</h>
     </coordinates>
@@ -813,7 +802,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>420</x>
-      <y>1760</y>
+      <y>1870</y>
       <w>300</w>
       <h>30</h>
     </coordinates>
@@ -824,7 +813,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>910</x>
-      <y>1820</y>
+      <y>1930</y>
       <w>170</w>
       <h>30</h>
     </coordinates>
@@ -835,7 +824,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>800</x>
-      <y>1730</y>
+      <y>1840</y>
       <w>170</w>
       <h>30</h>
     </coordinates>
@@ -846,7 +835,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>500</x>
-      <y>1690</y>
+      <y>1800</y>
       <w>150</w>
       <h>30</h>
     </coordinates>
@@ -857,7 +846,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>680</x>
-      <y>1690</y>
+      <y>1800</y>
       <w>170</w>
       <h>30</h>
     </coordinates>
@@ -868,7 +857,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>560</x>
-      <y>1650</y>
+      <y>1760</y>
       <w>220</w>
       <h>60</h>
     </coordinates>
@@ -879,7 +868,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>750</x>
-      <y>1650</y>
+      <y>1760</y>
       <w>140</w>
       <h>60</h>
     </coordinates>
@@ -890,7 +879,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>860</x>
-      <y>1630</y>
+      <y>1740</y>
       <w>50</w>
       <h>120</h>
     </coordinates>
@@ -901,7 +890,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>880</x>
-      <y>1650</y>
+      <y>1760</y>
       <w>130</w>
       <h>190</h>
     </coordinates>
@@ -912,7 +901,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>520</x>
-      <y>1890</y>
+      <y>2000</y>
       <w>360</w>
       <h>30</h>
     </coordinates>
@@ -923,7 +912,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>910</x>
-      <y>1860</y>
+      <y>1970</y>
       <w>170</w>
       <h>30</h>
     </coordinates>
@@ -937,7 +926,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>800</x>
-      <y>1770</y>
+      <y>1880</y>
       <w>170</w>
       <h>30</h>
     </coordinates>
@@ -951,7 +940,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>550</x>
-      <y>1800</y>
+      <y>1910</y>
       <w>170</w>
       <h>30</h>
     </coordinates>
@@ -965,7 +954,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>710</x>
-      <y>1930</y>
+      <y>2040</y>
       <w>170</w>
       <h>30</h>
     </coordinates>
@@ -979,7 +968,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>560</x>
-      <y>1710</y>
+      <y>1820</y>
       <w>30</w>
       <h>70</h>
     </coordinates>
@@ -990,7 +979,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>750</x>
-      <y>1710</y>
+      <y>1820</y>
       <w>30</w>
       <h>200</h>
     </coordinates>
@@ -1001,19 +990,19 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLPackage</id>
     <coordinates>
       <x>40</x>
-      <y>1200</y>
+      <y>1310</y>
       <w>1080</w>
       <h>780</h>
     </coordinates>
     <panel_attributes>Log Level: Location
-fg=blue</panel_attributes>
+fg=red</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
       <x>420</x>
-      <y>1260</y>
+      <y>1370</y>
       <w>250</w>
       <h>30</h>
     </coordinates>
@@ -1024,7 +1013,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>60</x>
-      <y>1430</y>
+      <y>1540</y>
       <w>340</w>
       <h>30</h>
     </coordinates>
@@ -1035,7 +1024,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>620</x>
-      <y>1470</y>
+      <y>1580</y>
       <w>220</w>
       <h>30</h>
     </coordinates>
@@ -1046,7 +1035,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>490</x>
-      <y>1380</y>
+      <y>1490</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1057,7 +1046,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>110</x>
-      <y>1340</y>
+      <y>1450</y>
       <w>200</w>
       <h>30</h>
     </coordinates>
@@ -1068,7 +1057,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>320</x>
-      <y>1340</y>
+      <y>1450</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1079,7 +1068,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>210</x>
-      <y>1300</y>
+      <y>1410</y>
       <w>230</w>
       <h>60</h>
     </coordinates>
@@ -1090,7 +1079,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>410</x>
-      <y>1300</y>
+      <y>1410</y>
       <w>150</w>
       <h>60</h>
     </coordinates>
@@ -1101,7 +1090,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>530</x>
-      <y>1280</y>
+      <y>1390</y>
       <w>90</w>
       <h>120</h>
     </coordinates>
@@ -1112,7 +1101,7 @@ fg=blue</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>590</x>
-      <y>1300</y>
+      <y>1410</y>
       <w>160</w>
       <h>190</h>
     </coordinates>
@@ -1123,7 +1112,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>160</x>
-      <y>1530</y>
+      <y>1640</y>
       <w>410</w>
       <h>30</h>
     </coordinates>
@@ -1134,7 +1123,7 @@ fg=blue</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>620</x>
-      <y>1510</y>
+      <y>1620</y>
       <w>220</w>
       <h>30</h>
     </coordinates>
@@ -1148,7 +1137,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>490</x>
-      <y>1420</y>
+      <y>1530</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1162,7 +1151,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>210</x>
-      <y>1360</y>
+      <y>1470</y>
       <w>30</w>
       <h>90</h>
     </coordinates>
@@ -1173,7 +1162,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>450</x>
-      <y>1360</y>
+      <y>1470</y>
       <w>30</w>
       <h>190</h>
     </coordinates>
@@ -1184,7 +1173,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>130</x>
-      <y>1480</y>
+      <y>1590</y>
       <w>310</w>
       <h>30</h>
     </coordinates>
@@ -1195,7 +1184,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>310</x>
-      <y>1580</y>
+      <y>1690</y>
       <w>320</w>
       <h>30</h>
     </coordinates>
@@ -1206,7 +1195,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>390</x>
-      <y>1430</y>
+      <y>1540</y>
       <w>50</w>
       <h>70</h>
     </coordinates>
@@ -1217,7 +1206,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>560</x>
-      <y>1530</y>
+      <y>1640</y>
       <w>50</w>
       <h>70</h>
     </coordinates>
@@ -1228,7 +1217,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>490</x>
-      <y>1060</y>
+      <y>1170</y>
       <w>30</w>
       <h>220</h>
     </coordinates>
@@ -1239,7 +1228,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>70</x>
-      <y>1450</y>
+      <y>1560</y>
       <w>400</w>
       <h>330</h>
     </coordinates>
@@ -1250,7 +1239,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>210</x>
-      <y>1550</y>
+      <y>1660</y>
       <w>420</w>
       <h>360</h>
     </coordinates>
@@ -1261,7 +1250,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>370</x>
-      <y>1930</y>
+      <y>2040</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1272,7 +1261,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>260</x>
-      <y>1800</y>
+      <y>1910</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1283,7 +1272,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>380</x>
-      <y>1760</y>
+      <y>1870</y>
       <w>60</w>
       <h>60</h>
     </coordinates>
@@ -1294,7 +1283,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>480</x>
-      <y>1890</y>
+      <y>2000</y>
       <w>60</w>
       <h>60</h>
     </coordinates>
@@ -1305,7 +1294,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLNote</id>
     <coordinates>
       <x>900</x>
-      <y>1240</y>
+      <y>1350</y>
       <w>200</w>
       <h>180</h>
     </coordinates>
@@ -1325,8 +1314,8 @@ bg=yellow</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>850</x>
-      <y>150</y>
+      <x>810</x>
+      <y>220</y>
       <w>190</w>
       <h>40</h>
     </coordinates>
@@ -1337,8 +1326,8 @@ lt=&lt;&lt;&lt;-</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>850</x>
-      <y>210</y>
+      <x>810</x>
+      <y>280</y>
       <w>190</w>
       <h>40</h>
     </coordinates>
@@ -1349,19 +1338,20 @@ lt=&lt;&lt;-</panel_attributes>
   <element>
     <id>Text</id>
     <coordinates>
-      <x>440</x>
-      <y>650</y>
+      <x>500</x>
+      <y>760</y>
       <w>260</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>Log Level continues at end of diagram.</panel_attributes>
+    <panel_attributes>Continues at end of diagram.
+fg=red</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>10</x>
-      <y>260</y>
+      <y>370</y>
       <w>350</w>
       <h>1810</h>
     </coordinates>
@@ -1371,8 +1361,8 @@ lt=&lt;&lt;-</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>850</x>
-      <y>270</y>
+      <x>810</x>
+      <y>340</y>
       <w>190</w>
       <h>50</h>
     </coordinates>
@@ -1385,7 +1375,7 @@ lt=&lt;-
     <id>UMLClass</id>
     <coordinates>
       <x>200</x>
-      <y>2050</y>
+      <y>2160</y>
       <w>290</w>
       <h>30</h>
     </coordinates>
@@ -1396,7 +1386,7 @@ lt=&lt;-
     <id>UMLClass</id>
     <coordinates>
       <x>180</x>
-      <y>2200</y>
+      <y>2310</y>
       <w>310</w>
       <h>30</h>
     </coordinates>
@@ -1407,7 +1397,7 @@ lt=&lt;-
     <id>UMLClass</id>
     <coordinates>
       <x>170</x>
-      <y>2290</y>
+      <y>2400</y>
       <w>330</w>
       <h>30</h>
     </coordinates>
@@ -1418,7 +1408,7 @@ lt=&lt;-
     <id>Relation</id>
     <coordinates>
       <x>330</x>
-      <y>2220</y>
+      <y>2330</y>
       <w>210</w>
       <h>90</h>
     </coordinates>
@@ -1432,7 +1422,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>170</x>
-      <y>2120</y>
+      <y>2230</y>
       <w>330</w>
       <h>30</h>
     </coordinates>
@@ -1443,7 +1433,7 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>330</x>
-      <y>2140</y>
+      <y>2250</y>
       <w>260</w>
       <h>80</h>
     </coordinates>
@@ -1456,7 +1446,7 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>470</x>
-      <y>2310</y>
+      <y>2420</y>
       <w>340</w>
       <h>70</h>
     </coordinates>
@@ -1469,7 +1459,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>450</x>
-      <y>2360</y>
+      <y>2470</y>
       <w>400</w>
       <h>30</h>
     </coordinates>
@@ -1480,7 +1470,7 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>330</x>
-      <y>2240</y>
+      <y>2350</y>
       <w>580</w>
       <h>150</h>
     </coordinates>
@@ -1491,7 +1481,7 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>180</x>
-      <y>2310</y>
+      <y>2420</y>
       <w>230</w>
       <h>180</h>
     </coordinates>
@@ -1509,126 +1499,31 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>70</x>
-      <y>2300</y>
-      <w>550</w>
+      <y>2410</y>
+      <w>510</w>
       <h>880</h>
     </coordinates>
     <panel_attributes>AttackSequenceResolveDamageMessage
 lt=&lt;-</panel_attributes>
-    <additional_attributes>530.0;860.0;530.0;830.0;10.0;830.0;10.0;10.0;100.0;10.0</additional_attributes>
+    <additional_attributes>490.0;860.0;490.0;830.0;10.0;830.0;10.0;10.0;100.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>10</x>
-      <y>2290</y>
-      <w>300</w>
-      <h>1710</h>
+      <y>2400</y>
+      <w>530</w>
+      <h>1900</h>
     </coordinates>
-    <panel_attributes>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-AttackSequenceWeaponCompleteMessage
+    <panel_attributes>AttackSequenceWeaponCompleteMessage
 lt=&lt;-</panel_attributes>
-    <additional_attributes>140.0;1690.0;10.0;1690.0;10.0;10.0;160.0;10.0</additional_attributes>
+    <additional_attributes>510.0;1880.0;510.0;1850.0;10.0;1850.0;10.0;10.0;160.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>330</x>
-      <y>2070</y>
+      <y>2180</y>
       <w>220</w>
       <h>70</h>
     </coordinates>
@@ -1641,7 +1536,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>170</x>
-      <y>2470</y>
+      <y>2580</y>
       <w>280</w>
       <h>30</h>
     </coordinates>
@@ -1652,7 +1547,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>510</x>
-      <y>2630</y>
+      <y>2740</y>
       <w>230</w>
       <h>30</h>
     </coordinates>
@@ -1663,7 +1558,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>130</x>
-      <y>2820</y>
+      <y>2930</y>
       <w>290</w>
       <h>30</h>
     </coordinates>
@@ -1674,7 +1569,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>870</x>
-      <y>2710</y>
+      <y>2820</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1685,7 +1580,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>660</x>
-      <y>2710</y>
+      <y>2820</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -1696,7 +1591,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>230</x>
-      <y>2710</y>
+      <y>2820</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -1707,7 +1602,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>440</x>
-      <y>2710</y>
+      <y>2820</y>
       <w>200</w>
       <h>30</h>
     </coordinates>
@@ -1718,7 +1613,7 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>320</x>
-      <y>2670</y>
+      <y>2780</y>
       <w>240</w>
       <h>60</h>
     </coordinates>
@@ -1729,7 +1624,7 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>530</x>
-      <y>2670</y>
+      <y>2780</y>
       <w>120</w>
       <h>60</h>
     </coordinates>
@@ -1740,7 +1635,7 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>620</x>
-      <y>2650</y>
+      <y>2760</y>
       <w>150</w>
       <h>80</h>
     </coordinates>
@@ -1751,7 +1646,7 @@ lt=&lt;-</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>740</x>
-      <y>2670</y>
+      <y>2780</y>
       <w>250</w>
       <h>60</h>
     </coordinates>
@@ -1762,7 +1657,7 @@ lt=&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>870</x>
-      <y>2860</y>
+      <y>2970</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1776,7 +1671,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>660</x>
-      <y>2860</y>
+      <y>2970</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -1790,7 +1685,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>230</x>
-      <y>2860</y>
+      <y>2970</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -1804,7 +1699,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>260</x>
-      <y>2730</y>
+      <y>2840</y>
       <w>30</w>
       <h>70</h>
     </coordinates>
@@ -1815,7 +1710,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>660</x>
-      <y>2820</y>
+      <y>2930</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -1826,7 +1721,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>870</x>
-      <y>2820</y>
+      <y>2930</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1837,7 +1732,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>960</x>
-      <y>2730</y>
+      <y>2840</y>
       <w>30</w>
       <h>70</h>
     </coordinates>
@@ -1848,7 +1743,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>740</x>
-      <y>2730</y>
+      <y>2840</y>
       <w>30</w>
       <h>70</h>
     </coordinates>
@@ -1859,7 +1754,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>440</x>
-      <y>2820</y>
+      <y>2930</y>
       <w>200</w>
       <h>30</h>
     </coordinates>
@@ -1870,7 +1765,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>440</x>
-      <y>2860</y>
+      <y>2970</y>
       <w>200</w>
       <h>30</h>
     </coordinates>
@@ -1884,7 +1779,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>530</x>
-      <y>2730</y>
+      <y>2840</y>
       <w>30</w>
       <h>70</h>
     </coordinates>
@@ -1895,7 +1790,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>Relation</id>
     <coordinates>
       <x>420</x>
-      <y>2490</y>
+      <y>2600</y>
       <w>230</w>
       <h>160</h>
     </coordinates>
@@ -1906,19 +1801,19 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLPackage</id>
     <coordinates>
       <x>110</x>
-      <y>2570</y>
+      <y>2680</y>
       <w>990</w>
       <h>500</h>
     </coordinates>
     <panel_attributes>Log Level: Damage
-fg=blue</panel_attributes>
+fg=red</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
       <x>870</x>
-      <y>2780</y>
+      <y>2890</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -1932,7 +1827,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>660</x>
-      <y>2780</y>
+      <y>2890</y>
       <w>190</w>
       <h>30</h>
     </coordinates>
@@ -1946,7 +1841,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>130</x>
-      <y>2780</y>
+      <y>2890</y>
       <w>200</w>
       <h>30</h>
     </coordinates>
@@ -1960,7 +1855,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLClass</id>
     <coordinates>
       <x>440</x>
-      <y>2780</y>
+      <y>2890</y>
       <w>200</w>
       <h>30</h>
     </coordinates>
@@ -1974,7 +1869,7 @@ drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
     <id>UMLNote</id>
     <coordinates>
       <x>480</x>
-      <y>2920</y>
+      <y>3030</y>
       <w>220</w>
       <h>130</h>
     </coordinates>
@@ -1992,7 +1887,7 @@ bg=yellow</panel_attributes>
     <id>UMLNote</id>
     <coordinates>
       <x>720</x>
-      <y>2920</y>
+      <y>3030</y>
       <w>360</w>
       <h>130</h>
     </coordinates>
@@ -2009,8 +1904,8 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>430</x>
-      <y>3160</y>
+      <x>390</x>
+      <y>3270</y>
       <w>340</w>
       <h>30</h>
     </coordinates>
@@ -2020,19 +1915,19 @@ bg=yellow</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>730</x>
-      <y>2630</y>
-      <w>410</w>
+      <x>720</x>
+      <y>2740</y>
+      <w>420</w>
       <h>560</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;390.0;10.0;390.0;540.0;40.0;540.0</additional_attributes>
+    <additional_attributes>20.0;10.0;400.0;10.0;400.0;540.0;10.0;540.0</additional_attributes>
   </element>
   <element>
     <id>Text</id>
     <coordinates>
       <x>980</x>
-      <y>3140</y>
+      <y>3250</y>
       <w>140</w>
       <h>30</h>
     </coordinates>
@@ -2042,8 +1937,8 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>470</x>
-      <y>3250</y>
+      <x>430</x>
+      <y>3340</y>
       <w>250</w>
       <h>30</h>
     </coordinates>
@@ -2053,8 +1948,8 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>860</x>
-      <y>3450</y>
+      <x>800</x>
+      <y>3430</y>
       <w>230</w>
       <h>30</h>
     </coordinates>
@@ -2064,8 +1959,8 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>730</x>
-      <y>3410</y>
+      <x>570</x>
+      <y>3430</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -2075,8 +1970,8 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>380</x>
-      <y>3330</y>
+      <x>90</x>
+      <y>3430</y>
       <w>220</w>
       <h>30</h>
     </coordinates>
@@ -2086,8 +1981,8 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>580</x>
-      <y>3370</y>
+      <x>330</x>
+      <y>3430</y>
       <w>220</w>
       <h>30</h>
     </coordinates>
@@ -2097,74 +1992,74 @@ bg=yellow</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>480</x>
-      <y>3290</y>
-      <w>140</w>
-      <h>60</h>
+      <x>190</x>
+      <y>3380</y>
+      <w>390</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;40.0;10.0;10.0;120.0;10.0</additional_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0;370.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>430</x>
+      <y>3380</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>550</x>
+      <y>3360</y>
+      <w>150</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>130.0;70.0;130.0;30.0;10.0;30.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>670</x>
-      <y>3290</y>
-      <w>30</w>
-      <h>100</h>
+      <y>3380</y>
+      <w>260</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
+    <additional_attributes>240.0;50.0;240.0;10.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>590</x>
-      <y>3270</y>
-      <w>250</w>
-      <h>160</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>230.0;140.0;230.0;30.0;10.0;30.0;10.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>810</x>
-      <y>3290</y>
-      <w>170</w>
-      <h>180</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>150.0;160.0;150.0;10.0;10.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>480</x>
-      <y>3350</y>
-      <w>30</w>
-      <h>120</h>
+      <x>120</x>
+      <y>3490</y>
+      <w>80</w>
+      <h>30</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;100.0;10.0;10.0</additional_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>590</x>
-      <y>3180</y>
+      <x>550</x>
+      <y>3290</y>
       <w>30</w>
-      <h>90</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
       <x>740</x>
-      <y>2470</y>
+      <y>2580</y>
       <w>240</w>
       <h>30</h>
     </coordinates>
@@ -2175,7 +2070,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>740</x>
-      <y>2550</y>
+      <y>2660</y>
       <w>300</w>
       <h>30</h>
     </coordinates>
@@ -2186,7 +2081,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>880</x>
-      <y>2510</y>
+      <y>2620</y>
       <w>240</w>
       <h>30</h>
     </coordinates>
@@ -2197,7 +2092,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>440</x>
-      <y>2470</y>
+      <y>2580</y>
       <w>320</w>
       <h>30</h>
     </coordinates>
@@ -2208,7 +2103,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>440</x>
-      <y>2480</y>
+      <y>2590</y>
       <w>320</w>
       <h>100</h>
     </coordinates>
@@ -2219,7 +2114,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>970</x>
-      <y>2470</y>
+      <y>2580</y>
       <w>60</w>
       <h>60</h>
     </coordinates>
@@ -2230,7 +2125,7 @@ bg=yellow</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>350</x>
-      <y>2400</y>
+      <y>2510</y>
       <w>240</w>
       <h>30</h>
     </coordinates>
@@ -2241,7 +2136,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>370</x>
-      <y>2310</y>
+      <y>2420</y>
       <w>30</w>
       <h>110</h>
     </coordinates>
@@ -2251,9 +2146,9 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>460</x>
-      <y>3520</y>
-      <w>290</w>
+      <x>180</x>
+      <y>3490</y>
+      <w>280</w>
       <h>30</h>
     </coordinates>
     <panel_attributes>WeaponHitInfo.ConsolidateCriticalHitInfo</panel_attributes>
@@ -2262,9 +2157,9 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>390</x>
-      <y>3560</y>
-      <w>290</w>
+      <x>220</x>
+      <y>3590</y>
+      <w>150</w>
       <h>30</h>
     </coordinates>
     <panel_attributes>Mech.CheckForCrit</panel_attributes>
@@ -2274,7 +2169,7 @@ bg=yellow</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>340</x>
-      <y>2770</y>
+      <y>2880</y>
       <w>90</w>
       <h>70</h>
     </coordinates>
@@ -2287,7 +2182,7 @@ lt=&lt;&lt;&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>210</x>
-      <y>2920</y>
+      <y>3030</y>
       <w>210</w>
       <h>30</h>
     </coordinates>
@@ -2298,7 +2193,7 @@ lt=&lt;&lt;&lt;-</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>130</x>
-      <y>2960</y>
+      <y>3070</y>
       <w>230</w>
       <h>30</h>
     </coordinates>
@@ -2309,7 +2204,7 @@ lt=&lt;&lt;&lt;-</panel_attributes>
     <id>UMLNote</id>
     <coordinates>
       <x>180</x>
-      <y>3000</y>
+      <y>3110</y>
       <w>240</w>
       <h>50</h>
     </coordinates>
@@ -2322,7 +2217,7 @@ bg=light_gray</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>170</x>
-      <y>2840</y>
+      <y>2950</y>
       <w>60</w>
       <h>110</h>
     </coordinates>
@@ -2333,7 +2228,7 @@ bg=light_gray</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>140</x>
-      <y>2840</y>
+      <y>2950</y>
       <w>30</w>
       <h>140</h>
     </coordinates>
@@ -2344,7 +2239,7 @@ bg=light_gray</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>390</x>
-      <y>2940</y>
+      <y>3050</y>
       <w>30</w>
       <h>80</h>
     </coordinates>
@@ -2356,7 +2251,7 @@ fg=dark_gray</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>350</x>
-      <y>2960</y>
+      <y>3070</y>
       <w>50</w>
       <h>60</h>
     </coordinates>
@@ -2367,8 +2262,8 @@ fg=dark_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>150</x>
-      <y>3970</y>
+      <x>390</x>
+      <y>4280</y>
       <w>240</w>
       <h>30</h>
     </coordinates>
@@ -2378,8 +2273,8 @@ fg=dark_gray</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>400</x>
-      <y>3970</y>
+      <x>640</x>
+      <y>4280</y>
       <w>160</w>
       <h>30</h>
     </coordinates>
@@ -2392,8 +2287,8 @@ drawRectangle(4,4,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width,
   <element>
     <id>UMLNote</id>
     <coordinates>
-      <x>400</x>
-      <y>4030</y>
+      <x>810</x>
+      <y>4230</y>
       <w>160</w>
       <h>80</h>
     </coordinates>
@@ -2407,19 +2302,8 @@ bg=yellow</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>470</x>
-      <y>3990</y>
-      <w>30</w>
-      <h>60</h>
-    </coordinates>
-    <panel_attributes>lt=.</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;40.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
       <x>10</x>
-      <y>190</y>
+      <y>300</y>
       <w>300</w>
       <h>100</h>
     </coordinates>
@@ -2429,9 +2313,9 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>370</x>
-      <y>3620</y>
-      <w>290</w>
+      <x>180</x>
+      <y>4020</y>
+      <w>170</w>
       <h>30</h>
     </coordinates>
     <panel_attributes>Mech.AddExternalHeat</panel_attributes>
@@ -2440,9 +2324,9 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>380</x>
-      <y>3670</y>
-      <w>290</w>
+      <x>180</x>
+      <y>4070</y>
+      <w>260</w>
       <h>30</h>
     </coordinates>
     <panel_attributes>WeaponHitInfo.ConsolidateInstability</panel_attributes>
@@ -2451,12 +2335,470 @@ bg=yellow</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>380</x>
-      <y>3720</y>
-      <w>290</w>
+      <x>180</x>
+      <y>4120</y>
+      <w>200</w>
       <h>30</h>
     </coordinates>
     <panel_attributes>Mech.AddAbsoluteInstability</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>3450</y>
+      <w>80</w>
+      <h>700</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>60.0;680.0;10.0;680.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>3590</y>
+      <w>120</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>100.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>4020</y>
+      <w>80</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>120</x>
+      <y>4070</y>
+      <w>80</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>380</x>
+      <y>3590</y>
+      <w>160</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>[postfix] LogCritResult
+bg=pink
+customelement=
+drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width, height)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>270</x>
+      <y>3640</y>
+      <w>230</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>CritChanceRules.GetCritChance</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>270</x>
+      <y>3790</y>
+      <w>270</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>AttackDirector.GetRandomFromCache</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>270</x>
+      <y>3830</y>
+      <w>200</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Mech.GetComponentInSlot</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>270</x>
+      <y>3870</y>
+      <w>260</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>MechComponent.DamageComponent</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>270</x>
+      <y>3950</y>
+      <w>210</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Weapon.DamageComponent</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>500</x>
+      <y>3950</y>
+      <w>250</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>AmmunitionBox.DamageComponent</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>320</x>
+      <y>3690</y>
+      <w>260</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>CritChanceRules.GetBaseCritChance</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>320</x>
+      <y>3730</y>
+      <w>260</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>CritChanceRules.GetCritMultiplier</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>510</x>
+      <y>3640</y>
+      <w>170</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>[postfix] LogCritChance
+bg=pink
+customelement=
+drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width, height)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>480</x>
+      <y>3830</y>
+      <w>160</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>[postfix] LogCritComp
+bg=pink
+customelement=
+drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width, height)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>590</x>
+      <y>3690</y>
+      <w>200</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>[postfix] LogBaseCritChance
+bg=pink
+customelement=
+drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width, height)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>590</x>
+      <y>3730</y>
+      <w>180</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>[postfix] LogCritMultiplier
+bg=pink
+customelement=
+drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width, height)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>550</x>
+      <y>3790</y>
+      <w>170</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>[postfix] LogCritRolls
+bg=pink
+customelement=
+drawRectangle(3,3,width-8,height-8) //fg= bg= lt= lw= //Parameters (x, y, width, height)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>180</x>
+      <y>3540</y>
+      <w>860</w>
+      <h>460</h>
+    </coordinates>
+    <panel_attributes>Log Level: Crit
+fg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>230</x>
+      <y>3640</y>
+      <w>60</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>280</x>
+      <y>3660</y>
+      <w>60</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>40.0;80.0;10.0;80.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>280</x>
+      <y>3690</y>
+      <w>60</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>230</x>
+      <y>3610</y>
+      <w>60</w>
+      <h>290</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>40.0;270.0;10.0;270.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>230</x>
+      <y>3830</y>
+      <w>60</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>230</x>
+      <y>3790</y>
+      <w>60</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>40.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>370</x>
+      <y>3910</y>
+      <w>280</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>260.0;40.0;260.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>370</x>
+      <y>3890</y>
+      <w>30</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>800</x>
+      <y>3690</y>
+      <w>150</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Also log location hp.
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>690</x>
+      <y>3640</y>
+      <w>160</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Log final crit chance.
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>730</x>
+      <y>3790</y>
+      <w>170</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Set checkCritComp flag.
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>650</x>
+      <y>3830</y>
+      <w>290</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Check &amp; clear checkCritComp flag.
+Log crit component and its before crit state.
+If it is ammo box, also check for explosion.
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>790</x>
+      <y>3950</y>
+      <w>230</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Fun! Ammo Explosion Warning!
+bg=light_gray</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>740</x>
+      <y>3960</y>
+      <w>70</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=.
+fg=dark_gray</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>550</x>
+      <y>3570</y>
+      <w>230</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>Find hit line from hit map.
+Log post-crit component status
+and update hit line with crit info.
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>40</x>
+      <y>4170</y>
+      <w>1000</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>Log Level: Attack
+fg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>40</x>
+      <y>4190</y>
+      <w>240</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Resumed from top of diagram.
+fg=red</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>0</x>
+      <y>0</y>
+      <w>1090</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>BATTLETECH Attack Flow Chart
+fontsize=48
+halign=center</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>700</x>
+      <y>470</y>
+      <w>410</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>BATTLETECH ver 1.1.2.
+
+Charted by Sheepy to keep track of
+attack log patches in 
+Attack Improvement Mod.
+fontsize=24
+halign=center</panel_attributes>
     <additional_attributes/>
   </element>
 </diagram>
