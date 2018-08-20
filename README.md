@@ -76,7 +76,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 **IMPORTANT Note on upgrading FROM mod version 1.0**:</span>
 Rename your old `mod.json` to `settings.json` to keep old settings.
 
-1. Install [BTML](https://github.com/janxious/BattleTechModLoader) and [ModTek](https://github.com/janxious/ModTek).  These are new versions by jo/janiux; the originals by [Mpstark](https://github.com/Mpstark/ModTek/wiki/The-Drop-Dead-Simple-Guide-to-Installing-BTML-&-ModTek-&-ModTek-mods) also works.
+1. Install [BTML and ModTek](https://github.com/janxious/ModTek/wiki/The-Drop-Dead-Simple-Guide-to-Installing-BTML-&-ModTek-&-ModTek-mods).
 2. [Download this mod](https://github.com/Sheep-y/Attack-Improvement-Mod/releases), extract in the mod folder. i.e. You should see `BATTLETECH\Mods\AttackImprovementMod\mod.json`
 3. Launch the game. The mod will creates a "settings.json" and a mod log in the same folder as `mod.json`.
 4. Open `settings.json` to see mod settings.  If you want to change it, restart game to apply changes.
