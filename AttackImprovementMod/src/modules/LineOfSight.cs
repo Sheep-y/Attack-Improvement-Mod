@@ -216,7 +216,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void SetupLOS ( WeaponRangeIndicators __instance, Vector3 position, AbstractActor selectedActor, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          WeaponRangeIndicators me = __instance;
-         int dirIndex = Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) );
+         bool canSee = selectedActor.VisibilityCache.VisibilityToTarget( target ).VisibilityLevel == VisibilityLevel.LOSFull;
+         int dirIndex = canSee ? Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) ) : 0;
          if ( dirIndex != lastDirIndex && Mats[ NoAttack ] != null ) {
             me.MaterialOutOfRange = Mats[ NoAttack ][ dirIndex ];
             me.LOSOutOfRange = Mats[ NoAttack ][ dirIndex ].color;
