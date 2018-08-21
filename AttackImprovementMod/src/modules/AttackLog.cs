@@ -23,15 +23,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static readonly Type AttackType = typeof( AttackDirector.AttackSequence );
       private static readonly Type ArtilleyAttackType = typeof( ArtillerySequence );
 
-      private static readonly Type MechType = typeof( Mech );
-      private static readonly Type VehiType = typeof( Vehicle );
-      private static readonly Type TurtType = typeof( Turret );
-      private static readonly Type BuldType = typeof( BattleTech.Building );
-
       private static string thisCombatId = string.Empty;
 
       public override void CombatStartsOnce () {
          if ( Settings.AttackLogLevel == null ) return;
+
+         Type MechType = typeof( Mech );
+         Type VehiType = typeof( Vehicle );
+         Type TurtType = typeof( Turret );
+         Type BuldType = typeof( BattleTech.Building );
 
          switch ( Settings.AttackLogFormat.Trim().ToLower() ) {
             default:
@@ -434,7 +434,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RecordUnitDamage( BuildingLocation.Structure.ToString(), totalDamage, 0, __instance.CurrentStructure );
       }
 
-      [ HarmonyPriority( Priority.First ) ]
       private static void RecordUnitDamage ( string loc, float totalDamage, float armour, float structure ) {
          //Log( $"{totalDamage} Damage @ {loc}" );
          lastLocation = loc;
