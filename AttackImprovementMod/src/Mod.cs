@@ -26,6 +26,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Add( new ModifierList(){ Name = "Modifier List" } );
          Add( new RollCorrection(){ Name = "Roll Corrections" } );
          Add( new HitLocation(){ Name = "Hit Location" } );
+         Add( new Criticals(){ Name = "Criticals" } );
          Add( new HitResolution(){ Name = "Hit Resolution" } );
          Add( new AttackLog(){ Name = "Logger" } );
       }
