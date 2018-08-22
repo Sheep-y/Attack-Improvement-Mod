@@ -59,7 +59,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( CritRulesType, "GetCritMultiplier", null, "LogCritMultiplier" );
                Patch( CritRulesType, "GetCritChance", null, "LogCritChance" );
                Patch( MechType, "GetComponentInSlot", null, "LogCritComp" );
-               Patch( typeof( AttackDirector.AttackSequence ), "FlagAttackCausedAmmoExplosion", null, "LogAmmoExplosion" );
+               Patch( typeof( AttackDirector.AttackSequence ), "FlagAttackCausedAmmoExplosion", null, "LogAmmoExplosionFlag" );
+               Patch( typeof( Pilot ), "SetNeedsInjury", null, "LogAmmoExplosionOnPilot" );
                Patch( MechType, "CheckForCrit", NonPublic, null, "LogCritResult" );
                goto case "damage";
 
@@ -505,7 +506,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static string CritDummy;
 
       private static float thisCritRoll, thisCritSlotRoll, thisBaseCritChance, thisCritMultiplier, thisCritChance, thisLocationMaxHP;
-      private static bool checkCritComp = false;
+      private static bool ammoExploded, checkCritComp;
+      private static int thisCritSlot;
+      private static MechComponent thisCritComp;
+      private static ComponentDamageLevel thisCompBefore;
 
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritRolls ( float[] __result, int amount ) {
@@ -536,24 +540,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisCritComp = null;
       }
 
-      private static int thisCritSlot;
-      private static MechComponent thisCritComp = null;
-      private static ComponentDamageLevel thisCompBefore;
-      private static bool ammoExploded = false;
-
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritComp ( MechComponent __result, ChassisLocations location, int index ) {
          if ( ! checkCritComp ) return;  // GetComponentInSlot is used in lots of places, and is better gated.
          //Log( $"Record Crit Comp @ {location} = {__result?.UIName}" );
          thisCritSlot = index;
          thisCritComp = __result;
-         if ( __result != null )
-            thisCompBefore = __result.DamageLevel;
-         checkCritComp = false;
+         if ( thisCritComp != null ) {
+            thisCompBefore = thisCritComp.DamageLevel;
+            ammoExploded = checkCritComp = false;
+         }
       }
 
       [ HarmonyPriority( Priority.Last ) ]
-      public static void LogAmmoExplosion () {
+      public static void LogAmmoExplosionFlag () {
+         ammoExploded = true; // Not sure why, but this may not be triggered, so need pilot check as safeguard.
+      }
+
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogAmmoExplosionOnPilot ( InjuryReason reason ) {
+         if ( reason != InjuryReason.AmmoExplosion ) return;
          ammoExploded = true;
       }
 
@@ -584,7 +590,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                critLine += Separator + "(Empty)" + Separator + "--" + Separator + "--";
             else {
                string thisCompAfter = ammoExploded ? "Explosion" : thisCritComp.DamageLevel.ToString();
-               critLine += Separator + thisCritComp.UIName +
+               critLine += Separator + thisCritComp.UIName.ToString() +
                            Separator + thisCompBefore +
                            Separator + thisCompAfter;
             }
@@ -594,7 +600,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          log[ lineIndex ] = line;
          thisCritSlot = -1;
          thisCritComp = null;
-         ammoExploded = false;
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
