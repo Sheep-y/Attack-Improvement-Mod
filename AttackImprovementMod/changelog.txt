@@ -1,8 +1,14 @@
 CHANGE LOG
 
+2018-08-23 AIM Version 2.1.1 for BATTLETECH 1.1.2
+
+* Fix: LOS of unknown targets always use front colour.
+* Fix: Ammo AI was leaving too many ammo in bins.
+* Mod: Better compatibility with mods that change explosion rules.
+
 2018-08-18 AIM Version 2.1 for BATTLETECH 1.1.2
 
-* Big: Remove support code for game version 1.1.1 and before.
+* Big: Updated for 1.1.2. Incompatible with game version 1.1.1 and before.
 * New: Change Line of Fire colours by attack direction.
 * New: Change Facing Indicators colours.
 * New: Change Floating Armor Bar colours.
