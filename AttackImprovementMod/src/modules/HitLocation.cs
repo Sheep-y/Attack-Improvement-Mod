@@ -28,15 +28,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          VehicleCalledShotMultiplier = (float) Settings.VehicleCalledShotMultiplier;
 
          bool prefixMech    = MechCalledShotMultiplier    != 1 || Settings.CalledShotUseClustering,
-              prefixVehicle = VehicleCalledShotMultiplier != 1 || Settings.FixVehicleCalledShot;
+              prefixVehicle = VehicleCalledShotMultiplier != 1;
          MethodInfo MechGetHit    = AttackLog.GetHitLocation( typeof( ArmorLocation ) ),
                     VehicleGetHit = AttackLog.GetHitLocation( typeof( VehicleChassisLocations ) );
          if ( prefixMech )
             Patch( MechGetHit, "PrefixMechCalledShot", null );
          if ( prefixVehicle )
             Patch( VehicleGetHit, "PrefixVehicleCalledShot", null );
-         if ( prefixVehicle )
-            Patch( typeof( Mech ), "GetLongArmorLocation", Static, typeof( ArmorLocation ), "FixVehicleCalledShotFloatie", null );
          if ( Settings.FixHitDistribution ) {
             ScaledMechHitTables = new Dictionary<Dictionary<ArmorLocation, int>, Dictionary<ArmorLocation, int>>();
             ScaledVehicleHitTables = new Dictionary<Dictionary<VehicleChassisLocations, int>, Dictionary<VehicleChassisLocations, int>>();
@@ -47,19 +45,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.FixGreyHeadDisease ) {
             HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
             Patch( MechGetHit, null, "FixGreyHeadDisease" );
-         }
-
-         if ( Settings.FixVehicleCalledShot ) {
-            // Store popup location
-            Patch( typeof( SelectionStateFire ), "SetCalledShot", typeof( VehicleChassisLocations ), null, "RecordVehicleCalledShotFireLocation" );
-
-            ReadoutProp = typeof( CombatHUDVehicleArmorHover ).GetProperty( "Readout", NonPublic | Instance );
-            if ( ReadoutProp != null )
-               Patch( typeof( CombatHUDVehicleArmorHover ), "OnPointerClick", typeof( PointerEventData ), null, "RecordVehicleCalledShotClickLocation" );
-            else
-               Error( "Can't find CombatHUDVehicleArmorHover.Readout. OnPointerClick not patched. Vehicle called shot may not work." );
-
-            Patch( typeof( Vehicle ), "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, "RestoreVehicleCalledShotLocation", null );
          }
       }
 
@@ -195,37 +180,5 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ! hitTable.ContainsKey( Head ) && HeadHitWeights.ContainsKey( hitTable ) )
             hitTable.Add( Head, HeadHitWeights[ hitTable ] );
       }
-
-      // ============ Vehicle Called Shot ============
-
-      private static PropertyInfo ReadoutProp = null;
-
-      // Somehow PostfixSetCalledShot is NOT called since 1.1 beta. So need to override PostPointerClick to make sure called shot location is translated
-      public static void RecordVehicleCalledShotClickLocation ( CombatHUDVehicleArmorHover __instance ) {
-         HUDVehicleArmorReadout Readout = (HUDVehicleArmorReadout) ReadoutProp?.GetValue( __instance, null );
-         if ( Readout?.HUD?.SelectionHandler?.ActiveState is SelectionStateFire selectionState )
-            selectionState.calledShotLocation = TranslateLocation( selectionState.calledShotVLocation );
-      }
-
-      // Store vehicle called shot location in mech location, so that it will be passed down event chain
-      public static void RecordVehicleCalledShotFireLocation ( SelectionStateFire __instance, VehicleChassisLocations location ) {
-         __instance.calledShotLocation = TranslateLocation( location );
-      }
-
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool RestoreVehicleCalledShotLocation ( Vehicle __instance, ref int __result, AbstractActor attacker, Vector3 attackPosition, float hitLocationRoll, ArmorLocation calledShotLocation, float bonusMultiplier ) { try {
-         __result = (int) Combat.HitLocation.GetHitLocation( attackPosition, __instance, hitLocationRoll, TranslateLocation( calledShotLocation ), bonusMultiplier );
-         return false;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
-
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool FixVehicleCalledShotFloatie ( ref string __result, ArmorLocation location ) { try {
-         if ( (int) location >= 0 ) return true;
-         __result = Vehicle.GetLongChassisLocation( TranslateLocation( location ) );
-         return false;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
-
-      public static ArmorLocation TranslateLocation ( VehicleChassisLocations location ) { return (ArmorLocation)(-(int)location); }
-      public static VehicleChassisLocations TranslateLocation ( ArmorLocation location ) { return (VehicleChassisLocations)(-(int)location); }
    }
 }

@@ -31,7 +31,6 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 
 ## Game Bugs Fixed and HUD Enhancements ##
 
-* Vehicle Called Shot fixed.
 * Damaged Structure Display fixed and enhanced.
 * Grey Head Disease fixed.
 * Line of Fire fixed and stylised by type and direction.
@@ -68,6 +67,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Adjustable Base Hit Chance.
 * Adjustable Hit Chance stepping and min/max cap.
 * Control Display Precision of hit chance and called shot chance.
+
 
 
 # Installation
@@ -253,15 +253,6 @@ These settings can be changed in `settings.json`.
 
 
 ## Called Shot Settings
-
-**Enable Vehicle Called Shot**
-
-> Setting: `FixVehicleCalledShot`  (true/false, default true)
->
-> Called shot have absolutely no effect on vehicles, as of game version 1.1.2.  Set to true to make it work again.
->
-> In the code, Mech Locations and Vehicle Locations are two separate data type, meaning there are two set of states and methods to handle hit location.  And vehicle's called shot handling is incomplete.  You can pick a called shot location, but it never reach the hit location routine.  This can be verified by disabling this setting and enabling attack log.
-
 
 
 **Fix Grey Head Disease**

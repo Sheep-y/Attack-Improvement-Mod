@@ -99,9 +99,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideHUDVehicleCalledShotPercent ( ref string __result, VehicleChassisLocations location, VehicleChassisLocations targetedLocation ) { try {
-         if ( ! Settings.FixVehicleCalledShot || ! Settings.ShowRealVehicleCalledShotChance )
-            targetedLocation = VehicleChassisLocations.None; // Disable called location if vehicle called shot is not fixed
-
          Dictionary<VehicleChassisLocations, int> hitTable = Combat.HitLocation.GetVehicleHitTable( AttackDirection );
          if ( CacheNeedRefresh( hitTable, (int) targetedLocation ) )
             HitTableTotalWeight = SumWeight( hitTable, targetedLocation, FixMultiplier( targetedLocation, ActorCalledShotBonus ), scale );

@@ -103,9 +103,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
        [ JsonSection( "Called Shots" ) ]
       //
 
-      [ JsonComment( "Enable Vehicle Called Shot, which the game did not implement fully. Default true." ) ]
-      public bool FixVehicleCalledShot = true;
-
       [ JsonComment( new string[]{
         "Did you know you can called shot the head of headshot immune boss?",
         "You can do that before any headshot immune unit has been attacked.  But it won't have any effect.  Default true." } ) ]
