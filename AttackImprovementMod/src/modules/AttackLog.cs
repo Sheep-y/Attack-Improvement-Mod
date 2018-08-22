@@ -239,7 +239,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          long cap = Settings.AttackLogArchiveMaxMB * 1024L * 1024L,
                sum = oldLogs.Select( e => e.Length ).Sum();
-         Info( "Background: Found {0} old logs totalling {1:#,##0} bytes. Cap is {2:#,##0}.", oldLogs.Length, sum, cap );
+         Info( "Background: Found {0} old log(s) totalling {1:#,##0} bytes. Cap is {2:#,##0}.", oldLogs.Length, sum, cap );
          if ( sum <= cap ) return;
 
          int deleted = 0;
