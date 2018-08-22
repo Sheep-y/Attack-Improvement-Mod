@@ -12,13 +12,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class Criticals : BattleModModule {
 
       public override void CombatStartsOnce () {
-         Type MechType = typeof( Mech );
-         Type VehiType = typeof( Vehicle );
-         Type TurtType = typeof( Turret );
-
-         if ( Settings.SkipCritingDeadMech ) 
-            Patch( MechType, "ResolveWeaponDamage", new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) }, "Skip_BeatingDeadMech", null );
-         }
+         if ( Settings.SkipCritingDeadMech )
+            Patch( typeof( Mech ), "ResolveWeaponDamage", new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) }, "Skip_BeatingDeadMech", null );
       }
 
       public override void CombatStarts () {
