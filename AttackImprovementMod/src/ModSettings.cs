@@ -92,7 +92,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
 
-      [ JsonComment( "Change marker colour of the facing indicator. Colorus are for Front, Left, Right, Back, Prone." ) ]
+      [ JsonComment( "Change marker colour of the facing indicator. Colours are for Front, Left, Right, Back, Prone." ) ]
       //public string FacingMarkerPlayerColors = "#FFFF,#AAFD,#AAFD,#BFBF,#FFBF"; // Darker sides and green back
       //public string FacingMarkerEnemyColors  = "#FFFF,#AAFD,#AAFD,#FBBF,#FFBF"; // Darker sides and red back
       public string FacingMarkerPlayerColors = "#FFFF,#CFCF,#CFCF,#AFAF,#FF8F";
@@ -269,6 +269,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Hit Resolution" ) ]
       //
 
+      //[ JsonComment( "Crit is now checked on final damaged location by following damage transfer.  Default true." ) ]
+      //public bool CritFollowDamageTransfer = true;
+
       [ JsonComment( "Skip critical checks if target is dead.  Default true." ) ]
       public bool SkipCritingDeadMech = true;
 
@@ -280,7 +283,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool AutoJettisonAmmo = true;
       public bool AutoJettisonEnemyAmmo = false;
 
-      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below." ) ]
+      [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true." ) ]
       public bool FixHitDistribution = true;
 
       [ JsonComment(

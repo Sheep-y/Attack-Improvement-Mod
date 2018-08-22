@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 2.2 development #
+# AIM - Attack Improvement Mod 2.2 #
 For BATTLETECH 1.2.0
 
 - [Features Overview](#features-overview)
@@ -21,7 +21,7 @@ For BATTLETECH 1.2.0
 - [Credits](#credits)
 
 
-AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as fixing vehicle called shot, improves targeting lines, tune down roll correction, show heat and stability numbers, and a detailed attack log.  The default settings aims to not deviate too far from vanilla.
+AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show heat and stability numbers, or a detailed attack log.  The default settings aims to not deviate too far from vanilla.
 
 This mod does *not* modify game data.  Saves made with this mod on will *not* be affected by disabling or removing this mod.
 
@@ -67,6 +67,8 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Adjustable Base Hit Chance.
 * Adjustable Hit Chance stepping and min/max cap.
 * Control Display Precision of hit chance and called shot chance.
+
+## Legacy ##
 
 
 
@@ -724,7 +726,7 @@ These logs later become the Attack Log feature.
 How about the roll correction?  A mod kills it.  Can I tune it down instead? (Play with formulas in Excel.) Ok, let's do that.
 Hmm, now I need to show the modified hit chance. (Re-learn algebra and coded perhaps the most complicated formula in all BattleTech mods.)
 
-Eventually I fixed the two bugs I intended to fix, plus fixing vehicle called shot.
+Eventually I fixed the two bugs I intended to fix, plus fixing vehicle called shot. (Fixed in 1.2.0 beta, two months after AIM is released.)
 When I am mostly done, game updates 1.1 landed just the day before I plan to release, and it changed how called shot works.  Took me two whole days to update the mod, before I went back to enjoy the game.
 
 Or so I hoped.

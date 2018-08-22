@@ -30,9 +30,9 @@ document.addEventListener( 'DOMContentLoaded', () => {
 </script>
 <body>
 
-<h1 id="aimattackimprovementmod21development">AIM - Attack Improvement Mod 2.1 </h1>
+<h1 id="aimattackimprovementmod21development">AIM - Attack Improvement Mod 2.2 </h1>
 
-<p>For BATTLETECH 1.1.2</p>
+<p>For BATTLETECH 1.2.0</p>
 
 <ul>
 <li><a href="#featuresoverview">Features Overview</a></li>
@@ -75,7 +75,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <li><a href="#credits">Credits</a></li>
 </ul>
 
-<p>AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as fixing vehicle called shot, improves targeting lines, tune down roll correction, show heat and stability numbers, and a detailed attack log.  The default settings aims to not deviate too far from vanilla.</p>
+<p>AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show heat and stability numbers, or a detailed attack log.  The default settings aims to not deviate too far from vanilla.</p>
 
 <p>This mod does <em>not</em> modify game data.  Saves made with this mod on will <em>not</em> be affected by disabling or removing this mod.</p>
 
@@ -86,8 +86,6 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <h2 id="gamebugsfixedandhudenhancements">Game Bugs Fixed and HUD Enhancements</h2>
 
 <ul>
-<li>Vehicle Called Shot fixed.</li>
-
 <li>Damaged Structure Display fixed and enhanced.</li>
 
 <li>Grey Head Disease fixed.</li>
@@ -157,6 +155,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <li>Control Display Precision of hit chance and called shot chance.</li>
 </ul>
 
+<h2 id="legacy">Legacy</h2>
+
 <h1 id="installation">Installation</h1>
 
 <p><span style="color:red">
@@ -164,7 +164,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 Rename your old <code>mod.json</code> to <code>settings.json</code> to keep old settings.</p>
 
 <ol>
-<li><a href="https://github.com/Mpstark/ModTek/wiki/The-Drop-Dead-Simple-Guide-to-Installing-BTML-&amp;-ModTek-&amp;-ModTek-mods">Install BTML and ModTek.</a></li>
+<li>Install <a href="https://github.com/janxious/ModTek/wiki/The-Drop-Dead-Simple-Guide-to-Installing-BTML-&amp;-ModTek-&amp;-ModTek-mods">BTML and ModTek</a>.</li>
 
 <li><a href="https://github.com/Sheep-y/Attack-Improvement-Mod/releases">Download this mod</a>, extract in the mod folder. i.e. You should see <code>BATTLETECH\Mods\AttackImprovementMod\mod.json</code></li>
 
@@ -357,16 +357,6 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 </blockquote>
 
 <h2 id="calledshotsettings">Called Shot Settings</h2>
-
-<p><strong>Enable Vehicle Called Shot</strong></p>
-
-<blockquote>
-  <p>Setting: <code>FixVehicleCalledShot</code>  (true/false, default true)</p>
-  
-  <p>Called shot have absolutely no effect on vehicles, as of game version 1.1.2.  Set to true to make it work again.</p>
-  
-  <p>In the code, Mech Locations and Vehicle Locations are two separate data type, meaning there are two set of states and methods to handle hit location.  And vehicle's called shot handling is incomplete.  You can pick a called shot location, but it never reach the hit location routine.  This can be verified by disabling this setting and enabling attack log.</p>
-</blockquote>
 
 <p><strong>Fix Grey Head Disease</strong></p>
 
@@ -793,6 +783,14 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 
 <h1 id="compatibilities">Compatibilities</h1>
 
+<ul>
+<li>BattleTech 1.0 - AIM 1.0.1.</li>
+
+<li>BattleTech 1.1 - AIM 1.0.1, 2.0, and 2.1.</li>
+
+<li>BattleTech 1.2 - AIM 2.2.</li>
+</ul>
+
 <p>AIM is aware of some other mods and will behave differently in their present to meet player expectations.</p>
 
 <p>These behaviours will not change saved settings.  If you want to replace them with AIM, you may need to change AIM settings.</p>
@@ -846,7 +844,7 @@ These logs later become the Attack Log feature.
 How about the roll correction?  A mod kills it.  Can I tune it down instead? (Play with formulas in Excel.) Ok, let's do that.
 Hmm, now I need to show the modified hit chance. (Re-learn algebra and coded perhaps the most complicated formula in all BattleTech mods.)</p>
 
-<p>Eventually I fixed the two bugs I intended to fix, plus fixing vehicle called shot.
+<p>Eventually I fixed the two bugs I intended to fix, plus fixing vehicle called shot. (Fixed in 1.2.0 beta, two months after AIM is released.)
 When I am mostly done, game updates 1.1 landed just the day before I plan to release, and it changed how called shot works.  Took me two whole days to update the mod, before I went back to enjoy the game.</p>
 
 <p>Or so I hoped.</p>
