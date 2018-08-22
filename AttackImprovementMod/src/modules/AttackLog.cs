@@ -59,6 +59,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( CritRulesType, "GetCritMultiplier", null, "LogCritMultiplier" );
                Patch( CritRulesType, "GetCritChance", null, "LogCritChance" );
                Patch( MechType, "GetComponentInSlot", null, "LogCritComp" );
+               Patch( typeof( AttackDirector.AttackSequence ), "FlagAttackCausedAmmoExplosion", null, "LogAmmoExplosion" );
                Patch( MechType, "CheckForCrit", NonPublic, null, "LogCritResult" );
                goto case "damage";
 
@@ -316,7 +317,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       internal static string GetShotLog () {
-         string weaponName = thisWeapon?.UIName?.Replace( " +", "+" );
+         string weaponName = thisWeapon?.UIName?.ToString().Replace( " +", "+" );
          string uid = thisWeapon?.uid;
          if ( uid != null ) {
             if ( uid.EndsWith( "_Melee" ) ) uid = "Melee";
@@ -538,7 +539,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static int thisCritSlot;
       private static MechComponent thisCritComp = null;
       private static ComponentDamageLevel thisCompBefore;
-      private static bool halfFullAmmo = false;
+      private static bool ammoExploded = false;
 
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritComp ( MechComponent __result, ChassisLocations location, int index ) {
@@ -546,12 +547,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          //Log( $"Record Crit Comp @ {location} = {__result?.UIName}" );
          thisCritSlot = index;
          thisCritComp = __result;
-         if ( __result != null ) {
+         if ( __result != null )
             thisCompBefore = __result.DamageLevel;
-            if ( __result is AmmunitionBox box )
-               halfFullAmmo = box.CurrentAmmo > ( box.ammunitionBoxDef.Capacity / 2f );
-         }
          checkCritComp = false;
+      }
+
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogAmmoExplosion () {
+         ammoExploded = true;
       }
 
       [ HarmonyPriority( Priority.Last ) ]
@@ -580,7 +583,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( thisCritComp == null )
                critLine += Separator + "(Empty)" + Separator + "--" + Separator + "--";
             else {
-               string thisCompAfter = thisCritComp is AmmunitionBox && halfFullAmmo ? "Explosion" : thisCritComp.DamageLevel.ToString();
+               string thisCompAfter = ammoExploded ? "Explosion" : thisCritComp.DamageLevel.ToString();
                critLine += Separator + thisCritComp.UIName +
                            Separator + thisCompBefore +
                            Separator + thisCompAfter;
@@ -591,7 +594,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          log[ lineIndex ] = line;
          thisCritSlot = -1;
          thisCritComp = null;
-         halfFullAmmo = false;
+         ammoExploded = false;
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
