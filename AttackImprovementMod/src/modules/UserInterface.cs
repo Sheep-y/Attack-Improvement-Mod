@@ -1,5 +1,6 @@
 using BattleTech.UI;
 using BattleTech;
+using Localize;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -213,16 +214,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          ToolTip.DebuffStrings.Clear();
          ToolTip.BasicString = Mech.GetLongArmorLocation(location);
          foreach ( MechComponent mechComponent in mech.GetComponentsForLocation( MechStructureRules.GetChassisLocationFromArmorLocation( location ), ComponentType.NotSet ) ) {
-            string componentName = mechComponent.UIName;
+            string componentName = mechComponent.UIName.ToString();
             int allAmmo = 1;
             if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
                componentName += " (" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
             else if ( mechComponent is AmmunitionBox ammo )
                componentName += " (" + ammo.CurrentAmmo + "/" + ammo.AmmoCapacity + ")";
             if ( mechComponent.DamageLevel >= ComponentDamageLevel.NonFunctional || allAmmo <= 0 )
-               ToolTip.DebuffStrings.Add( componentName );
+               ToolTip.DebuffStrings.Add( new Text( componentName ) );
             else
-               ToolTip.BuffStrings.Add( componentName );
+               ToolTip.BuffStrings.Add( new Text( componentName ) );
          }
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
@@ -419,14 +420,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseToHitChance( HUD.SelectedActor ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( "Gunnery " + mech.SkillGunnery + " = " + string.Format( "{0:0.#}%", baseChance ) );
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( Translate( "GUNNERY" ) + " " + mech.SkillGunnery + string.Format( " = {0:0.#}%", baseChance ) ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowBaseMeleeChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseMeleeToHitChance( mech ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( "Piloting " + mech.SkillPiloting + " = " + string.Format( "{0:0.#}%", baseChance ) );
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( Translate( "PILOTING" ) + " " + mech.SkillPiloting + string.Format( " = {0:0.#}%", baseChance ) ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
    }

@@ -1,5 +1,6 @@
 ﻿using BattleTech.UI;
 using BattleTech;
+using Localize;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -194,9 +195,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          int mod = Mathf.RoundToInt( tooltip.Value );
          if ( mod == 0 ) return 0;
          if ( mod > 0 )
-            tip.DebuffStrings.Add( tooltip.DisplayName + " +" + mod );
+            tip.DebuffStrings.Add( new Text( tooltip.DisplayName + " +" + mod ) );
          else // if ( mod < 0 )
-            tip.BuffStrings.Add( tooltip.DisplayName + " " + mod );
+            tip.BuffStrings.Add( new Text( tooltip.DisplayName + " " + mod ) );
          return mod;
       }
 
@@ -239,7 +240,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "locationdamage" :
             return () => {
                if ( Attacker is Mech mech ) {
-                  string location = Mech.GetAbbreviatedChassisLocation( (ChassisLocations) AttackWeapon.Location );
+                  Text location = Mech.GetAbbreviatedChassisLocation( (ChassisLocations) AttackWeapon.Location );
                   return new AttackModifier( $"{location} DAMAGED", MechStructureRules.GetToHitModifierLocationDamage( mech, AttackWeapon ) );
                } else
                   return new AttackModifier( "CHASSIS DAMAGED", Hit.GetSelfDamageModifier( Attacker, AttackWeapon ) );

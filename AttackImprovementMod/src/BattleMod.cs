@@ -1,6 +1,7 @@
 ﻿using BattleTech;
 using BattleTech.UI;
 using Harmony;
+using Localize;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -363,7 +364,11 @@ namespace Sheepy.BattleTechMod {
       }
 
       // ============ UTILS ============
-         
+
+      public static string Translate ( string s ) {
+         return new Text( s, new object[0] ).ToString( true );
+      }
+
       public static string UppercaseFirst ( string s ) {
          if ( string.IsNullOrEmpty( s ) ) return string.Empty;
          return char.ToUpper( s[ 0 ] ) + s.Substring( 1 );
