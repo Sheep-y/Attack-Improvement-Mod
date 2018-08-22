@@ -4,6 +4,9 @@ CHANGE LOG
 
 * Big: Updated for 1.2.0. Incompatible with game version 1.1.2 and before.
 * Big: Vehicle called shot fix removed, because fixed in 1.2.0 and mod is not backward compatible due to game update.
+
+2018-08-23 AIM Version 2.1.1 for BATTLETECH 1.1.2
+
 * Fix: LOS of unknown targets always use front colour.
 * Fix: Ammo AI was leaving too many ammo in bins.
 * Mod: Better compatibility with mods that change explosion rules.

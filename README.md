@@ -68,9 +68,6 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Adjustable Hit Chance stepping and min/max cap.
 * Control Display Precision of hit chance and called shot chance.
 
-## Legacy ##
-
-
 
 # Installation
 
@@ -669,7 +666,7 @@ but because the code that determine hit distribution is not designed for fractio
 # Compatibilities
 
 * BattleTech 1.0 - AIM 1.0.1.
-* BattleTech 1.1 - AIM 1.0.1, 2.0, and 2.1.
+* BattleTech 1.1 - AIM 1.0.1, 2.0, 2.1, and 2.1.1.
 * BattleTech 1.2 - AIM 2.2.
 
 AIM is aware of some other mods and will behave differently in their present to meet player expectations.
