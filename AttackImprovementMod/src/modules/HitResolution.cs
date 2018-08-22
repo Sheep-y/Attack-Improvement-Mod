@@ -256,7 +256,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( maxDraw <= 0 ) return 0;
          int needAmmo = maxDraw;
          foreach ( AmmunitionBox box in boxes ) {
-            int ammo = box.CurrentAmmo, spare = ammo - (int) Math.Ceiling( box.AmmoCapacity / 2f ) - 1;
+            int ammo = box.CurrentAmmo, spare = ammo - (int) Math.Ceiling( box.AmmoCapacity / 2f ) + 1;
             if ( spare <= 0 || spare > threshold ) continue;
             needAmmo -= SubtractAmmo( box, me.uid, stackItemUID, Math.Min( needAmmo, spare ) );
             if ( needAmmo <= 0 ) return maxDraw;

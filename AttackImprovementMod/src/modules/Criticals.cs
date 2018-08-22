@@ -18,7 +18,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.SkipCritingDeadMech ) 
             Patch( MechType, "ResolveWeaponDamage", new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) }, "Skip_BeatingDeadMech", null );
-         }
+
+         //if ( Settings.CritFollowDamageTransfer ) {}
       }
 
       public override void CombatStarts () {
