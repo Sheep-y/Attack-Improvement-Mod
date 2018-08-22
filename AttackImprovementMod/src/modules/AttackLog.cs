@@ -76,8 +76,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                LogLocation = true;
                Patch( GetHitLocation( typeof( ArmorLocation ) ), null, "LogMechHit" );
                Patch( GetHitLocation( typeof( VehicleChassisLocations ) ), null, "LogVehicleHit" );
-               Patch( TurtType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
-               Patch( BuldType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( ArmorLocation ), typeof( float ) }, null, "LogBuildingHit" );
+               Patch( TurtType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( int ), typeof( float ) }, null, "LogBuildingHit" );
+               Patch( BuldType, "GetHitLocation", new Type[]{ typeof( AbstractActor ), typeof( UnityEngine.Vector3 ), typeof( float ), typeof( int ), typeof( float ) }, null, "LogBuildingHit" );
                Patch( TurtType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
                Patch( BuldType, "GetAdjacentHitLocation", null, "LogBuildingClusterHit" );
                goto case "shot";
