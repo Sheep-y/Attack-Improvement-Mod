@@ -162,7 +162,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static MethodInfo GetHitLocation ( Type generic ) {
          return typeof( BattleTech.HitLocation ).GetMethod( "GetHitLocation", Public | Static ).MakeGenericMethod( generic );
       }
-      
+
       internal static Random idGenerator; // Use an independent generator to make sure we don't affect the game's own RNG or be affected.
 
       public static string GetNewId () {
@@ -281,8 +281,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static void BuildSequenceLine ( ICombatant attacker, ICombatant target, AttackDirection direction, float range ) {
          string time = DateTime.Now.ToString( "s" );
          thisSequenceTargetId = target.GUID;
-         thisSequence = 
-            time + Separator + 
+         thisSequence =
+            time + Separator +
             TeamAndCallsign( attacker ) + // Attacker team, pilot, mech
             TeamAndCallsign( target ) +   // Target team, pilot, mech
             thisCombatId + Separator +
@@ -446,9 +446,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ HarmonyPriority( Priority.Last ) ]
-      public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc ) {
+      public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc, Weapon weapon ) {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
-         LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
+         int line = LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
+         if ( Settings.CritFollowDamageTransfer && hitMap != null )
+            hitMap[ GetHitKey( weapon.uid, aLoc, __instance.GUID ) ] = line;
       }
 
       [ HarmonyPriority( Priority.Last ) ]
@@ -468,20 +470,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          LogActorDamage( 0, __instance.CurrentStructure );
       }
 
-      private static void LogActorDamage ( float afterArmour, float afterStruct ) { try {
-         if ( damageResolved ) return;
+      private static int LogActorDamage ( float afterArmour, float afterStruct ) { try {
+         if ( damageResolved ) return -1;
          damageResolved = true;
          if ( hitList.Count <= 0 ) {
             Warn( "Damage Log cannot find matching hit record. May be DFA self-damage?" );
-            return;
+            return -1;
          }
-         string line = log[ hitList[0] ];
+         int index = hitList[0];
+         string line = log[ index ];
          if ( ( LogCritical && ! line.EndsWith( DamageDummy + CritDummy ) ) || ( ! LogCritical && ! line.EndsWith( DamageDummy ) ) ) {
             Warn( "Damage Log found an amended line, aborting." );
             hitList.RemoveAt( 0 );
             //Log( $"Hit list remaining: {hitList.Count}" );
             thisDamage = null;
-            return;
+            return -1;
          }
 
          if ( LogCritical )
@@ -494,12 +497,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             line += CritDummy;
 
          //Log( $"Log damage " + line );
-         log[ hitList[0] ] = line;
+         log[ index ] = line;
          hitList.RemoveAt( 0 );
          //Log( $"Hit list remaining: {hitList.Count}" );
          thisDamage = null;
-      }                 catch ( Exception ex ) { Error( ex ); } }
-      
+         return index;
+      }                 catch ( Exception ex ) { Error( ex ); return -1; } }
+
 
       // ============ Crit Log ============
 

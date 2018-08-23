@@ -269,11 +269,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Hit Resolution" ) ]
       //
 
-      //[ JsonComment( "Crit is now checked on final damaged location by following damage transfer.  Default true." ) ]
-      //public bool CritFollowDamageTransfer = true;
-
       [ JsonComment( "Skip critical checks if target is dead.  Default true." ) ]
       public bool SkipCritingDeadMech = true;
+
+      [ JsonComment( "Crit is now checked on final damaged location by following damage transfer.  Default true." ) ]
+      public bool CritFollowDamageTransfer = true;
 
       [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends." ) ]
       public bool BalanceAmmoConsumption = true;
