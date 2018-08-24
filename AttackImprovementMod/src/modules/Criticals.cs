@@ -1,21 +1,29 @@
 ﻿using BattleTech.UI;
 using BattleTech;
+using Harmony;
+using System.Reflection;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using Harmony;
    using static Mod;
    using static System.Reflection.BindingFlags;
 
    public class Criticals : BattleModModule {
 
+      private static Type MechType = typeof( Mech );
+      private static MethodInfo CheckForCrit;
+
       public override void CombatStartsOnce () {
-         Type MechType = typeof( Mech );
+         MethodInfo ResolveWeaponDamage = MechType.GetMethod( "ResolveWeaponDamage", new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) } );
 
          if ( Settings.SkipCritingDeadMech ) 
-            Patch( MechType, "ResolveWeaponDamage", new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) }, "Skip_BeatingDeadMech", null );
+            Patch( ResolveWeaponDamage, "Skip_BeatingDeadMech", null );
+
+         if ( Settings.FixFullStructureCrit ) {
+            Patch( ResolveWeaponDamage, "RecordCritMech", "ClearCritMech" );
+            Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", null, "RemoveFullStructureLocationsFromCritList" );
+         }
 
          if ( Settings.CritFollowDamageTransfer ) {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
@@ -26,10 +34,45 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStarts () {
       }
 
+      private static bool HasCheckForCrit () { try {
+         if ( CheckForCrit != null ) return true;
+         CheckForCrit = MechType.GetMethod( "CheckForCrit", NonPublic | Instance );
+         return CheckForCrit == null;
+      } catch ( Exception ex ) {
+         Error( ex );
+         return false;
+      } }
+
       [ HarmonyPriority( Priority.High ) ]
       public static bool Skip_BeatingDeadMech ( Mech __instance ) {
          if ( __instance.IsFlaggedForDeath || __instance.IsDead ) return false;
          return true;
+      }
+
+      // ============ FixFullStructureCrit ============
+
+      private static Mech thisCritMech;
+
+      public static void RecordCritMech ( Mech __instance ) {
+         thisCritMech = __instance;
+      }
+
+      public static void ClearCritMech () {
+         thisCritMech = null;
+      }
+
+      public static void RemoveFullStructureLocationsFromCritList ( Dictionary<int, float> __result ) {
+         if ( thisCritMech == null ) return;
+         List<ChassisLocations> fullStructureLocations = new List<ChassisLocations>(4);
+         foreach ( int armorLocation in __result.Keys ) {
+            ChassisLocations location = MechStructureRules.GetChassisLocationFromArmorLocation( (ArmorLocation) armorLocation );
+            float curr = thisCritMech.StructureForLocation( (int) location ), max = thisCritMech.MaxStructureForLocation( (int) location );
+            if ( curr == max ) fullStructureLocations.Add( location );
+         }
+         foreach ( ChassisLocations location in fullStructureLocations ) {
+            Verbo( "Prevented {0} crit on {1} because it is not structurally damaged.", location, thisCritMech.DisplayName );
+            __result.Remove( (int) location );
+         }
       }
 
       // ============ CritFollowDamageTransfer ============

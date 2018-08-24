@@ -74,7 +74,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static void KillZombie ( string type, string name, float HP, ref float totalDamage ) {
          float newHP = HP - totalDamage;
          if ( newHP >= 1 || newHP <= 0 ) return;
-         Info( "Upgrading damage dealt to {1} by {2} to kill zombie {0}", type, name, newHP );
+         Verbo( "Upgrading damage dealt to {1} by {2} to kill zombie {0}", type, name, newHP );
          totalDamage += newHP + 0.001f;
       }
 

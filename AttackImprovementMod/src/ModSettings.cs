@@ -275,6 +275,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Crit is now checked on final damaged location by following damage transfer.  Default true." ) ]
       public bool CritFollowDamageTransfer = true;
 
+      [ JsonComment( "Fix the case where a location with full sctructure but zero armour can be crit'ed.  Default true." ) ]
+      public bool FixFullStructureCrit = true;
+
       [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends." ) ]
       public bool BalanceAmmoConsumption = true;
       public bool BalanceEnemyAmmoConsumption = false;
