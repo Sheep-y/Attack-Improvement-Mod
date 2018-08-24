@@ -30,7 +30,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             armoured = new Dictionary<ArmorLocation, float>();
             damaged = new Dictionary<int, float>();
-            Patch( ResolveWeaponDamage, "ThroughArmorCritical", null );
+            Patch( ResolveWeaponDamage, "AddThroughArmorCritical", null );
             Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", "Override_ConsolidateCriticalHitInfo", null );
             ThroughArmorBaseCritChance = (float) Settings.ThroughArmorCritChanceFullArmor;
             ThroughArmorVarCritChance = (float) Settings.ThroughArmorCritChanceZeroArmor - ThroughArmorBaseCritChance;
@@ -112,7 +112,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
-      public static void ThroughArmorCritical ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) { try {
+      public static void AddThroughArmorCritical ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) { try {
          Mech mech = __instance;
 
          SplitCriticalHitInfo( mech, hitInfo, () => {
@@ -165,7 +165,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                aLog( "Critical Hit! Found {0} in slot {1}", componentInSlot.Name, slot );
                PlayCritAudio( mech, weapon, componentInSlot );
                PlayCritVisual( mech, location, componentInSlot );
-               AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence(hitInfo.attackSequenceId);
+               AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
                if ( attackSequence != null )
                   attackSequence.FlagAttackScoredCrit( componentInSlot as Weapon, componentInSlot as AmmunitionBox );
                ComponentDamageLevel componentDamageLevel = componentInSlot.DamageLevel;
@@ -183,6 +183,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          } else if ( atkLog.IsLogEnabled ) {
             aLog( "No crit" );
          }
+         AttackLog.LogCritResult( mech, location, weapon );
       }
 
       public static float GetThroughArmourCritChance ( ICombatant target, ArmorLocation hitLocation, Weapon weapon ) {
@@ -191,21 +192,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] CriticalHitImmunity!", new object[ 0 ] ) );
             return 0f;
          }
-         float change = 0f;
+         float chance = 0f;
          if ( target is Mech )
-            change = GetThroughArmourBaseCritChance( (Mech) target, hitLocation );
+            chance = GetThroughArmourBaseCritChance( (Mech) target, hitLocation );
          //change = Mathf.Max( change, CombatConstants.ResolutionConstants.MinCritChance ); // Min Chance does not apply to TAC
          float critMultiplier = Combat.CritChance.GetCritMultiplier( target, weapon, true );
          if ( CritChanceRules.attackLogger.IsDebugEnabled )
-            CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] base = {0}, multiplier = {1}!", change, critMultiplier ) );
-         return change * critMultiplier;
+            CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] base = {0}, multiplier = {1}!", chance, critMultiplier ) );
+         float result = chance * critMultiplier;
+         AttackLog.LogCritChance( result );
+         return result;
       }
 
       public static float GetThroughArmourBaseCritChance ( Mech target, ArmorLocation hitLocation ) {
          if ( CritChanceRules.attackLogger.IsDebugEnabled )
             CritChanceRules.attackLogger.LogDebug( string.Format( "Location Current Armour = {0}, Location Max Armour = {1}", target.GetCurrentArmor( hitLocation ), target.GetMaxArmor( hitLocation ) ) );
          float armorPercentage = target.GetCurrentArmor( hitLocation ) / target.GetMaxArmor( hitLocation );
-         return ThroughArmorBaseCritChance + ( 1f - armorPercentage ) * ThroughArmorVarCritChance;
+         float result = ThroughArmorBaseCritChance + ( 1f - armorPercentage ) * ThroughArmorVarCritChance;
+         AttackLog.LogBaseCritChance( result, target, MechStructureRules.GetChassisLocationFromArmorLocation( hitLocation ) );
+         return result;
       }
 
       public static void PlayCritAudio ( Mech mech, Weapon weapon, MechComponent component ) {
