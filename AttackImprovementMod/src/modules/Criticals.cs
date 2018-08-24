@@ -1,9 +1,10 @@
-﻿using BattleTech.UI;
-using BattleTech;
+﻿using BattleTech;
 using Harmony;
+using Localize;
 using System.Reflection;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
@@ -108,21 +109,107 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void ThroughArmorCritical ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) { try {
-         Mech me = __instance;
+         Mech mech = __instance;
 
-         SplitCriticalHitInfo( me, hitInfo, () => {
+         SplitCriticalHitInfo( mech, hitInfo, () => {
             float damage = weapon.parent == null ? weapon.DamagePerShot : weapon.DamagePerShotAdjusted( weapon.parent.occupiedDesignMask );
-            AbstractActor abstractActor = me.Combat.FindActorByGUID(hitInfo.attackerId);
-            LineOfFireLevel lineOfFireLevel = abstractActor.VisibilityCache.VisibilityToTarget( me ).LineOfFireLevel;
-            return me.GetAdjustedDamage( damage, weapon.Category, me.occupiedDesignMask, lineOfFireLevel, false );
+            AbstractActor abstractActor = mech.Combat.FindActorByGUID(hitInfo.attackerId);
+            LineOfFireLevel lineOfFireLevel = abstractActor.VisibilityCache.VisibilityToTarget( mech ).LineOfFireLevel;
+            return mech.GetAdjustedDamage( damage, weapon.Category, mech.occupiedDesignMask, lineOfFireLevel, false );
          } );
          
          if ( armoured == null || armoured.Count <= 0 ) return;
 
-         foreach ( var keyValuePair in armoured ) {
-            Info( $"Check through armour crit on {keyValuePair.Key}" );
-         }
+         foreach ( var keyValuePair in armoured )
+            CheckThroughArmourCrit( mech, hitInfo, keyValuePair.Key, weapon );
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static HBS.Logging.ILog atkLog;
+      private static string attackSequence;
+      private static void aLog( string message, params object[] args ) {
+         if ( atkLog.IsLogEnabled )
+            atkLog.Log( string.Format( attackSequence + message, args ) );
+      }
+
+      public static void CheckThroughArmourCrit ( Mech mech, WeaponHitInfo hitInfo, ArmorLocation armour, Weapon weapon ) {
+         atkLog = AbstractActor.attackLogger;
+         ChassisLocations location = MechStructureRules.GetChassisLocationFromArmorLocation( armour );
+         if ( weapon == null ) {
+            atkLog.LogError( "CheckForCrit had a null weapon!" );
+            return;
+         }
+         if ( atkLog.IsLogEnabled ) {
+            attackSequence = string.Format( "SEQ:{0}: WEAP:{1} Loc:{2}", hitInfo.attackSequenceId, hitInfo.attackWeaponIndex, location.ToString() );
+            aLog( "Base crit chance: {0:P2}", mech.Combat.CritChance.GetBaseCritChance(mech, location, true) );
+            aLog( "Modifiers : {0}", mech.Combat.CritChance.GetCritMultiplierDescription(mech, weapon) );
+         }
+         float critChance = mech.Combat.CritChance.GetCritChance(mech, location, weapon, true);
+         float[] randomFromCache = mech.Combat.AttackDirector.GetRandomFromCache(hitInfo, 2);
+         aLog( "Final crit chance: {0:P2}", critChance );
+         aLog( "Crit roll: {0:P2}", randomFromCache[0] );
+         if ( randomFromCache[ 0 ] <= critChance ) {
+            float slotCount = (float)mech.MechDef.GetChassisLocationDef(location).InventorySlots;
+            int slot = (int)(slotCount * randomFromCache[1]);
+            MechComponent componentInSlot = mech.GetComponentInSlot(location, slot);
+            if ( componentInSlot != null ) {
+               aLog( "Critical Hit! Found {0} in slot {1}", componentInSlot.Name, slot );
+               Weapon weaponCrited = componentInSlot as Weapon;
+               AmmunitionBox AmmoCrited = componentInSlot as AmmunitionBox;
+               Jumpjet jumpjetCrited = componentInSlot as Jumpjet;
+               HeatSinkDef heatsinkCrited = componentInSlot.componentDef as HeatSinkDef;
+               bool isWeapon = weaponCrited != null;
+               if ( mech.GameRep != null ) {
+                  if ( weapon.weaponRep != null && weapon.weaponRep.HasWeaponEffect ) {
+                     WwiseManager.SetSwitch<AudioSwitch_weapon_type>( weapon.weaponRep.WeaponEffect.weaponImpactType, mech.GameRep.audioObject );
+                  } else {
+                     WwiseManager.SetSwitch<AudioSwitch_weapon_type>( AudioSwitch_weapon_type.laser_medium, mech.GameRep.audioObject );
+                  }
+                  WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, mech.GameRep.audioObject );
+                  WwiseManager.PostEvent<AudioEventList_impact>( AudioEventList_impact.impact_weapon, mech.GameRep.audioObject, null, null );
+                  WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, mech.GameRep.audioObject, null, null );
+                  if ( mech.team.LocalPlayerControlsTeam )
+                     AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_friendly ", null, null );
+                  else if ( !mech.team.IsFriendly( mech.Combat.LocalPlayerTeam ) )
+                     AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
+                  if ( jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
+                     mech.GameRep.PlayComponentCritVFX( (int) location );
+                  if ( AmmoCrited != null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional ) {
+                     mech.GameRep.PlayVFX( (int) location, mech.Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
+                  }
+               }
+               AttackDirector.AttackSequence attackSequence = mech.Combat.AttackDirector.GetAttackSequence(hitInfo.attackSequenceId);
+               if ( attackSequence != null )
+                  attackSequence.FlagAttackScoredCrit( weaponCrited, AmmoCrited );
+               ComponentDamageLevel componentDamageLevel = componentInSlot.DamageLevel;
+               if ( componentDamageLevel == ComponentDamageLevel.Functional ) {
+                  if ( isWeapon ) {
+                     componentDamageLevel = ComponentDamageLevel.Penalized;
+                     mech.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech, new Text( "{0} CRIT", new object[]
+                     {
+                        componentInSlot.UIName
+                     } ), FloatieMessage.MessageNature.CriticalHit, true ) ) );
+                  } else {
+                     componentDamageLevel = ComponentDamageLevel.Destroyed;
+                     mech.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech, new Text( "{0} DESTROYED", new object[]
+                     {
+                        componentInSlot.UIName
+                     } ), FloatieMessage.MessageNature.ComponentDestroyed, true ) ) );
+                  }
+               } else if ( componentDamageLevel != ComponentDamageLevel.Destroyed ) {
+                  componentDamageLevel = ComponentDamageLevel.Destroyed;
+                  mech.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech, new Text( "{0} DESTROYED", new object[]
+                  {
+                     componentInSlot.UIName
+                  } ), FloatieMessage.MessageNature.ComponentDestroyed, true ) ) );
+               }
+               componentInSlot.DamageComponent( hitInfo, componentDamageLevel, true );
+               aLog( "Critical: {3} new damage state: {4}", componentInSlot.Name, componentDamageLevel );
+            } else
+               aLog( "Critical Hit! No component in slot {0}", slot );
+         } else if ( atkLog.IsLogEnabled ) {
+            aLog( "No crit" );
+         }
+      }
 
       // ============ FixFullStructureCrit ============
 
