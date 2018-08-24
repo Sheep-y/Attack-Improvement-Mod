@@ -131,76 +131,45 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             atkLog.Log( string.Format( attackSequence + message, args ) );
       }
 
+      private static void PublishMessage ( Mech mech, string message, object arg, FloatieMessage.MessageNature type ) {
+         mech.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( 
+            new ShowActorInfoSequence( mech, new Text( message, new object[] { arg } ), type, true ) ) );
+      }
+
       public static void CheckThroughArmourCrit ( Mech mech, WeaponHitInfo hitInfo, ArmorLocation armour, Weapon weapon ) {
          atkLog = AbstractActor.attackLogger;
-         ChassisLocations location = MechStructureRules.GetChassisLocationFromArmorLocation( armour );
          if ( weapon == null ) {
             atkLog.LogError( "CheckForCrit had a null weapon!" );
             return;
          }
+         ChassisLocations location = MechStructureRules.GetChassisLocationFromArmorLocation( armour );
+         CombatGameState Combat = mech.Combat;
          if ( atkLog.IsLogEnabled ) {
             attackSequence = string.Format( "SEQ:{0}: WEAP:{1} Loc:{2}", hitInfo.attackSequenceId, hitInfo.attackWeaponIndex, location.ToString() );
-            aLog( "Base crit chance: {0:P2}", mech.Combat.CritChance.GetBaseCritChance(mech, location, true) );
-            aLog( "Modifiers : {0}", mech.Combat.CritChance.GetCritMultiplierDescription(mech, weapon) );
+            aLog( "Base crit chance: {0:P2}", Combat.CritChance.GetBaseCritChance( mech, location, true ) );
+            aLog( "Modifiers : {0}", Combat.CritChance.GetCritMultiplierDescription( mech, weapon ) );
          }
-         float critChance = mech.Combat.CritChance.GetCritChance(mech, location, weapon, true);
-         float[] randomFromCache = mech.Combat.AttackDirector.GetRandomFromCache(hitInfo, 2);
+         float critChance = Combat.CritChance.GetCritChance(mech, location, weapon, true);
+         float[] randomFromCache = Combat.AttackDirector.GetRandomFromCache( hitInfo, 2 );
          aLog( "Final crit chance: {0:P2}", critChance );
          aLog( "Crit roll: {0:P2}", randomFromCache[0] );
          if ( randomFromCache[ 0 ] <= critChance ) {
-            float slotCount = (float)mech.MechDef.GetChassisLocationDef(location).InventorySlots;
+            float slotCount = mech.MechDef.GetChassisLocationDef( location ).InventorySlots;
             int slot = (int)(slotCount * randomFromCache[1]);
-            MechComponent componentInSlot = mech.GetComponentInSlot(location, slot);
+            MechComponent componentInSlot = mech.GetComponentInSlot( location, slot );
             if ( componentInSlot != null ) {
                aLog( "Critical Hit! Found {0} in slot {1}", componentInSlot.Name, slot );
-               Weapon weaponCrited = componentInSlot as Weapon;
-               AmmunitionBox AmmoCrited = componentInSlot as AmmunitionBox;
-               Jumpjet jumpjetCrited = componentInSlot as Jumpjet;
-               HeatSinkDef heatsinkCrited = componentInSlot.componentDef as HeatSinkDef;
-               bool isWeapon = weaponCrited != null;
-               if ( mech.GameRep != null ) {
-                  if ( weapon.weaponRep != null && weapon.weaponRep.HasWeaponEffect ) {
-                     WwiseManager.SetSwitch<AudioSwitch_weapon_type>( weapon.weaponRep.WeaponEffect.weaponImpactType, mech.GameRep.audioObject );
-                  } else {
-                     WwiseManager.SetSwitch<AudioSwitch_weapon_type>( AudioSwitch_weapon_type.laser_medium, mech.GameRep.audioObject );
-                  }
-                  WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, mech.GameRep.audioObject );
-                  WwiseManager.PostEvent<AudioEventList_impact>( AudioEventList_impact.impact_weapon, mech.GameRep.audioObject, null, null );
-                  WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, mech.GameRep.audioObject, null, null );
-                  if ( mech.team.LocalPlayerControlsTeam )
-                     AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_friendly ", null, null );
-                  else if ( !mech.team.IsFriendly( mech.Combat.LocalPlayerTeam ) )
-                     AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
-                  if ( jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
-                     mech.GameRep.PlayComponentCritVFX( (int) location );
-                  if ( AmmoCrited != null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional ) {
-                     mech.GameRep.PlayVFX( (int) location, mech.Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
-                  }
-               }
-               AttackDirector.AttackSequence attackSequence = mech.Combat.AttackDirector.GetAttackSequence(hitInfo.attackSequenceId);
+               PlayCritEffects( mech, location, weapon, componentInSlot );
+               AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence(hitInfo.attackSequenceId);
                if ( attackSequence != null )
-                  attackSequence.FlagAttackScoredCrit( weaponCrited, AmmoCrited );
+                  attackSequence.FlagAttackScoredCrit( componentInSlot as Weapon, componentInSlot as AmmunitionBox );
                ComponentDamageLevel componentDamageLevel = componentInSlot.DamageLevel;
-               if ( componentDamageLevel == ComponentDamageLevel.Functional ) {
-                  if ( isWeapon ) {
-                     componentDamageLevel = ComponentDamageLevel.Penalized;
-                     mech.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech, new Text( "{0} CRIT", new object[]
-                     {
-                        componentInSlot.UIName
-                     } ), FloatieMessage.MessageNature.CriticalHit, true ) ) );
-                  } else {
-                     componentDamageLevel = ComponentDamageLevel.Destroyed;
-                     mech.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech, new Text( "{0} DESTROYED", new object[]
-                     {
-                        componentInSlot.UIName
-                     } ), FloatieMessage.MessageNature.ComponentDestroyed, true ) ) );
-                  }
+               if ( componentInSlot is Weapon && componentDamageLevel == ComponentDamageLevel.Functional ) {
+                  componentDamageLevel = ComponentDamageLevel.Penalized;
+                  PublishMessage( mech, "{0} CRIT", componentInSlot.UIName, FloatieMessage.MessageNature.CriticalHit );
                } else if ( componentDamageLevel != ComponentDamageLevel.Destroyed ) {
                   componentDamageLevel = ComponentDamageLevel.Destroyed;
-                  mech.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage( new ShowActorInfoSequence( mech, new Text( "{0} DESTROYED", new object[]
-                  {
-                     componentInSlot.UIName
-                  } ), FloatieMessage.MessageNature.ComponentDestroyed, true ) ) );
+                  PublishMessage( mech, "{0} DESTROYED", componentInSlot.UIName, FloatieMessage.MessageNature.ComponentDestroyed );
                }
                componentInSlot.DamageComponent( hitInfo, componentDamageLevel, true );
                aLog( "Critical: {3} new damage state: {4}", componentInSlot.Name, componentDamageLevel );
@@ -208,6 +177,30 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                aLog( "Critical Hit! No component in slot {0}", slot );
          } else if ( atkLog.IsLogEnabled ) {
             aLog( "No crit" );
+         }
+      }
+
+      public static void PlayCritEffects ( Mech mech, ChassisLocations location, Weapon weapon, MechComponent componentInSlot ) {
+         if ( mech.GameRep != null ) {
+            AmmunitionBox AmmoCrited = componentInSlot as AmmunitionBox;
+            Jumpjet jumpjetCrited = componentInSlot as Jumpjet;
+            HeatSinkDef heatsinkCrited = componentInSlot.componentDef as HeatSinkDef;
+            if ( weapon.weaponRep != null && weapon.weaponRep.HasWeaponEffect ) {
+               WwiseManager.SetSwitch<AudioSwitch_weapon_type>( weapon.weaponRep.WeaponEffect.weaponImpactType, mech.GameRep.audioObject );
+            } else {
+               WwiseManager.SetSwitch<AudioSwitch_weapon_type>( AudioSwitch_weapon_type.laser_medium, mech.GameRep.audioObject );
+            }
+            WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, mech.GameRep.audioObject );
+            WwiseManager.PostEvent<AudioEventList_impact>( AudioEventList_impact.impact_weapon, mech.GameRep.audioObject, null, null );
+            WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, mech.GameRep.audioObject, null, null );
+            if ( mech.team.LocalPlayerControlsTeam )
+               AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_friendly ", null, null );
+            else if ( !mech.team.IsFriendly( Combat.LocalPlayerTeam ) )
+               AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
+            if ( jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
+               mech.GameRep.PlayComponentCritVFX( (int) location );
+            if ( AmmoCrited != null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
+               mech.GameRep.PlayVFX( (int) location, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
          }
       }
 
