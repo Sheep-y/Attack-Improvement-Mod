@@ -234,8 +234,8 @@ namespace Sheepy.BattleTechMod {
 
       public static bool FoundMod ( params string[] mods ) {
          if ( modList == null ) GetModList();
-         foreach ( string mod in mods )
-            if ( modList.Contains( mod ) ) return true;
+         for ( int i = 0, len = mods.Length ; i < len ; i++ )
+            if ( modList.Contains( mods[i] ) ) return true;
          return false;
       }
    }
