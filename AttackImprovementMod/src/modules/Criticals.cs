@@ -159,7 +159,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             MechComponent componentInSlot = mech.GetComponentInSlot( location, slot );
             if ( componentInSlot != null ) {
                aLog( "Critical Hit! Found {0} in slot {1}", componentInSlot.Name, slot );
-               PlayCritEffects( mech, location, weapon, componentInSlot );
+               PlayCritAudio( mech, weapon, componentInSlot );
+               PlayCritVisual( mech, location, componentInSlot );
                AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence(hitInfo.attackSequenceId);
                if ( attackSequence != null )
                   attackSequence.FlagAttackScoredCrit( componentInSlot as Weapon, componentInSlot as AmmunitionBox );
@@ -179,29 +180,31 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             aLog( "No crit" );
          }
       }
+      
+      public static void PlayCritAudio ( Mech mech, Weapon weapon, MechComponent component ) {
+         if ( mech.GameRep == null ) return;
+         if ( weapon.weaponRep != null && weapon.weaponRep.HasWeaponEffect )
+            WwiseManager.SetSwitch<AudioSwitch_weapon_type>( weapon.weaponRep.WeaponEffect.weaponImpactType, mech.GameRep.audioObject );
+         else
+            WwiseManager.SetSwitch<AudioSwitch_weapon_type>( AudioSwitch_weapon_type.laser_medium, mech.GameRep.audioObject );
+         WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, mech.GameRep.audioObject );
+         WwiseManager.PostEvent<AudioEventList_impact>( AudioEventList_impact.impact_weapon, mech.GameRep.audioObject, null, null );
+         WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, mech.GameRep.audioObject, null, null );
+      }
 
-      public static void PlayCritEffects ( Mech mech, ChassisLocations location, Weapon weapon, MechComponent componentInSlot ) {
-         if ( mech.GameRep != null ) {
-            AmmunitionBox AmmoCrited = componentInSlot as AmmunitionBox;
-            Jumpjet jumpjetCrited = componentInSlot as Jumpjet;
-            HeatSinkDef heatsinkCrited = componentInSlot.componentDef as HeatSinkDef;
-            if ( weapon.weaponRep != null && weapon.weaponRep.HasWeaponEffect ) {
-               WwiseManager.SetSwitch<AudioSwitch_weapon_type>( weapon.weaponRep.WeaponEffect.weaponImpactType, mech.GameRep.audioObject );
-            } else {
-               WwiseManager.SetSwitch<AudioSwitch_weapon_type>( AudioSwitch_weapon_type.laser_medium, mech.GameRep.audioObject );
-            }
-            WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, mech.GameRep.audioObject );
-            WwiseManager.PostEvent<AudioEventList_impact>( AudioEventList_impact.impact_weapon, mech.GameRep.audioObject, null, null );
-            WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, mech.GameRep.audioObject, null, null );
-            if ( mech.team.LocalPlayerControlsTeam )
-               AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_friendly ", null, null );
-            else if ( !mech.team.IsFriendly( Combat.LocalPlayerTeam ) )
-               AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
-            if ( jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
-               mech.GameRep.PlayComponentCritVFX( (int) location );
-            if ( AmmoCrited != null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
-               mech.GameRep.PlayVFX( (int) location, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
-         }
+      public static void PlayCritVisual ( Mech mech, ChassisLocations location, MechComponent componentInSlot ) {
+         if ( mech.GameRep == null ) return;
+         AmmunitionBox AmmoCrited = componentInSlot as AmmunitionBox;
+         Jumpjet jumpjetCrited = componentInSlot as Jumpjet;
+         HeatSinkDef heatsinkCrited = componentInSlot.componentDef as HeatSinkDef;
+         if ( mech.team.LocalPlayerControlsTeam )
+            AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_friendly ", null, null );
+         else if ( !mech.team.IsFriendly( Combat.LocalPlayerTeam ) )
+            AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
+         if ( jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
+            mech.GameRep.PlayComponentCritVFX( (int) location );
+         if ( AmmoCrited != null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
+            mech.GameRep.PlayVFX( (int) location, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
       }
 
       // ============ FixFullStructureCrit ============
