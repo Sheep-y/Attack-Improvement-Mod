@@ -105,9 +105,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "MissStreakBreakerThreshold", ref settings.MissStreakBreakerThreshold, 0, 1 );
          RangeCheck( "MissStreakBreakerDivider", ref settings.MissStreakBreakerDivider, -100, 100 );
 
+         RangeCheck( "ThroughArmorCritThreshold", ref settings.ThroughArmorCritThreshold, 0, 10000 );
+         RangeCheck( "ThroughArmorCritChanceZeroArmor", ref settings.ThroughArmorCritChanceZeroArmor, 0, 1 );
+         RangeCheck( "ThroughArmorCritChanceFullArmor", ref settings.ThroughArmorCritChanceFullArmor, -1, settings.ThroughArmorCritChanceZeroArmor );
+
          // Is 1TB a reasonable limit of how many logs to keep?
          RangeCheck( "AttackLogArchiveMaxMB", ref settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
-         
+
          if ( settings.SettingVersion == null ) settings.SettingVersion = 0;
          if ( settings.SettingVersion < 2_001_000 ) { // Pre-2.1.0
             Info( "Upgrading settings to 2.1" );

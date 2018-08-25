@@ -278,13 +278,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix the case where a location with full sctructure but zero armour can be crit'ed.  Default true." ) ]
       public bool FixFullStructureCrit = true;
 
-      [ JsonComment( "A weapon must deal this much damage to a location for through armour crit to roll.  Default 10." ) ]
+      [ JsonComment( new string[]{
+        "A weapon must deal this much total damage to a location for through armour crit to roll.  Default 10.  Set to 0 for no threshold.",
+        "A number between 0 and 1 (exclusive) means a fraction of max armour.  1 and above means fixed damage threshold." } ) ]
       public decimal ThroughArmorCritThreshold = 10;
 
-      [ JsonComment( "A weapon has this much chance to crit when the location is reduced to exactly zero armour.  Set to 0 to disable through armor critical. Default 0.2 for 20%." ) ]
+      [ JsonComment( new string[]{
+        "Base crit chance of a location with zero armour but full structure.",
+        "Set to 0 to disable through armor critical.  Default 0.2 for 20%.  Can be 0 to 1." } ) ]
       public decimal ThroughArmorCritChanceZeroArmor = 0.2m;
 
-      [ JsonComment( "A weapon has this much chance to crit a location with full armour.  Default 0 for 0%." ) ]
+      [ JsonComment( new string[]{
+        "Base crit chance of a location with full armour.  Must not be higher than ThroughArmorCritChanceZeroArmor.",
+        "Actual through armour crit rate is between this and zero armour chance.  Default 0 for 0%.  Can be -1 to 1.",
+        "If negative, crit will not happens until armour is sufficiently weakened." } ) ]
       public decimal ThroughArmorCritChanceFullArmor = 0;
 
       [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends." ) ]
@@ -298,8 +305,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Increase hit distribution precision for degrading called shots.  Default true." ) ]
       public bool FixHitDistribution = true;
 
-      [ JsonComment(
-        "If a location would become a zombie part with zero hp, make sure it is destroyed instead. Default true." ) ]
+      [ JsonComment( "If a location would become a zombie part with zero hp, make sure it is destroyed instead. Default true." ) ]
       public bool KillZeroHpLocation = true;
 
       //
