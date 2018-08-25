@@ -118,12 +118,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static bool IsStructureDamaged ( ref float percent, Mech mech, MechDef mechDef, ChassisLocations location ) {
          if ( float.IsNaN( percent ) ) {
-            float hp;
-            if ( mech != null )
+            float hp, maxHp;
+            if ( mech != null ) {
                hp = mech.GetCurrentStructure( location );
-            else // if ( mechDef != null )
+               maxHp = mech.GetMaxStructure( location );
+            } else { // if ( mechDef != null )
                hp = mechDef.GetLocationLoadoutDef( location ).CurrentInternalStructure;
-            percent = hp / mechDef.GetChassisLocationDef( location ).InternalStructure;
+               maxHp = mechDef.GetChassisLocationDef( location ).InternalStructure;
+            }
+            percent = hp / maxHp;
          }
          return percent < 1f;
       }
