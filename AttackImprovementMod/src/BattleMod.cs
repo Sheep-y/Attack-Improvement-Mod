@@ -36,6 +36,7 @@ namespace Sheepy.BattleTechMod {
          TryRun( Setup ); // May be overloaded
          if ( log != Log ) 
             log = Log;
+         log.AddFilter( TranslateBattleTechText );
          Add( this );
          PatchBattleMods();
          CurrentMod = null;
@@ -54,12 +55,6 @@ namespace Sheepy.BattleTechMod {
 
       // ============ Setup ============
 
-      /*
-      private static List<BattleMod> modScopes = new List<BattleMod>();
-      private void PushScope () { modScopes.Add( this ); }
-      private void PopScope () { modScopes.RemoveAt( modScopes.Count - 1 ); }
-      internal static BattleMod CurrentMod { get { return modScopes.LastOrDefault(); } }
-      */
       internal static BattleMod CurrentMod;
 
 #pragma warning disable CS0649 // Disable "field never set" warnings since they are set by JsonConvert.
@@ -134,6 +129,15 @@ namespace Sheepy.BattleTechMod {
 
       private void SaveSettings ( string settings ) {
          TryRun( Log, () => File.WriteAllText( BaseDir + "settings.json", settings ) );
+      }
+
+      private static bool TranslateBattleTechText ( Logger.LogEntry line ) {
+         object[] args = line?.args;
+         if ( args == null ) return true;
+         for ( int i = 0, len = args.Length ; i < len ; i++ )
+            if ( args[i] is Text text )
+               args[i] = text.ToString( true );
+         return true;
       }
 
       // ============ Execution ============
