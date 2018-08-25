@@ -5,7 +5,6 @@ using Localize;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using Sheepy.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +13,6 @@ using System.Threading;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using UnityEngine;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod {
@@ -38,6 +36,7 @@ namespace Sheepy.BattleTechMod {
          TryRun( Setup ); // May be overloaded
          if ( log != Log ) 
             log = Log;
+         log.AddFilter( TranslateBattleTechText );
          Add( this );
          PatchBattleMods();
          CurrentMod = null;
@@ -56,12 +55,6 @@ namespace Sheepy.BattleTechMod {
 
       // ============ Setup ============
 
-      /*
-      private static List<BattleMod> modScopes = new List<BattleMod>();
-      private void PushScope () { modScopes.Add( this ); }
-      private void PopScope () { modScopes.RemoveAt( modScopes.Count - 1 ); }
-      internal static BattleMod CurrentMod { get { return modScopes.LastOrDefault(); } }
-      */
       internal static BattleMod CurrentMod;
 
 #pragma warning disable CS0649 // Disable "field never set" warnings since they are set by JsonConvert.
@@ -136,6 +129,15 @@ namespace Sheepy.BattleTechMod {
 
       private void SaveSettings ( string settings ) {
          TryRun( Log, () => File.WriteAllText( BaseDir + "settings.json", settings ) );
+      }
+
+      private static bool TranslateBattleTechText ( Logger.LogEntry line ) {
+         object[] args = line?.args;
+         if ( args == null ) return true;
+         for ( int i = 0, len = args.Length ; i < len ; i++ )
+            if ( args[i] is Text text )
+               args[i] = text.ToString( true );
+         return true;
       }
 
       // ============ Execution ============
@@ -236,8 +238,8 @@ namespace Sheepy.BattleTechMod {
 
       public static bool FoundMod ( params string[] mods ) {
          if ( modList == null ) GetModList();
-         foreach ( string mod in mods )
-            if ( modList.Contains( mod ) ) return true;
+         for ( int i = 0, len = mods.Length ; i < len ; i++ )
+            if ( modList.Contains( mods[i] ) ) return true;
          return false;
       }
    }
