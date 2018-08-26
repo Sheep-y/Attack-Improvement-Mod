@@ -533,6 +533,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisLocationMaxHP = target.GetMaxStructure( hitLocation );
       }
 
+      // Used by Through Armour Crit of this mod
+      public static void LogThroughArmourCritChance ( float __result, Mech target, ArmorLocation hitLocation ) {
+         thisBaseCritChance = __result;
+         thisLocationMaxHP = target.GetMaxArmor( hitLocation );
+      }
+
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritMultiplier ( float __result ) {
          thisCritMultiplier = __result;
@@ -594,7 +600,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                critLine += Separator + "(Empty)" + Separator + "--" + Separator + "--";
             else {
                string thisCompAfter = ammoExploded ? "Explosion" : thisCritComp.DamageLevel.ToString();
-               critLine += Separator + thisCritComp.UIName +
+               critLine += Separator + thisCritComp.UIName?.ToString() +
                            Separator + thisCompBefore +
                            Separator + thisCompAfter;
             }

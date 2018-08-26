@@ -285,14 +285,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "Base crit chance of a location with zero armour but full structure.",
-        "Set to 0 to disable through armor critical.  Default 0.2 for 20%.  Can be 0 to 1." } ) ]
+        "Set to 0 to disable through armor critical.  Default 0.  Can be 0 to 1, e.g. 0.2 for 20%." } ) ]
       public decimal ThroughArmorCritChanceZeroArmor = 0.2m;
 
       [ JsonComment( new string[]{
         "Base crit chance of a location with full armour.  Must not be higher than ThroughArmorCritChanceZeroArmor.",
-        "Actual through armour crit rate is between this and zero armour chance.  Default 0 for 0%.  Can be -1 to 1.",
+        "Actual through armour crit rate is between this and zero armour chance.  Default 0.  Can be -1 to 1, e.g. 0.1 for 10%.",
         "If negative, crit will not happens until armour is sufficiently weakened." } ) ]
-      public decimal ThroughArmorCritChanceFullArmor = 0;
+      public decimal ThroughArmorCritChanceFullArmor = -0.1m;
 
       [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends." ) ]
       public bool BalanceAmmoConsumption = true;

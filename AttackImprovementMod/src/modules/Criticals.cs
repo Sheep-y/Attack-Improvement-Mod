@@ -38,6 +38,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                ThroughArmorCritThreshold = (float) Settings.ThroughArmorCritThreshold;
             else
                ThroughArmorCritThresholdPerc = (float)Settings.ThroughArmorCritThreshold;
+            if ( Settings.ThroughArmorCritThreshold > 0 && ! Settings.CritFollowDamageTransfer )
+               Warn( "Disabling CritFollowDamageTransfer will impact ThroughArmorCritThreshold calculation." );
 
          } else if ( Settings.FixFullStructureCrit ) {
             Patch( ResolveWeaponDamage, "RecordCritMech", "ClearCritMech" );
@@ -48,9 +50,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
             Patch( MechType, "DamageLocation", NonPublic, "UpdateCritLocation", null );
          }
-      }
-
-      public override void CombatStarts () {
       }
 
       private static bool HasCheckForCrit () { try {
@@ -74,6 +73,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<ArmorLocation, float> armoured, damages;
       private static Dictionary<int, float> damaged;
 
+      // Consolidate critical hit info and split into armoured and structurally damaged locations.
       private static void SplitCriticalHitInfo ( Mech mech, WeaponHitInfo info, Func<float> damageFunc ) {
          if ( armoured == null || damages == null ) return;
 
@@ -219,7 +219,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             CritChanceRules.attackLogger.LogDebug( string.Format( "Location Current Armour = {0}, Location Max Armour = {1}", target.GetCurrentArmor( hitLocation ), target.GetMaxArmor( hitLocation ) ) );
          float armorPercentage = target.GetCurrentArmor( hitLocation ) / target.GetMaxArmor( hitLocation );
          float result = ThroughArmorBaseCritChance + ( 1f - armorPercentage ) * ThroughArmorVarCritChance;
-         AttackLog.LogBaseCritChance( result, target, MechStructureRules.GetChassisLocationFromArmorLocation( hitLocation ) );
+         AttackLog.LogThroughArmourCritChance( result, target, hitLocation );
          return result;
       }
 
