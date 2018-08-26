@@ -200,9 +200,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          bool logCrit = CritChanceRules.attackLogger.IsDebugEnabled;
          if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) {
             if ( logCrit ) CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] CriticalHitImmunity!", new object[ 0 ] ) );
-            return 0f;
+            return 0;
          }
-         float chance = 0f, critMultiplier = 1f;
+         float chance = 0, critMultiplier = 0;
          if ( target is Mech )
             chance = GetThroughArmourBaseCritChance( (Mech) target, hitLocation );
          if ( chance > 0 ) {
