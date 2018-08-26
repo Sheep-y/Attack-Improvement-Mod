@@ -13,6 +13,7 @@ For BATTLETECH 1.2.0
   * [Net Hit Modifier Settings](#net-hit-modifier-settings)
   * [Hit Roll Settings](#hit-roll-settings)
   * [Hit Chance Preview Settings](#hit-chance-preview-settings)
+  * [Critical Hit Settings](#critical-hit-settings)
   * [Hit Resolution Settings](#hit-resolution-settings)
   * [Attack Log Settings](#attack-log-settings)
 - [Compatibilities](#compatibilities)
@@ -557,16 +558,72 @@ These settings can be changed in `settings.json`.
 
 
 
-## Hit Resolution Settings
+## Critical Hit Settings
 
 
 **Skip Criting the Dead Mech**
 
-> Setting: `SkipCritingDeadMech`  (true/false, default true)<br>
+> Setting: `SkipCritingDeadMech`  (true/false, default true)
 >
 > When true, critical hits are not rolled for dead units.
 > This is mainly designed to prevent crit messages from flooding over cause of death.
 > It will also slightly increase salvaged components.
+
+
+**Crit Follows Damage Transfer**
+
+> Setting: `CritFollowDamageTransfer`  (true/false, default true)
+>
+> When true, critical hits will be rolled on last damaged location, i.e. they follows damage transfer.
+>
+> In un-modded game, critical hit is checked only on the rolled hit location and does not follow damage transfer.
+> For example, when a laser hits a destroyed arm and structurally damage a side torso, crit is not rolled since the arm is already destroyed.
+
+
+**Fix False Positive Crits**
+
+> Setting: `FixFullStructureCrit`  (true/false, default true)
+>
+> When true, critical hit does not happens on locations with intact structure.
+>
+> In un-modded game, critical hit is rolled on all location that is hit and has zero armour.
+> This means crit is rolled even if an attack reduce the armour to exactly zero, even if it does not do any structural damage.
+> Given the default min crit chance of 50%, a crit slot will be rolled half the time when this happens!
+>
+> This settings is ignored when through armour critical (below) is on, in which case zero armour uses the through armour rules.
+
+
+**Through Armour Critical Hits**
+
+> Setting: `ThroughArmorCritThreshold`  (0 to 1000, default 9)
+>
+> Each weapon must deal this much damage to a location in an attack for through armour critical hit to be checked.
+>
+> Default is 9 which is 3 MG hits, 3 LRM hits, or 2 SRM hits to the same location when un-braced and un-covered.
+>
+> If the number is between 0 and 1 (exclusive), the threshold is a fraction of the max armour of the location.
+> e.g. 0.2 means a weapon must do as much damage as 20% of the max armour of the location.
+
+
+> Setting: `ThroughArmorCritChanceZeroArmor`  (0 to 1, default 0)<br>
+> Setting: `ThroughArmorCritChanceFullArmor`  (-1 to 1, default 0)<br>
+>
+> The two settings together determine the range of through armour base critical chance.
+> ThroughArmorCritChanceZeroArmor is the max chance, and ThroughArmorCritChanceFullArmor is the min chance.
+> When ThroughArmorCritChanceZeroArmor is 0, through armour critical hit is disabled.
+>
+> For a fixed crit chance, set both numbers to be the same.  Classic BattleTech has around 2% chance.
+>
+> Otherwise, the crit chance increase in proportion to armour damage.
+> Example: When zero = 0.4 and Full = 0, a location with half armour has a 20% base crit chance.
+> Example: When zero = 0.2 and Full = -0.1, crit happens after armour is reduced to 2/3 or below.
+>
+> When through armour critical hit happens and it is logged by this mod's Attack Log,
+> the Max HP column logs the max armour of the location instead of max structure.
+
+
+
+## Hit Resolution Settings
 
 
 **Balance Ammo Consumption**
@@ -633,7 +690,7 @@ but because the code that determine hit distribution is not designed for fractio
 >
 > **Location** - Location Roll, Hit Table, Called Shot, and the Hit Location.
 >
-> **Damage** - Damage, Final Damaged Location, and Armor/HP of this location. 
+> **Damage** - Damage, Final Damaged Location, and Armor/HP of this location.
 > Damage is determined in a different phase from hit and location, and is a rather complicated info to log.
 >
 > **Critical** - Crit Location, Crit Roll, Crit Slot, Crit Component, and the result of the crit.

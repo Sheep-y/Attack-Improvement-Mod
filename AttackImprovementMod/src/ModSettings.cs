@@ -264,9 +264,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool AllowDFACalledShotVehicle = true;
       /**/
 
-
       //
-      [ JsonSection( "Hit Resolution" ) ]
+      [ JsonSection( "Critical Hits" ) ]
       //
 
       [ JsonComment( "Skip critical checks if target is dead.  Default true." ) ]
@@ -279,14 +278,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool FixFullStructureCrit = true;
 
       [ JsonComment( new string[]{
-        "A weapon must deal this much total damage to a location for through armour crit to roll.  Default 10.  Set to 0 for no threshold.",
+        "A weapon must deal this much total damage to a location for through armour crit to roll.  Default 9.  Set to 0 for no threshold.",
         "A number between 0 and 1 (exclusive) means a fraction of max armour.  1 and above means fixed damage threshold." } ) ]
-      public decimal ThroughArmorCritThreshold = 0;
+      public decimal ThroughArmorCritThreshold = 9;
 
       [ JsonComment( new string[]{
         "Base crit chance of a location with zero armour but full structure.",
-        "Set to 0 to disable through armor critical.  Default 0.  Can be 0 to 1, e.g. 0.2 for 20%.",
-        "When logging through armour crits, the Max HP column logs the max armor." } ) ]
+        "Set to 0 to disable through armour critical.  Default 0.  Can be 0 to 1, e.g. 0.2 for 20%.",
+        "When logging through armour crits, the Max HP column logs the max armour." } ) ]
       public decimal ThroughArmorCritChanceZeroArmor = 0;
 
       [ JsonComment( new string[]{
@@ -294,6 +293,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Actual through armour crit rate is between this and zero armour chance.  Default 0.  Can be -1 to 1, e.g. 0.1 for 10%.",
         "If negative, crit will not happens until armour is sufficiently weakened." } ) ]
       public decimal ThroughArmorCritChanceFullArmor = 0;
+
+      //
+      [ JsonSection( "Hit Resolution" ) ]
+      //
 
       [ JsonComment( "Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends." ) ]
       public bool BalanceAmmoConsumption = true;
