@@ -285,7 +285,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "Base crit chance of a location with zero armour but full structure.",
-        "Set to 0 to disable through armor critical.  Default 0.  Can be 0 to 1, e.g. 0.2 for 20%." } ) ]
+        "Set to 0 to disable through armor critical.  Default 0.  Can be 0 to 1, e.g. 0.2 for 20%.",
+        "When logging through armour crits, the Max HP column logs the max armor." } ) ]
       public decimal ThroughArmorCritChanceZeroArmor = 0.2m;
 
       [ JsonComment( new string[]{

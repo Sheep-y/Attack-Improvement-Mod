@@ -34,7 +34,7 @@ namespace Sheepy.BattleTechMod {
       public void Start ( ref Logger log ) {
          CurrentMod = this;
          TryRun( Setup ); // May be overloaded
-         if ( log != Log ) 
+         if ( log != Log )
             log = Log;
          log.AddFilter( TranslateBattleTechText );
          Add( this );
@@ -66,7 +66,7 @@ namespace Sheepy.BattleTechMod {
          Assembly file = GetType().Assembly;
          Id = GetType().Namespace;
          Name = file.GetName().Name;
-         BaseDir = Path.GetDirectoryName( file.Location ) + "/"; 
+         BaseDir = Path.GetDirectoryName( file.Location ) + "/";
          string mod_info_file = BaseDir + "mod.json";
          if ( File.Exists( mod_info_file ) ) TryRun( Log, () => {
             ModInfo info = JsonConvert.DeserializeObject<ModInfo>( File.ReadAllText( mod_info_file ) );
@@ -187,7 +187,7 @@ namespace Sheepy.BattleTechMod {
          }
          CallAllModules( module => module.CampaignStarts() );
       }
-      
+
       private static bool CalledCombatStartsOnce = false;
       private static void RunCombatStarts ( CombatHUD __instance ) {
          HUD = __instance;
@@ -199,7 +199,7 @@ namespace Sheepy.BattleTechMod {
          }
          CallAllModules( module => module.CombatStarts() );
       }
-      
+
       private static void RunCombatEnds ( CombatHUD __instance ) {
          CallAllModules( module => module.CombatEnds() );
       }
@@ -208,8 +208,8 @@ namespace Sheepy.BattleTechMod {
          foreach ( var mod in modules ) {
             foreach ( BattleModModule module in mod.Value ) try {
                task( module );
-            } catch ( Exception ex ) { 
-               mod.Key.Log.Error( ex ); 
+            } catch ( Exception ex ) {
+               mod.Key.Log.Error( ex );
             }
          }
       }
@@ -245,7 +245,7 @@ namespace Sheepy.BattleTechMod {
    }
 
    public abstract class BattleModModule {
-      
+
       // Set on GameStarts
       public static GameInstance BattleTechGame { get; internal set; }
       // Set on CampaignStarts
@@ -283,7 +283,7 @@ namespace Sheepy.BattleTechMod {
 
       public string Id { get; protected internal set; } = "org.example.mod.module";
       public string Name { get; protected internal set; } = "Module";
-      
+
       private Logger _Logger;
       protected Logger Log {
          get { return _Logger ?? BattleMod.BTML_LOG; }
@@ -406,7 +406,7 @@ namespace Sheepy.BattleTechMod {
          action.Invoke();
       } catch ( Exception ex ) { log.Error( ex ); } }
 
-      public static T TryGet<T> ( T[] array, int index, T fallback = default(T), string errorArrayName = null ) {
+      public static T TryGet<T> ( T[] array, int index, T fallback = default, string errorArrayName = null ) {
          if ( array == null || array.Length <= index ) {
             if ( errorArrayName != null ) BattleMod.BTML_LOG.Warn( $"{errorArrayName}[{index}] not found, using default {fallback}." );
             return fallback;
@@ -414,7 +414,7 @@ namespace Sheepy.BattleTechMod {
          return array[ index ];
       }
 
-      public static V TryGet<T,V> ( Dictionary<T, V> map, T key, V fallback = default(V), string errorDictName = null ) {
+      public static V TryGet<T,V> ( Dictionary<T, V> map, T key, V fallback = default, string errorDictName = null ) {
          if ( map == null || ! map.ContainsKey( key ) ) {
             if ( errorDictName != null ) BattleMod.BTML_LOG.Warn( $"{errorDictName}[{key}] not found, using default {fallback}." );
             return fallback;
@@ -422,7 +422,7 @@ namespace Sheepy.BattleTechMod {
          return map[ key ];
       }
 
-      public static T ValueCheck<T> ( ref T value, T fallback = default(T), Func<T,bool> validate = null ) {
+      public static T ValueCheck<T> ( ref T value, T fallback = default, Func<T,bool> validate = null ) {
          if ( value == null ) value = fallback;
          else if ( validate != null && ! validate( value ) ) value = fallback;
          return value;

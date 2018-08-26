@@ -38,6 +38,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                ThroughArmorCritThreshold = (float) Settings.ThroughArmorCritThreshold;
             else
                ThroughArmorCritThresholdPerc = (float)Settings.ThroughArmorCritThreshold;
+            //Info( "ThroughArmorCritChance is {0:##0}% to {1:##0}%.", ThroughArmorBaseCritChance * 100, ThroughArmorVarCritChance * 100 );
             if ( Settings.ThroughArmorCritThreshold > 0 && ! Settings.CritFollowDamageTransfer )
                Warn( "Disabling CritFollowDamageTransfer will impact ThroughArmorCritThreshold calculation." );
 
@@ -201,7 +202,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( logCrit ) CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] CriticalHitImmunity!", new object[ 0 ] ) );
             return 0f;
          }
-         float chance = 0f, critMultiplier = 0f;
+         float chance = 0f, critMultiplier = 1f;
          if ( target is Mech )
             chance = GetThroughArmourBaseCritChance( (Mech) target, hitLocation );
          if ( chance > 0 ) {

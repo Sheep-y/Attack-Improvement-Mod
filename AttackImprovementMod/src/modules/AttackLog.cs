@@ -608,6 +608,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          //Verbo( "Crit Line = {0}", critLine );
          line = line.Substring( 0, line.Length - CritDummy.Length ) + critLine;
          log[ lineIndex ] = line;
+         thisCritRoll = thisCritSlotRoll = 0;
          thisCritSlot = -1;
          thisCritComp = null;
       }                 catch ( Exception ex ) { Error( ex ); } }
