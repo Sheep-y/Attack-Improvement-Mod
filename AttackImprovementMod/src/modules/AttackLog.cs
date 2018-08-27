@@ -95,7 +95,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
             case "attack":
                Patch( ArtilleyAttackType, "PerformAttack", NonPublic, "RecordArtilleryAttack", null );
-               Patch( AttackType, "GenerateToHitInfo", NonPublic, "RecordAttack", null );
+               Patch( AttackType, "GenerateToHitInfo", NonPublic, "RecordAttack", "LogSelfAttack" );
                Patch( typeof( AttackDirector ), "OnAttackComplete", null, "WriteRollLog" );
                InitLog();
                break;
@@ -282,6 +282,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          BuildSequenceLine( me.attacker, me.target, direction, range );
       }
 
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogSelfAttack ( AttackDirector.AttackSequence __instance ) {
+         if ( thisWeapon?.WeaponSubType == WeaponSubType.DFA && LogShot ) {
+            if ( DebugLog ) Verbo( "Adding {0} DFA self-damage lines", 2 );
+            BuildSelfSequenceLine( __instance.attacker, "DFA" );
+            LogSelfHitSequence( ArmorLocation.LeftLeg  ); // 64
+            LogSelfHitSequence( ArmorLocation.RightLeg ); // 128
+         }
+      }
+
       private static void BuildSequenceLine ( ICombatant attacker, ICombatant target, AttackDirection direction, float range ) {
          string time = DateTime.Now.ToString( "s" );
          if ( DebugLog ) Verbo( "Build Sequence {0} => {1}", attacker?.GUID, target?.GUID );
@@ -299,6 +309,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             range;
          if ( ! LogShot )
             log.Add( thisSequence );
+      }
+
+      private static void BuildSelfSequenceLine ( AbstractActor attacker, string cause ) {
+         string time = DateTime.Now.ToString( "s" );
+         string team = TeamAndCallsign( attacker );
+         thisSequence =
+            time + Separator + team + team + // Attacker == Target
+            thisCombatId + Separator +
+            Combat.TurnDirector.CurrentRound + Separator +
+            Combat.TurnDirector.CurrentPhase + Separator +
+            thisSequenceId + Separator +
+            "ToSelf" + Separator + "0" + Separator + // Direction and distance
+            cause + Separator + "Self Damage" + FillBlanks( 5 );
       }
 
       // ============ Shot Log ============
@@ -390,19 +413,34 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          LogHitSequence( BuildingLocation.Structure, randomRoll, "None", 0, false, "1" + FillBlanks( 7 ) );
       }
 
-      private static void LogHitSequence<T,C> ( T hitLocation, float randomRoll, C bonusLocation, float bonusLocationMultiplier, bool canCrit, string line ) where T : Enum { try {
-         line = GetShotLog() + Separator + randomRoll + Separator + line + Separator + bonusLocation + Separator + bonusLocationMultiplier + Separator + hitLocation;
-         //if ( DebugLog ) Verbo( "HIT {0} {1} >>> {2}", GetShotLog(), hitLocation, log.Count );
+      private static void LogHitSequence<T,C> ( T hitLocation, float randomRoll, C bonusLocation, float bonusLocationMultiplier, bool canCrit, string hitTable ) where T : Enum { try {
+         hitTable = GetShotLog() + Separator + randomRoll + Separator + hitTable + Separator + bonusLocation + Separator + bonusLocationMultiplier + Separator + hitLocation;
+         if ( DebugLog ) Verbo( "HIT {0} {1} >>> {2}", GetShotLog(), hitLocation, log.Count );
          if ( LogDamage ) {
             hitList.Add( log.Count );
-            line += DamageDummy;
+            hitTable += DamageDummy;
             if ( LogCritical ) {
-               line += CritDummy;
+               hitTable += CritDummy;
                if ( canCrit && thisWeapon != null ) {
                   string key = GetHitKey( thisWeapon.uid, hitLocation, thisSequenceTargetId );
                   if ( DebugLog ) Verbo( "Hit map {0} = {1}", key, log.Count );
                   hitMap[ key ] = log.Count;
                }
+            }
+         }
+         log.Add( hitTable );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static void LogSelfHitSequence ( ArmorLocation hitLocation ) { try {
+         if ( DebugLog ) Verbo( "SELF HIT {0} {1} >>> {2}", thisSequence, hitLocation, log.Count );
+         string line = thisSequence;
+         if ( LogLocation ) {
+            line += FillBlanks( 12 ) + Separator + hitLocation;
+            if ( LogDamage ) {
+               line += DamageDummy;
+               if ( LogCritical )
+                  line += CritDummy;
+               hitList.Add( log.Count );
             }
          }
          log.Add( line );
@@ -421,10 +459,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.First ) ]
       public static void RecordMechDamage ( Mech __instance, ArmorLocation aLoc, float totalDamage ) {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
-         if ( __instance.GUID == thisAttackerId ) {
-            if ( DebugLog ) Verbo( "Skip recording self damage" );
-            return;
-         }
          RecordUnitDamage( aLoc.ToString(), totalDamage,
             __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
       }
@@ -458,12 +492,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc, Weapon weapon ) {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
-         if ( __instance.GUID == thisAttackerId ) {
-            if ( DebugLog ) Verbo( "Skip logging self damage" );
-            return;
-         }
          int line = LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
-         if ( line > 0 && Settings.CritFollowDamageTransfer && hitMap != null ) {
+         if ( line >= 0 && Settings.CritFollowDamageTransfer && hitMap != null ) {
             string newKey = GetHitKey( weapon.uid, aLoc, __instance.GUID );
             if ( DebugLog ) Verbo( "Log damage transfer {0} = {1}", newKey, line );
             hitMap[ newKey ] = line;
@@ -515,7 +545,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          log[ index ] = line;
          hitList.RemoveAt( 0 );
-         if ( DebugLog ) Verbo( "Log damage {0} @ {1}. Hit list remaining: {2}", thisDamage, lastLocation, hitList.Count );
+         if ( DebugLog ) Verbo( "Log damage {0} @ {1}. Hit list remaining: {2}. Line index {3}", thisDamage, lastLocation, hitList.Count, index );
          thisDamage = null;
          return index;
       }                 catch ( Exception ex ) { Error( ex ); return -1; } }
