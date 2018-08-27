@@ -208,7 +208,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static int[] thisHitLocations;
       private static int thisHitIndex;
 
-      public static void RecordHitInfo ( WeaponHitInfo hitInfo, int hitIndex ) {
+      public static void RecordHitInfo ( WeaponHitInfo hitInfo, int hitIndex, DamageType damageType ) {
+         if ( damageType == DamageType.DFASelf ) return;
          thisHitLocations = hitInfo.hitLocations;
          thisHitIndex = hitIndex;
       }

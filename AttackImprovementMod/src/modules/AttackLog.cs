@@ -176,6 +176,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static string GetHitKey<T> ( string weapon, T hitLocation, string targetId ) where T : Enum  {
+         if ( weapon.Length > 8 ) weapon = weapon.Substring( weapon.Length - 5 ); // "Melee" or "0_DFA"
+         if ( DebugLog ) return weapon + "/" + hitLocation + "/" + targetId;
          return weapon + "/" + (int)(object) hitLocation + "/" + targetId;
       }
 
@@ -260,9 +262,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Attack Log ============
 
-      internal static string thisSequence = "";
-      internal static string thisSequenceId = "";
-      internal static string thisSequenceTargetId = "";
+      internal static string thisSequence = "", thisSequenceId = "", thisSequenceTargetId = "", thisAttackerId = "";
 
       [ HarmonyPriority( Priority.First ) ]
       public static void RecordArtilleryAttack ( ArtillerySequence __instance, ICombatant target ) {
@@ -284,7 +284,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static void BuildSequenceLine ( ICombatant attacker, ICombatant target, AttackDirection direction, float range ) {
          string time = DateTime.Now.ToString( "s" );
-         thisSequenceTargetId = target.GUID;
+         if ( DebugLog ) Verbo( "Build Sequence {0} => {1}", attacker?.GUID, target?.GUID );
+         thisAttackerId = attacker?.GUID;
+         thisSequenceTargetId = target?.GUID;
          thisSequence =
             time + Separator +
             TeamAndCallsign( attacker ) + // Attacker team, pilot, mech
@@ -308,7 +310,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void RecordSequenceWeapon ( Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
          thisWeapon = weapon;
-         if ( DebugLog ) Verbo( "GetIndividualHits / GetClusteredHits / ArtillerySequence = {0} {1}", weapon?.UIName, thisWeapon?.uid );
+         if ( DebugLog ) Verbo( "New Sequence = {0} {1}", weapon?.UIName, thisWeapon?.uid );
       }
 
       internal static float thisRoll;
@@ -396,8 +398,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             line += DamageDummy;
             if ( LogCritical ) {
                line += CritDummy;
-               if ( canCrit ) {
-                  string key = GetHitKey( thisWeapon?.uid, hitLocation, thisSequenceTargetId );
+               if ( canCrit && thisWeapon != null ) {
+                  string key = GetHitKey( thisWeapon.uid, hitLocation, thisSequenceTargetId );
                   if ( DebugLog ) Verbo( "Hit map {0} = {1}", key, log.Count );
                   hitMap[ key ] = log.Count;
                }
@@ -419,6 +421,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.First ) ]
       public static void RecordMechDamage ( Mech __instance, ArmorLocation aLoc, float totalDamage ) {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
+         if ( __instance.GUID == thisAttackerId ) {
+            if ( DebugLog ) Verbo( "Skip recording self damage" );
+            return;
+         }
          RecordUnitDamage( aLoc.ToString(), totalDamage,
             __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
       }
@@ -452,8 +458,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc, Weapon weapon ) {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
+         if ( __instance.GUID == thisAttackerId ) {
+            if ( DebugLog ) Verbo( "Skip logging self damage" );
+            return;
+         }
          int line = LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
-         if ( Settings.CritFollowDamageTransfer && hitMap != null ) {
+         if ( line > 0 && Settings.CritFollowDamageTransfer && hitMap != null ) {
             string newKey = GetHitKey( weapon.uid, aLoc, __instance.GUID );
             if ( DebugLog ) Verbo( "Log damage transfer {0} = {1}", newKey, line );
             hitMap[ newKey ] = line;
@@ -481,7 +491,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( damageResolved ) return -1;
          damageResolved = true;
          if ( hitList.Count <= 0 ) {
-            Warn( "Damage Log cannot find matching hit record. May be DFA self-damage?" );
+            Warn( "Damage Log cannot find matching hit record." );
             return -1;
          }
          int index = hitList[0];
@@ -557,7 +567,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritComp ( MechComponent __result, ChassisLocations location, int index ) {
          if ( ! checkCritComp ) return;  // GetComponentInSlot is used in lots of places, and is better gated.
-         if ( DebugLog ) Verbo( "Record Crit Comp @ {0} = {1}", location, __result?.UIName );
+         if ( DebugLog ) Verbo( "Record Crit Comp @ {0} = {1} of {2}", location, __result?.UIName, __result?.parent?.GUID );
          thisCritSlot = index;
          thisCritComp = __result;
          if ( thisCritComp != null ) {
@@ -579,38 +589,42 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritResult ( Mech __instance, ChassisLocations location, Weapon weapon ) { try {
-         string key = GetHitKey( weapon.uid, location, __instance.GUID );
-         if ( DebugLog ) Verbo( "Crit {0} {1} {2}, key {3}", weapon.UIName, __instance.GetPilot().Callsign, location, key );
-         if ( ( ! hitMap.TryGetValue( key, out int lineIndex ) ) ) {
-            Warn( "Critical Hit Log cannot find matching hit record: " + key );
-            return;
-         }
-         string line = log[ lineIndex ];
-         if ( ! line.EndsWith( CritDummy ) ) {
-            Warn( "Critical Hit Log found duplicate crit: " + key );
-            return;
-         }
-         string critLine = Separator + thisLocationMaxHP +
-                           Separator + thisCritRoll +
-                           Separator + thisBaseCritChance +
-                           Separator + thisCritMultiplier +
-                           Separator + thisCritChance;
-         if ( thisCritSlot < 0 )
-            critLine += Separator + "--" + Separator + "--" + Separator + "(No Crit)" + Separator + "--" + Separator + "--";
-         else {
-            critLine += Separator + thisCritSlotRoll +
-                        Separator + ( thisCritSlot + 1 );
-            if ( thisCritComp == null )
-               critLine += Separator + "(Empty)" + Separator + "--" + Separator + "--";
-            else {
-               string thisCompAfter = ammoExploded ? "Explosion" : thisCritComp.DamageLevel.ToString();
-               critLine += Separator + thisCritComp.UIName?.ToString() +
-                           Separator + thisCompBefore +
-                           Separator + thisCompAfter;
+         if ( __instance.GUID == thisAttackerId ) {
+            if ( DebugLog ) Verbo( "Skip logging self crit" );
+         } else {
+            string key = GetHitKey( weapon.uid, location, __instance.GUID );
+            if ( DebugLog ) Verbo( "Crit {0}, key {1}", weapon.UIName, key );
+            if ( ( ! hitMap.TryGetValue( key, out int lineIndex ) ) ) {
+               Warn( "Critical Hit Log cannot find matching hit record: {0}", key );
+               return;
             }
+            string line = log[ lineIndex ];
+            if ( ! line.EndsWith( CritDummy ) ) {
+               Warn( "Critical Hit Log found duplicate crit {0}", key );
+               return;
+            }
+            string critLine = Separator + thisLocationMaxHP +
+                              Separator + thisCritRoll +
+                              Separator + thisBaseCritChance +
+                              Separator + thisCritMultiplier +
+                              Separator + thisCritChance;
+            if ( thisCritSlot < 0 )
+               critLine += Separator + "--" + Separator + "--" + Separator + "(No Crit)" + Separator + "--" + Separator + "--";
+            else {
+               critLine += Separator + thisCritSlotRoll +
+                           Separator + ( thisCritSlot + 1 );
+               if ( thisCritComp == null )
+                  critLine += Separator + "(Empty)" + Separator + "--" + Separator + "--";
+               else {
+                  string thisCompAfter = ammoExploded ? "Explosion" : thisCritComp.DamageLevel.ToString();
+                  critLine += Separator + thisCritComp.UIName?.ToString() +
+                              Separator + thisCompBefore +
+                              Separator + thisCompAfter;
+               }
+            }
+            line = line.Substring( 0, line.Length - CritDummy.Length ) + critLine;
+            log[ lineIndex ] = line;
          }
-         line = line.Substring( 0, line.Length - CritDummy.Length ) + critLine;
-         log[ lineIndex ] = line;
          thisCritRoll = thisCritSlotRoll = 0;
          thisCritSlot = -1;
          thisCritComp = null;
