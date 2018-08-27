@@ -535,9 +535,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       // Used by Through Armour Crit of this mod
-      public static void LogThroughArmourCritChance ( float __result, Mech target, ArmorLocation hitLocation ) {
-         thisBaseCritChance = __result;
-         thisLocationMaxHP = target.GetMaxArmor( hitLocation );
+      public static void LogThroughArmourCritChance ( float chance, float maxArmour ) {
+         thisBaseCritChance = chance;
+         thisLocationMaxHP = maxArmour;
       }
 
       [ HarmonyPriority( Priority.Last ) ]

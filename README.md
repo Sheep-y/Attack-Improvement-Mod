@@ -567,7 +567,7 @@ These settings can be changed in `settings.json`.
 >
 > When true, critical hits are not rolled for dead units.
 > This is mainly designed to prevent crit messages from flooding over cause of death.
-> It will also slightly increase salvaged components.
+> As a side effect, slightly more components will be salvageable instead of being destroyed.
 
 
 **Crit Follows Damage Transfer**
@@ -577,7 +577,7 @@ These settings can be changed in `settings.json`.
 > When true, critical hits will be rolled on last damaged location, i.e. they follows damage transfer.
 >
 > In un-modded game, critical hit is checked only on the rolled hit location and does not follow damage transfer.
-> For example, when a laser hits a destroyed arm and structurally damage a side torso, crit is not rolled since the arm is already destroyed.
+> For example, when a laser hits a destroyed arm and damages a side torso, crit is not rolled since the arm is already destroyed.
 
 
 **Fix False Positive Crits**
@@ -587,10 +587,10 @@ These settings can be changed in `settings.json`.
 > When true, critical hit does not happens on locations with intact structure.
 >
 > In un-modded game, critical hit is rolled on all location that is hit and has zero armour.
-> This means crit is rolled even if an attack reduce the armour to exactly zero, even if it does not do any structural damage.
-> Given the default min crit chance of 50%, a crit slot will be rolled half the time when this happens!
+> This means crit is rolled even if the weapon reduces the armour to exactly zero and did not do any structural damage.
+> When this happens, a crit slot will be rolled half the time, since minimal crit chance is 50%!
 >
-> This settings is ignored when through armour critical (below) is on, in which case zero armour uses the through armour rules.
+> This setting is off when through armour critical (below) is on, in which case zero armour uses the through armour rules.
 
 
 **Through Armour Critical Hits**
@@ -609,14 +609,15 @@ These settings can be changed in `settings.json`.
 > Setting: `ThroughArmorCritChanceFullArmor`  (-1 to 1, default 0)<br>
 >
 > The two settings together determine the range of through armour base critical chance.
-> ThroughArmorCritChanceZeroArmor is the max chance, and ThroughArmorCritChanceFullArmor is the min chance.
-> When ThroughArmorCritChanceZeroArmor is 0, through armour critical hit is disabled.
+> `ThroughArmorCritChanceZeroArmor` is the max chance, and `ThroughArmorCritChanceFullArmor` is the min chance.
+> When `ThroughArmorCritChanceZeroArmor` is 0, through armour critical hit is disabled.
 >
-> For a fixed crit chance, set both numbers to be the same.  Classic BattleTech has around 2% chance.
+> For a fixed crit chance, set both numbers to same.
+> Classic BattleTech has the chance at around 3%, or 0.03.
 >
-> Otherwise, the crit chance increase in proportion to armour damage.
-> Example: When zero = 0.4 and Full = 0, a location with half armour has a 20% base crit chance.
-> Example: When zero = 0.2 and Full = -0.1, crit happens after armour is reduced to 2/3 or below.
+> When the numbers are different, the crit chance increases in proportion to armour damage.<br>
+> Example: When zero = 0.4 and Full = 0, a location with half armour has a 20% base crit chance.<br>
+> Example: When zero = 0.2 and Full = -0.1, crit may happens after armour is reduced to 2/3 or below.<br>
 >
 > When through armour critical hit happens and it is logged by this mod's Attack Log,
 > the Max HP column logs the max armour of the location instead of max structure.

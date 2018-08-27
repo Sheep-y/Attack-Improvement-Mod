@@ -4,8 +4,8 @@ CHANGE LOG
 
 * New: Critical hits now follows damage transfer.
 * New: Hits may optionally crit through armour.
-* New: Excludes intact structure from crits. (When through armor crit is disabled.)
-* Fix: Errors when writing attack log is now (try to) logged by the mod log.
+* New: Excludes intact structures from crits. (When through armour crit is disabled.)
+* Fix: Errors when writing attack log is now (try to be) logged by the mod log.
 * Fix: Attempt to fix see-through armour with Mech Engineer's composite structure.
 
 2018-08-22 AIM Version 2.2 for BATTLETECH 1.2.0
