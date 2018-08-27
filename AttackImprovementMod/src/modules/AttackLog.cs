@@ -91,6 +91,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( AttackType, "GetIndividualHits", NonPublic, "RecordSequenceWeapon", null );
                Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordSequenceWeapon", null );
                Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", "LogMissedAttack" );
+               Patch( MechType, "CheckForHeatDamage" , NonPublic, "RecordOverheatCheck", "WriteSpecialLog" );
+               Patch( MechType, "ApplyHeatDamage"    , NonPublic, "RecordOverheat", "LogOverheat" );
                goto case "attack";
 
             case "attack":
@@ -161,6 +163,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          hitMap?.Clear();
          thisSequenceId = GetNewId();
          if ( DebugLog ) Verbo( "Log written and HitMap Cleared\n" );
+      }
+
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void WriteSpecialLog () {
+         if ( log.Count <= 0 ) return;
+         ROLL_LOG.Info( string.Join( Environment.NewLine, log.ToArray() ) );
+         log.Clear();
+         if ( DebugLog ) Verbo( "Log written\n" );
       }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
@@ -286,7 +296,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void LogSelfAttack ( AttackDirector.AttackSequence __instance ) {
          if ( thisWeapon?.WeaponSubType == WeaponSubType.DFA && LogShot ) {
             if ( DebugLog ) Verbo( "Adding {0} DFA self-damage lines", 2 );
-            BuildSelfSequenceLine( __instance.attacker, "DFA" );
+            BuildSpecialSequenceLine( __instance.attacker, __instance.attacker, "ToSelf", "DFA" );
             LogSelfHitSequence( ArmorLocation.LeftLeg  ); // 64
             LogSelfHitSequence( ArmorLocation.RightLeg ); // 128
          }
@@ -311,17 +321,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             log.Add( thisSequence );
       }
 
-      private static void BuildSelfSequenceLine ( AbstractActor attacker, string cause ) {
+      private static void BuildSpecialSequenceLine ( AbstractActor attacker, AbstractActor target, string direction, string cause ) {
          string time = DateTime.Now.ToString( "s" );
-         string team = TeamAndCallsign( attacker );
+         if ( DebugLog ) Verbo( "Build {2} Sequence {0} => {1}", attacker?.GUID, target?.GUID, cause );
          thisSequence =
-            time + Separator + team + team + // Attacker == Target
+            time + Separator + TeamAndCallsign( attacker ) + TeamAndCallsign( target ) +
             thisCombatId + Separator +
             Combat.TurnDirector.CurrentRound + Separator +
             Combat.TurnDirector.CurrentPhase + Separator +
             thisSequenceId + Separator +
-            "ToSelf" + Separator + "0" + Separator + // Direction and distance
-            cause + Separator + "Self Damage" + FillBlanks( 5 );
+            direction + Separator + "0" + Separator + // Direction and distance
+            cause + Separator + "Sepcial Damage" + FillBlanks( 5 );
       }
 
       // ============ Shot Log ============
@@ -363,19 +373,49 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisCorrectedRoll = __result;
          bool miss = __result > thisHitChance;
          if ( miss || ! LogLocation ) { // If miss, log now because hit location won't be rolled
-            StringBuilder logBuffer = new StringBuilder();
-            logBuffer.Append( GetShotLog() );
+            string line = GetShotLog();
             if ( LogLocation ) {
                if ( DebugLog ) Verbo( "MISS" );
-               logBuffer.Append( FillBlanks( 11 ) + Separator + "(Miss)" );
-               if ( LogDamage )
-                  logBuffer.Append( DamageDummy );
-               if ( LogCritical )
-                  logBuffer.Append( CritDummy );
+               line += FillBlanks( 11 ) + Separator + "(Miss)";
+               if ( LogDamage ) {
+                  line += DamageDummy;
+                  if ( LogCritical )
+                     line += CritDummy;
+               }
             } else
-               logBuffer.Append( Separator ).Append( miss ? "(Miss)" : "(Hit)" );
-            log.Add( logBuffer.ToString() );
+               line += Separator + ( miss ? "(Miss)" : "(Hit)" );
+            log.Add( line );
          }
+      }
+
+      [ HarmonyPriority( Priority.First ) ]
+      public static void RecordOverheatCheck ( Mech __instance, string attackerID ) {
+         if ( ! __instance.IsOverheated ) return;
+         AbstractActor attacker = attackerID != __instance.GUID ? Combat.FindActorByGUID( attackerID ) : __instance;
+         BuildSpecialSequenceLine( attacker, __instance, "Internal", "Overheat" );
+      }
+
+      [ HarmonyPriority( Priority.First ) ]
+      public static void RecordOverheat ( Mech __instance, ChassisLocations location ) {
+         beforeStruct = __instance.GetCurrentStructure( location );
+      }
+
+      [ HarmonyPriority( Priority.Last ) ]
+      public static void LogOverheat ( Mech __instance, ChassisLocations location, float damageAmount ) {
+         string line = thisSequence;
+         if ( DebugLog ) Verbo( "Overheat damage {1} to {0}", location, damageAmount );
+         if ( LogLocation ) {
+            line += FillBlanks( 11 ) + Separator + "(Miss)";
+            if ( LogDamage ) {
+               line += Separator + damageAmount
+                     + Separator + location // stops at
+                     + FillBlanks( 2 ) // armours
+                     + Separator + beforeStruct + Separator + __instance.GetCurrentStructure( location );
+               if ( LogCritical )
+                  line += CritDummy;
+            }
+         }
+         log.Add( line );
       }
 
       // ============ Location Log ============
@@ -602,8 +642,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisCritComp = __result;
          if ( thisCritComp != null ) {
             thisCompBefore = thisCritComp.DamageLevel;
-            ammoExploded = checkCritComp = false;
+            ammoExploded = false;
          }
+         checkCritComp = false;
       }
 
       [ HarmonyPriority( Priority.Last ) ]
