@@ -1,10 +1,8 @@
 ﻿using BattleTech;
 using Harmony;
-using Localize;
 using System.Reflection;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
@@ -136,8 +134,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          foreach ( var damagedArmour in armoured ) {
             ThroughArmor = damagedArmour.Key;
-            CheckForCrit.Invoke( mech, new object[]{ hitInfo, 0, weapon } ); // After its GetCritChance transpiled to our own GetCritChance
-            //CheckThroughArmourCrit( mech, hitInfo, damagedArmour.Key, weapon );
+            CheckForCrit.Invoke( mech, new object[]{ hitInfo, MechStructureRules.GetChassisLocationFromArmorLocation( ThroughArmor.GetValueOrDefault() ), weapon } );
          }
          ThroughArmor = null;
       }                 catch ( Exception ex ) { Error( ex ); } }

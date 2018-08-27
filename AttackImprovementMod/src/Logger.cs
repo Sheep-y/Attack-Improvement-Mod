@@ -165,8 +165,11 @@ namespace Sheepy.Logging {
                   if ( ! AllowMessagePass( line, txt ) ) continue;
                   FormatMessage( buf, line, txt );
                }
-               NewLine( buf, line ); // Null or empty message = insert blank new line.
-            } catch ( Exception ex ) { HandleError( ex ); }
+               NewLine( buf, line );
+            } catch ( Exception ex ) {
+               buf?.Append( Environment.NewLine ); // Clear error'ed line
+               HandleError( ex );
+            }
          }
          OutputLog( buf );
       }

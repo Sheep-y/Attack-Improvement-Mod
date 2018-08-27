@@ -15,6 +15,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class AttackLog : BattleModModule {
 
+      private const bool DebugLog = false;
+
       internal static Logger ROLL_LOG;
 
       private static bool LogShot, LogLocation, LogDamage, LogCritical;
@@ -25,6 +27,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static string thisCombatId = string.Empty;
 
+#pragma warning disable CS0162 // Disable "unreachable code" warnings due to DebugLog flag
       public override void CombatStartsOnce () {
          if ( Settings.AttackLogLevel == null ) return;
 
@@ -157,7 +160,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          hitList?.Clear();
          hitMap?.Clear();
          thisSequenceId = GetNewId();
-         //Verbo( "Log written and HitMap Cleared\n" );
+         if ( DebugLog ) Verbo( "Log written and HitMap Cleared\n" );
       }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
@@ -305,7 +308,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void RecordSequenceWeapon ( Weapon weapon, float toHitChance ) {
          thisHitChance = toHitChance;
          thisWeapon = weapon;
-         //Verbo( "GetIndividualHits / GetClusteredHits / ArtillerySequence = {0} {1}", weapon?.UIName, thisWeapon?.uid );
+         if ( DebugLog ) Verbo( "GetIndividualHits / GetClusteredHits / ArtillerySequence = {0} {1}", weapon?.UIName, thisWeapon?.uid );
       }
 
       internal static float thisRoll;
@@ -313,7 +316,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.First ) ]
       public static void RecordAttackRoll ( float roll, Team team ) {
-         //Verbo( "Roll = {0}", roll );
+         if ( DebugLog ) Verbo( "Roll = {0}", roll );
          thisRoll = roll;
          thisStreak = team?.StreakBreakingValue ?? 0;
       }
@@ -338,7 +341,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             StringBuilder logBuffer = new StringBuilder();
             logBuffer.Append( GetShotLog() );
             if ( LogLocation ) {
-               //Verbo( "MISS" );
+               if ( DebugLog ) Verbo( "MISS" );
                logBuffer.Append( FillBlanks( 11 ) + Separator + "(Miss)" );
                if ( LogDamage )
                   logBuffer.Append( DamageDummy );
@@ -387,7 +390,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static void LogHitSequence<T,C> ( T hitLocation, float randomRoll, C bonusLocation, float bonusLocationMultiplier, bool canCrit, string line ) where T : Enum { try {
          line = GetShotLog() + Separator + randomRoll + Separator + line + Separator + bonusLocation + Separator + bonusLocationMultiplier + Separator + hitLocation;
-         //Verbo( "HIT {0} {1} >>> {3}", GetShotLog(), hitLocation, log.Count );
+         //if ( DebugLog ) Verbo( "HIT {0} {1} >>> {2}", GetShotLog(), hitLocation, log.Count );
          if ( LogDamage ) {
             hitList.Add( log.Count );
             line += DamageDummy;
@@ -395,7 +398,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                line += CritDummy;
                if ( canCrit ) {
                   string key = GetHitKey( thisWeapon?.uid, hitLocation, thisSequenceTargetId );
-                  //Verbo( "Hit map {0} = {1}", key, log.Count );
+                  if ( DebugLog ) Verbo( "Hit map {0} = {1}", key, log.Count );
                   hitMap[ key ] = log.Count;
                }
             }
@@ -438,7 +441,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static void RecordUnitDamage ( string loc, float totalDamage, float armour, float structure ) {
-         //Verbo( "{0} Damage @ {1}", loc, totalDamage );
+         if ( DebugLog ) Verbo( "{0} Damage @ {1}", loc, totalDamage );
          lastLocation = loc;
          if ( thisDamage == null ) thisDamage = totalDamage;
          beforeArmour = armour;
@@ -452,7 +455,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          int line = LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
          if ( Settings.CritFollowDamageTransfer && hitMap != null ) {
             string newKey = GetHitKey( weapon.uid, aLoc, __instance.GUID );
-            //Verbo( "Log damage transfer {0} = {1}", newKey, line );
+            if ( DebugLog ) Verbo( "Log damage transfer {0} = {1}", newKey, line );
             hitMap[ newKey ] = line;
          }
       }
@@ -486,7 +489,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ( LogCritical && ! line.EndsWith( DamageDummy + CritDummy ) ) || ( ! LogCritical && ! line.EndsWith( DamageDummy ) ) ) {
             Warn( "Damage Log found an amended line, aborting." );
             hitList.RemoveAt( 0 );
-            //Verbo( "Hit list remaining {0}", hitList.Count );
+            if ( DebugLog ) Verbo( "Hit list remaining {0}", hitList.Count );
             thisDamage = null;
             return -1;
          }
@@ -502,7 +505,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          log[ index ] = line;
          hitList.RemoveAt( 0 );
-         //Verbo( "Log damage {0} @ {1}. Hit list remaining: {2}", thisDamage, lastLocation, hitList.Count );
+         if ( DebugLog ) Verbo( "Log damage {0} @ {1}. Hit list remaining: {2}", thisDamage, lastLocation, hitList.Count );
          thisDamage = null;
          return index;
       }                 catch ( Exception ex ) { Error( ex ); return -1; } }
@@ -521,7 +524,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritRolls ( float[] __result, int amount ) {
          if ( amount == 2 ) {
-            //Verbo( "Crit Roll = {0} & {1}", __result[0], __result[1] );
+            if ( DebugLog ) Verbo( "Crit Roll = {0} & {1}", __result[0], __result[1] );
             thisCritRoll = __result[0];
             thisCritSlotRoll = __result[1];
             checkCritComp = true;
@@ -554,7 +557,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritComp ( MechComponent __result, ChassisLocations location, int index ) {
          if ( ! checkCritComp ) return;  // GetComponentInSlot is used in lots of places, and is better gated.
-         //Verbo( "Record Crit Comp @ {0} = {1}", location, __result?.UIName );
+         if ( DebugLog ) Verbo( "Record Crit Comp @ {0} = {1}", location, __result?.UIName );
          thisCritSlot = index;
          thisCritComp = __result;
          if ( thisCritComp != null ) {
@@ -577,7 +580,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.Last ) ]
       public static void LogCritResult ( Mech __instance, ChassisLocations location, Weapon weapon ) { try {
          string key = GetHitKey( weapon.uid, location, __instance.GUID );
-         //Verbo( "Crit {0} {1} {2}, key {3}", weapon.UIName, __instance.GetPilot().Callsign, location, key );
+         if ( DebugLog ) Verbo( "Crit {0} {1} {2}, key {3}", weapon.UIName, __instance.GetPilot().Callsign, location, key );
          if ( ( ! hitMap.TryGetValue( key, out int lineIndex ) ) ) {
             Warn( "Critical Hit Log cannot find matching hit record: " + key );
             return;
@@ -606,7 +609,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                            Separator + thisCompAfter;
             }
          }
-         //Verbo( "Crit Line = {0}", critLine );
          line = line.Substring( 0, line.Length - CritDummy.Length ) + critLine;
          log[ lineIndex ] = line;
          thisCritRoll = thisCritSlotRoll = 0;
@@ -614,4 +616,5 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisCritComp = null;
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
+#pragma warning restore CS0162 // Restore "unreachable code" warnings
 }
