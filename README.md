@@ -691,7 +691,7 @@ but because the code that determine hit distribution is not designed for fractio
 >
 > **Location** - Location Roll, Hit Table, Called Shot, and the Hit Location.
 >
-> **Damage** - Damage, Final Damaged Location, and Armor/HP of this location.
+> **Damage** - Damage, Final Damaged Location, and Armor/HP of this location. 
 > Damage is determined in a different phase from hit and location, and is a rather complicated info to log.
 >
 > **Critical** - Crit Location, Crit Roll, Crit Slot, Crit Component, and the result of the crit.
@@ -724,8 +724,8 @@ but because the code that determine hit distribution is not designed for fractio
 # Compatibilities
 
 * BattleTech 1.0 - AIM 1.0.1.
-* BattleTech 1.1 - AIM 1.0.1, 2.0, 2.1, and 2.1.1.
-* BattleTech 1.2 - AIM 2.2.
+* BattleTech 1.1 - AIM 1.0.1 to 2.1.2.
+* BattleTech 1.2 - AIM 2.2 to 2.2.1.
 
 AIM is aware of some other mods and will behave differently in their present to meet player expectations.
 
