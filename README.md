@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 2.2 #
+# AIM - Attack Improvement Mod 2.2.1 #
 For BATTLETECH 1.2.0
 
 - [Features Overview](#features-overview)
@@ -666,8 +666,8 @@ but because the code that determine hit distribution is not designed for fractio
 # Compatibilities
 
 * BattleTech 1.0 - AIM 1.0.1.
-* BattleTech 1.1 - AIM 1.0.1, 2.0, 2.1, and 2.1.1.
-* BattleTech 1.2 - AIM 2.2.
+* BattleTech 1.1 - AIM 1.0.1 to 2.1.2.
+* BattleTech 1.2 - AIM 2.2 to 2.2.1.
 
 AIM is aware of some other mods and will behave differently in their present to meet player expectations.
 

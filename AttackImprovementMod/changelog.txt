@@ -1,5 +1,10 @@
 CHANGE LOG
 
+2018-08-28 AIM Version 2.2.1 for BATTLETECH 1.2.0
+
+* Fix: Grey head disease regression.
+* New: Errors when logging Attack Log is now logged in main mod log.
+
 2018-08-22 AIM Version 2.2 for BATTLETECH 1.2.0
 
 * Big: Updated for 1.2.0. Incompatible with game version 1.1.2 and before.
