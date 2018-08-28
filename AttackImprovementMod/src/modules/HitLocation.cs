@@ -34,7 +34,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.FixHitDistribution ) {
             ScaledMechHitTables = new Dictionary<Dictionary<ArmorLocation, int>, Dictionary<ArmorLocation, int>>();
             ScaledVehicleHitTables = new Dictionary<Dictionary<VehicleChassisLocations, int>, Dictionary<VehicleChassisLocations, int>>();
-            Patch( MechGetHit, "ScaleMechHitTable", null );
+            Patch( MechGetHit, "ScaleMechHitTable", "RestoreHeadToScaledHitTable" );
             Patch( VehicleGetHit, "ScaleVehicleHitTable", null );
          }
 
@@ -117,11 +117,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
+      private static int head;
+
       public static void ScaleMechHitTable ( ref Dictionary<ArmorLocation, int> hitTable ) { try {
          if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) )
             ScaledMechHitTables.Add( hitTable, scaled = ScaleHitTable( hitTable ) );
+         else if ( ! hitTable.ContainsKey( Head ) && scaled.TryGetValue( Head, out head ) )
+            scaled[ Head ] = 0;
          hitTable = scaled;
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void RestoreHeadToScaledHitTable ( Dictionary<ArmorLocation, int> hitTable ) {
+         if ( head <= 0 ) return;
+         hitTable[ Head ] = head;
+         head = 0;
+      }
 
       public static void PrefixVehicleCalledShot ( VehicleChassisLocations bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );

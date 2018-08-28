@@ -50,20 +50,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Boss heads ============
 
       private static PropertyInfo currentHitTableProp;
-      private static int? head = null;
+      private static int head;
 
       public static void FixBossHead ( CombatHUDCalledShotPopUp __instance ) {
          if ( __instance.DisplayedActor?.CanBeHeadShot ?? true ) return;
          Dictionary<ArmorLocation, int> currentHitTable = (Dictionary<ArmorLocation, int>) currentHitTableProp.GetValue( __instance, null );
-         if ( ! ( currentHitTable?.ContainsKey( ArmorLocation.Head ) ?? false ) ) return;
-         head = currentHitTable[ ArmorLocation.Head ];
+         if ( currentHitTable == null || ! currentHitTable.TryGetValue( ArmorLocation.Head, out head ) ) return;
          currentHitTable[ ArmorLocation.Head ] = 0;
       }
 
       public static void CleanupBossHead ( CombatHUDCalledShotPopUp __instance ) {
-         if ( head == null ) return;
+         if ( head <= 0 ) return;
          Dictionary<ArmorLocation, int> currentHitTable = (Dictionary<ArmorLocation, int>) currentHitTableProp.GetValue( __instance, null );
-         currentHitTable[ ArmorLocation.Head ] = head.GetValueOrDefault( 1 );
+         currentHitTable[ ArmorLocation.Head ] = head;
+         head = 0;
       }
 
       // ============ HUD Override ============
@@ -116,8 +116,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static string FineTuneAndFormat<T> ( Dictionary<T, int> hitTable, T location, int local, bool simulate  ) { try {
          float perc = local * 100f / HitTableTotalWeight;
          return string.Format( CalledShotHitChanceFormat, perc );
-      } catch ( Exception ex ) { 
-         Error( ex ); 
+      } catch ( Exception ex ) {
+         Error( ex );
          return "ERR";
       } }
    }
