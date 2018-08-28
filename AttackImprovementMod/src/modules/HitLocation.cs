@@ -1,11 +1,7 @@
-using BattleTech.UI;
 using BattleTech;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using UnityEngine.EventSystems;
-using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static ArmorLocation;
@@ -46,7 +42,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.FixGreyHeadDisease ) {
             HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
-            Patch( MechGetHit, null, "FixGreyHeadDisease" );
+            Patch( typeof( BattleTech.HitLocation ), "GetMechHitTable", null, "FixGreyHeadDisease" );
          }
 
          if ( Settings.FixVehicleCalledShot ) {
@@ -87,22 +83,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                      ScaledMechHitTables.Add( hitTableC, ScaleHitTable( hitTableC ) );
                   }
             }
-         }
-
-         if ( Settings.FixGreyHeadDisease ) {
-            List<Dictionary<ArmorLocation, int>> hitTables;
-            if ( Settings.FixHitDistribution ) 
-               hitTables = ScaledMechHitTables.Values.ToList();
-            else {
-               hitTables = new List<Dictionary<ArmorLocation, int>>();
-               foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
-                  if ( direction == AttackDirection.None ) continue;
-                  hitTables.Add( Combat.HitLocation.GetMechHitTable( direction ) );
-               }
-            }
-            foreach ( Dictionary<ArmorLocation, int> hitTable in hitTables )
-               if ( hitTable.TryGetValue( Head, out int head ) && head > 0 )
-                  HeadHitWeights.Add( hitTable, head );
          }
       }
 
@@ -153,12 +133,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ScaleMechHitTable ( ref Dictionary<ArmorLocation, int> hitTable ) { try {
-         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) ) {
+         if ( ! ScaledMechHitTables.TryGetValue( hitTable, out Dictionary<ArmorLocation, int> scaled ) )
             ScaledMechHitTables.Add( hitTable, scaled = ScaleHitTable( hitTable ) );
-            Warn( "New unscaled hit table [{0}]", Join( ",", hitTable.Select( e => e.Key+"="+e.Value ) ) );
-            if ( Settings.FixGreyHeadDisease && scaled.TryGetValue( Head, out int head ) && head > 0 )
-               HeadHitWeights.Add( scaled, head ); // Would be too late if head is already removed, thus the warning
-         }
          hitTable = scaled;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
@@ -189,11 +165,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return totalWeight;
       }
 
-      // Not the most efficient fix since it is called per shot - same as the bugged head removal code - but this is dead simple
-      public static void FixGreyHeadDisease ( Dictionary<ArmorLocation, int> hitTable ) {
-         // Re-attach missing head after hit location is rolled
-         if ( ! hitTable.ContainsKey( Head ) && HeadHitWeights.ContainsKey( hitTable ) )
-            hitTable.Add( Head, HeadHitWeights[ hitTable ] );
+      public static void FixGreyHeadDisease ( Dictionary<ArmorLocation, int> __result ) {
+         if ( __result == null ) return;
+         if ( __result.TryGetValue( Head, out int head ) ) {
+            // Has head. Cache it.
+            if ( HeadHitWeights.ContainsKey( __result ) ) return;
+            HeadHitWeights[ __result ] = head;
+         } else {
+            // No head. Add it?
+            if ( ! HeadHitWeights.TryGetValue( __result, out head ) ) return;
+            __result[ Head ] = head;
+         }
       }
 
       // ============ Vehicle Called Shot ============
