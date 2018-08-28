@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using Harmony;
    using static ArmorLocation;
    using static BindingFlags;
    using static Mod;
@@ -127,6 +128,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          hitTable = scaled;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
+      [ HarmonyPriority( ( Priority.VeryLow - Priority.Last ) / 2 ) ] // After attack log's LogMechHit
       public static void RestoreHeadToScaledHitTable ( Dictionary<ArmorLocation, int> hitTable ) {
          if ( head <= 0 ) return;
          hitTable[ Head ] = head;

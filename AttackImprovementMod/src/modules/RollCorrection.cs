@@ -11,7 +11,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static System.Reflection.BindingFlags;
 
    public class RollCorrection : BattleModModule {
-      
+
       private static bool NoRollCorrection = false;
       private static bool TrueRNG = false;
       private static Dictionary<float, float> correctionCache;
@@ -134,7 +134,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      [ HarmonyPriority( Priority.High ) ] // Above alexanderabramov's Real Hit Chance mod
+      [ HarmonyPriority( Priority.HigherThanNormal ) ] // Above alexanderabramov's Real Hit Chance mod
       public static void ShowCorrectedHitChance ( ref float chance ) { try {
          chance = Mathf.Clamp( chance, 0f, 1f );
          if ( ! correctionCache.TryGetValue( chance, out float corrected ) )
@@ -145,7 +145,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static MethodInfo HitChance, Refresh;
 
       // Override the original code to remove accuracy cap on display, since correction or other settings can push it above 95%.
-      [ HarmonyPriority( Priority.High ) ] // Above alexanderabramov's Real Hit Chance mod
+      [ HarmonyPriority( Priority.HigherThanNormal ) ] // Above alexanderabramov's Real Hit Chance mod
       public static bool OverrideDisplayedHitChance ( CombatHUDWeaponSlot __instance, float chance ) { try {
          HitChance.Invoke( __instance, new object[]{ chance } );
          __instance.HitChanceText.text = string.Format( WeaponHitChanceFormat, Mathf.Clamp( chance * 100f, 0f, 100f ) );
