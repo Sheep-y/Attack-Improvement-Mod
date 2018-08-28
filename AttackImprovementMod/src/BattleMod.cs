@@ -36,7 +36,7 @@ namespace Sheepy.BattleTechMod {
          TryRun( Setup ); // May be overloaded
          if ( log != Log )
             log = Log;
-         log.AddFilter( TranslateBattleTechText );
+         log.AddFilter( FormatParameters );
          Add( this );
          PatchBattleMods();
          CurrentMod = null;
@@ -131,12 +131,18 @@ namespace Sheepy.BattleTechMod {
          TryRun( Log, () => File.WriteAllText( BaseDir + "settings.json", settings ) );
       }
 
-      private static bool TranslateBattleTechText ( Logger.LogEntry line ) {
+      private static bool FormatParameters ( Logger.LogEntry line ) {
          object[] args = line?.args;
          if ( args == null ) return true;
-         for ( int i = 0, len = args.Length ; i < len ; i++ )
-            if ( args[i] is Text text )
+         for ( int i = 0, len = args.Length ; i < len ; i++ ) {
+            object arg = args[ i ];
+            if ( arg is string )
+               continue;
+            if ( arg is Text text )
                args[i] = text.ToString( true );
+            else if ( arg is System.Collections.IEnumerable list )
+               args[i] = "[" + Join( ", ", list ) + "]";
+         }
          return true;
       }
 
@@ -383,6 +389,16 @@ namespace Sheepy.BattleTechMod {
          return new StringBuilder( tLen - sLen + replace.Length )
             .Append( text, 0, pos ).Append( replace ).Append( text, sEnd, tLen - sEnd )
             .ToString();
+      }
+
+      public static string Join ( string separator, System.Collections.IEnumerable list, Func<object,string> formatter = null ) {
+         if ( list == null ) return string.Empty;
+         StringBuilder result = new StringBuilder();
+         foreach ( object e in list ) {
+            if ( result.Length > 0 ) result.Append( separator );
+            result.Append( formatter == null ? e?.ToString() : formatter( e ) );
+         }
+         return result.ToString();
       }
 
       public static string Join<T> ( string separator, IEnumerable<T> list, Func<T,string> formatter = null ) {

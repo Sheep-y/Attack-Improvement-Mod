@@ -64,7 +64,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             typeof( CombatGameConstants ).GetProperty( "ToHit" ).SetValue( CombatConstants, con, null );
          }
          if ( Settings.AllowNetBonusModifier && steppingModifier == null && ! Settings.DiminishingHitChanceModifier )
-            FillSteppedModifiers(); // Use Combat Constants and must be lazily loaded 
+            FillSteppedModifiers(); // Use Combat Constants and must be lazily loaded
       }
 
       // ============ Preparations ============
@@ -82,7 +82,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             lastMod = mod;
          }
          steppingModifier = mods.ToArray();
-         Info( "Stepping ToHit Multipliers\t" + Join( "\t", steppingModifier ) );
+         Info( "Stepping ToHit Multipliers {0}", steppingModifier );
       }
 
       internal static float GetSteppedModifier ( float modifier ) {
@@ -107,8 +107,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             diminishingBonus[ i-1 ] = (float) ( 2.0 - Math.Pow( bonusBase, i / bonusDiv ) );
          for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
             diminishingPenalty[ i-1 ] = (float) Math.Pow( penaltyBase, i / penaltyDiv );
-         Info( "Diminishing hit% multipliers (bonus)\t" + Join( "\t", diminishingBonus ) );
-         Info( "Diminishing hit% multipliers (penalty)\t" + Join( "\t", diminishingPenalty ) );
+         Info( "Diminishing hit% multipliers (bonus) {0}", diminishingBonus );
+         Info( "Diminishing hit% multipliers (penalty) {1}", diminishingPenalty );
       }
 
       // ============ Fixes ============

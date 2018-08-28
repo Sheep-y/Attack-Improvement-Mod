@@ -61,7 +61,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static MethodInfo SetColors;
       private static Color[] OrigDirectionMarkerColors; // [ Active #FFFFFF4B, Inactive #F8441464 ]
       private static Color?[] FacingMarkerPlayerColors, FacingMarkerEnemyColors, FacingMarkerTargetColors;
-      
+
       private static void InitDirectionColors () {
          FacingMarkerPlayerColors = new Color?[ LOSDirectionCount ];
          FacingMarkerEnemyColors  = new Color?[ LOSDirectionCount ];
@@ -79,9 +79,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( active != null && active.Length > i )
                FacingMarkerTargetColors[ i ] = ParseColour( active[ i ] );
          }
-         Info( "Player direction marker = " + Join( ", ", FacingMarkerPlayerColors.Select( e => ColorUtility.ToHtmlStringRGBA(e.GetValueOrDefault() ) ) ) );
-         Info( "Enemy  direction marker = " + Join( ", ", FacingMarkerEnemyColors .Select( e => ColorUtility.ToHtmlStringRGBA(e.GetValueOrDefault() ) ) ) );
-         Info( "Target direction marker = " + Join( ", ", FacingMarkerTargetColors.Select( e => ColorUtility.ToHtmlStringRGBA(e.GetValueOrDefault() ) ) ) );
+         Info( "Player direction marker = {0}", FacingMarkerPlayerColors.Select( e => ColorUtility.ToHtmlStringRGBA( e.GetValueOrDefault() ) ) );
+         Info( "Enemy  direction marker = {0}", FacingMarkerEnemyColors .Select( e => ColorUtility.ToHtmlStringRGBA( e.GetValueOrDefault() ) ) );
+         Info( "Target direction marker = {0}", FacingMarkerTargetColors.Select( e => ColorUtility.ToHtmlStringRGBA( e.GetValueOrDefault() ) ) );
       }
 
       public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) {

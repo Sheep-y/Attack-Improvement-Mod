@@ -209,7 +209,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static void InitRangedModifiers ( string[] factors ) {
          RangedModifiers = new List<Func<AttackModifier>>();
          HashSet<string> Factors = InitModifiers( RangedModifiers, GetRangedModifierFactor, factors );
-         Info( "Ranged modifiers ({0}): {1}", RangedModifiers.Count, Join( ",", Factors ) );
+         Info( "Ranged modifiers ({0}): {1}", RangedModifiers.Count, Factors );
       }
 
       public static Func<AttackModifier> GetRangedModifierFactor ( string factorId ) {
@@ -218,7 +218,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return () => new AttackModifier( "ARM MOUNTED", Hit.GetSelfArmMountedModifier( AttackWeapon ) );
 
          case "range":
-            return () => { 
+            return () => {
                float modifier = Hit.GetRangeModifier( AttackWeapon, AttackPos, TargetPos );
                AttackModifier result = new AttackModifier( modifier );
                float range = Vector3.Distance( AttackPos, TargetPos );
@@ -308,7 +308,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static void InitMeleeModifiers ( string[] factors ) {
          MeleeModifiers = new List<Func<AttackModifier>>();
          HashSet<string> Factors = InitModifiers( MeleeModifiers, GetMeleeModifierFactor, factors );
-         Info( "Melee and DFA modifiers ({0}): {1}", MeleeModifiers.Count, Join( ",", Factors ) );
+         Info( "Melee and DFA modifiers ({0}): {1}", MeleeModifiers.Count, Factors );
       }
 
       public static Func<AttackModifier> GetMeleeModifierFactor ( string factorId ) {
