@@ -193,6 +193,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result.Remove( (int) ArmorLocation.None );
          __result.Remove( (int) ArmorLocation.Invalid );
          foreach ( int armourInt in __result.Keys ) {
+            if ( thisCritMech.GetCurrentArmor( (ArmorLocation) armourInt ) > 0 ) continue;
             ChassisLocations location = MechStructureRules.GetChassisLocationFromArmorLocation( (ArmorLocation) armourInt );
             float curr = thisCritMech.StructureForLocation( (int) location ), max = thisCritMech.MaxStructureForLocation( (int) location );
             if ( curr == max ) removeList.Add( armourInt );
