@@ -421,7 +421,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.VeryLow ) ]
       public static void LogMechHit ( ArmorLocation __result, Dictionary<ArmorLocation, int> hitTable, float randomRoll, ArmorLocation bonusLocation, float bonusLocationMultiplier ) {
-         LogHitSequence( MechStructureRules.GetChassisLocationFromArmorLocation( __result ), randomRoll, bonusLocation, bonusLocationMultiplier, true,
+         LogHitSequence( MechStructureRules.GetChassisLocationFromArmorLocation( __result ), randomRoll, bonusLocation, bonusLocationMultiplier,
             TryGet( hitTable, ArmorLocation.Head ) + Separator +
             ( TryGet( hitTable, ArmorLocation.CenterTorso ) + TryGet( hitTable, ArmorLocation.CenterTorsoRear ) ) + Separator +
             ( TryGet( hitTable, ArmorLocation.LeftTorso   ) + TryGet( hitTable, ArmorLocation.LeftTorsoRear   ) ) + Separator +
@@ -434,7 +434,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.VeryLow ) ]
       public static void LogVehicleHit ( VehicleChassisLocations __result, Dictionary<VehicleChassisLocations, int> hitTable, float randomRoll, VehicleChassisLocations bonusLocation, float bonusLocationMultiplier ) {
-         LogHitSequence( __result, randomRoll, bonusLocation, bonusLocationMultiplier, false,
+         LogHitSequence( __result, randomRoll, bonusLocation, bonusLocationMultiplier,
             TryGet( hitTable, VehicleChassisLocations.Turret ) + Separator +
             TryGet( hitTable, VehicleChassisLocations.Front  ) + Separator +
             TryGet( hitTable, VehicleChassisLocations.Left   ) + Separator +
@@ -444,15 +444,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.VeryLow ) ]
       public static void LogBuildingHit ( int __result, float hitLocationRoll, BuildingLocation calledShotLocation, float bonusMultiplier ) {
-         LogHitSequence( BuildingLocation.Structure, hitLocationRoll, calledShotLocation, bonusMultiplier, false, "1" + FillBlanks( 7 ) );
+         LogHitSequence( BuildingLocation.Structure, hitLocationRoll, calledShotLocation, bonusMultiplier, "1" + FillBlanks( 7 ) );
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
       public static void LogBuildingClusterHit ( int __result, float randomRoll ) {
-         LogHitSequence( BuildingLocation.Structure, randomRoll, "None", 0, false, "1" + FillBlanks( 7 ) );
+         LogHitSequence( BuildingLocation.Structure, randomRoll, "None", 0, "1" + FillBlanks( 7 ) );
       }
 
-      private static void LogHitSequence<T,C> ( T hitLocation, float randomRoll, C bonusLocation, float bonusLocationMultiplier, bool canCrit, string hitTable ) where T : Enum { try {
+      private static void LogHitSequence<T,C> ( T hitLocation, float randomRoll, C bonusLocation, float bonusLocationMultiplier, string hitTable ) where T : Enum { try {
          hitTable = GetShotLog() + Separator + randomRoll + Separator + hitTable + Separator + bonusLocation + Separator + bonusLocationMultiplier + Separator + hitLocation;
          if ( DebugLog ) Verbo( "HIT {0} {1} >>> {2}", GetShotLog(), hitLocation, log.Count );
          if ( LogDamage ) {
@@ -460,7 +460,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             hitTable += DamageDummy;
             if ( LogCritical ) {
                hitTable += CritDummy;
-               if ( canCrit && thisWeapon != null ) {
+               if ( thisWeapon != null ) {
                   string key = GetHitKey( thisWeapon.uid, hitLocation, thisSequenceTargetId );
                   if ( DebugLog ) Verbo( "Hit map {0} = {1}", key, log.Count );
                   hitMap[ key ] = log.Count;
@@ -618,7 +618,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       // Used by Through Armour Crit of this mod
-      public static void LogThroughArmourCritChance ( float chance, float maxArmour ) {
+      public static void LogAIMBaseCritChance ( float chance, float maxArmour ) {
          thisBaseCritChance = chance;
          thisLocationMaxHP = maxArmour;
       }
@@ -629,7 +629,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogCritChance ( float __result, object hitLocation ) {
+      public static void LogCritChance ( float __result, ChassisLocations hitLocation ) {
+         LogAIMCritChance( __result, hitLocation );
+      }
+
+      public static void LogAIMCritChance ( float __result, object hitLocation ) {
          thisCritChance = __result;
          thisCritComp = null;
          thisCritLocation = hitLocation.ToString();

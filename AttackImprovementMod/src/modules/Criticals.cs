@@ -223,7 +223,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public abstract Vector2 GetArmour();     // x = current, y = max
          public abstract Vector2 GetStructure(); // x = current, y = max
          public abstract float GetCritChance(); // Need to recalc/reassign critLocation from hitLocation
-         public abstract MechComponent FindComponentInSlot( float random );
+         public virtual MechComponent FindComponentInSlot ( float random ) { // TODO: take component slot into account
+            float slotCount = target.allComponents.Count;
+            int slot = (int)(slotCount * random );
+            component = target.allComponents[ slot ];
+            AttackLog.LogCritComp( component, slot );
+            return component;
+         }
       }
 
       public class AIMMechCritInfo : AIMCritInfo {
@@ -251,7 +257,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                critLocation = (int) MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
                Vector2 armour = GetArmour(), structure = GetStructure();
                if ( armour.x > 0 || structure.x == structure.y )
-                  return GetTACChance( target, HitArmour, weapon, armour.x, armour.y, critLocation );
+                  return GetTACChance( target, HitArmour, weapon, armour, critLocation );
             } else {
                if ( CritChassis == ChassisLocations.None ) return 0;
                ThroughArmor = null;
@@ -275,22 +281,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return CritChassis != VehicleChassisLocations.None && CritChassis != VehicleChassisLocations.Invalid;
          }
 
-         public override Vector2 GetArmour() {
+         public override Vector2 GetArmour () {
             return new Vector2( Me.GetCurrentArmor( CritChassis ), Me.GetMaxArmor( CritChassis ) );
          }
 
-         public override Vector2 GetStructure() {
+         public override Vector2 GetStructure () {
             return new Vector2( Me.GetCurrentStructure( CritChassis ), Me.GetMaxStructure( CritChassis ) );
          }
 
-         public override float GetCritChance() {
-            return 1;
-         }
-
-         public override MechComponent FindComponentInSlot( float random ) {
-            float slotCount = Me.allComponents.Count;
-            int slot = (int)(slotCount * random );
-            return component = Me.allComponents[ slot ];
+         public override float GetCritChance () {
+            float result = GetNonMechCritChance( Me, weapon, GetArmour(), GetStructure() );
+            AttackLog.LogAIMCritChance( result, CritChassis );
+            return result;
          }
       }
 
@@ -303,22 +305,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return CritLocation != BuildingLocation.None && CritLocation != BuildingLocation.Invalid;
          }
 
-         public override Vector2 GetArmour() {
+         public override Vector2 GetArmour () {
             return new Vector2( Me.GetCurrentArmor( CritLocation ), Me.GetMaxArmor( CritLocation ) );
          }
 
-         public override Vector2 GetStructure() {
+         public override Vector2 GetStructure () {
             return new Vector2( Me.GetCurrentStructure( CritLocation ), Me.GetMaxStructure( CritLocation ) );
          }
 
-         public override float GetCritChance() {
-            return 1;
-         }
-
-         public override MechComponent FindComponentInSlot( float random ) {
-            float slotCount = Me.allComponents.Count;
-            int slot = (int)(slotCount * random );
-            return component = Me.allComponents[ slot ];
+         public override float GetCritChance () {
+            float result = GetNonMechCritChance( Me, weapon, GetArmour(), GetStructure() );
+            AttackLog.LogAIMCritChance( result, CritLocation );
+            return result;
          }
       }
 
@@ -346,6 +344,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
+      public static float GetNonMechCritChance ( ICombatant target, Weapon weapon, Vector2 armour, Vector2 structure ) {
+         if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
+         float chance = 0, critMultiplier = 0;
+         if ( armour.x > 0 || structure.x == structure.y )
+            chance = GetTACBaseChance( armour );
+         else {
+            chance = structure.x / structure.y;
+            AttackLog.LogAIMBaseCritChance( chance, structure.y );
+            chance = Mathf.Max( chance, CombatConstants.ResolutionConstants.MinCritChance );
+         }
+         if ( chance > 0 )
+            critMultiplier = Combat.CritChance.GetCritMultiplier( target, weapon, true );
+         float result = chance * critMultiplier;
+         return result;
+      }
+
       // ============ ThroughArmorCritical ============
 
       private static Dictionary<int, float> armoured = new Dictionary<int, float>(), damages = new Dictionary<int, float>(), damaged;
@@ -371,32 +385,34 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          ThroughArmor = null;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static bool GetThroughArmorCritChance ( ref float __result, Mech target, ChassisLocations hitLocation, Weapon weapon, bool shouldLog = false ) {
+      public static bool GetThroughArmorCritChance ( ref float __result, ICombatant target, ChassisLocations hitLocation, Weapon weapon, bool shouldLog = false ) {
          if ( ThroughArmor == null ) return true;
+         Mech mech = target as Mech;
          ArmorLocation armour = ThroughArmor.GetValueOrDefault();
          __result = GetTACChance( target, ThroughArmor.GetValueOrDefault(), weapon, 
-                  target.GetCurrentArmor( armour ), target.GetMaxArmor( armour ), MechStructureRules.GetChassisLocationFromArmorLocation( armour ) );
+                  new Vector2( mech.GetCurrentArmor( armour ), mech.GetMaxArmor( armour ) ),
+                  MechStructureRules.GetChassisLocationFromArmorLocation( armour ) );
          return false;
       }
 
-      public static float GetTACChance ( ICombatant target, ArmorLocation hitLocation, Weapon weapon, float currentArmour, float maxArmour, object location ) {
+      public static float GetTACChance ( ICombatant target, ArmorLocation hitLocation, Weapon weapon, Vector2 armour, object location ) {
          if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
          float chance = 0, critMultiplier = 0;
          if ( target is Mech )
-            chance = GetTACBaseChance( currentArmour, maxArmour );
+            chance = GetTACBaseChance( armour );
          if ( chance > 0 )
             //chance = Mathf.Max( change, CombatConstants.ResolutionConstants.MinCritChance ); // Min Chance does not apply to TAC
             critMultiplier = Combat.CritChance.GetCritMultiplier( target, weapon, true );
          float result = chance * critMultiplier;
-         AttackLog.LogCritChance( result, location.ToString() );
+         AttackLog.LogAIMCritChance( result, location );
          return result;
       }
 
-      public static float GetTACBaseChance ( float currentArmour, float maxArmour ) {
+      public static float GetTACBaseChance ( Vector2 armour ) {
          float result = ThroughArmorBaseCritChance;
          if ( ThroughArmorVarCritChance > 0 )
-            result += ( 1f - currentArmour / maxArmour ) * ThroughArmorVarCritChance;
-         AttackLog.LogThroughArmourCritChance( result, maxArmour );
+            result += ( 1f - armour.x / armour.y ) * ThroughArmorVarCritChance;
+         AttackLog.LogAIMBaseCritChance( result, armour.y );
          return result;
       }
 
