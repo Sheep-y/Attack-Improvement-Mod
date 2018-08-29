@@ -150,7 +150,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static float GetThroughArmourCritChance ( ICombatant target, ArmorLocation hitLocation, Weapon weapon ) {
          bool logCrit = CritChanceRules.attackLogger.IsDebugEnabled;
          if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) {
-            if ( logCrit ) CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] CriticalHitImmunity!", new object[ 0 ] ) );
+            if ( logCrit ) CritChanceRules.attackLogger.LogDebug( "[GetCritChance] CriticalHitImmunity!" );
             return 0;
          }
          float chance = 0, critMultiplier = 0;
@@ -159,7 +159,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( chance > 0 ) {
             //chance = Mathf.Max( change, CombatConstants.ResolutionConstants.MinCritChance ); // Min Chance does not apply to TAC
             critMultiplier = Combat.CritChance.GetCritMultiplier( target, weapon, true );
-            if ( logCrit ) CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] base = {0}, multiplier = {1}!", chance, critMultiplier ) );
+            if ( logCrit ) CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] TAC base = {0}, multiplier = {1}!", chance, critMultiplier ) );
          }
          float result = chance * critMultiplier;
          AttackLog.LogCritChance( result );
@@ -169,8 +169,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static float GetThroughArmourBaseCritChance ( Mech target, ArmorLocation hitLocation ) {
          if ( CritChanceRules.attackLogger.IsDebugEnabled )
             CritChanceRules.attackLogger.LogDebug( string.Format( "Location Current Armour = {0}, Location Max Armour = {1}", target.GetCurrentArmor( hitLocation ), target.GetMaxArmor( hitLocation ) ) );
-         float curr = target.GetCurrentArmor( hitLocation ), max = target.GetMaxArmor( hitLocation ), armorPercentage = curr / max;
-         float result = ThroughArmorBaseCritChance + ( 1f - armorPercentage ) * ThroughArmorVarCritChance;
+
+         float result = ThroughArmorBaseCritChance, max = target.GetMaxArmor( hitLocation );
+         if ( ThroughArmorVarCritChance > 0 ) {
+            float curr = target.GetCurrentArmor( hitLocation ), armorPercentage = curr / max;
+            result += ( 1f - armorPercentage ) * ThroughArmorVarCritChance;
+         }
          AttackLog.LogThroughArmourCritChance( result, max );
          return result;
       }
