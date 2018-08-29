@@ -185,10 +185,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return Convert.ToBase64String( buffer );
       }
 
-      private static string GetHitKey<T> ( string weapon, T hitLocation, string targetId ) where T : Enum  {
+      private static string GetHitKey ( string weapon, object hitLocation, string targetId ) {
          if ( weapon.Length > 8 ) weapon = weapon.Substring( weapon.Length - 5 ); // "Melee" or "0_DFA"
-         if ( DebugLog ) return weapon + "/" + hitLocation + "/" + targetId;
-         return weapon + "/" + (int)(object) hitLocation + "/" + targetId;
+         return weapon + "/" + hitLocation.ToString() + "/" + targetId;
       }
 
       private static List<string> blankCache = new List<string>(12);
@@ -595,6 +594,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static string CritDummy;
 
+      private static string thisCritLocation;
       private static float thisCritRoll, thisCritSlotRoll, thisBaseCritChance, thisCritMultiplier, thisCritChance, thisLocationMaxHP;
       private static bool ammoExploded, checkCritComp;
       private static int thisCritSlot;
@@ -629,15 +629,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogCritChance ( float __result ) {
+      public static void LogCritChance ( float __result, ChassisLocations hitLocation ) {
          thisCritChance = __result;
          thisCritComp = null;
+         thisCritLocation = hitLocation.ToString();
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogCritComp ( MechComponent __result, ChassisLocations location, int index ) {
+      public static void LogCritComp ( MechComponent __result, int index ) {
          if ( ! checkCritComp ) return;  // GetComponentInSlot is used in lots of places, and is better gated.
-         if ( DebugLog ) Verbo( "Record Crit Comp @ {0} = {1} of {2}", location, __result?.UIName, __result?.parent?.GUID );
+         if ( DebugLog ) Verbo( "Record Crit Comp = {0} of {1}", __result?.UIName, __result?.parent?.GUID );
          thisCritSlot = index;
          thisCritComp = __result;
          if ( thisCritComp != null ) {
@@ -659,11 +660,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogCritResult ( Mech __instance, ChassisLocations location, Weapon weapon ) { try {
+      public static void LogCritResult ( AbstractActor __instance, Weapon weapon ) { try {
          if ( __instance.GUID == thisAttackerId ) {
             if ( DebugLog ) Verbo( "Skip logging self crit" );
          } else {
-            string key = GetHitKey( weapon.uid, location, __instance.GUID );
+            string key = GetHitKey( weapon.uid, thisCritLocation, __instance.GUID );
             if ( DebugLog ) Verbo( "Crit {0}, key {1}", weapon.UIName, key );
             if ( ( ! hitMap.TryGetValue( key, out int lineIndex ) ) ) {
                Warn( "Critical Hit Log cannot find matching hit record: {0}", key );
@@ -697,6 +698,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             log[ lineIndex ] = line;
          }
          thisCritRoll = thisCritSlotRoll = 0;
+         thisCritLocation = "None";
          thisCritSlot = -1;
          thisCritComp = null;
       }                 catch ( Exception ex ) { Error( ex ); } }
