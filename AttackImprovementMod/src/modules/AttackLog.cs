@@ -629,7 +629,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogCritChance ( float __result, ChassisLocations hitLocation ) {
+      public static void LogCritChance ( float __result, object hitLocation ) {
          thisCritChance = __result;
          thisCritComp = null;
          thisCritLocation = hitLocation.ToString();
