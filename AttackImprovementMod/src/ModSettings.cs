@@ -268,6 +268,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Critical Hits" ) ]
       //
 
+      [ JsonComment( "Critical rate on vehicles, relative to mech.  Set to 0 to disable ." ) ]
+      public decimal VehicleCritMultiplier = 1;
+
+      [ JsonComment( "Critical rate on turret, relative to mech.  Set to 0 to disable." ) ]
+      public decimal TurretCritMultiplier = 1;
+
       [ JsonComment( "Skip critical checks if target is dead.  Default true." ) ]
       public bool SkipCritingDeadMech = true;
 

@@ -1,8 +1,10 @@
 ﻿using BattleTech;
 using Harmony;
+using Localize;
 using System.Reflection;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
@@ -22,6 +24,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.SkipCritingDeadMech )
             Patch( ResolveWeaponDamage, "Skip_BeatingDeadMech", null );
 
+         if ( Settings.TurretCritMultiplier > 0 )
+            Patch( typeof( Turret ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
+         if ( Settings.VehicleCritMultiplier > 0 )
+            Patch( typeof( Vehicle ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
+
          if ( Settings.ThroughArmorCritChanceZeroArmor > 0 && HasCheckForCrit() ) {
             if ( Settings.FixFullStructureCrit ) {
                Warn( "FullStructureCrit disabled because ThroughArmorCritical is enabled, meaning full structure can be crit'ed." );
@@ -38,8 +45,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                ThroughArmorCritThreshold = (float) Settings.ThroughArmorCritThreshold;
             else
                ThroughArmorCritThresholdPerc = (float)Settings.ThroughArmorCritThreshold;
-            if ( Settings.ThroughArmorCritThreshold > 0 && ! Settings.CritFollowDamageTransfer )
-               Warn( "Disabling CritFollowDamageTransfer will impact ThroughArmorCritThreshold calculation." );
+            if ( Settings.ThroughArmorCritThreshold != 0 && ! Settings.CritFollowDamageTransfer )
+               Warn( "Disabling CritFollowDamageTransfer may affect ThroughArmorCritThreshold calculation." );
 
          } else if ( Settings.FixFullStructureCrit ) {
             Patch( ResolveWeaponDamage, "RecordCritMech", "ClearCritMech" );
@@ -50,6 +57,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
             Patch( MechType, "DamageLocation", NonPublic, "UpdateCritLocation", null );
          }
+      }
+
+      public override void CombatStarts () {
+         atkLog = AbstractActor.attackLogger;
       }
 
       private static bool HasCheckForCrit () { try {
@@ -66,6 +77,110 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static bool Skip_BeatingDeadMech ( Mech __instance ) {
          if ( __instance.IsFlaggedForDeath || __instance.IsDead ) return false;
          return true;
+      }
+
+      // ============ Non-Mech Critical ============
+
+      public static void EnableNonMechCrit ( AbstractActor __instance, WeaponHitInfo hitInfo ) {
+         Info( __instance.allComponents );
+			AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
+			Weapon weapon = attackSequence.GetWeapon( hitInfo.attackGroupIndex, hitInfo.attackWeaponIndex );
+			MeleeAttackType meleeAttackType = attackSequence.meleeAttackType;
+			//ResolveWeaponDamage( __instance, hitInfo, weapon, meleeAttackType);
+      }
+      
+      private static HBS.Logging.ILog atkLog;
+      private static string attackSequence;
+      private static void ALog( string message, params object[] args ) {
+         if ( atkLog != null && atkLog.IsLogEnabled )
+            atkLog.Log( string.Format( attackSequence + message, args ) );
+      }
+
+      private static void PublishMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
+         unit.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage(
+            new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) ) );
+      }
+
+      public static void CheckThroughArmourCrit ( Mech mech, WeaponHitInfo hitInfo, ArmorLocation armour, Weapon weapon ) {
+         if ( weapon == null ) {
+            atkLog.LogError( "CheckForCrit had a null weapon!" );
+            return;
+         }
+         ChassisLocations location = MechStructureRules.GetChassisLocationFromArmorLocation( armour );
+         CombatGameState Combat = mech.Combat;
+         if ( atkLog.IsLogEnabled ) {
+            attackSequence = string.Format( "SEQ:{0}: WEAP:{1} Loc:{2}", hitInfo.attackSequenceId, hitInfo.attackWeaponIndex, location.ToString() );
+            ALog( "Base crit chance: {0:P2}", Combat.CritChance.GetBaseCritChance( mech, location, true ) );
+            ALog( "Modifiers : {0}", Combat.CritChance.GetCritMultiplierDescription( mech, weapon ) );
+         }
+         float critChance = GetThroughArmourCritChance( mech, armour, weapon );
+         if ( critChance > 0 ) {
+            float[] randomFromCache = Combat.AttackDirector.GetRandomFromCache( hitInfo, 2 );
+            ALog( "Final crit chance: {0:P2}", critChance );
+            ALog( "Crit roll: {0:P2}", randomFromCache[0] );
+            //Verbo( "Crit list: Armoured {2} by {0} {1}", weapon, weapon.uid, armour );
+            if ( randomFromCache[ 0 ] <= critChance ) {
+               float slotCount = mech.MechDef.GetChassisLocationDef( location ).InventorySlots;
+               int slot = (int)(slotCount * randomFromCache[1]);
+               MechComponent componentInSlot = mech.GetComponentInSlot( location, slot );
+               if ( componentInSlot != null ) {
+                  ALog( "Critical Hit! Found {0} in slot {1}", componentInSlot.Name, slot );
+                  PlayCritAudio( mech, weapon, componentInSlot );
+                  PlayCritVisual( mech, (int) location, componentInSlot );
+                  AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
+                  if ( attackSequence != null )
+                     attackSequence.FlagAttackScoredCrit( componentInSlot as Weapon, componentInSlot as AmmunitionBox );
+                  ComponentDamageLevel componentDamageLevel = PublishComponentCrit( mech, hitInfo, componentInSlot );
+                  componentInSlot.DamageComponent( hitInfo, componentDamageLevel, true );
+                  ALog( "Critical: {3} new damage state: {4}", componentInSlot.Name, componentDamageLevel );
+               } else
+                  ALog( "Critical Hit! No component in slot {0}", slot );
+            } else if ( atkLog.IsLogEnabled ) {
+               ALog( "No crit" );
+            }
+         }
+         AttackLog.LogCritResult( mech, location, weapon );
+      }
+
+      public static ComponentDamageLevel PublishComponentCrit ( ICombatant unit, WeaponHitInfo hitInfo, MechComponent componentInSlot ) {
+         ComponentDamageLevel componentDamageLevel = componentInSlot.DamageLevel;
+         if ( componentInSlot is Weapon && componentDamageLevel == ComponentDamageLevel.Functional ) {
+            componentDamageLevel = ComponentDamageLevel.Penalized;
+            PublishMessage( unit, "{0} CRIT", componentInSlot.UIName, FloatieMessage.MessageNature.CriticalHit );
+         } else if ( componentDamageLevel != ComponentDamageLevel.Destroyed ) {
+            componentDamageLevel = ComponentDamageLevel.Destroyed;
+            PublishMessage( unit, "{0} DESTROYED", componentInSlot.UIName, FloatieMessage.MessageNature.ComponentDestroyed );
+         }
+         return componentDamageLevel;
+      }
+
+      public static void PlayCritAudio ( ICombatant target, Weapon weapon, MechComponent component ) {
+         GameRepresentation GameRep = target.GameRep;
+         if ( GameRep == null ) return;
+         if ( weapon.weaponRep != null && weapon.weaponRep.HasWeaponEffect )
+            WwiseManager.SetSwitch<AudioSwitch_weapon_type>( weapon.weaponRep.WeaponEffect.weaponImpactType, GameRep.audioObject );
+         else
+            WwiseManager.SetSwitch<AudioSwitch_weapon_type>( AudioSwitch_weapon_type.laser_medium, GameRep.audioObject );
+         WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, GameRep.audioObject );
+         WwiseManager.PostEvent<AudioEventList_impact>( AudioEventList_impact.impact_weapon, GameRep.audioObject, null, null );
+         WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, GameRep.audioObject, null, null );
+      }
+
+      public static void PlayCritVisual ( ICombatant target, int location, MechComponent componentInSlot ) {
+         GameRepresentation GameRep = target.GameRep;
+         MechRepresentation MechRep = GameRep as MechRepresentation;
+         if ( target.GameRep == null ) return;
+         AmmunitionBox AmmoCrited = componentInSlot as AmmunitionBox;
+         Jumpjet jumpjetCrited = componentInSlot as Jumpjet;
+         HeatSinkDef heatsinkCrited = componentInSlot.componentDef as HeatSinkDef;
+         if ( target.team.LocalPlayerControlsTeam )
+            AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_friendly ", null, null );
+         else if ( !target.team.IsFriendly( Combat.LocalPlayerTeam ) )
+            AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
+         if ( MechRep != null && jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
+            MechRep.PlayComponentCritVFX( location );
+         if ( AmmoCrited != null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
+            GameRep.PlayVFX( location, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
       }
 
       // ============ ThroughArmorCritical ============
@@ -102,10 +217,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( mech.IsLocationDestroyed( location ) ) continue;
             if ( mech.GetCurrentArmor( armour ) <= 0 && mech.GetCurrentStructure( location ) < mech.GetMaxStructure( location ) )
                damaged.Add( (int) armour, damage.Value );
-            else if ( ( ThroughArmorCritThreshold == 0 && ThroughArmorCritThresholdPerc == 0 )
-                      || ( ThroughArmorCritThreshold > 0 && damage.Value > ThroughArmorCritThreshold )
-                      || ( ThroughArmorCritThresholdPerc > 0 && damage.Value > ThroughArmorCritThresholdPerc * mech.GetMaxArmor( armour ) )
-                      || ( ThroughArmorCritThresholdPerc < 0 && damage.Value > ThroughArmorCritThresholdPerc * ( mech.GetCurrentArmor( armour ) + damage.Value ) ) )
+            else if ( ( ThroughArmorCritThreshold == 0 && ThroughArmorCritThresholdPerc == 0 ) // No threshold
+            /*const*/ || ( ThroughArmorCritThreshold > 0 && damage.Value > ThroughArmorCritThreshold )
+            /*abs% */ || ( ThroughArmorCritThresholdPerc > 0 && damage.Value > ThroughArmorCritThresholdPerc * mech.GetMaxArmor( armour ) )
+            /*curr%*/ || ( ThroughArmorCritThresholdPerc < 0 && damage.Value > ThroughArmorCritThresholdPerc * ( mech.GetCurrentArmor( armour ) + damage.Value ) ) )
                armoured.Add( armour, damage.Value );
             //else
             //   Verbo( "{0} damage ({1}) on {2} not reach threshold {3} & {4}%", armour, damage.Value, mech.DisplayName, ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc*100 );
