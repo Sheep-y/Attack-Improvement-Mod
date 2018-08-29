@@ -39,7 +39,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( ResolveWeaponDamage, "AddThroughArmorCritical", null );
             Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", "Override_ConsolidateCriticalHitInfo", null );
             Patch( typeof( CritChanceRules ), "GetCritChance" , "GetAIMCritChance", null ); // Vanilla Crit Hijack
-            Patch( CheckForCritMethod, "AIMCheckMechCrit", null ); // Use AIM Crit System
+            //Patch( CheckForCritMethod, "AIMCheckMechCrit", null ); // Use AIM Crit System. Tested working.
             ThroughArmorBaseCritChance = (float) Settings.ThroughArmorCritChanceFullArmor;
             ThroughArmorVarCritChance = (float) Settings.ThroughArmorCritChanceZeroArmor - ThroughArmorBaseCritChance;
             if ( Settings.ThroughArmorCritThreshold > 1 )
@@ -76,7 +76,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return true;
       }
 
-      // ============ Non-Mech Critical ============
+      // ============ Generic Critical System ============
 
       public static void EnableNonMechCrit ( AbstractActor __instance, WeaponHitInfo hitInfo ) {
          Info( __instance.allComponents );
@@ -92,7 +92,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static bool AIMCheckMechCrit ( Mech __instance, WeaponHitInfo hitInfo, ChassisLocations location, Weapon weapon ) {
-         AIMMechCritInfo info = new AIMMechCritInfo( __instance, hitInfo, weapon ){ critLocation = (int) location };
+         AIMMechCritInfo info = new AIMMechCritInfo( __instance, hitInfo, weapon ){ 
+            hitLocation = (int) ThroughArmor.GetValueOrDefault(),
+            critLocation = (int) location };
          CheckForCrit( info );
          return false;
       }
@@ -144,10 +146,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void PlayCritVisual ( AIMCritInfo info ) {
          ICombatant target = info.target;
-         GameRepresentation GameRep = target.GameRep;
-         MechRepresentation MechRep = GameRep as MechRepresentation;
+         if ( target.GameRep == null ) return;
+         MechRepresentation MechRep = target.GameRep as MechRepresentation;
          MechComponent component = info.component;
-         if ( info.target.GameRep == null ) return;
          AmmunitionBox AmmoCrited = component as AmmunitionBox;
          Jumpjet jumpjetCrited = component as Jumpjet;
          HeatSinkDef heatsinkCrited = component.componentDef as HeatSinkDef;
@@ -158,7 +159,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( MechRep != null && jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && component.DamageLevel > ComponentDamageLevel.Functional )
             MechRep.PlayComponentCritVFX( info.critLocation );
          if ( AmmoCrited != null && component.DamageLevel > ComponentDamageLevel.Functional )
-            GameRep.PlayVFX( info.critLocation, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
+            target.GameRep.PlayVFX( info.critLocation, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
       }
 
       public abstract class AIMCritInfo {
@@ -186,8 +187,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( HitArmour != ArmorLocation.None && HitArmour != ArmorLocation.Invalid ) {
                critLocation = (int) MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
                if ( ( Me.GetCurrentArmor( HitArmour ) <= 0 || Me.GetCurrentStructure( CritChassis ) == Me.GetMaxStructure( CritChassis ) ) )
-                  ThroughArmor = HitArmour;
-                  //return GetThroughArmourCritChance( target, HitArmour, weapon );
+                  return GetThroughArmourCritChance( target, HitArmour, weapon );
             } else {
                if ( CritChassis == ChassisLocations.None ) return 0;
                ThroughArmor = null;
