@@ -90,69 +90,45 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) ) );
       }
 
-      public static float GetMechCritChance ( Mech mech, WeaponHitInfo hitInfo, int hitLocation, Weapon weapon ) {
-         ArmorLocation armour = (ArmorLocation) hitLocation;
-         CombatGameState Combat = mech.Combat;
-         return GetThroughArmourCritChance( mech, armour, weapon );
-      }
-
-      public static int GetMechCritLocation ( int hitLocation ) {
-         ArmorLocation armour = (ArmorLocation) hitLocation;
-         return (int) MechStructureRules.GetChassisLocationFromArmorLocation( armour );
-      }
-
-      public static MechComponent GetMechComponentInSlot ( Mech unit, WeaponHitInfo hitInfo, int critLocation, float random ) {
-         ChassisLocations location = (ChassisLocations) critLocation;
-         float slotCount = unit.MechDef.GetChassisLocationDef( location ).InventorySlots;
-         int slot = (int)(slotCount * random );
-         MechComponent componentInSlot = unit.GetComponentInSlot( location, slot );
-         if ( componentInSlot != null ) return componentInSlot;
-         return null;
-      }
-
-      public static void CheckForCrit<T> ( T unit, WeaponHitInfo hitInfo, int hitLocation, Weapon weapon,
-                                           Func<T,int,Weapon,float> GetCritChance,
-                                           Func<int,int> TranslateHitLocationToCritLocation,
-                                           Func<T,int,float,MechComponent> GetComponentInSlot )
-                                        where T : AbstractActor {
-         if ( weapon == null ) return;
-         float critChance = GetCritChance( unit, hitLocation, weapon );
+      public static void CheckForCrit ( AIMCritInfo critInfo ) {
+         if ( critInfo?.weapon == null ) return;
+         float critChance = critInfo.GetCritChance();
          if ( critChance > 0 ) {
-            float[] randomFromCache = Combat.AttackDirector.GetRandomFromCache( hitInfo, 2 );
+            float[] randomFromCache = Combat.AttackDirector.GetRandomFromCache( critInfo.hitInfo, 2 );
             if ( randomFromCache[ 0 ] <= critChance ) {
-               int critLocation = TranslateHitLocationToCritLocation( hitLocation );
-               MechComponent componentInSlot = GetComponentInSlot( unit, critLocation, randomFromCache[1] );
+               MechComponent componentInSlot = critInfo.FindComponentInSlot( randomFromCache[1] );
                if ( componentInSlot != null ) {
-                  PlayCritAudio( unit, weapon, componentInSlot );
-                  PlayCritVisual( unit, critLocation, componentInSlot );
-                  AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
+                  PlayCritAudio( critInfo );
+                  PlayCritVisual( critInfo );
+                  AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( critInfo.hitInfo.attackSequenceId );
                   if ( attackSequence != null )
                      attackSequence.FlagAttackScoredCrit( componentInSlot as Weapon, componentInSlot as AmmunitionBox );
-                  ComponentDamageLevel componentDamageLevel = PublishComponentCrit( unit, hitInfo, componentInSlot );
-                  componentInSlot.DamageComponent( hitInfo, componentDamageLevel, true );
+                  ComponentDamageLevel componentDamageLevel = PublishComponentCrit( critInfo );
+                  componentInSlot.DamageComponent( critInfo.hitInfo, componentDamageLevel, true );
                }
             }
          }
-         AttackLog.LogCritResult( unit, weapon );
+         AttackLog.LogCritResult( critInfo.target, critInfo.weapon );
       }
 
-      public static ComponentDamageLevel PublishComponentCrit ( ICombatant unit, WeaponHitInfo hitInfo, MechComponent componentInSlot ) {
-         ComponentDamageLevel componentDamageLevel = componentInSlot.DamageLevel;
-         if ( componentInSlot is Weapon && componentDamageLevel == ComponentDamageLevel.Functional ) {
+      public static ComponentDamageLevel PublishComponentCrit ( AIMCritInfo info ) {
+         MechComponent component = info.component;
+         ComponentDamageLevel componentDamageLevel = component.DamageLevel;
+         if ( component is Weapon && componentDamageLevel == ComponentDamageLevel.Functional ) {
             componentDamageLevel = ComponentDamageLevel.Penalized;
-            PublishMessage( unit, "{0} CRIT", componentInSlot.UIName, FloatieMessage.MessageNature.CriticalHit );
+            PublishMessage( info.target, "{0} CRIT", component.UIName, FloatieMessage.MessageNature.CriticalHit );
          } else if ( componentDamageLevel != ComponentDamageLevel.Destroyed ) {
             componentDamageLevel = ComponentDamageLevel.Destroyed;
-            PublishMessage( unit, "{0} DESTROYED", componentInSlot.UIName, FloatieMessage.MessageNature.ComponentDestroyed );
+            PublishMessage( info.target, "{0} DESTROYED", component.UIName, FloatieMessage.MessageNature.ComponentDestroyed );
          }
          return componentDamageLevel;
       }
 
-      public static void PlayCritAudio ( ICombatant target, Weapon weapon, MechComponent component ) {
-         GameRepresentation GameRep = target.GameRep;
+      public static void PlayCritAudio ( AIMCritInfo info ) {
+         GameRepresentation GameRep = info.target.GameRep;
          if ( GameRep == null ) return;
-         if ( weapon.weaponRep != null && weapon.weaponRep.HasWeaponEffect )
-            WwiseManager.SetSwitch<AudioSwitch_weapon_type>( weapon.weaponRep.WeaponEffect.weaponImpactType, GameRep.audioObject );
+         if ( info.weapon.weaponRep != null && info.weapon.weaponRep.HasWeaponEffect )
+            WwiseManager.SetSwitch<AudioSwitch_weapon_type>( info.weapon.weaponRep.WeaponEffect.weaponImpactType, GameRep.audioObject );
          else
             WwiseManager.SetSwitch<AudioSwitch_weapon_type>( AudioSwitch_weapon_type.laser_medium, GameRep.audioObject );
          WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, GameRep.audioObject );
@@ -160,21 +136,55 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, GameRep.audioObject, null, null );
       }
 
-      public static void PlayCritVisual ( ICombatant target, int location, MechComponent componentInSlot ) {
+      public static void PlayCritVisual ( AIMCritInfo info ) {
+         ICombatant target = info.target;
          GameRepresentation GameRep = target.GameRep;
          MechRepresentation MechRep = GameRep as MechRepresentation;
-         if ( target.GameRep == null ) return;
-         AmmunitionBox AmmoCrited = componentInSlot as AmmunitionBox;
-         Jumpjet jumpjetCrited = componentInSlot as Jumpjet;
-         HeatSinkDef heatsinkCrited = componentInSlot.componentDef as HeatSinkDef;
+         MechComponent component = info.component;
+         if ( info.target.GameRep == null ) return;
+         AmmunitionBox AmmoCrited = component as AmmunitionBox;
+         Jumpjet jumpjetCrited = component as Jumpjet;
+         HeatSinkDef heatsinkCrited = component.componentDef as HeatSinkDef;
          if ( target.team.LocalPlayerControlsTeam )
             AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_friendly ", null, null );
          else if ( !target.team.IsFriendly( Combat.LocalPlayerTeam ) )
             AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
-         if ( MechRep != null && jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
-            MechRep.PlayComponentCritVFX( location );
-         if ( AmmoCrited != null && componentInSlot.DamageLevel > ComponentDamageLevel.Functional )
-            GameRep.PlayVFX( location, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
+         if ( MechRep != null && jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && component.DamageLevel > ComponentDamageLevel.Functional )
+            MechRep.PlayComponentCritVFX( info.critLocation );
+         if ( AmmoCrited != null && component.DamageLevel > ComponentDamageLevel.Functional )
+            GameRep.PlayVFX( info.critLocation, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
+      }
+
+      public abstract class AIMCritInfo {
+         public ICombatant target;
+         public WeaponHitInfo hitInfo;
+         public Weapon weapon;
+         public int hitLocation; // Only used for through armour crit.  All vanilla logic should use critLocation
+         public int critLocation;
+         public MechComponent component;
+         public AIMCritInfo( ICombatant target, WeaponHitInfo hitInfo, Weapon weapon ) {
+            this.target = target;
+            this.hitInfo = hitInfo;
+            this.weapon = weapon;
+         }
+         public abstract float GetCritChance();
+         public abstract MechComponent FindComponentInSlot( float random );
+      }
+
+      public class AIMMechCritInfo : AIMCritInfo {
+         public Mech TargetMech { get => target as Mech; }
+         public ArmorLocation HitArmour { get => (ArmorLocation) hitLocation; }
+         public ChassisLocations CritChassis { get => (ChassisLocations) critLocation; }
+         public AIMMechCritInfo ( Mech target, WeaponHitInfo hitInfo, Weapon weapon ) : base( target, hitInfo, weapon ) {}
+         public override float GetCritChance() {
+            critLocation = (int) MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
+            return GetThroughArmourCritChance( target, HitArmour, weapon );
+         }
+         public override MechComponent FindComponentInSlot( float random ) {
+            float slotCount = TargetMech.MechDef.GetChassisLocationDef( CritChassis ).InventorySlots;
+            int slot = (int)(slotCount * random );
+            return component = TargetMech.GetComponentInSlot( CritChassis, slot );
+         }
       }
 
       // ============ ThroughArmorCritical ============
@@ -258,29 +268,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       //float critChance = GetThroughArmourCritChance( mech, armour, weapon );
 
+      // TODO: Rename and implements normal crit chance too
       public static float GetThroughArmourCritChance ( ICombatant target, ArmorLocation hitLocation, Weapon weapon ) {
-         bool logCrit = CritChanceRules.attackLogger.IsDebugEnabled;
-         if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) {
-            if ( logCrit ) CritChanceRules.attackLogger.LogDebug( "[GetCritChance] CriticalHitImmunity!" );
-            return 0;
-         }
+         if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
          float chance = 0, critMultiplier = 0;
          if ( target is Mech )
             chance = GetThroughArmourBaseCritChance( (Mech) target, hitLocation );
-         if ( chance > 0 ) {
+         if ( chance > 0 )
             //chance = Mathf.Max( change, CombatConstants.ResolutionConstants.MinCritChance ); // Min Chance does not apply to TAC
             critMultiplier = Combat.CritChance.GetCritMultiplier( target, weapon, true );
-            if ( logCrit ) CritChanceRules.attackLogger.LogDebug( string.Format( "[GetCritChance] TAC base = {0}, multiplier = {1}!", chance, critMultiplier ) );
-         }
          float result = chance * critMultiplier;
          AttackLog.LogCritChance( result, MechStructureRules.GetChassisLocationFromArmorLocation( hitLocation ) );
          return result;
       }
 
       public static float GetThroughArmourBaseCritChance ( Mech target, ArmorLocation hitLocation ) {
-         if ( CritChanceRules.attackLogger.IsDebugEnabled )
-            CritChanceRules.attackLogger.LogDebug( string.Format( "Location Current Armour = {0}, Location Max Armour = {1}", target.GetCurrentArmor( hitLocation ), target.GetMaxArmor( hitLocation ) ) );
-
          float result = ThroughArmorBaseCritChance, max = target.GetMaxArmor( hitLocation );
          if ( ThroughArmorVarCritChance > 0 ) {
             float curr = target.GetCurrentArmor( hitLocation ), armorPercentage = curr / max;
