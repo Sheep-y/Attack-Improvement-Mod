@@ -603,6 +603,18 @@ These settings can be changed in `settings.json`.
 >
 > If the number is between 0 and 1 (exclusive), the threshold is a fraction of the max armour of the location.
 > e.g. 0.2 means a weapon must do as much damage as 20% of the max armour of the location.
+>
+> If the number is between 0 and -1 (inclusive), the threshold is a fraction of the current armour of the location.
+> e.g. 0.2 means a weapon must do as much damage as 20% of the current armour of the location.
+>
+> Note: If `CritFollowDamageTransfer` is false, damage transfer will not be counted on the final damaged location,
+> and may cause a multi-shot weapon to fail to reach threshold when it actually did.
+> (Single-shot weapon won't even check for crit when damage transfer happens - that is what the settings do.)
+>
+> Also, in order to keep the code simple, fraction of armour is not exact.
+> Shots with partially transferred damage are counted in full and can more easily meet the threshold.
+> Fraction of current armour is also more easily skewed when damage is partially transferred.
+> But generally speaking, the imprecision has limited impact and align with the spirit of through armour crit.
 
 
 > Setting: `ThroughArmorCritChanceZeroArmor`  (0 to 1, default 0)<br>

@@ -132,8 +132,15 @@ namespace Sheepy.BattleTechMod {
       }
 
       private static bool FormatParameters ( Logger.LogEntry line ) {
+         if ( line == null ) return true;
          object[] args = line?.args;
-         if ( args == null ) return true;
+         // Convert Log( data ) to Log( "{0}", data ) so that it can be formatted
+         if ( ! ( line.message is string ) && args == null || args.Length == 0 ) {
+            line.args = args = new object[]{ line.message };
+            line.message = "{0}";
+         } else if ( args == null ) 
+            return true;
+         // Format parameters
          for ( int i = 0, len = args.Length ; i < len ; i++ ) {
             object arg = args[ i ];
             if ( arg is string )
