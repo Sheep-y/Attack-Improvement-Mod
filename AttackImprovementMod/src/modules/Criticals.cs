@@ -59,10 +59,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
-      public override void CombatStarts () {
-         atkLog = AbstractActor.attackLogger;
-      }
-
       private static bool HasCheckForCrit () { try {
          if ( CheckForCritMethod != null ) return true;
          CheckForCritMethod = MechType.GetMethod( "CheckForCrit", NonPublic | Instance );
@@ -89,13 +85,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          //ResolveWeaponDamage( __instance, hitInfo, weapon, meleeAttackType);
       }
 
-      private static HBS.Logging.ILog atkLog;
-      private static string attackSequence;
-      public static void ALog( string message, params object[] args ) {
-         if ( atkLog != null && atkLog.IsLogEnabled )
-            atkLog.Log( string.Format( attackSequence + message, args ) );
-      }
-
       public static void PublishMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
          unit.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage(
             new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) ) );
@@ -104,12 +93,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static float GetMechCritChance ( Mech mech, WeaponHitInfo hitInfo, int hitLocation, Weapon weapon ) {
          ArmorLocation armour = (ArmorLocation) hitLocation;
          CombatGameState Combat = mech.Combat;
-         if ( atkLog.IsLogEnabled ) {
-            ChassisLocations location = MechStructureRules.GetChassisLocationFromArmorLocation( armour );
-            attackSequence = string.Format( "SEQ:{0}: WEAP:{1} Loc:{2}", hitInfo.attackSequenceId, hitInfo.attackWeaponIndex, location.ToString() );
-            ALog( "Base crit chance: {0:P2}", Combat.CritChance.GetBaseCritChance( mech, location, true ) );
-            ALog( "Modifiers : {0}", Combat.CritChance.GetCritMultiplierDescription( mech, weapon ) );
-         }
          return GetThroughArmourCritChance( mech, armour, weapon );
       }
 
@@ -123,11 +106,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float slotCount = unit.MechDef.GetChassisLocationDef( location ).InventorySlots;
          int slot = (int)(slotCount * random );
          MechComponent componentInSlot = unit.GetComponentInSlot( location, slot );
-         if ( componentInSlot != null ) {
-            ALog( "Critical Hit! Found {0} in slot {1}", componentInSlot.Name, slot );
-            return componentInSlot;
-         }
-         ALog( "Critical Hit! No component in slot {0}", slot );
+         if ( componentInSlot != null ) return componentInSlot;
          return null;
       }
 
@@ -136,15 +115,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                                            Func<int,int> TranslateHitLocationToCritLocation,
                                            Func<T,int,float,MechComponent> GetComponentInSlot )
                                         where T : AbstractActor {
-         if ( weapon == null ) {
-            atkLog.LogError( "CheckForCrit had a null weapon!" );
-            return;
-         }
+         if ( weapon == null ) return;
          float critChance = GetCritChance( unit, hitLocation, weapon );
          if ( critChance > 0 ) {
             float[] randomFromCache = Combat.AttackDirector.GetRandomFromCache( hitInfo, 2 );
-            ALog( "Final crit chance: {0:P2}", critChance );
-            ALog( "Crit roll: {0:P2}", randomFromCache[0] );
             if ( randomFromCache[ 0 ] <= critChance ) {
                int critLocation = TranslateHitLocationToCritLocation( hitLocation );
                MechComponent componentInSlot = GetComponentInSlot( unit, critLocation, randomFromCache[1] );
@@ -156,10 +130,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                      attackSequence.FlagAttackScoredCrit( componentInSlot as Weapon, componentInSlot as AmmunitionBox );
                   ComponentDamageLevel componentDamageLevel = PublishComponentCrit( unit, hitInfo, componentInSlot );
                   componentInSlot.DamageComponent( hitInfo, componentDamageLevel, true );
-                  ALog( "Critical: {3} new damage state: {4}", componentInSlot.Name, componentDamageLevel );
                }
-            } else ALog( "No crit" );
-         } else ALog( "No crit" );
+            }
+         }
          AttackLog.LogCritResult( unit, weapon );
       }
 

@@ -110,7 +110,8 @@ namespace Sheepy.BattleTechMod {
          ThreadPool.QueueUserWorkItem( ( obj ) => {
             string sanitised;
             sanitised = JsonConvert.SerializeObject( obj, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
-            sanitised = Regex.Replace( sanitised, @"(?<=\d\.\d+)0+(?=,\r?\n)", "" );
+            sanitised = Regex.Replace( sanitised, @"(?<=\d)\.0+(?=,\r?\n)", "" ); // Convert 1.0000000000 to 1
+            sanitised = Regex.Replace( sanitised, @"(?<=\d\.\d+)0+(?=,\r?\n)", "" ); // Convert 1.20000000 to 1.2
             Log.Info( "WARNING: Do NOT change settings here. This is just a log." );
             Log.Info( "Loaded Settings: " + sanitised );
             Log.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
