@@ -16,7 +16,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float ThroughArmorCritThreshold = 0, ThroughArmorCritThresholdPerc = 0, ThroughArmorBaseCritChance, ThroughArmorVarCritChance;
 
       public override void CombatStartsOnce () {
-         MethodInfo ResolveWeaponDamage = MechType.GetMethod( "ResolveWeaponDamage", new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) } );
+         Type[] ResolveParams = new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) };
+         MethodInfo ResolveWeaponDamage = MechType.GetMethod( "ResolveWeaponDamage", ResolveParams );
 
          if ( Settings.SkipCritingDeadMech )
             Patch( ResolveWeaponDamage, "Skip_BeatingDeadMech", null );
@@ -37,7 +38,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                ThroughArmorCritThreshold = (float) Settings.ThroughArmorCritThreshold;
             else
                ThroughArmorCritThresholdPerc = (float)Settings.ThroughArmorCritThreshold;
-            //Info( "ThroughArmorCritChance is {0:##0}% to {1:##0}%.", ThroughArmorBaseCritChance * 100, ThroughArmorVarCritChance * 100 );
             if ( Settings.ThroughArmorCritThreshold > 0 && ! Settings.CritFollowDamageTransfer )
                Warn( "Disabling CritFollowDamageTransfer will impact ThroughArmorCritThreshold calculation." );
 
@@ -79,7 +79,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( armoured == null || damages == null ) return;
 
          int i = 0, len = info.numberOfShots;
-         if ( ThroughArmorCritThreshold > 0 || ThroughArmorCritThresholdPerc > 0 ) {
+         if ( ThroughArmorCritThreshold != 0 || ThroughArmorCritThresholdPerc != 0 ) {
             float damage = damageFunc();
             for ( ; i < len ; i++ ) {
                ArmorLocation key = (ArmorLocation) info.hitLocations[i];
@@ -102,8 +102,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( mech.IsLocationDestroyed( location ) ) continue;
             if ( mech.GetCurrentArmor( armour ) <= 0 && mech.GetCurrentStructure( location ) < mech.GetMaxStructure( location ) )
                damaged.Add( (int) armour, damage.Value );
-            else if ( damage.Value > ThroughArmorCritThreshold
-                      && ( ThroughArmorCritThresholdPerc == 0 || damage.Value > ThroughArmorCritThresholdPerc * mech.GetMaxArmor( armour ) ) )
+            else if ( ( ThroughArmorCritThreshold == 0 && ThroughArmorCritThresholdPerc == 0 )
+                      || ( ThroughArmorCritThreshold > 0 && damage.Value > ThroughArmorCritThreshold )
+                      || ( ThroughArmorCritThresholdPerc > 0 && damage.Value > ThroughArmorCritThresholdPerc * mech.GetMaxArmor( armour ) )
+                      || ( ThroughArmorCritThresholdPerc < 0 && damage.Value > ThroughArmorCritThresholdPerc * ( mech.GetCurrentArmor( armour ) + damage.Value ) ) )
                armoured.Add( armour, damage.Value );
             //else
             //   Verbo( "{0} damage ({1}) on {2} not reach threshold {3} & {4}%", armour, damage.Value, mech.DisplayName, ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc*100 );
