@@ -148,6 +148,10 @@ namespace Sheepy.BattleTechMod {
                continue;
             if ( arg is Text text )
                args[i] = text.ToString( true );
+            else if ( arg is MechComponent comp )
+               args[i] = comp.UIName.ToString() + " (" + comp.uid + ")";
+            else if ( arg is AbstractActor unit )
+               args[i] = unit.DisplayName.ToString() + " (" + unit.GetPilot()?.Callsign + ( unit.team.IsLocalPlayer ? ",PC" : ",NPC" ) + ")";
             else if ( arg is System.Collections.IEnumerable list )
                args[i] = "[" + Join( ", ", list ) + "]";
          }
