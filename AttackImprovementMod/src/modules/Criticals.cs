@@ -101,7 +101,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static void ResolveWeaponDamage ( AIMCritInfo info ) { try {
          ConsolidateDamage( damages, info.hitInfo, () => GetWeaponDamage( info ) );
          armoured.Clear();
-         damaged = new Dictionary<int, float>();
+         damaged.Clear();
          //Verbo( "SplitCriticalHitInfo found {0} hit locations by {1} on {2}.", damages.Count, info.weapon, info.target );
          foreach ( var damage in damages ) {
             info.hitLocation = damage.Key;
@@ -147,8 +147,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                }
             }
          }
-         if ( ! ( target is Mech ) ) // Mech already has postfix
-            AttackLog.LogCritResult( target, critInfo.weapon );
+         AttackLog.LogCritResult( target, critInfo.weapon );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static ComponentDamageLevel GetDegradedComponentLevel ( AIMCritInfo info ) {
@@ -240,15 +239,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public override float GetCritChance() {
-            if ( HitArmour != ArmorLocation.None && HitArmour != ArmorLocation.Invalid ) {
-               critLocation = MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
-               Vector2 armour = GetArmour(), structure = GetStructure();
-               if ( armour.x > 0 || structure.x == structure.y )
-                  return GetTACChance( target, HitArmour, weapon, armour, critLocation );
-            } else {
-               if ( critLocation == ChassisLocations.None ) return 0;
-            }
-            return Combat.CritChance.GetCritChance( Me, critLocation, weapon, true );
+            critLocation = MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
+            Vector2 armour = GetArmour(), structure = GetStructure();
+            if ( armour.x > 0 || structure.x == structure.y )
+               return GetTACChance( target, HitArmour, weapon, armour, critLocation );
+            float result = Combat.CritChance.GetCritChance( Me, critLocation, weapon, true );
+            AttackLog.LogAIMCritChance( result, critLocation );
+            return result;
          }
 
          public override MechComponent FindComponentInSlot( float random ) {
@@ -257,7 +254,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return component = Me.GetComponentInSlot( critLocation, slot );
          }
 
-         public virtual int GetCritLocation() { return (int) critLocation; }
+         public override int GetCritLocation() { return (int) critLocation; }
       }
 
       public class AIMVehicleInfo : AIMCritInfo {
@@ -322,7 +319,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          foreach ( var damagedLocation in armoured )
             CheckForCrit( info, damagedLocation.Key );
          foreach ( var damagedLocation in damaged )
-            CheckForCrit( info, 0 );
+            CheckForCrit( info, damagedLocation.Key );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static float GetNonMechCritChance ( ICombatant target, Weapon weapon, Vector2 armour, Vector2 structure ) {
@@ -343,8 +340,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ ThroughArmorCritical ============
 
-      private static Dictionary<int, float> armoured = new Dictionary<int, float>(), damages = new Dictionary<int, float>(), damaged;
-      private static ArmorLocation? ThroughArmor;
+      private static Dictionary<int, float> armoured = new Dictionary<int, float>(), damages = new Dictionary<int, float>(), damaged = new Dictionary<int, float>();
 
       // Do our own crit first, before vanilla ResolveWeaponDamage
       public static void AddThroughArmorCritical ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) { try {
@@ -353,9 +349,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( armoured == null || armoured.Count <= 0 ) return;
 
          foreach ( var damagedArmour in armoured )
-            CheckForCrit( new AIMCritInfo( __instance, hitInfo, weapon ), damagedArmour.Key );
+            CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), damagedArmour.Key );
          foreach ( var damagedArmour in damaged )
-            CheckForCrit( new AIMCritInfo( __instance, hitInfo, weapon ), 0 );
+            CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), damagedArmour.Key );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       // We already did all the crit in AddThroughArmorCritical, so the vanilla don't have to.
