@@ -13,10 +13,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class Criticals : BattleModModule {
 
       private static Type MechType = typeof( Mech );
-      private static MethodInfo CheckForCritMethod;
 
       private static bool ThroughArmorCritEnabled;
-      private static float ThroughArmorCritThreshold = 0, ThroughArmorCritThresholdPerc = 0, ThroughArmorBaseCritChance, ThroughArmorVarCritChance;
+      private static float ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc, ThroughArmorBaseCritChance, ThroughArmorVarCritChance;
 
       public override void CombatStartsOnce () {
          Type[] ResolveParams = new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) };
@@ -30,7 +29,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.VehicleCritMultiplier > 0 )
             Patch( typeof( Vehicle ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
 
-         if ( Settings.ThroughArmorCritChanceZeroArmor > 0 && HasCheckForCrit() ) {
+         if ( Settings.ThroughArmorCritChanceZeroArmor > 0 ) {
             ThroughArmorCritEnabled = true;
             if ( Settings.FixFullStructureCrit ) {
                Warn( "FullStructureCrit disabled because ThroughArmorCritical is enabled, meaning full structure can be crit'ed." );
@@ -38,8 +37,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             Patch( ResolveWeaponDamage, "AddThroughArmorCritical", null );
             Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", "Override_ConsolidateCriticalHitInfo", null );
-            Patch( typeof( CritChanceRules ), "GetCritChance" , "GetThroughArmorCritChance", null ); // Vanilla Crit Hijack
-            //Patch( CheckForCritMethod, "AIMCheckMechCrit", null ); // Use AIM Crit System. Tested working.
             ThroughArmorBaseCritChance = (float) Settings.ThroughArmorCritChanceFullArmor;
             ThroughArmorVarCritChance = (float) Settings.ThroughArmorCritChanceZeroArmor - ThroughArmorBaseCritChance;
             if ( Settings.ThroughArmorCritThreshold > 1 )
@@ -59,16 +56,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "DamageLocation", NonPublic, "UpdateCritLocation", null );
          }
       }
-
-      private static bool HasCheckForCrit () { try {
-         if ( CheckForCritMethod != null ) return true;
-         CheckForCritMethod = MechType.GetMethod( "CheckForCrit", NonPublic | Instance );
-         if ( CheckForCritMethod == null ) Warn( "Mech.CheckForCrit not found. One or more crit features disabled." );
-         return CheckForCritMethod != null;
-      } catch ( Exception ex ) {
-         Error( ex );
-         return false;
-      } }
 
       [ HarmonyPriority( Priority.High ) ]
       public static bool Skip_BeatingDeadMech ( Mech __instance ) {
@@ -260,7 +247,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   return GetTACChance( target, HitArmour, weapon, armour, critLocation );
             } else {
                if ( critLocation == ChassisLocations.None ) return 0;
-               ThroughArmor = null;
             }
             return Combat.CritChance.GetCritChance( Me, critLocation, weapon, true );
          }
@@ -336,15 +322,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          foreach ( var damagedLocation in armoured )
             CheckForCrit( info, damagedLocation.Key );
          foreach ( var damagedLocation in damaged )
-            CheckForCrit( info, damagedLocation.Key );
-         ThroughArmor = null;
+            CheckForCrit( info, 0 );
       }                 catch ( Exception ex ) { Error( ex ); } }
-
-      public static bool AIMCheckMechCrit ( Mech __instance, WeaponHitInfo hitInfo, ChassisLocations location, Weapon weapon ) {
-         AIMMechCritInfo info = new AIMMechCritInfo( __instance, hitInfo, weapon ){ critLocation = (int) location };
-         CheckForCrit( info, (int) ThroughArmor.GetValueOrDefault() );
-         return false;
-      }
 
       public static float GetNonMechCritChance ( ICombatant target, Weapon weapon, Vector2 armour, Vector2 structure ) {
          if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
@@ -367,33 +346,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<int, float> armoured = new Dictionary<int, float>(), damages = new Dictionary<int, float>(), damaged;
       private static ArmorLocation? ThroughArmor;
 
-      public static bool Override_ConsolidateCriticalHitInfo ( ref Dictionary<int, float> __result ) {
-         if ( damaged == null ) return true;
-         //foreach ( int i in damaged.Keys ) Verbo( "Crit list: Damaged {0}", (ArmorLocation) i );
-         __result = damaged; // Use the result from SplitCriticalHitInfo
-         damaged = null;
-         return false;
-      }
-
+      // Do our own crit first, before vanilla ResolveWeaponDamage
       public static void AddThroughArmorCritical ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) { try {
          Mech mech = __instance;
          ResolveWeaponDamage( new AIMMechCritInfo( mech, hitInfo, weapon ) );
          if ( armoured == null || armoured.Count <= 0 ) return;
 
-         foreach ( var damagedArmour in armoured ) {
-            ThroughArmor = (ArmorLocation) damagedArmour.Key;
-            CheckForCritMethod.Invoke( mech, new object[]{ hitInfo, MechStructureRules.GetChassisLocationFromArmorLocation( ThroughArmor.GetValueOrDefault() ), weapon } );
-         }
-         ThroughArmor = null;
+         foreach ( var damagedArmour in armoured )
+            CheckForCrit( new AIMCritInfo( __instance, hitInfo, weapon ), damagedArmour.Key );
+         foreach ( var damagedArmour in damaged )
+            CheckForCrit( new AIMCritInfo( __instance, hitInfo, weapon ), 0 );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static bool GetThroughArmorCritChance ( ref float __result, ICombatant target, ChassisLocations hitLocation, Weapon weapon, bool shouldLog = false ) {
-         if ( ThroughArmor == null ) return true;
-         Mech mech = target as Mech;
-         ArmorLocation armour = ThroughArmor.GetValueOrDefault();
-         __result = GetTACChance( target, ThroughArmor.GetValueOrDefault(), weapon, 
-                  new Vector2( mech.GetCurrentArmor( armour ), mech.GetMaxArmor( armour ) ),
-                  MechStructureRules.GetChassisLocationFromArmorLocation( armour ) );
+      // We already did all the crit in AddThroughArmorCritical, so the vanilla don't have to.
+      public static bool Override_ConsolidateCriticalHitInfo ( ref Dictionary<int, float> __result ) {
+         if ( __result == null ) __result = new Dictionary<int, float>();
+         else __result.Clear();
          return false;
       }
 
