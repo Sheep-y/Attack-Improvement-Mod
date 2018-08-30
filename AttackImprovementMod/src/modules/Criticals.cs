@@ -29,22 +29,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.VehicleCritMultiplier > 0 )
             Patch( typeof( Vehicle ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
 
-         if ( Settings.ThroughArmorCritChanceZeroArmor > 0 ) {
-            ThroughArmorCritEnabled = true;
-            if ( Settings.FixFullStructureCrit ) {
-               Warn( "FullStructureCrit disabled because ThroughArmorCritical is enabled, meaning full structure can be crit'ed." );
-               Settings.FixFullStructureCrit = false;
-            }
+         if ( ThroughArmorCritEnabled = Settings.ThroughArmorCritChanceZeroArmor > 0 ) {
             Patch( ResolveWeaponDamage, "AddThroughArmorCritical", null );
             Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", "Override_ConsolidateCriticalHitInfo", null );
-            ThroughArmorBaseCritChance = (float) Settings.ThroughArmorCritChanceFullArmor;
-            ThroughArmorVarCritChance = (float) Settings.ThroughArmorCritChanceZeroArmor - ThroughArmorBaseCritChance;
-            if ( Settings.ThroughArmorCritThreshold > 1 )
-               ThroughArmorCritThreshold = (float) Settings.ThroughArmorCritThreshold;
-            else
-               ThroughArmorCritThresholdPerc = (float)Settings.ThroughArmorCritThreshold;
-            if ( Settings.ThroughArmorCritThreshold != 0 && ! Settings.CritFollowDamageTransfer )
-               Warn( "Disabling CritFollowDamageTransfer may affect ThroughArmorCritThreshold calculation." );
+            InitThroughArmourCrit();
 
          } else if ( Settings.FixFullStructureCrit ) {
             Patch( ResolveWeaponDamage, "RecordCritMech", "ClearCritMech" );
@@ -55,6 +43,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
             Patch( MechType, "DamageLocation", NonPublic, "UpdateCritLocation", null );
          }
+      }
+
+      private void InitThroughArmourCrit () {
+         if ( Settings.FixFullStructureCrit ) {
+            Warn( "FullStructureCrit disabled because ThroughArmorCritical is enabled, meaning full structure can be crit'ed." );
+            Settings.FixFullStructureCrit = false;
+         }
+         ThroughArmorBaseCritChance = (float) Settings.ThroughArmorCritChanceFullArmor;
+         ThroughArmorVarCritChance = (float) Settings.ThroughArmorCritChanceZeroArmor - ThroughArmorBaseCritChance;
+         if ( Settings.ThroughArmorCritThreshold > 1 )
+            ThroughArmorCritThreshold = (float) Settings.ThroughArmorCritThreshold;
+         else
+            ThroughArmorCritThresholdPerc = (float)Settings.ThroughArmorCritThreshold;
+         if ( Settings.ThroughArmorCritThreshold != 0 && ! Settings.CritFollowDamageTransfer )
+            Warn( "Disabling CritFollowDamageTransfer may affect ThroughArmorCritThreshold calculation." );
       }
 
       [ HarmonyPriority( Priority.High ) ]
@@ -81,47 +84,30 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return target.GetAdjustedDamage( damage, weapon.Category, target.occupiedDesignMask, lineOfFireLevel, false );
       }
 
-      public static void ConsolidateDamage ( Dictionary<int,float> consolidated, WeaponHitInfo info, Func<float> damageFunc ) {
-         consolidated.Clear();
-         int i = 0, len = info.numberOfShots;
-         if ( ThroughArmorCritThreshold != 0 || ThroughArmorCritThresholdPerc != 0 ) {
-            float damage = damageFunc();
-            for ( ; i < len ; i++ ) {
-               int location = info.hitLocations[i];
-               consolidated.TryGetValue( location, out float allDamage );
-               allDamage += damage;
-               consolidated[ location ] = allDamage;
-            }
-         } else {
-            for ( ; i < len ; i++ )
-               consolidated[ info.hitLocations[i] ] = 1;
-         }
-      }
-
       // ============ Generic Critical System Core ============
 
-      private static void ResolveWeaponDamage ( AIMCritInfo info ) { try {
-         ConsolidateDamage( damages, info.hitInfo, () => GetWeaponDamage( info ) );
-         armoured.Clear();
+      private static Dictionary<int, float> damages = new Dictionary<int, float>(), damaged = new Dictionary<int, float>();
+
+      private static void ConsolidateAIMCrit ( AIMCritInfo info ) { try {
+         damages = info.hitInfo.ConsolidateCriticalHitInfo( GetWeaponDamage( info ) );
          damaged.Clear();
          //Verbo( "SplitCriticalHitInfo found {0} hit locations by {1} on {2}.", damages.Count, info.weapon, info.target );
          foreach ( var damage in damages ) {
             info.SetLocation( damage.Key );
             if ( ! info.IsValidLocation() ) continue;
-            if ( ! info.IsArmourBreached ) {
-               if ( ThroughArmorCritEnabled ) {
-                  //Verbo( "Armour damage {0} = {1}", damage.Key, damage.Value );
-                  if ( ( ThroughArmorCritThreshold == 0 && ThroughArmorCritThresholdPerc == 0 ) // No threshold
-                  /*const*/ || ( ThroughArmorCritThreshold > 0 && damage.Value > ThroughArmorCritThreshold )
-                  /*abs% */ || ( ThroughArmorCritThresholdPerc > 0 && damage.Value > ThroughArmorCritThresholdPerc * info.maxArmour )
-                  /*curr%*/ || ( ThroughArmorCritThresholdPerc < 0 && damage.Value > ThroughArmorCritThresholdPerc * ( info.currentArmour + damage.Value ) ) )
-                     armoured.Add( info.HitLocation, damage.Value );
-                     //else Verbo( "Damage not reach threshold {0} / {1}% (Armour {2}/{3})", ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc*100, armour.x, armour.y );
-               }
-            } else {
+            if ( info.IsArmourBreached ) {
                //Verbo( "Struct damage {0} = {1}", damage.Key, damage.Value );
                damaged.Add( info.HitLocation, damage.Value );
+               continue;
             }
+            if ( ! ThroughArmorCritEnabled ) continue;
+            //Verbo( "Armour damage {0} = {1}", damage.Key, damage.Value );
+            if ( ( ThroughArmorCritThreshold == 0 && ThroughArmorCritThresholdPerc == 0 ) // No threshold
+            /*const*/ || ( ThroughArmorCritThreshold > 0 && damage.Value > ThroughArmorCritThreshold )
+            /*abs% */ || ( ThroughArmorCritThresholdPerc > 0 && damage.Value > ThroughArmorCritThresholdPerc * info.maxArmour )
+            /*curr%*/ || ( ThroughArmorCritThresholdPerc < 0 && damage.Value > ThroughArmorCritThresholdPerc * ( info.currentArmour + damage.Value ) ) )
+               damaged.Add( info.HitLocation, damage.Value );
+            //else Verbo( "Damage not reach threshold {0} / {1}% (Armour {2}/{3})", ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc*100, armour.x, armour.y );
          }
          damages.Clear();
       }                 catch ( Exception ex ) { Error( ex ); } }
@@ -193,6 +179,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             target.GameRep.PlayVFX( info.GetCritLocation(), Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
       }
 
+      // ============ AIMCritInfo ============
+
       public abstract class AIMCritInfo {
          public AbstractActor target;
          public WeaponHitInfo hitInfo;
@@ -207,7 +195,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          public int HitLocation { get; protected set; }
          public float currentArmour, maxArmour, currentStructure, maxStructure;
-         public bool IsArmourBreached { get => maxArmour <= 0 && currentStructure < maxStructure; }
+         public bool IsArmourBreached { get => maxArmour <= 0 && ( ! Settings.FixFullStructureCrit || currentStructure < maxStructure ); }
          public abstract bool IsValidLocation();
          public virtual  void SetLocation ( int location ) { HitLocation = location; }
          protected void SetStates ( float currA, float maxA, float currS, float maxS ) {
@@ -306,16 +294,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Universal Crit Patch ============
 
       public static void EnableNonMechCrit ( AbstractActor __instance, WeaponHitInfo hitInfo ) { try {
-         AIMCritInfo info = null;
          AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
          Weapon weapon = attackSequence.GetWeapon( hitInfo.attackGroupIndex, hitInfo.attackWeaponIndex );
          //MeleeAttackType meleeAttackType = attackSequence.meleeAttackType;
-         if ( __instance is Vehicle vehicle ) info = new AIMVehicleInfo( vehicle, hitInfo, weapon );
-         else if ( __instance is Turret turret ) info = new AIMTurretInfo( turret, hitInfo, weapon );
-         else return;
-         ResolveWeaponDamage( info );
-         foreach ( var damagedLocation in armoured )
-            CheckForCrit( info, damagedLocation.Key );
+         if      ( __instance is Vehicle vehicle ) ResolveAIMWeaponDamage( new AIMVehicleInfo( vehicle, hitInfo, weapon ) );
+         else if ( __instance is Turret  turret  ) ResolveAIMWeaponDamage( new AIMTurretInfo ( turret , hitInfo, weapon ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ResolveAIMWeaponDamage ( AIMCritInfo info ) { try {
+         ConsolidateAIMCrit( info );
          foreach ( var damagedLocation in damaged )
             CheckForCrit( info, damagedLocation.Key );
       }                 catch ( Exception ex ) { Error( ex ); } }
@@ -323,13 +310,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static float GetNonMechCritChance ( AIMCritInfo info ) {
          if ( info.target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
          float chance = 0, critMultiplier = 0;
-         if ( ! info.IsArmourBreached )
-            chance = GetTACBaseChance( info.currentArmour, info.maxArmour );
-         else {
+         if ( info.IsArmourBreached ) {
             chance = info.currentArmour / info.maxStructure;
             AttackLog.LogAIMBaseCritChance( chance, info.maxStructure );
             chance = Mathf.Max( chance, CombatConstants.ResolutionConstants.MinCritChance );
-         }
+         } else
+            chance = GetTACBaseChance( info.currentArmour, info.maxArmour );
          if ( chance > 0 )
             critMultiplier = Combat.CritChance.GetCritMultiplier( info.target, info.weapon, true );
          float result = chance * critMultiplier;
@@ -338,19 +324,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ ThroughArmorCritical ============
 
-      private static Dictionary<int, float> armoured = new Dictionary<int, float>(), damages = new Dictionary<int, float>(), damaged = new Dictionary<int, float>();
-
-      // Do our own crit first, before vanilla ResolveWeaponDamage
-      public static void AddThroughArmorCritical ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) { try {
-         Mech mech = __instance;
-         ResolveWeaponDamage( new AIMMechCritInfo( mech, hitInfo, weapon ) );
-         if ( armoured == null || armoured.Count <= 0 ) return;
-
-         foreach ( var damagedArmour in armoured )
-            CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), damagedArmour.Key );
-         foreach ( var damagedArmour in damaged )
-            CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), damagedArmour.Key );
-      }                 catch ( Exception ex ) { Error( ex ); } }
+      public static void AddThroughArmorCritical ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) {
+         ResolveAIMWeaponDamage( new AIMMechCritInfo( __instance, hitInfo, weapon ) );
+      }
 
       // We already did all the crit in AddThroughArmorCritical, so the vanilla don't have to.
       public static bool Override_ConsolidateCriticalHitInfo ( ref Dictionary<int, float> __result ) {
@@ -361,9 +337,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static float GetTACChance ( ICombatant target, ArmorLocation hitLocation, Weapon weapon, float currentArmour, float maxArmour, object location ) {
          if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
-         float chance = 0, critMultiplier = 0;
-         if ( target is Mech )
-            chance = GetTACBaseChance( currentArmour, maxArmour );
+         float chance = GetTACBaseChance( currentArmour, maxArmour ), critMultiplier = 0;
          if ( chance > 0 )
             //chance = Mathf.Max( change, CombatConstants.ResolutionConstants.MinCritChance ); // Min Chance does not apply to TAC
             critMultiplier = Combat.CritChance.GetCritMultiplier( target, weapon, true );
@@ -430,6 +404,5 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( thisHitIndex < 0 || thisHitIndex >= thisHitLocations.Length ) return;
          thisHitLocations[ thisHitIndex ] = (int) aLoc;
       }
-
    }
 }
