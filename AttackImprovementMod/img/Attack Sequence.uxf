@@ -2799,11 +2799,11 @@ halign=center</panel_attributes>
       <w>410</w>
       <h>160</h>
     </coordinates>
-    <panel_attributes>BATTLETECH ver 1.1.2.
+    <panel_attributes>BATTLETECH ver 1.2.0
 
 Charted by Sheepy to keep track of
 attack log patches in 
-Attack Improvement Mod 2.1
+Attack Improvement Mod 2.3
 fontsize=24
 halign=center</panel_attributes>
     <additional_attributes/>
@@ -2971,7 +2971,7 @@ halign=center</panel_attributes>
       <h>80</h>
     </coordinates>
     <panel_attributes>Not all methods shown.
-Updated 2018-08-20.
+Updated 2018-08-30.
 Made by UMLet. Original file host on mod's GitHub.
 halign=center</panel_attributes>
     <additional_attributes/>
