@@ -202,9 +202,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( !target.team.IsFriendly( Combat.LocalPlayerTeam ) )
             AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
          if ( MechRep != null && jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && component.DamageLevel > ComponentDamageLevel.Functional )
-            MechRep.PlayComponentCritVFX( info.critLocation );
+            MechRep.PlayComponentCritVFX( info.GetCritLocation() );
          if ( AmmoCrited != null && component.DamageLevel > ComponentDamageLevel.Functional )
-            target.GameRep.PlayVFX( info.critLocation, Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
+            target.GameRep.PlayVFX( info.GetCritLocation(), Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
       }
 
       public abstract class AIMCritInfo {
@@ -212,7 +212,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public WeaponHitInfo hitInfo;
          public Weapon weapon;
          public int hitLocation; // Only used for through armour crit.  All vanilla logic should use critLocation
-         public int critLocation;
          public MechComponent component;
          public AIMCritInfo( AbstractActor target, WeaponHitInfo hitInfo, Weapon weapon ) {
             this.target = target;
@@ -222,7 +221,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public abstract bool IsValidLocation();
          public abstract Vector2 GetArmour();     // x = current, y = max
          public abstract Vector2 GetStructure(); // x = current, y = max
-         public abstract float GetCritChance(); // Need to recalc/reassign critLocation from hitLocation
+         public abstract float GetCritChance();
          public virtual MechComponent FindComponentInSlot ( float random ) { // TODO: take component slot into account
             float slotCount = target.allComponents.Count;
             int slot = (int)(slotCount * random );
@@ -230,18 +229,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             AttackLog.LogCritComp( component, slot );
             return component;
          }
+         public virtual int GetCritLocation() { return hitLocation; } // Used to play VFX
       }
 
       public class AIMMechCritInfo : AIMCritInfo {
          public Mech Me { get => target as Mech; }
          public ArmorLocation HitArmour { get => (ArmorLocation) hitLocation; }
-         public ChassisLocations CritChassis { get => (ChassisLocations) critLocation; }
+         public ChassisLocations critLocation;
          public AIMMechCritInfo ( Mech target, WeaponHitInfo hitInfo, Weapon weapon ) : base( target, hitInfo, weapon ) {}
 
          public override bool IsValidLocation () {
             if ( HitArmour == ArmorLocation.None || HitArmour == ArmorLocation.Invalid ) return false;
-            critLocation = (int) MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
-            return ! Me.IsLocationDestroyed( CritChassis );
+            critLocation = MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
+            return ! Me.IsLocationDestroyed( critLocation );
          }
 
          public override Vector2 GetArmour() {
@@ -249,27 +249,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public override Vector2 GetStructure() {
-            return new Vector2( Me.GetCurrentStructure( CritChassis ), Me.GetMaxStructure( CritChassis ) );
+            return new Vector2( Me.GetCurrentStructure( critLocation ), Me.GetMaxStructure( critLocation ) );
          }
 
          public override float GetCritChance() {
             if ( HitArmour != ArmorLocation.None && HitArmour != ArmorLocation.Invalid ) {
-               critLocation = (int) MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
+               critLocation = MechStructureRules.GetChassisLocationFromArmorLocation( HitArmour );
                Vector2 armour = GetArmour(), structure = GetStructure();
                if ( armour.x > 0 || structure.x == structure.y )
                   return GetTACChance( target, HitArmour, weapon, armour, critLocation );
             } else {
-               if ( CritChassis == ChassisLocations.None ) return 0;
+               if ( critLocation == ChassisLocations.None ) return 0;
                ThroughArmor = null;
             }
-            return Combat.CritChance.GetCritChance( Me, CritChassis, weapon, true );
+            return Combat.CritChance.GetCritChance( Me, critLocation, weapon, true );
          }
 
          public override MechComponent FindComponentInSlot( float random ) {
-            float slotCount = Me.MechDef.GetChassisLocationDef( CritChassis ).InventorySlots;
+            float slotCount = Me.MechDef.GetChassisLocationDef( critLocation ).InventorySlots;
             int slot = (int)(slotCount * random );
-            return component = Me.GetComponentInSlot( CritChassis, slot );
+            return component = Me.GetComponentInSlot( critLocation, slot );
          }
+
+         public virtual int GetCritLocation() { return (int) critLocation; }
       }
 
       public class AIMVehicleInfo : AIMCritInfo {
