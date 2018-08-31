@@ -350,6 +350,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return result;
       }
 
+      public MechComponent GetComponentInSlot ( Mech me, ChassisLocations location, int index ) {
+         List<MechComponent> list = new List<MechComponent>();
+         foreach ( MechComponent mechComponent in me.allComponents ) {
+            ChassisLocations componentLocation = (ChassisLocations)mechComponent.Location;
+            if ( ( componentLocation & location ) > ChassisLocations.None )
+               for ( int i = 0 ; i < mechComponent.inventorySize ; i++ )
+                  list.Add( mechComponent );
+         }
+         LocationDef chassisLocationDef = me.MechDef.GetChassisLocationDef(location);
+         while ( list.Count < chassisLocationDef.InventorySlots )
+            list.Add( null );
+         if ( me.Combat.Constants.ResolutionConstants.SearchForValidCritSlot ) {
+            for ( int j = 0 ; j < chassisLocationDef.InventorySlots ; j++ ) {
+               if ( index >= list.Count )
+                  index %= list.Count;
+               if ( index < list.Count && list[ index ] != null && list[ index ].DamageLevel < ComponentDamageLevel.Destroyed )
+                  return list[ index ];
+            }
+         } else if ( index < list.Count )
+            return list[ index ];
+         return null;
+      }
+
       // ============ ThroughArmorCritical ============
 
       private static bool allowConsolidateOnce = true;
