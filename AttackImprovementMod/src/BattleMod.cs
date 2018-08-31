@@ -20,8 +20,8 @@ namespace Sheepy.BattleTechMod {
 
    public abstract class BattleMod : BattleModModule {
 
-      public static readonly Logger BTML_LOG = new Logger( "Mods/BTModLoader.log" );
-      public static readonly Logger BT_LOG = new Logger( "BattleTech_Data/output_log.txt" );
+      public static readonly Logger BTML_LOG = new Logger( "Mods/BTModLoader.log", "BTML log should not be deleted." );
+      public static readonly Logger BT_LOG = new Logger( "BattleTech_Data/output_log.txt", "BattleTech game log should not be deleted." );
 
       // Basic mod info for public access, will auto load from assembly then mod.json (if exists)
       public string Version { get; protected set; } = "Unknown";

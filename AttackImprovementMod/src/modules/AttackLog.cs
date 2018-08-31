@@ -617,10 +617,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisLocationMaxHP = target.GetMaxStructure( hitLocation );
       }
 
-      // Used by Through Armour Crit of this mod
-      public static void LogAIMBaseCritChance ( float chance, float maxArmour ) {
+      // Used by universal crit system of this mod (through armour crit included)
+      public static void LogAIMBaseCritChance ( float chance, float maxHP ) {
          thisBaseCritChance = chance;
-         thisLocationMaxHP = maxArmour;
+         thisLocationMaxHP = maxHP;
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
@@ -635,7 +635,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static float LogAIMCritChance ( float chance, object hitLocation ) {
          thisCritChance = chance;
-         thisCritComp = null;
          thisCritLocation = hitLocation.ToString();
          return chance;
       }

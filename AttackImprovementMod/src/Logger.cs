@@ -7,9 +7,10 @@ using System.Threading;
 
 namespace Sheepy.Logging {
    public class Logger : IDisposable {
-      public Logger ( string file ) : this( file, 1000 ) { }
-      public Logger ( string file, int writeDelay ) {
+      public Logger ( string file, string blockDelete ) : this( file, 1000, blockDelete ) { }
+      public Logger ( string file, int writeDelay = 1000, string blockDelete = null ) {
          if ( string.IsNullOrEmpty( file ) ) throw new NullReferenceException();
+         BlockDeleteReason = blockDelete;
          LogFile = file.Trim();
          if ( writeDelay < 0 ) return;
          this.writeDelay = writeDelay;
@@ -19,6 +20,8 @@ namespace Sheepy.Logging {
       }
 
       // ============ Self Prop ============
+
+      private readonly string BlockDeleteReason; // Non-null to block delete
 
       protected Func<SourceLevels,string> _LevelText = ( level ) => { //return level.ToString() + ": ";
          if ( level <= SourceLevels.Critical ) return "CRIT "; if ( level <= SourceLevels.Error       ) return "ERR  ";
@@ -74,8 +77,8 @@ namespace Sheepy.Logging {
       public virtual bool Exists () { return File.Exists( LogFile ); }
 
       public virtual void Delete () {
-         if ( LogFile == "Mods/BTModLoader.log" || LogFile == "BattleTech_Data/output_log.txt" ) {
-            HandleError( new ApplicationException( "Cannot delete BTModLoader.log or BattleTech game log." ) );
+         if ( BlockDeleteReason != null ) {
+            HandleError( new ApplicationException( "Cannot delete " + LogFile + ": " + BlockDeleteReason ) );
             return;
          }
          try {
