@@ -44,6 +44,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
             Patch( MechType, "DamageLocation", NonPublic, "UpdateCritLocation", null );
          }
+
+         if ( Settings.TurretCritMultiplier > 0 || Settings.VehicleCritMultiplier > 0 || ThroughArmorCritEnabled ) {
+            if ( BattleMod.FoundMod( "MechEngineer.Control" ) ) { try {
+               Type MechCheckForCritPatch = AppDomain.CurrentDomain.GetAssemblies().First( e => e.GetName().Name == "MechEngineer" )
+                                                      ?.GetType( "MechEngineer.MechCheckForCritPatch" );
+               MechEngineerCheckCritPublishMessage = MechCheckForCritPatch?.GetMethod( "PublishMessage", Static | Public );
+               MechEngineerCheckCritPostfix = MechCheckForCritPatch?.GetMethod( "Postfix", Static | Public );
+               MechSetCombat = typeof( Mech ).GetMethod( "set_Combat", NonPublic | Instance );
+               if ( MechEngineerCheckCritPublishMessage == null || MechEngineerCheckCritPostfix == null || MechSetCombat == null ) {
+                  MechEngineerCheckCritPublishMessage = MechEngineerCheckCritPostfix = MechSetCombat = null;
+                  throw new NullReferenceException();
+               }
+               Info( "Attack Improvement Mod has registered MechEngineer.MechCheckForCritPatch on crit handling." );
+            } catch ( Exception ex ) {
+               Error( ex );
+               BattleMod.BTML_LOG.Warn( "Attack Improvement Mod cannot patch MechEngineer. Component crit may not be handled properly." );
+            } }
+         }
       }
 
       private void InitThroughArmourCrit () {
@@ -69,9 +87,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Generic Critical System Support ============
 
+      private static MethodInfo MechEngineerCheckCritPublishMessage, MechEngineerCheckCritPostfix, MechSetCombat;
+
       public static void PublishMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
-         unit.Combat.MessageCenter.PublishMessage( new AddSequenceToStackMessage(
-            new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) ) );
+         MessageCenterMessage msg = new AddSequenceToStackMessage( new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) );
+         if ( MechEngineerCheckCritPublishMessage != null )
+            MechEngineerCheckCritPublishMessage.Invoke( null, new object[]{ unit.Combat.MessageCenter, msg } );
+         else
+            unit.Combat.MessageCenter.PublishMessage( msg );
       }
 
       public static float GetWeaponDamage ( AIMCritInfo info ) {
@@ -136,6 +159,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          AttackLog.LogCritResult( target, critInfo.weapon );
+         if ( MechEngineerCheckCritPostfix != null ) {
+            Mech mech = new Mech();
+            MechSetCombat.Invoke( mech, new object[]{ Combat } );
+            MechEngineerCheckCritPostfix.Invoke( null, new object[]{ mech } );
+         }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static ComponentDamageLevel GetDegradedComponentLevel ( AIMCritInfo info ) {
