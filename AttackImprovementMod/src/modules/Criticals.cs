@@ -341,8 +341,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             chance = Mathf.Max( chance, CombatConstants.ResolutionConstants.MinCritChance );
          } else
             chance = GetTACBaseChance( info.currentArmour, info.maxArmour );
-         if ( chance > 0 )
+         if ( chance > 0 ) {
             critMultiplier = Combat.CritChance.GetCritMultiplier( info.target, info.weapon, true );
+            if ( info.target is Vehicle && Settings.VehicleCritMultiplier != 1 )
+               critMultiplier *= (float) Settings.VehicleCritMultiplier;
+            else if ( info.target is Turret && Settings.TurretCritMultiplier != 1 )
+               critMultiplier *= (float) Settings.TurretCritMultiplier;
+            AttackLog.LogCritMultiplier( critMultiplier );
+         }
          float result = chance * critMultiplier;
          return result;
       }
