@@ -232,12 +232,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public override float GetCritChance() {
-            float result;
-            if ( currentArmour > 0 || currentStructure == maxStructure )
-               result = GetTACChance( target, HitArmour, weapon, currentArmour, maxArmour, critLocation );
+            if ( ! IsArmourBreached )
+               return AttackLog.LogAIMCritChance( GetAIMCritChance( this ), critLocation );
             else
-               result = Combat.CritChance.GetCritChance( Me, critLocation, weapon, true );
-            return result;
+               return Combat.CritChance.GetCritChance( Me, critLocation, weapon, true );
          }
 
          public override MechComponent FindComponentInSlot( float random ) {
@@ -264,9 +262,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public override float GetCritChance () {
-            float result = GetNonMechCritChance( this );
-            AttackLog.LogAIMCritChance( result, CritChassis );
-            return result;
+            return AttackLog.LogAIMCritChance( GetAIMCritChance( this ), CritChassis );
          }
       }
 
@@ -285,9 +281,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public override float GetCritChance () {
-            float result = GetNonMechCritChance( this );
-            AttackLog.LogAIMCritChance( result, CritLocation );
-            return result;
+            return AttackLog.LogAIMCritChance( GetAIMCritChance( this ), CritLocation );
          }
       }
 
@@ -307,7 +301,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             CheckForCrit( info, damagedLocation.Key );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static float GetNonMechCritChance ( AIMCritInfo info ) {
+      public static float GetAIMCritChance ( AIMCritInfo info ) {
          if ( info.target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
          float chance = 0, critMultiplier = 0;
          if ( info.IsArmourBreached ) {
@@ -335,18 +329,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
-      public static float GetTACChance ( ICombatant target, ArmorLocation hitLocation, Weapon weapon, float currentArmour, float maxArmour, object location ) {
-         if ( target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
-         float chance = GetTACBaseChance( currentArmour, maxArmour ), critMultiplier = 0;
-         if ( chance > 0 )
-            //chance = Mathf.Max( change, CombatConstants.ResolutionConstants.MinCritChance ); // Min Chance does not apply to TAC
-            critMultiplier = Combat.CritChance.GetCritMultiplier( target, weapon, true );
-         float result = chance * critMultiplier;
-         AttackLog.LogAIMCritChance( result, location );
-         return result;
-      }
-
       public static float GetTACBaseChance ( float currentArmour, float maxArmour ) {
+         if ( ! ThroughArmorCritEnabled ) return 0;
          float result = ThroughArmorBaseCritChance;
          if ( ThroughArmorVarCritChance > 0 )
             result += ( 1f - currentArmour / maxArmour ) * ThroughArmorVarCritChance;

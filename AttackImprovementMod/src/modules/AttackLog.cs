@@ -633,10 +633,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          LogAIMCritChance( __result, hitLocation );
       }
 
-      public static void LogAIMCritChance ( float __result, object hitLocation ) {
-         thisCritChance = __result;
+      public static float LogAIMCritChance ( float chance, object hitLocation ) {
+         thisCritChance = chance;
          thisCritComp = null;
          thisCritLocation = hitLocation.ToString();
+         return chance;
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
