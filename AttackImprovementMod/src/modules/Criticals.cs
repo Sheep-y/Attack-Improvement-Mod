@@ -113,9 +113,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<int, float> damages = new Dictionary<int, float>(), damaged = new Dictionary<int, float>();
 
       private static void ConsolidateCrit ( AIMCritInfo info ) { try {
+         damaged.Clear();
          allowConsolidateOnce = true;
          damages = info.hitInfo.ConsolidateCriticalHitInfo( GetWeaponDamage( info ) );
-         damaged.Clear();
          //Verbo( "SplitCriticalHitInfo found {0} hit locations by {1} on {2}.", damages.Count, info.weapon, info.target );
          foreach ( var damage in damages ) {
             info.SetLocation( damage.Key );
@@ -194,18 +194,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void PlayCritVisual ( AIMCritInfo info ) {
          ICombatant target = info.target;
          if ( target.GameRep == null ) return;
-         MechRepresentation MechRep = target.GameRep as MechRepresentation;
          MechComponent component = info.component;
-         AmmunitionBox AmmoCrited = component as AmmunitionBox;
-         Jumpjet jumpjetCrited = component as Jumpjet;
-         HeatSinkDef heatsinkCrited = component.componentDef as HeatSinkDef;
+         bool isAmmo = component is AmmunitionBox, isJumpJet = component is Jumpjet, isHeatSink = component.componentDef is HeatSinkDef;
          if ( target.team.LocalPlayerControlsTeam )
             AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_friendly ", null, null );
          else if ( !target.team.IsFriendly( Combat.LocalPlayerTeam ) )
             AudioEventManager.PlayAudioEvent( "audioeventdef_musictriggers_combat", "critical_hit_enemy", null, null );
-         if ( MechRep != null && jumpjetCrited == null && heatsinkCrited == null && AmmoCrited == null && component.DamageLevel > ComponentDamageLevel.Functional )
+         if ( target.GameRep is MechRepresentation MechRep && ! isJumpJet && ! isHeatSink && ! isAmmo && component.DamageLevel > ComponentDamageLevel.Functional )
             MechRep.PlayComponentCritVFX( info.GetCritLocation() );
-         if ( AmmoCrited != null && component.DamageLevel > ComponentDamageLevel.Functional )
+         if ( isAmmo && component.DamageLevel > ComponentDamageLevel.Functional )
             target.GameRep.PlayVFX( info.GetCritLocation(), Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
       }
 
@@ -277,6 +274,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public override int GetCritLocation() { return (int) critLocation; }
       }
 
+      // ============ Non-Mech Crit ============
+
       public class AIMVehicleInfo : AIMCritInfo {
          public Vehicle Me { get => target as Vehicle; }
          public VehicleChassisLocations CritChassis { get => (VehicleChassisLocations) HitLocation; }
@@ -314,8 +313,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return AttackLog.LogAIMCritChance( GetTotalCritChance( this ), CritLocation );
          }
       }
-
-      // ============ Universal Crit Patch ============
 
       public static void EnableNonMechCrit ( AbstractActor __instance, WeaponHitInfo hitInfo ) { try {
          AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
