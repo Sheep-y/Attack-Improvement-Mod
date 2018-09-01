@@ -111,6 +111,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
+      public override void CombatEnds () {
+         ForceWriteLog();
+      }
+
       public static void InitLog () {
          Info( "Init logger" );
          ROLL_LOG = new Logger( ModLogDir + "Log_Attack." + Settings.AttackLogFormat ){ LevelText = null, TimeFormat = null };
@@ -133,7 +137,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             // LogCritical
             logBuffer.Append( Separator ).Append( string.Join( Separator, new string[]{ "Max HP", "Crit Roll", "Base Crit%", "Crit Multiplier", "Crit%", "Slot Roll", "Crit Slot", "Crit Equipment", "From State", "To State" } ) );
             log.Add( logBuffer.ToString() );
-            WriteRollLog( null );
+            WriteRollLog();
          }
 
          if ( LogDamage )
@@ -153,24 +157,30 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<string, int> hitMap; // Used to assign critical hit information
       private static List<string> log = new List<string>( 32 );
 
-      [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void WriteRollLog ( AttackDirector __instance ) {
-         if ( __instance != null && __instance.IsAnyAttackSequenceActive )
-            return; // Defer if Multi-Target is not finished
+      public static void ForceWriteLog () {
+         if ( log.Count <= 0 ) return;
          ROLL_LOG.Info( string.Join( Environment.NewLine, log.ToArray() ) );
          log.Clear();
+         if ( DebugLog ) Verbo( "Log written\n" );
+      }
+
+      [ HarmonyPriority( Priority.VeryLow ) ]
+      public static void WriteRollLog () {
+         if ( Combat?.AttackDirector?.IsAnyAttackSequenceActive ?? true )
+            return; // Defer if Multi-Target is not finished. Defer when in doubt.
+         ForceWriteLog();
          hitList?.Clear();
          hitMap?.Clear();
          thisSequenceId = GetNewId();
-         if ( DebugLog ) Verbo( "Log written and HitMap Cleared\n" );
+         if ( DebugLog ) Verbo( "HitMap Cleared" );
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
       public static void WriteSpecialLog () {
          if ( log.Count <= 0 ) return;
-         ROLL_LOG.Info( string.Join( Environment.NewLine, log.ToArray() ) );
-         log.Clear();
-         if ( DebugLog ) Verbo( "Log written\n" );
+         if ( Combat?.AttackDirector?.IsAnyAttackSequenceActive ?? true )
+            return; // Defer if Multi-Target is not finished. Defer when in doubt.
+         ForceWriteLog();
       }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {

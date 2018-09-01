@@ -140,9 +140,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( ! ThroughArmorCritEnabled ) continue;
             if ( DebugLog ) Verbo( "Armour damage {0} = {1}", damage.Key, damage.Value );
             if ( ( ThroughArmorCritThreshold == 0 && ThroughArmorCritThresholdPerc == 0 ) // No threshold
-            /*const*/ || ( ThroughArmorCritThreshold > 0 && damage.Value > ThroughArmorCritThreshold )
-            /*abs% */ || ( ThroughArmorCritThresholdPerc > 0 && damage.Value > ThroughArmorCritThresholdPerc * info.maxArmour )
-            /*curr%*/ || ( ThroughArmorCritThresholdPerc < 0 && damage.Value > ThroughArmorCritThresholdPerc * ( info.currentArmour + damage.Value ) ) )
+            /*const*/ || ( ThroughArmorCritThreshold > 0 && damage.Value >= ThroughArmorCritThreshold )
+            /*abs% */ || ( ThroughArmorCritThresholdPerc > 0 && damage.Value >= ThroughArmorCritThresholdPerc * info.maxArmour )
+            /*curr%*/ || ( ThroughArmorCritThresholdPerc < 0 && damage.Value >= ThroughArmorCritThresholdPerc * ( info.currentArmour + damage.Value ) ) )
                damaged.Add( damage.Key, damage.Value );
             else if ( DebugLog ) Verbo( "Damage not reach threshold {0} / {1}% (Armour {2}/{3})", ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc*100, info.currentArmour, info.maxArmour );
          }
@@ -320,7 +320,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public override float GetCritChance () {
-            return AttackLog.LogAIMCritChance( GetAdjustedChance( this ), critLocation );
+            return AttackLog.LogAIMCritChance( GetAdjustedChance( this ), HitArmour );
          }
 
          public override MechComponent FindComponentInSlot ( float random ) {
