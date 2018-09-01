@@ -124,6 +124,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          damaged.Clear();
          allowConsolidateOnce = true;
          damages = info.hitInfo.ConsolidateCriticalHitInfo( GetWeaponDamage( info ) );
+         damages.Remove( 0 );
+         damages.Remove( 65536 );
          //Verbo( "SplitCriticalHitInfo found {0} hit locations by {1} on {2}.", damages.Count, info.weapon, info.target );
          foreach ( var damage in damages ) {
             info.SetHitLocation( damage.Key );
@@ -249,6 +251,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             int componentLocation = MechEngineerGetCompLocation != null 
                                   ? (int) MechEngineerGetCompLocation.Invoke( null, new object[]{ component } )
                                   : component.Location;
+            //Verbo( "Check {0}, {3} location {1}, Final = {2}", location, componentLocation, componentLocation & location, component );
             if ( ( componentLocation & location ) <= 0 ) continue;
             for ( int i = component.inventorySize ; i > 0 ; i-- )
                list.Add( component );
@@ -286,7 +289,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          public abstract float GetCritChance ();
          public virtual MechComponent FindComponentInSlot ( float random ) {
-            return GetComponentFromRoll( target, -1, random, target.allComponents.Count );
+            return component = GetComponentFromRoll( target, -1, random, target.allComponents.Count );
          }
          public virtual int GetCritLocation () { return HitLocation; } // Used to play VFX
       }
