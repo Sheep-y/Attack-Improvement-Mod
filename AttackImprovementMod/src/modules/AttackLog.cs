@@ -698,7 +698,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                               Separator + thisBaseCritChance +
                               Separator + thisCritMultiplier +
                               Separator + thisCritChance;
-            if ( thisCritSlot < 0 )
+            if ( thisCritSlot < 0 || thisCritChance <= 0 )
                critLine += Separator + "--" + Separator + "--" + Separator + "(No Crit)" + Separator + "--" + Separator + "--";
             else {
                critLine += Separator + thisCritSlotRoll +
@@ -719,6 +719,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisCritLocation = "None";
          thisCritSlot = -1;
          thisCritComp = null;
+         checkCritComp = false;
       }                 catch ( Exception ex ) { Error( ex ); } }
 #pragma warning restore CS0162 // Restore "unreachable code" warnings
    }

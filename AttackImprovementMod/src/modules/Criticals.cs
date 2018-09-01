@@ -260,7 +260,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             int componentLocation = MechEngineerGetCompLocation != null 
                                   ? (int) MechEngineerGetCompLocation.Invoke( null, new object[]{ component } )
                                   : component.Location;
-            if ( DebugLog ) Verbo( "List compoents at {0}, {1} location {2}, Flag = {3}", location, component, componentLocation, componentLocation & location );
+            if ( DebugLog ) Verbo( "List components at {0}, {1} location {2}, Flag = {3}", location, component, componentLocation, componentLocation & location );
             if ( ( componentLocation & location ) <= 0 ) continue;
             for ( int i = component.inventorySize ; i > 0 ; i-- )
                list.Add( component );
