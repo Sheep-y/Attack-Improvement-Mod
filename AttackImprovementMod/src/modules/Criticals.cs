@@ -237,7 +237,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return Mathf.Max( chance, CombatConstants.ResolutionConstants.MinCritChance );
          } else {
             chance = GetTACBaseChance( info.currentArmour, info.maxArmour );
-            if ( DebugLog ) Verbo( "TAC base crit chance = {0}/{1} = {3}", info.currentArmour, info.maxArmour, chance );
+            if ( DebugLog ) Verbo( "TAC base crit chance = {0}/{1} = {2}", info.currentArmour, info.maxArmour, chance );
             AttackLog.LogAIMBaseCritChance( chance, info.maxArmour );
          }
          return chance;
