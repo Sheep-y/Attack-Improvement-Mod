@@ -112,6 +112,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static Dictionary<int, float> damages = new Dictionary<int, float>(), damaged = new Dictionary<int, float>();
 
+      public static void CheckForAllCrits ( AIMCritInfo info ) { try {
+         ConsolidateCrit( info );
+         //Verbo( "Locations damaged by {0}: {1}", info.weapon, damaged );
+         foreach ( var damagedLocation in damaged )
+            CheckForCrit( info, damagedLocation.Key );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
       private static void ConsolidateCrit ( AIMCritInfo info ) { try {
          damaged.Clear();
          allowConsolidateOnce = true;
@@ -206,6 +213,50 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             target.GameRep.PlayVFX( info.GetCritLocation(), Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
       }
 
+      public static float GetTotalCritChance ( AIMCritInfo info ) {
+         if ( info.target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
+         float chance = GetBaseCritChance( info ), critMultiplier = chance > 0 ? GetCritMultiplier( info ) : 0;
+         return chance * critMultiplier;
+      }
+
+      public static float GetBaseCritChance ( AIMCritInfo info ) {
+         float chance;
+         if ( info.IsArmourBreached ) {
+            chance = info.currentStructure / info.maxStructure;
+            AttackLog.LogAIMBaseCritChance( chance, info.maxStructure );
+            return Mathf.Max( chance, CombatConstants.ResolutionConstants.MinCritChance );
+         } else {
+            chance = GetTACBaseChance( info.currentArmour, info.maxArmour );
+            AttackLog.LogAIMBaseCritChance( chance, info.maxArmour );
+         }
+         return chance;
+      }
+
+      public static float GetCritMultiplier ( AIMCritInfo info ) {
+         float critMultiplier = Combat.CritChance.GetCritMultiplier( info.target, info.weapon, true );
+         if ( info.target is Vehicle && Settings.VehicleCritMultiplier != 1 )
+            critMultiplier *= (float) Settings.VehicleCritMultiplier;
+         else if ( info.target is Turret && Settings.TurretCritMultiplier != 1 )
+            critMultiplier *= (float) Settings.TurretCritMultiplier;
+         AttackLog.LogCritMultiplier( critMultiplier );
+         return critMultiplier;
+      }
+
+      public static MechComponent GetComponentInSlot ( AbstractActor me, int location, float random, int MinSlots = 0 ) {
+         List<MechComponent> list = new List<MechComponent>( MinSlots );
+         foreach ( MechComponent component in me.allComponents ) {
+            if ( ( component.Location & location ) <= 0 ) continue;
+            for ( int i = component.inventorySize ; i > 0 ; i-- )
+               list.Add( component );
+         }
+         for ( int i = list.Count ; i < MinSlots ; i++ )
+            list.Add( null );
+         int slot = (int)( list.Count * random );
+         MechComponent result = slot < list.Count ? list[ slot ] : null;
+         AttackLog.LogCritComp( result, slot );
+         return result;
+      }
+
       // ============ AIMCritInfo ============
 
       public abstract class AIMCritInfo {
@@ -230,12 +281,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public abstract float GetCritChance ();
-         public virtual  MechComponent FindComponentInSlot ( float random ) { // TODO: take component slot into account
-            float slotCount = target.allComponents.Count;
-            int slot = (int)(slotCount * random );
-            component = target.allComponents[ slot ];
-            AttackLog.LogCritComp( component, slot );
-            return component;
+         public virtual MechComponent FindComponentInSlot ( float random ) {
+            return GetComponentInSlot( target, HitLocation, random, target.allComponents.Count );
          }
          public virtual int GetCritLocation() { return HitLocation; } // Used to play VFX
       }
@@ -259,33 +306,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public override float GetCritChance () {
-            if ( ! IsArmourBreached )
-               return AttackLog.LogAIMCritChance( GetTotalCritChance( this ), critLocation );
-            else
-               return Combat.CritChance.GetCritChance( Me, critLocation, weapon, true );
+            return AttackLog.LogAIMCritChance( GetTotalCritChance( this ), critLocation );
          }
 
          public override MechComponent FindComponentInSlot ( float random ) {
-            float slotCount = Me.MechDef.GetChassisLocationDef( critLocation ).InventorySlots;
-            int slot = (int)(slotCount * random );
-            return component = GetComponentInSlot( Me, slot, (int) critLocation, Me.MechDef.GetChassisLocationDef( critLocation ).InventorySlots );
+            return component = GetComponentInSlot( target, (int) critLocation, random, Me.MechDef.GetChassisLocationDef( critLocation ).InventorySlots );
          }
 
          public override int GetCritLocation() { return (int) critLocation; }
-      }
-
-      public static MechComponent GetComponentInSlot ( AbstractActor me, int slot, int location, int MinSlots = 0 ) {
-         // MinSlots = me.MechDef.GetChassisLocationDef( location ).InventorySlots;
-         List<MechComponent> list = new List<MechComponent>( MinSlots );
-         foreach ( MechComponent component in me.allComponents ) {
-            if ( ( component.Location & location ) <= 0 ) continue;
-            for ( int i = component.inventorySize ; i > 0 ; i-- )
-               list.Add( component );
-         }
-         for ( int i = list.Count ; i < MinSlots ; i++ )
-            list.Add( null );
-         if ( slot >= list.Count ) return null;
-         return list[ slot ];
       }
 
       // ============ Non-Mech Crit ============
@@ -336,33 +364,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( __instance is Turret  turret  ) CheckForAllCrits( new AIMTurretInfo ( turret , hitInfo, weapon ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void CheckForAllCrits ( AIMCritInfo info ) { try {
-         ConsolidateCrit( info );
-         //Verbo( "Locations damaged by {0}: {1}", info.weapon, damaged );
-         foreach ( var damagedLocation in damaged )
-            CheckForCrit( info, damagedLocation.Key );
-      }                 catch ( Exception ex ) { Error( ex ); } }
-
-      public static float GetTotalCritChance ( AIMCritInfo info ) {
-         if ( info.target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
-         float chance = 0, critMultiplier = 0;
-         if ( info.IsArmourBreached ) {
-            chance = info.currentArmour / info.maxStructure;
-            AttackLog.LogAIMBaseCritChance( chance, info.maxStructure );
-            chance = Mathf.Max( chance, CombatConstants.ResolutionConstants.MinCritChance );
-         } else
-            chance = GetTACBaseChance( info.currentArmour, info.maxArmour );
-         if ( chance > 0 ) {
-            critMultiplier = Combat.CritChance.GetCritMultiplier( info.target, info.weapon, true );
-            if ( info.target is Vehicle && Settings.VehicleCritMultiplier != 1 )
-               critMultiplier *= (float) Settings.VehicleCritMultiplier;
-            else if ( info.target is Turret && Settings.TurretCritMultiplier != 1 )
-               critMultiplier *= (float) Settings.TurretCritMultiplier;
-            AttackLog.LogCritMultiplier( critMultiplier );
-         }
-         float result = chance * critMultiplier;
-         return result;
-      }
       // ============ ThroughArmorCritical ============
 
       private static bool allowConsolidateOnce = true;
@@ -387,7 +388,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float result = ThroughArmorBaseCritChance;
          if ( ThroughArmorVarCritChance > 0 )
             result += ( 1f - currentArmour / maxArmour ) * ThroughArmorVarCritChance;
-         AttackLog.LogAIMBaseCritChance( result, maxArmour );
          return result;
       }
 
