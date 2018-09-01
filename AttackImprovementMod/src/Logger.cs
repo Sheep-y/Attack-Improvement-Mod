@@ -193,8 +193,9 @@ namespace Sheepy.Logging {
          if ( _LevelText != null )
             buf.Append( _LevelText( line.level ) );
          buf.Append( _Prefix );
-         if ( line.args != null && line.args.Length > 0 && txt != null )
+         if ( line.args != null && line.args.Length > 0 && txt != null ) try {
             txt = string.Format( txt, line.args );
+         } catch ( FormatException ) {}
          buf.Append( txt ).Append( _Postfix );
       }
 
