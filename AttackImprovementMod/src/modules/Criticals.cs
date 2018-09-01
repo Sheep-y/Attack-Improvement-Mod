@@ -13,11 +13,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class Criticals : BattleModModule {
 
+      private const bool DebugLog = false;
+
       private static Type MechType = typeof( Mech );
 
       private static bool ThroughArmorCritEnabled;
       private static float ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc, ThroughArmorBaseCritChance, ThroughArmorVarCritChance;
 
+#pragma warning disable CS0162 // Disable "unreachable code" warnings due to DebugLog flag
       public override void CombatStartsOnce () {
          Type[] ResolveParams = new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) };
          MethodInfo ResolveWeaponDamage = MechType.GetMethod( "ResolveWeaponDamage", ResolveParams );
@@ -115,7 +118,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void CheckForAllCrits ( AIMCritInfo info ) { try {
          ConsolidateCrit( info );
-         //Verbo( "Locations damaged by {0}: {1}", info.weapon, damaged );
          foreach ( var damagedLocation in damaged )
             CheckForCrit( info, damagedLocation.Key );
       }                 catch ( Exception ex ) { Error( ex ); } }
@@ -126,23 +128,23 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          damages = info.hitInfo.ConsolidateCriticalHitInfo( GetWeaponDamage( info ) );
          damages.Remove( 0 );
          damages.Remove( 65536 );
-         //Verbo( "SplitCriticalHitInfo found {0} hit locations by {1} on {2}.", damages.Count, info.weapon, info.target );
+         if ( DebugLog ) Verbo( "SplitCriticalHitInfo found {0} hit locations by {1} on {2}.", damages.Count, info.weapon, info.target );
          foreach ( var damage in damages ) {
             info.SetHitLocation( damage.Key );
             if ( ! info.CanBeCrit() ) continue;
             if ( info.IsArmourBreached ) {
-               //Verbo( "Struct damage {0} = {1}", damage.Key, damage.Value );
+               if ( DebugLog ) Verbo( "Struct damage {0} = {1}", damage.Key, damage.Value );
                damaged.Add( damage.Key, damage.Value );
                continue;
             }
             if ( ! ThroughArmorCritEnabled ) continue;
-            //Verbo( "Armour damage {0} = {1}", damage.Key, damage.Value );
+            if ( DebugLog ) Verbo( "Armour damage {0} = {1}", damage.Key, damage.Value );
             if ( ( ThroughArmorCritThreshold == 0 && ThroughArmorCritThresholdPerc == 0 ) // No threshold
             /*const*/ || ( ThroughArmorCritThreshold > 0 && damage.Value > ThroughArmorCritThreshold )
             /*abs% */ || ( ThroughArmorCritThresholdPerc > 0 && damage.Value > ThroughArmorCritThresholdPerc * info.maxArmour )
             /*curr%*/ || ( ThroughArmorCritThresholdPerc < 0 && damage.Value > ThroughArmorCritThresholdPerc * ( info.currentArmour + damage.Value ) ) )
                damaged.Add( damage.Key, damage.Value );
-            //else Verbo( "Damage not reach threshold {0} / {1}% (Armour {2}/{3})", ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc*100, info.currentArmour, info.maxArmour );
+            else if ( DebugLog ) Verbo( "Damage not reach threshold {0} / {1}% (Armour {2}/{3})", ThroughArmorCritThreshold, ThroughArmorCritThresholdPerc*100, info.currentArmour, info.maxArmour );
          }
          damages.Clear();
       }                 catch ( Exception ex ) { Error( ex ); } }
@@ -219,6 +221,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static float GetAdjustedChance ( AIMCritInfo info ) {
          if ( info.target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
          float chance = GetBaseChance( info ), critMultiplier = chance > 0 ? GetMultiplier( info ) : 0;
+         if ( DebugLog ) Verbo( "Crit chance = {0} x {1} = {2}", chance, critMultiplier, chance * critMultiplier );
          return chance * critMultiplier;
       }
 
@@ -226,10 +229,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float chance;
          if ( info.IsArmourBreached ) {
             chance = info.currentStructure / info.maxStructure;
+            if ( DebugLog ) Verbo( "Normal base crit chance = {0}/{1} = {3}", info.currentStructure, info.maxStructure, chance );
             AttackLog.LogAIMBaseCritChance( chance, info.maxStructure );
             return Mathf.Max( chance, CombatConstants.ResolutionConstants.MinCritChance );
          } else {
             chance = GetTACBaseChance( info.currentArmour, info.maxArmour );
+            if ( DebugLog ) Verbo( "TAC base crit chance = {0}/{1} = {3}", info.currentArmour, info.maxArmour, chance );
             AttackLog.LogAIMBaseCritChance( chance, info.maxArmour );
          }
          return chance;
@@ -237,6 +242,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static float GetMultiplier ( AIMCritInfo info ) {
          float critMultiplier = Combat.CritChance.GetCritMultiplier( info.target, info.weapon, true );
+         if ( DebugLog ) Verbo( "Base crit multiplier x{0}, vehicle x{1}, Turret x{2}", critMultiplier, Settings.VehicleCritMultiplier, Settings.TurretCritMultiplier );
          if ( info.target is Vehicle && Settings.VehicleCritMultiplier != 1 )
             critMultiplier *= (float) Settings.VehicleCritMultiplier;
          else if ( info.target is Turret && Settings.TurretCritMultiplier != 1 )
@@ -251,7 +257,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             int componentLocation = MechEngineerGetCompLocation != null 
                                   ? (int) MechEngineerGetCompLocation.Invoke( null, new object[]{ component } )
                                   : component.Location;
-            //Verbo( "Check {0}, {3} location {1}, Final = {2}", location, componentLocation, componentLocation & location, component );
+            if ( DebugLog ) Verbo( "List compoents at {0}, {1} location {2}, Flag = {3}", location, component, componentLocation, componentLocation & location );
             if ( ( componentLocation & location ) <= 0 ) continue;
             for ( int i = component.inventorySize ; i > 0 ; i-- )
                list.Add( component );
@@ -260,6 +266,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             list.Add( null );
          int slot = (int)( list.Count * random );
          MechComponent result = slot < list.Count ? list[ slot ] : null;
+         if ( DebugLog ) Verbo( "Slot roll {0}, slot count {1}, slot {2}, component {3} status {4}", random, list.Count, slot, result, result.DamageLevel );
          AttackLog.LogCritComp( result, slot );
          return result;
       }
@@ -448,5 +455,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( thisHitIndex < 0 || thisHitIndex >= thisHitLocations.Length ) return;
          thisHitLocations[ thisHitIndex ] = (int) aLoc;
       }
+#pragma warning restore CS0162 // Restore "unreachable code" warnings
    }
 }

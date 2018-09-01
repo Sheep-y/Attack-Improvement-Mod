@@ -564,6 +564,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return -1;
          }
          int index = hitList[0];
+         if ( log.Count <= index ) {
+            Warn( "Damage Log does not contain index #{0}, aborting.", index );
+            return -1;
+         }
          string line = log[ index ];
          if ( ( LogCritical && ! line.EndsWith( DamageDummy + CritDummy ) ) || ( ! LogCritical && ! line.EndsWith( DamageDummy ) ) ) {
             Warn( "Damage Log found an amended line, aborting." );
@@ -706,6 +710,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisCritSlot = -1;
          thisCritComp = null;
       }                 catch ( Exception ex ) { Error( ex ); } }
-   }
 #pragma warning restore CS0162 // Restore "unreachable code" warnings
+   }
 }
