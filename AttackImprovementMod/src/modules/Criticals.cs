@@ -157,19 +157,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float critChance = critInfo.GetCritChance();
          if ( critChance > 0 ) {
             float[] randomFromCache = Combat.AttackDirector.GetRandomFromCache( critInfo.hitInfo, 2 );
+            if ( DebugLog ) Verbo( "Crit roll {0} < chance {1}? {2}", randomFromCache[0], critChance, randomFromCache[ 0 ] <= critChance );
             if ( randomFromCache[ 0 ] <= critChance ) {
-               MechComponent componentInSlot = critInfo.FindComponentInSlot( randomFromCache[1] );
-               if ( componentInSlot != null ) {
+               MechComponent component = critInfo.FindComponentFromRoll( randomFromCache[1] );
+               if ( component != null ) {
+                  if ( DebugLog ) Verbo( "Play crit SFX and VFX on {0} ({1}) at {2}", component, component.DamageLevel, component.Location );
                   PlaySFX( critInfo );
                   PlayVFX( critInfo );
                   AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( critInfo.hitInfo.attackSequenceId );
                   if ( attackSequence != null )
-                     attackSequence.FlagAttackScoredCrit( componentInSlot as Weapon, componentInSlot as AmmunitionBox );
-                  ComponentDamageLevel componentDamageLevel = GetDegradedComponentLevel( critInfo );
-                  componentInSlot.DamageComponent( critInfo.hitInfo, componentDamageLevel, true );
+                     attackSequence.FlagAttackScoredCrit( component as Weapon, component as AmmunitionBox );
+                  ComponentDamageLevel newDamageLevel = GetDegradedComponentLevel( critInfo );
+                  if ( DebugLog ) Verbo( "Component damaged to {0}", newDamageLevel );
+                  component.DamageComponent( critInfo.hitInfo, newDamageLevel, true );
                }
             }
-         }
+         } else if ( DebugLog ) Verbo( "Crit chance is 0. Skipping crit roll and check." );
          AttackLog.LogCritResult( target, critInfo.weapon );
          if ( MechEngineerCheckCritPostfix != null ) {
             Mech mech = new Mech();
@@ -295,7 +298,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public abstract float GetCritChance ();
-         public virtual MechComponent FindComponentInSlot ( float random ) {
+         public virtual MechComponent FindComponentFromRoll ( float random ) {
             return component = GetComponentFromRoll( target, -1, random, target.allComponents.Count );
          }
          public virtual int GetCritLocation () { return HitLocation; } // Used to play VFX
@@ -323,7 +326,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return AttackLog.LogAIMCritChance( GetAdjustedChance( this ), HitArmour );
          }
 
-         public override MechComponent FindComponentInSlot ( float random ) {
+         public override MechComponent FindComponentFromRoll ( float random ) {
             return component = GetComponentFromRoll( target, (int) critLocation, random, Me.MechDef.GetChassisLocationDef( critLocation ).InventorySlots );
          }
 

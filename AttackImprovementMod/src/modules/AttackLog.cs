@@ -683,7 +683,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( DebugLog ) Verbo( "Skip logging self crit" );
          } else {
             string key = GetHitKey( weapon.uid, thisCritLocation, __instance.GUID );
-            if ( DebugLog ) Verbo( "Crit {0}, key {1}", weapon.UIName, key );
+            if ( DebugLog ) Verbo( "Crit by {0}, key {1}", weapon.UIName, key );
             if ( ( ! hitMap.TryGetValue( key, out int lineIndex ) ) ) {
                Warn( "Critical Hit Log cannot find matching hit record: {0}", key );
                return;
