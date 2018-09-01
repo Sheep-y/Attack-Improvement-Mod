@@ -268,10 +268,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public override MechComponent FindComponentInSlot ( float random ) {
             float slotCount = Me.MechDef.GetChassisLocationDef( critLocation ).InventorySlots;
             int slot = (int)(slotCount * random );
-            return component = Me.GetComponentInSlot( critLocation, slot );
+            return component = GetComponentInSlot( Me, slot, (int) critLocation, Me.MechDef.GetChassisLocationDef( critLocation ).InventorySlots );
          }
 
          public override int GetCritLocation() { return (int) critLocation; }
+      }
+
+      public static MechComponent GetComponentInSlot ( AbstractActor me, int slot, int location, int MinSlots = 0 ) {
+         // MinSlots = me.MechDef.GetChassisLocationDef( location ).InventorySlots;
+         List<MechComponent> list = new List<MechComponent>( MinSlots );
+         foreach ( MechComponent component in me.allComponents ) {
+            if ( ( component.Location & location ) <= 0 ) continue;
+            for ( int i = component.inventorySize ; i > 0 ; i-- )
+               list.Add( component );
+         }
+         for ( int i = list.Count ; i < MinSlots ; i++ )
+            list.Add( null );
+         if ( slot >= list.Count ) return null;
+         return list[ slot ];
       }
 
       // ============ Non-Mech Crit ============
@@ -349,30 +363,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float result = chance * critMultiplier;
          return result;
       }
-
-      public MechComponent GetComponentInSlot ( Mech me, ChassisLocations location, int index ) {
-         List<MechComponent> list = new List<MechComponent>();
-         foreach ( MechComponent mechComponent in me.allComponents ) {
-            ChassisLocations componentLocation = (ChassisLocations)mechComponent.Location;
-            if ( ( componentLocation & location ) > ChassisLocations.None )
-               for ( int i = 0 ; i < mechComponent.inventorySize ; i++ )
-                  list.Add( mechComponent );
-         }
-         LocationDef chassisLocationDef = me.MechDef.GetChassisLocationDef(location);
-         while ( list.Count < chassisLocationDef.InventorySlots )
-            list.Add( null );
-         if ( me.Combat.Constants.ResolutionConstants.SearchForValidCritSlot ) {
-            for ( int j = 0 ; j < chassisLocationDef.InventorySlots ; j++ ) {
-               if ( index >= list.Count )
-                  index %= list.Count;
-               if ( index < list.Count && list[ index ] != null && list[ index ].DamageLevel < ComponentDamageLevel.Destroyed )
-                  return list[ index ];
-            }
-         } else if ( index < list.Count )
-            return list[ index ];
-         return null;
-      }
-
       // ============ ThroughArmorCritical ============
 
       private static bool allowConsolidateOnce = true;
