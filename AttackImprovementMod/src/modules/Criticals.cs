@@ -47,13 +47,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.TurretCritMultiplier > 0 || Settings.VehicleCritMultiplier > 0 || ThroughArmorCritEnabled ) {
             if ( BattleMod.FoundMod( "MechEngineer.Control" ) ) { try {
-               Type MechCheckForCritPatch = AppDomain.CurrentDomain.GetAssemblies().First( e => e.GetName().Name == "MechEngineer" )
-                                                      ?.GetType( "MechEngineer.MechCheckForCritPatch" );
+               Assembly MechEngineer = AppDomain.CurrentDomain.GetAssemblies().First( e => e.GetName().Name == "MechEngineer" );
+               Type MechCheckForCritPatch = MechEngineer?.GetType( "MechEngineer.MechCheckForCritPatch" );
                MechEngineerCheckCritPublishMessage = MechCheckForCritPatch?.GetMethod( "PublishMessage", Static | Public );
                MechEngineerCheckCritPostfix = MechCheckForCritPatch?.GetMethod( "Postfix", Static | Public );
+               MechEngineerGetCompLocation = MechEngineer?.GetType( "MechEngineer.DamageIgnoreHelper" )?.GetMethod( "OverrideLocation" );
                MechSetCombat = typeof( Mech ).GetMethod( "set_Combat", NonPublic | Instance );
-               if ( MechEngineerCheckCritPublishMessage == null || MechEngineerCheckCritPostfix == null || MechSetCombat == null ) {
-                  MechEngineerCheckCritPublishMessage = MechEngineerCheckCritPostfix = MechSetCombat = null;
+               if ( MechEngineerCheckCritPublishMessage == null || MechEngineerCheckCritPostfix == null || MechEngineerGetCompLocation == null || MechSetCombat == null ) {
+                  MechEngineerCheckCritPublishMessage = MechEngineerCheckCritPostfix = MechEngineerGetCompLocation = MechSetCombat = null;
                   throw new NullReferenceException();
                }
                Info( "Attack Improvement Mod has registered MechEngineer.MechCheckForCritPatch on crit handling." );
@@ -87,7 +88,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Generic Critical System Support ============
 
-      private static MethodInfo MechEngineerCheckCritPublishMessage, MechEngineerCheckCritPostfix, MechSetCombat;
+      private static MethodInfo MechEngineerCheckCritPublishMessage, MechEngineerCheckCritPostfix, MechEngineerGetCompLocation, MechSetCombat;
 
       public static void PublishMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
          MessageCenterMessage msg = new AddSequenceToStackMessage( new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) );
@@ -245,7 +246,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static MechComponent GetComponentFromRoll ( AbstractActor me, int location, float random, int MinSlots = 0 ) {
          List<MechComponent> list = new List<MechComponent>( MinSlots );
          foreach ( MechComponent component in me.allComponents ) {
-            if ( ( component.Location & location ) <= 0 ) continue;
+            int componentLocation = MechEngineerGetCompLocation != null 
+                                  ? (int) MechEngineerGetCompLocation.Invoke( null, new object[]{ component } )
+                                  : component.Location;
+            if ( ( componentLocation & location ) <= 0 ) continue;
             for ( int i = component.inventorySize ; i > 0 ; i-- )
                list.Add( component );
          }
