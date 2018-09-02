@@ -44,16 +44,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", "Override_ConsolidateCriticalHitInfo", null );
             InitThroughArmourCrit();
 
-         } else if ( Settings.FixFullStructureCrit ) {
-            Patch( ResolveWeaponDamage, "RecordCritMech", "ClearCritMech" );
-            Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", null, "RemoveFullStructureLocationsFromCritList" );
+         } else {
+            if ( Settings.FixFullStructureCrit ) {
+               Patch( ResolveWeaponDamage, "RecordCritMech", "ClearCritMech" );
+               Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", null, "RemoveFullStructureLocationsFromCritList" );
+            }
+            // The settings below are built-in to generic crit system and only need to be patched when it is not used for mech.
+            if ( Settings.CritIgnoreDestroyedComponent || Settings.CritIgnoreEmptySlots || Settings.CritLocationTransfer ) {
+               Patch( MechType, "CheckForCrit", NonPublic, "Override_CheckForCrit", null );
+               if ( Settings.CritLocationTransfer && ! Settings.CritFollowDamageTransfer ) 
+                  Warn( "Disabling CritFollowDamageTransfer will cause less crit to be checked, diminishing CritLocationTransfer." );
+            }
+            if ( CritChanceBase != 0 || CritChanceVar != 1 )
+               Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, "Override_BaseCritChance", null );
+            if ( CritChanceMax < 1 )
+               Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "CapBaseCritChance" );
          }
-
-         if ( CritChanceBase != 0 || CritChanceVar != 1 )
-            Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, "Override_BaseCritChance", null );
-
-         if ( CritChanceMax < 1 )
-            Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "CapBaseCritChance" );
 
          if ( Settings.CritFollowDamageTransfer ) {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
@@ -72,10 +78,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   MechEngineerCheckCritPublishMessage = MechEngineerCheckCritPostfix = MechEngineerGetCompLocation = MechSetCombat = null;
                   throw new NullReferenceException();
                }
-               Info( "Attack Improvement Mod has registered MechEngineer.MechCheckForCritPatch on crit handling." );
+               Info( "Attack Improvement Mod has bridged with MechEngineer.MechCheckForCritPatch on crit handling." );
             } catch ( Exception ex ) {
                Error( ex );
-               BattleMod.BTML_LOG.Warn( "Attack Improvement Mod cannot patch MechEngineer. Component crit may not be handled properly." );
+               BattleMod.BTML_LOG.Warn( "Attack Improvement Mod cannot bridge with MechEngineer. Component crit may not be handled properly." );
             } }
          }
       }
@@ -510,6 +516,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( __result > CritChanceMax )
             __result = CritChanceMax;
       }
+
+      public static bool Override_CheckForCrit ( Mech __instance, WeaponHitInfo hitInfo, ChassisLocations location, Weapon weapon ) { try {
+         CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), (int) MechStructureRules.GetArmorFromChassisLocation( location ) );
+         return false;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ CritFollowDamageTransfer ============
 
