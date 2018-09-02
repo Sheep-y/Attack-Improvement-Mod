@@ -110,10 +110,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "MissStreakBreakerThreshold", ref settings.MissStreakBreakerThreshold, 0, 1 );
          RangeCheck( "MissStreakBreakerDivider"  , ref settings.MissStreakBreakerDivider, -100, 100 );
 
-         RangeCheck( "CritChanceMultiplierEnemy", ref settings.CritChanceMultiplierEnemy, 0, 1000 );
-         RangeCheck( "CritChanceMultiplierAlly", ref settings.CritChanceMultiplierAlly, 0, 1000 );
-         RangeCheck( "VehicleCritMultiplier", ref settings.VehicleCritMultiplier, 0, 1000 );
-         RangeCheck( "TurretCritMultiplier" , ref settings.TurretCritMultiplier, 0, 1000 );
+         RangeCheck( "CritChanceMultiplierEnemy", ref settings.CritChanceEnemy, 0, 1000 );
+         RangeCheck( "CritChanceMultiplierAlly", ref settings.CritChanceAlly, 0, 1000 );
+         RangeCheck( "VehicleCritMultiplier", ref settings.CriChanceVsVehicle, 0, 1000 );
+         RangeCheck( "TurretCritMultiplier" , ref settings.CritChanceVsTurret, 0, 1000 );
          RangeCheck( "ThroughArmorCritThreshold", ref settings.ThroughArmorCritThreshold, -1, 10000 );
          RangeCheck( "CritChanceZeroArmor", ref settings.CritChanceZeroArmor, 0, 2 );
          RangeCheck( "CritChanceFullArmor", ref settings.CritChanceFullArmor, -1, settings.CritChanceZeroArmor );

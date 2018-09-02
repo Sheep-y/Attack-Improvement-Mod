@@ -274,14 +274,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( new string[] {
         "Overrides AICritChanceBaseMultiplier in CombatGameConstants.json.  Default 0.2, same as game.",
         "Set to 1 for same crit chance as players, or set to 0 to prevent enemy or allies from dealing crit." } ) ]
-      public decimal CritChanceMultiplierEnemy = 0.2m;
-      public decimal CritChanceMultiplierAlly = 1;
+      public decimal CritChanceEnemy = 0.2m;
+      public decimal CritChanceAlly = 1;
 
       [ JsonComment( "Critical rate on vehicles, relative to mech.  Set to 0 to disable." ) ]
-      public decimal VehicleCritMultiplier = 1;
+      public decimal CriChanceVsVehicle = 1;
 
       [ JsonComment( "Critical rate on turret, relative to mech.  Set to 0 to disable." ) ]
-      public decimal TurretCritMultiplier = 1;
+      public decimal CritChanceVsTurret = 1;
 
       [ JsonComment( "Crit is now checked on final damaged location by following damage transfer.  Default true." ) ]
       public bool CritFollowDamageTransfer = true;
