@@ -268,6 +268,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Critical Hits" ) ]
       //
 
+      [ JsonComment( "Set to true to disable AICritChanceBaseMultiplier in CombatGameConstants.json." ) ]
+      public bool DisableAICritChanceMultiplier = false;
+
       [ JsonComment( "Critical rate on vehicles, relative to mech.  Set to 0 to disable." ) ]
       public decimal VehicleCritMultiplier = 1;
 
@@ -289,16 +292,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public decimal ThroughArmorCritThreshold = 9;
 
       [ JsonComment( new string[]{
-        "Base crit chance of a location with zero armour but full structure.",
+        "Base crit chance of a location with zero armour but full structure.  Works by fully replacing mech crit system.",
         "Set to 0 to disable through armour critical.  Default 0.  Can be 0 to 1, e.g. 0.2 for 20%.",
         "When logging through armour crits, the Max HP column logs the max armour." } ) ]
-      public decimal ThroughArmorCritChanceZeroArmor = 0;
+      public decimal CritChanceZeroArmor = 0;
 
       [ JsonComment( new string[]{
         "Base crit chance of a location with full armour.  Must not be higher than ThroughArmorCritChanceZeroArmor.",
         "Actual through armour crit rate is between this and zero armour chance.  Default 0.  Can be -1 to 1, e.g. 0.1 for 10%.",
         "If negative, crit will not happens until armour is sufficiently weakened." } ) ]
-      public decimal ThroughArmorCritChanceFullArmor = 0;
+      public decimal CritChanceFullArmor = 0;
+
+      [ JsonComment( "Base crit chance of a structurally hit location if it is at zero structure, can be 0 to 1.  Default 1, same as game." ) ]
+      public decimal CritChanceZeroStructure = 1;
+
+      [ JsonComment( "Base crit chance of a structurally hit location if it is at full structure, can be -1 to 1.  Default 0, same as game." ) ]
+      public decimal CritChanceFullStructure = 0;
+
+      [ JsonComment( "Min crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 0.5, same as game." ) ]
+      public decimal CritChanceMin = 0.5m;
+
+      [ JsonComment( "Max crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 1, same as game." ) ]
+      public decimal CritChanceMax = 1;
 
       //
       [ JsonSection( "Hit Resolution" ) ]
@@ -341,6 +356,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( "Used to determine which settings should be updated and how.  Please do not change." ) ]
       public int? SettingVersion = null;
+
+
+      [ Obsolete( "[v2.3 pre 20180827] Default 0. Replaced by CritChanceZeroArmor." ) ]
+      public decimal? ThroughArmorCritChanceZeroArmor = null;
+      [ Obsolete( "[v2.3 pre 20180827] Default 0. Replaced by CritChanceFullArmor." ) ]
+      public decimal? ThroughArmorCritChanceFullArmor = null;
 
       [ Obsolete( "[v2.0] Default empty. Replaced by LOSMeleeColors." ) ]
       public string LOSMeleeColor = null;

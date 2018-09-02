@@ -77,6 +77,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          // if ( old.ShowDecimalHitChance == true ); // Same as new default, don't change
          if ( settings.LogHitRolls == true && ( settings.AttackLogLevel == null || settings.AttackLogLevel.Trim().ToLower() == "none" ) )
             settings.AttackLogLevel = "All";
+
+         if ( settings.ThroughArmorCritChanceZeroArmor != null )
+            settings.CritChanceZeroArmor = settings.ThroughArmorCritChanceZeroArmor.GetValueOrDefault( 0 );
+         if ( settings.ThroughArmorCritChanceFullArmor != null )
+            settings.CritChanceFullArmor = settings.ThroughArmorCritChanceZeroArmor.GetValueOrDefault( 0 );
 #pragma warning restore CS0618
 
          RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
@@ -108,8 +113,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "VehicleCritMultiplier", ref settings.VehicleCritMultiplier, 0, 1000 );
          RangeCheck( "TurretCritMultiplier" , ref settings.TurretCritMultiplier, 0, 1000 );
          RangeCheck( "ThroughArmorCritThreshold", ref settings.ThroughArmorCritThreshold, -1, 10000 );
-         RangeCheck( "ThroughArmorCritChanceZeroArmor", ref settings.ThroughArmorCritChanceZeroArmor, 0, 1 );
-         RangeCheck( "ThroughArmorCritChanceFullArmor", ref settings.ThroughArmorCritChanceFullArmor, -1, settings.ThroughArmorCritChanceZeroArmor );
+         RangeCheck( "CritChanceZeroArmor", ref settings.CritChanceZeroArmor, 0, 1 );
+         RangeCheck( "CritChanceFullArmor", ref settings.CritChanceFullArmor, -1, settings.CritChanceZeroArmor );
+         RangeCheck( "CritChanceZeroStructure", ref settings.CritChanceZeroStructure, 0, 1 );
+         RangeCheck( "CritChanceFullStructure", ref settings.CritChanceFullStructure, -1, settings.CritChanceZeroStructure );
+         RangeCheck( "CritChanceMin", ref settings.CritChanceMin, 0, 1 );
+         RangeCheck( "CritChanceMax", ref settings.CritChanceMax, settings.CritChanceMin, 1 );
 
          // Is 1TB a reasonable limit of how many logs to keep?
          RangeCheck( "AttackLogArchiveMaxMB", ref settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
