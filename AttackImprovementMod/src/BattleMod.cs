@@ -312,7 +312,7 @@ namespace Sheepy.BattleTechMod {
 
       /* Find and create a HarmonyMethod from this class. method must be public and has unique name. */
       protected HarmonyMethod MakePatch ( string method ) {
-         if ( method == null ) return null;
+         if ( string.IsNullOrEmpty( method ) ) return null;
          MethodInfo mi = GetType().GetMethod( method, Static | Public | NonPublic );
          if ( mi == null ) {
             Log.Error( "Cannot find patch method " + method );
