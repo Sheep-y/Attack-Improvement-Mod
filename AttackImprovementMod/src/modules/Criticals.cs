@@ -41,8 +41,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( Vehicle ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
 
          if ( ThroughArmorCritEnabled = Settings.CritChanceZeroArmor > 0 ) {
-            Patch( ResolveWeaponDamage, "AddThroughArmorCritical", null );
-            Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", "Override_ConsolidateCriticalHitInfo", null );
+            Patch( ResolveWeaponDamage, "ReplaceCritHandling", null );
+            Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", "Skip_ConsolidateCriticalHitInfo", null );
             InitThroughArmourCrit();
 
          } else {
@@ -307,7 +307,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          MechComponent result = slot < list.Count ? list[ slot ] : null;
          if ( list.Count <= 0 && Settings.CritLocationTransfer && me is Mech mech ) {
             ArmorLocation newLocation = MechStructureRules.GetPassthroughLocation( MechStructureRules.GetArmorFromChassisLocation( (ChassisLocations) location ) & FrontArmours, AttackDirection.FromFront );
-            if ( DebugLog ) Verbo( "Crit list empty at {0}, transferring crit to {1}", location, newLocation );
+            Verbo( "Crit list empty at {0} of {1}, transferring crit to {2}", (ChassisLocations) location, me, newLocation );
             if ( newLocation != ArmorLocation.None ) {
                ChassisLocations chassis = MechStructureRules.GetChassisLocationFromArmorLocation( newLocation );
                result = GetComponentFromRoll( me, (int) chassis, random, mech.MechDef.GetChassisLocationDef( chassis ).InventorySlots );
@@ -363,7 +363,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          public abstract float GetCritChance ();
          public virtual MechComponent FindComponentFromRoll ( float random ) {
-            return component = GetComponentFromRoll( target, -1, random, target.allComponents.Count );
+            return component = GetComponentFromRoll( target, 65535, random, target.allComponents.Count );
          }
          public virtual int GetCritLocation () { return HitLocation; } // Used to play VFX
       }
@@ -450,12 +450,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static bool allowConsolidateOnce = true;
 
-      public static void AddThroughArmorCritical ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) {
+      public static void ReplaceCritHandling ( Mech __instance, WeaponHitInfo hitInfo, Weapon weapon, MeleeAttackType meleeAttackType ) {
          CheckForAllCrits( new AIMMechCritInfo( __instance, hitInfo, weapon ) );
       }
 
       // We already did all the crit in AddThroughArmorCritical, so the vanilla don't have to.
-      public static bool Override_ConsolidateCriticalHitInfo ( ref Dictionary<int, float> __result ) {
+      public static bool Skip_ConsolidateCriticalHitInfo ( ref Dictionary<int, float> __result ) {
          if ( allowConsolidateOnce ) {
             allowConsolidateOnce = false;
             return true;
