@@ -330,8 +330,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Roll on next damage transfer location if a location has nothing to crit." ) ]
       public bool CritLocationTransfer = false;
 
-      //[ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero." ) ]
-      //public bool MultupleCrit = false;
+      [ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero." ) ]
+      public bool MultupleCrit = false;
 
       //
       [ JsonSection( "Hit Resolution" ) ]

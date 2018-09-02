@@ -650,6 +650,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static float LogAIMCritChance ( float chance, object hitLocation ) {
          thisCritChance = chance;
          thisCritLocation = hitLocation.ToString();
+         thisCritComp = null;
          return chance;
       }
 
@@ -679,6 +680,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.VeryLow ) ]
       public static void LogCritResult ( ICombatant __instance, Weapon weapon ) { try {
+         if ( __instance == null || weapon == null || thisCritLocation == null ) return;
          if ( __instance.GUID == thisAttackerId ) {
             if ( DebugLog ) Verbo( "Skip logging self crit" );
          } else {
