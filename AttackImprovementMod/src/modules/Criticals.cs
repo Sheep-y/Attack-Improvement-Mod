@@ -53,7 +53,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             // The settings below are built-in to generic crit system and only need to be patched when it is not used for mech.
             if ( Settings.CritIgnoreDestroyedComponent || Settings.CritIgnoreEmptySlots || Settings.CritLocationTransfer || Settings.MultupleCrit ) {
                Patch( MechType, "CheckForCrit", NonPublic, "Override_CheckForCrit", null );
-               if ( Settings.CritLocationTransfer && ! Settings.CritFollowDamageTransfer ) 
+               if ( Settings.CritLocationTransfer && ! Settings.CritFollowDamageTransfer )
                   Warn( "Disabling CritFollowDamageTransfer will cause less crit to be checked, diminishing CritLocationTransfer." );
             }
             if ( CritChanceBase != 0 || CritChanceVar != 1 )
@@ -156,7 +156,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( DebugLog ) Verbo( "Start crit check on {0} by {1}", info.target, info.weapon );
          ConsolidateCrit( info );
          foreach ( var damagedLocation in damaged )
-            CheckForCrit( info, damagedLocation.Key );
+            CheckForCrit( info, damagedLocation.Key, true );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static void ConsolidateCrit ( AIMCritInfo info ) { try {
@@ -186,27 +186,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          damages.Clear();
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void CheckForCrit ( AIMCritInfo critInfo, int hitLocation ) { try {
+      public static void CheckForCrit ( AIMCritInfo critInfo, int hitLocation, bool logCrit ) { try {
          if ( critInfo?.weapon == null ) return;
          critInfo.SetHitLocation( hitLocation );
          AbstractActor target = critInfo.target;
          if ( Settings.SkipCritingDeadMech && ( target.IsDead || target.IsFlaggedForDeath ) ) return;
-         bool critLogged = false;
          float critChance = critInfo.GetCritChance();
          while ( critChance > 0 ) {
             float[] randomFromCache = Combat.AttackDirector.GetRandomFromCache( critInfo.hitInfo, 2 );
             if ( DebugLog ) Verbo( "Crit roll {0} < chance {1}? {2}", randomFromCache[0], critChance, randomFromCache[ 0 ] <= critChance );
             if ( randomFromCache[ 0 ] > critChance ) break;
             FindAndCritComponent( critInfo, randomFromCache[ 1 ] );
-            if ( ! critLogged ) {
+            if ( logCrit ) {
                AttackLog.LogCritResult( target, critInfo.weapon );
-               critLogged = true;
+               logCrit = false;
             }
             if ( ! Settings.MultupleCrit ) break;
             critChance -= randomFromCache[ 0 ];
             if ( DebugLog ) Verbo( "Chance of next crit = {0}.", critChance );
          }
-         if ( ! critLogged ) AttackLog.LogCritResult( target, critInfo.weapon );
+         if ( logCrit ) AttackLog.LogCritResult( target, critInfo.weapon );
          if ( MechEngineerCheckCritPostfix != null ) {
             Mech mech = new Mech();
             MechSetCombat.Invoke( mech, new object[]{ Combat } );
@@ -280,7 +279,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float chance = 0;
          if ( info.IsArmourBreached ) {
             chance = GetBaseChance( info.currentStructure, info.maxStructure );
-            if ( DebugLog ) Verbo( "Normal base crit chance = {0}/{1} = {3}", info.currentStructure, info.maxStructure, chance );
+            if ( DebugLog ) Verbo( "Normal base crit chance = {0}/{1} = {2}", info.currentStructure, info.maxStructure, chance );
             AttackLog.LogAIMBaseCritChance( chance, info.maxStructure );
             return Mathf.Max( CritChanceMin, Mathf.Min( chance, CritChanceMax ) );
          } else if ( ThroughArmorCritEnabled ) {
@@ -303,26 +302,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static MechComponent GetComponentFromRoll ( AbstractActor me, int location, float random, int MinSlots = 0 ) {
-         List<MechComponent> list = new List<MechComponent>( MinSlots );
-         foreach ( MechComponent component in me.allComponents ) {
-            int componentLocation = MechEngineerGetCompLocation != null
-                                  ? (int) MechEngineerGetCompLocation.Invoke( null, new object[]{ component } )
-                                  : component.Location;
-            if ( DebugLog ) Verbo( "List components at {0}, {1} location {2}, Flag = {3}", location, component, componentLocation, componentLocation & location );
-            if ( ( componentLocation & location ) <= 0 ) continue;
-            if ( Settings.CritIgnoreDestroyedComponent && component.DamageLevel >= ComponentDamageLevel.Destroyed ) continue;
-            for ( int i = component.inventorySize ; i > 0 ; i-- )
-               list.Add( component );
-         }
-         if ( ! Settings.CritIgnoreEmptySlots )
-            for ( int i = list.Count ; i < MinSlots ; i++ )
-               list.Add( null );
+         List<MechComponent> list = ListComponentsAtLocation( me, location, MinSlots );
          int slot = (int)( list.Count * random );
          MechComponent result = slot < list.Count ? list[ slot ] : null;
          if ( list.Count <= 0 && Settings.CritLocationTransfer && me is Mech mech ) {
             ArmorLocation newLocation = MechStructureRules.GetPassthroughLocation( MechStructureRules.GetArmorFromChassisLocation( (ChassisLocations) location ) & FrontArmours, AttackDirection.FromFront );
-            if ( newLocation == ArmorLocation.None &&  location == (int) ChassisLocations.Head ) 
-               newLocation = ArmorLocation.CenterTorso; // Special crit passthrough rule. I say so.
             if ( DebugLog ) Verbo( "Crit list empty at {0}, transferring crit to {1}", location, newLocation );
             if ( newLocation != ArmorLocation.None ) {
                ChassisLocations chassis = MechStructureRules.GetChassisLocationFromArmorLocation( newLocation );
@@ -332,6 +316,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          AttackLog.LogCritComp( result, slot );
          return result;
       }
+
+      public static List<MechComponent> ListComponentsAtLocation ( AbstractActor me, int location, int MinSlots = 0 ) {
+         List<MechComponent> list = new List<MechComponent>( MinSlots );
+         foreach ( MechComponent component in me.allComponents ) {
+            int componentLocation = MechEngineerGetCompLocation != null
+                                  ? (int) MechEngineerGetCompLocation.Invoke( null, new object[]{ component } )
+                                  : component.Location;
+            int flag = componentLocation & location;
+            if ( DebugLog && flag > 0 ) Verbo( "List components at {0}, {1} location {2} state {3}, Flag = {4}", location, component, componentLocation, component.DamageLevel, flag );
+            if ( flag <= 0 ) continue;
+            if ( Settings.CritIgnoreDestroyedComponent && component.DamageLevel >= ComponentDamageLevel.Destroyed ) continue;
+            for ( int i = component.inventorySize ; i > 0 ; i-- )
+               list.Add( component );
+         }
+         if ( ! Settings.CritIgnoreEmptySlots )
+            for ( int i = list.Count ; i < MinSlots ; i++ )
+               list.Add( null );
+         return list;
+      }
+
 
       // ============ AIMCritInfo ============
 
@@ -539,7 +543,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ThroughArmorCritEnabled ) Error( "Assertion error: Override_CheckForCrit is not designed to work with TAC." );
          ArmorLocation HitLocation = MechStructureRules.GetArmorFromChassisLocation( location ) & FrontArmours;
          if ( DebugLog ) Verbo( "Override_CheckForCrit on {0} at {1} by {2}, location placeholder = {3}", __instance, location, weapon, HitLocation );
-         CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), (int) HitLocation );
+         CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), (int) HitLocation, false );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
