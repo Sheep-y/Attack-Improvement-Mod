@@ -18,7 +18,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Type MechType = typeof( Mech );
 
       private static bool ThroughArmorCritEnabled;
-      private static float TAC_Threshold, TAC_ThresholdPerc, TAC_BaseChance, TAC_VarChance, CritChanceMin, CritChanceMax, CritChanceBase, CritChanceVar;
+      private static float MultiplierEnemy, MultiplierAlly, 
+         TAC_Threshold, TAC_ThresholdPerc, TAC_BaseChance, TAC_VarChance, 
+         CritChanceMin, CritChanceMax, CritChanceBase, CritChanceVar;
 
 #pragma warning disable CS0162 // Disable "unreachable code" warnings due to DebugLog flag
       public override void CombatStartsOnce () {
@@ -28,6 +30,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.SkipCritingDeadMech )
             Patch( ResolveWeaponDamage, "Skip_BeatingDeadMech", null );
+
+         if ( MultiplierEnemy != 0.2 || MultiplierAlly != 0.2 )
+            Patch( typeof( CritChanceRules ), "GetCritMultiplier", "SetNPCCritMultiplier", null );
 
          if ( Settings.TurretCritMultiplier > 0 )
             Patch( typeof( Turret ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
@@ -45,10 +50,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          if ( CritChanceBase != 0 || CritChanceVar != 1 )
-            Patch( MechType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, "Override_BaseCritChance", null );
+            Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, "Override_BaseCritChance", null );
 
          if ( CritChanceMax < 1 )
-            Patch( MechType, "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "CapBaseCritChance" );
+            Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, null, "CapBaseCritChance" );
 
          if ( Settings.CritFollowDamageTransfer ) {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
@@ -76,16 +81,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatStarts () {
-         if ( Settings.DisableAICritChanceMultiplier || CritChanceMin != 0.5 ) {
-            CombatResolutionConstantsDef con = CombatConstants.ResolutionConstants;
-            if ( Settings.DisableAICritChanceMultiplier )
-               con.AICritChanceBaseMultiplier = 1;
+         CombatResolutionConstantsDef con = CombatConstants.ResolutionConstants;
+         if ( CritChanceMin != con.MinCritChance ) {
             con.MinCritChance = CritChanceMin;
             typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" ).SetValue( CombatConstants, con, null );
          }
       }
 
       private void InitCritChance () {
+         MultiplierEnemy = (float) Settings.CritChanceMultiplierEnemy;
+         MultiplierAlly = (float) Settings.CritChanceMultiplierAlly;
          CritChanceMin = (float) Settings.CritChanceMin;
          CritChanceMax = (float) Settings.CritChanceMax;
          CritChanceBase = (float) Settings.CritChanceZeroStructure;
@@ -468,7 +473,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      // ============ Normal Crit Chance ============
+      // ============ Normal Crit Chances and Multipliers ============
+
+      private static void SetAICritMultiplier ( float setTo ) {
+         CombatResolutionConstantsDef con = CombatConstants.ResolutionConstants;
+         if ( setTo != con.AICritChanceBaseMultiplier ) {
+            con.AICritChanceBaseMultiplier = setTo;
+            typeof( CombatGameConstants ).GetProperty( "ResolutionConstants" ).SetValue( CombatConstants, con, null );
+         }
+      }
+
+      public static void SetNPCCritMultiplier ( Weapon weapon ) {
+         Team team = weapon?.parent?.team;
+         if ( team == null || team.PlayerControlsTeam ) return;
+         SetAICritMultiplier( team.IsFriendly( Combat.LocalPlayerTeam ) ? MultiplierAlly : MultiplierEnemy );
+      }
 
       public static bool Override_BaseCritChance ( ref float __result, Mech target, ChassisLocations hitLocation ) {
          __result = GetBaseChance( target.GetCurrentStructure( hitLocation ), target.GetMaxStructure( hitLocation ) );

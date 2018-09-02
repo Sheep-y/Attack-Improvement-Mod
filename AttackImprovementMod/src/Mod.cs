@@ -81,7 +81,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( settings.ThroughArmorCritChanceZeroArmor != null )
             settings.CritChanceZeroArmor = settings.ThroughArmorCritChanceZeroArmor.GetValueOrDefault( 0 );
          if ( settings.ThroughArmorCritChanceFullArmor != null )
-            settings.CritChanceFullArmor = settings.ThroughArmorCritChanceZeroArmor.GetValueOrDefault( 0 );
+            settings.CritChanceFullArmor = settings.ThroughArmorCritChanceFullArmor.GetValueOrDefault( 0 );
 #pragma warning restore CS0618
 
          RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
@@ -110,12 +110,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "MissStreakBreakerThreshold", ref settings.MissStreakBreakerThreshold, 0, 1 );
          RangeCheck( "MissStreakBreakerDivider"  , ref settings.MissStreakBreakerDivider, -100, 100 );
 
+         RangeCheck( "CritChanceMultiplierEnemy", ref settings.CritChanceMultiplierEnemy, 0, 1000 );
+         RangeCheck( "CritChanceMultiplierAlly", ref settings.CritChanceMultiplierAlly, 0, 1000 );
          RangeCheck( "VehicleCritMultiplier", ref settings.VehicleCritMultiplier, 0, 1000 );
          RangeCheck( "TurretCritMultiplier" , ref settings.TurretCritMultiplier, 0, 1000 );
          RangeCheck( "ThroughArmorCritThreshold", ref settings.ThroughArmorCritThreshold, -1, 10000 );
-         RangeCheck( "CritChanceZeroArmor", ref settings.CritChanceZeroArmor, 0, 1 );
+         RangeCheck( "CritChanceZeroArmor", ref settings.CritChanceZeroArmor, 0, 2 );
          RangeCheck( "CritChanceFullArmor", ref settings.CritChanceFullArmor, -1, settings.CritChanceZeroArmor );
-         RangeCheck( "CritChanceZeroStructure", ref settings.CritChanceZeroStructure, 0, 1 );
+         RangeCheck( "CritChanceZeroStructure", ref settings.CritChanceZeroStructure, 0, 2 );
          RangeCheck( "CritChanceFullStructure", ref settings.CritChanceFullStructure, -1, settings.CritChanceZeroStructure );
          RangeCheck( "CritChanceMin", ref settings.CritChanceMin, 0, 1 );
          RangeCheck( "CritChanceMax", ref settings.CritChanceMax, settings.CritChanceMin, 1 );

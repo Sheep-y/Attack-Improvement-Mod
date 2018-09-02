@@ -268,17 +268,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Critical Hits" ) ]
       //
 
-      [ JsonComment( "Set to true to disable AICritChanceBaseMultiplier in CombatGameConstants.json." ) ]
-      public bool DisableAICritChanceMultiplier = false;
+      [ JsonComment( "Skip critical checks if target is dead.  Default true.  Applies to vehicle and turret too." ) ]
+      public bool SkipCritingDeadMech = true;
+
+      [ JsonComment( new string[] {
+        "Overrides AICritChanceBaseMultiplier in CombatGameConstants.json.  Default 0.2, same as game.",
+        "Set to 1 for same crit chance as players, or set to 0 to prevent enemy or allies from dealing crit." } ) ]
+      public decimal CritChanceMultiplierEnemy = 0.2m;
+      public decimal CritChanceMultiplierAlly = 1;
 
       [ JsonComment( "Critical rate on vehicles, relative to mech.  Set to 0 to disable." ) ]
       public decimal VehicleCritMultiplier = 1;
 
       [ JsonComment( "Critical rate on turret, relative to mech.  Set to 0 to disable." ) ]
       public decimal TurretCritMultiplier = 1;
-
-      [ JsonComment( "Skip critical checks if target is dead.  Default true." ) ]
-      public bool SkipCritingDeadMech = true;
 
       [ JsonComment( "Crit is now checked on final damaged location by following damage transfer.  Default true." ) ]
       public bool CritFollowDamageTransfer = true;
@@ -288,7 +291,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "A weapon must deal this much total damage to a location for through armour crit to roll.  Default 9.  Set to 0 for no threshold.",
-        "A number between 0 and 1 (exclusive) means a fraction of max armour.  1 and above means fixed damage threshold." } ) ]
+        "A number between 0 and 1 (exclusive) means a fraction of max armour, 0 and -1 means a fraction of current armour,",
+        "while 1 and above means a fixed damage threshold." } ) ]
       public decimal ThroughArmorCritThreshold = 9;
 
       [ JsonComment( new string[]{
@@ -309,7 +313,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Base crit chance of a structurally hit location if it is at full structure, can be -1 to 1.  Default 0, same as game." ) ]
       public decimal CritChanceFullStructure = 0;
 
-      [ JsonComment( "Min crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 0.5, same as game." ) ]
+      [ JsonComment( new string[] {
+        "Min crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 0.5, same as game.",
+        "This setting simply overrides ResolutionConstants.MinCritChance in CombatGameConstants.json." } ) ]
       public decimal CritChanceMin = 0.5m;
 
       [ JsonComment( "Max crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 1, same as game." ) ]
