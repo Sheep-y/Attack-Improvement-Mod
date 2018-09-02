@@ -2,10 +2,20 @@ CHANGE LOG
 
 ????-??-?? AIM Version 2.3 for BATTLETECH 1.2.0
 
+* New: Configure friends' and foes' crit multiplier.
+* New: Vehicles and Turrets may now be crit'ed.
 * New: Critical hits now follows damage transfer.
-* New: Hits may optionally crit through armour.
-* New: Excludes intact structures from crits. (When through armour crit is disabled.)
-* Fix: Attempt to fix see-through armour with Mech Engineer's composite structure.
+* New: Critical hits rates and cap may be set.
+* New: Critical hits may optionally happens through armour.
+* New: Critical hits may optionally ignore destroyed component and space.
+* New: Critical hits may optionally be transferred inward when there is nothing to crit.
+* New: Critical hits may optionally be rolled until there is no more crit chance.
+* New: Exclude intact structures from crits. (When through armour crit is disabled.)
+* New: Attack Log now logs DFA self-damage and overheat self-damage.
+* Mod: Make see-through armour compatible with Mech Engineer's composite structure.
+* Fix: Fix Turret and Building LOS are coloured by direction.
+* Fix: Fix FixBossHeadCalledShotDisplay regression.
+* Fix: Fix first crit line in Attack Log is always an empty slot 1.
 
 2018-08-28 AIM Version 2.2.1 for BATTLETECH 1.2.0
 

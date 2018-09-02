@@ -50,12 +50,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( ResolveWeaponDamage, "RecordCritMech", "ClearCritMech" );
                Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", null, "RemoveFullStructureLocationsFromCritList" );
             }
-            // The settings below are built-in to generic crit system and only need to be patched when it is not used for mech.
-            if ( Settings.CritIgnoreDestroyedComponent || Settings.CritIgnoreEmptySlots || Settings.CritLocationTransfer || Settings.MultupleCrit ) {
+            // The settings below are built-in to generic crit system and only need to be patched when the system is not used for mech.
+            if ( Settings.CritIgnoreDestroyedComponent || Settings.CritIgnoreEmptySlots || Settings.CritLocationTransfer || Settings.MultupleCrits )
                Patch( MechType, "CheckForCrit", NonPublic, "Override_CheckForCrit", null );
-               if ( Settings.CritLocationTransfer && ! Settings.CritFollowDamageTransfer )
-                  Warn( "Disabling CritFollowDamageTransfer will cause less crit to be checked, diminishing CritLocationTransfer." );
-            }
             if ( CritChanceBase != 0 || CritChanceVar != 1 )
                Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, "Override_BaseCritChance", null );
             if ( CritChanceMax < 1 )
@@ -67,24 +64,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "DamageLocation", NonPublic, "UpdateCritLocation", null );
          }
 
-         if ( Settings.CritChanceVsTurret > 0 || Settings.CriChanceVsVehicle > 0 || ThroughArmorCritEnabled ) {
-            if ( BattleMod.FoundMod( "MechEngineer.Control" ) ) { try {
-               Assembly MechEngineer = AppDomain.CurrentDomain.GetAssemblies().First( e => e.GetName().Name == "MechEngineer" );
-               Type MechCheckForCritPatch = MechEngineer?.GetType( "MechEngineer.MechCheckForCritPatch" );
-               MechEngineerCheckCritPublishMessage = MechCheckForCritPatch?.GetMethod( "PublishMessage", Static | Public );
-               MechEngineerCheckCritPostfix = MechCheckForCritPatch?.GetMethod( "Postfix", Static | Public );
-               MechEngineerGetCompLocation = MechEngineer?.GetType( "MechEngineer.DamageIgnoreHelper" )?.GetMethod( "OverrideLocation" );
-               MechSetCombat = typeof( Mech ).GetMethod( "set_Combat", NonPublic | Instance );
-               if ( MechEngineerCheckCritPublishMessage == null || MechEngineerCheckCritPostfix == null || MechEngineerGetCompLocation == null || MechSetCombat == null ) {
-                  MechEngineerCheckCritPublishMessage = MechEngineerCheckCritPostfix = MechEngineerGetCompLocation = MechSetCombat = null;
-                  throw new NullReferenceException();
-               }
-               Info( "Attack Improvement Mod has bridged with MechEngineer.MechCheckForCritPatch on crit handling." );
-            } catch ( Exception ex ) {
-               Error( ex );
-               BattleMod.BTML_LOG.Warn( "Attack Improvement Mod cannot bridge with MechEngineer. Component crit may not be handled properly." );
-            } }
-         }
+         if ( BattleMod.FoundMod( "MechEngineer.Control" ) ) InitMechEngineerBridge();
       }
 
       public override void CombatStarts () {
@@ -102,6 +82,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          CritChanceMax = (float) Settings.CritChanceMax;
          CritChanceBase = (float) Settings.CritChanceZeroStructure;
          CritChanceVar = (float) Settings.CritChanceFullStructure - CritChanceBase;
+         if ( Settings.CritLocationTransfer ) {
+            if ( ! Settings.CritIgnoreDestroyedComponent || ! Settings.CritIgnoreEmptySlots )
+               Warn( "Not enabling CritIgnoreDestroyedComponent and CritIgnoreEmptySlots will make CritLocationTransfer hard to happens." );
+            if ( ! Settings.CritFollowDamageTransfer )
+               Warn( "Disabling CritFollowDamageTransfer will cause less crit to be checked, diminishing CritLocationTransfer." );
+         }
       }
 
       private void InitThroughArmourCrit () {
@@ -118,6 +104,23 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ThroughArmorCritThreshold != 0 && ! Settings.CritFollowDamageTransfer )
             Warn( "Disabling CritFollowDamageTransfer may affect ThroughArmorCritThreshold calculation." );
       }
+
+      private void InitMechEngineerBridge () { try {
+         Assembly MechEngineer = AppDomain.CurrentDomain.GetAssemblies().First( e => e.GetName().Name == "MechEngineer" );
+         Type MechCheckForCritPatch = MechEngineer?.GetType( "MechEngineer.MechCheckForCritPatch" );
+         MechEngineerCheckCritPublishMessage = MechCheckForCritPatch?.GetMethod( "PublishMessage", Static | Public );
+         MechEngineerCheckCritPostfix = MechCheckForCritPatch?.GetMethod( "Postfix", Static | Public );
+         MechEngineerGetCompLocation = MechEngineer?.GetType( "MechEngineer.DamageIgnoreHelper" )?.GetMethod( "OverrideLocation" );
+         MechSetCombat = typeof( Mech ).GetMethod( "set_Combat", NonPublic | Instance );
+         if ( MechEngineerCheckCritPublishMessage == null || MechEngineerCheckCritPostfix == null || MechEngineerGetCompLocation == null || MechSetCombat == null ) {
+            MechEngineerCheckCritPublishMessage = MechEngineerCheckCritPostfix = MechEngineerGetCompLocation = MechSetCombat = null;
+            throw new NullReferenceException();
+         }
+         Info( "Attack Improvement Mod has bridged with MechEngineer.MechCheckForCritPatch on crit handling." );
+      } catch ( Exception ex ) {
+         Error( ex );
+         BattleMod.BTML_LOG.Warn( "Attack Improvement Mod cannot bridge with MechEngineer. Component crit may not be handled properly." );
+      } }
 
       [ HarmonyPriority( Priority.High ) ]
       public static bool Skip_BeatingDeadMech ( Mech __instance ) {
@@ -186,26 +189,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          damages.Clear();
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void CheckForCrit ( AIMCritInfo critInfo, int hitLocation, bool logCrit ) { try {
-         if ( critInfo?.weapon == null ) return;
-         critInfo.SetHitLocation( hitLocation );
-         AbstractActor target = critInfo.target;
+      public static void CheckForCrit ( AIMCritInfo info, int hitLocation, bool logCrit ) { try {
+         if ( info?.weapon == null ) return;
+         info.SetHitLocation( hitLocation );
+         AbstractActor target = info.target;
          if ( Settings.SkipCritingDeadMech && ( target.IsDead || target.IsFlaggedForDeath ) ) return;
-         float critChance = critInfo.GetCritChance();
-         while ( critChance > 0 ) {
-            float[] randomFromCache = Combat.AttackDirector.GetRandomFromCache( critInfo.hitInfo, 2 );
-            if ( DebugLog ) Verbo( "Crit roll {0} < chance {1}? {2}", randomFromCache[0], critChance, randomFromCache[ 0 ] <= critChance );
-            if ( randomFromCache[ 0 ] > critChance ) break;
-            FindAndCritComponent( critInfo, randomFromCache[ 1 ] );
+         float chance = info.GetCritChance();
+         for ( int i = 1 ; chance > 0 ; i++ ) {
+            float[] rolls = Combat.AttackDirector.GetRandomFromCache( info.hitInfo, 2 );
+            float critRoll = rolls[ 0 ];
+            if ( DebugLog ) Verbo( "Crit {3} roll {0} < chance {1}? {2}", critRoll, chance, critRoll <= chance, i );
+            if ( critRoll > chance ) break;
+            MechComponent component = FindAndCritComponent( info, rolls[ 1 ] );
+            if ( i > 1 ) Verbo( "Crit x{0} on location {1} of {2} by {3}. Roll {4} <= Chance {5}. Crit'ed {6}",
+                         i, component?.Location ?? hitLocation, info.target, info.weapon, critRoll, chance, component?.UIName.ToString() ?? "(None)" );
             if ( logCrit ) {
-               AttackLog.LogCritResult( target, critInfo.weapon );
+               AttackLog.LogCritResult( target, info.weapon );
                logCrit = false;
             }
-            if ( ! Settings.MultupleCrit ) break;
-            critChance -= randomFromCache[ 0 ];
-            if ( DebugLog ) Verbo( "Chance of next crit = {0}.", critChance );
+            if ( ! Settings.MultupleCrits ) break;
+            chance -= critRoll;
          }
-         if ( logCrit ) AttackLog.LogCritResult( target, critInfo.weapon );
+         if ( logCrit ) AttackLog.LogCritResult( target, info.weapon );
          if ( MechEngineerCheckCritPostfix != null ) {
             Mech mech = new Mech();
             MechSetCombat.Invoke( mech, new object[]{ Combat } );
@@ -213,7 +218,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void FindAndCritComponent ( AIMCritInfo critInfo, float random ) {
+      public static MechComponent FindAndCritComponent ( AIMCritInfo critInfo, float random ) {
          MechComponent component = critInfo.FindComponentFromRoll( random );
          if ( component != null ) {
             if ( DebugLog ) Verbo( "Play crit SFX and VFX on {0} ({1}) at {2}", component, component.DamageLevel, component.Location );
@@ -226,6 +231,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( DebugLog ) Verbo( "Component damaged to {0}", newDamageLevel );
             component.DamageComponent( critInfo.hitInfo, newDamageLevel, true );
          }
+         return component;
       }
 
       public static ComponentDamageLevel GetDegradedComponentLevel ( AIMCritInfo info ) {

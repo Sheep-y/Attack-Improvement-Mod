@@ -154,7 +154,7 @@ namespace Sheepy.BattleTechMod {
                if ( string.IsNullOrEmpty( comp.uid ) )
                   args[i] = comp.UIName.ToString();
                else
-                  args[i] = comp.UIName.ToString() + " (" + comp.uid + ")";
+                  args[i] = comp.UIName.ToString() + " (#" + comp.uid + ")";
             else if ( arg is MechComponentDef def )
                args[i] = def.Description.Id;
             else if ( arg is System.Collections.IEnumerable list )

@@ -331,7 +331,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool CritLocationTransfer = false;
 
       [ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero." ) ]
-      public bool MultupleCrit = false;
+      public bool MultupleCrits = false;
 
       //
       [ JsonSection( "Hit Resolution" ) ]
