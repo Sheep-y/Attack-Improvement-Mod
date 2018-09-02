@@ -321,6 +321,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Max crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 1, same as game." ) ]
       public decimal CritChanceMax = 1;
 
+      [ JsonComment( "Ignore (reroll) destroyed component when rolling crit." ) ]
+      public bool CritIgnoreDestroyedComponent = false;
+
+      [ JsonComment( "Ignore (reroll) empty slots when rolling crit." ) ]
+      public bool CritIgnoreEmptySlots = false;
+
+      [ JsonComment( "Roll on next damage transfer location if a location has nothing to crit." ) ]
+      public bool CritLocationTransfer = false;
+
+      //[ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero." ) ]
+      //public bool MultupleCrit = false;
+
       //
       [ JsonSection( "Hit Resolution" ) ]
       //

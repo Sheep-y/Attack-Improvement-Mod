@@ -13,7 +13,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class Criticals : BattleModModule {
 
-      private const bool DebugLog = false;
+      private const bool DebugLog = true;
 
       private static Type MechType = typeof( Mech );
 
@@ -291,14 +291,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                                   : component.Location;
             if ( DebugLog ) Verbo( "List components at {0}, {1} location {2}, Flag = {3}", location, component, componentLocation, componentLocation & location );
             if ( ( componentLocation & location ) <= 0 ) continue;
+            if ( Settings.CritIgnoreDestroyedComponent && component.DamageLevel >= ComponentDamageLevel.Destroyed ) continue;
             for ( int i = component.inventorySize ; i > 0 ; i-- )
                list.Add( component );
          }
-         for ( int i = list.Count ; i < MinSlots ; i++ )
-            list.Add( null );
+         if ( ! Settings.CritIgnoreEmptySlots )
+            for ( int i = list.Count ; i < MinSlots ; i++ )
+               list.Add( null );
          int slot = (int)( list.Count * random );
          MechComponent result = slot < list.Count ? list[ slot ] : null;
-         if ( DebugLog ) Verbo( "Slot roll {0}, slot count {1}, slot {2}, component {3} status {4}", random, list.Count, slot, result, result.DamageLevel );
+         if ( list.Count <= 0 && Settings.CritLocationTransfer && me is Mech mech ) {
+            ArmorLocation newLocation = MechStructureRules.GetPassthroughLocation( MechStructureRules.GetArmorFromChassisLocation( (ChassisLocations) location ), AttackDirection.FromFront );
+            if ( newLocation == ArmorLocation.None &&  location == (int) ChassisLocations.Head ) 
+               newLocation = ArmorLocation.CenterTorso; // Special crit passthrough rule. I say so.
+            if ( DebugLog ) Verbo( "Crit list empty at {0}, transferring crit to {1}", location, newLocation );
+            if ( newLocation != ArmorLocation.None ) {
+               ChassisLocations chassis = MechStructureRules.GetChassisLocationFromArmorLocation( newLocation );
+               result = GetComponentFromRoll( me, (int) chassis, random, mech.MechDef.GetChassisLocationDef( chassis ).InventorySlots );
+            }
+         } else if ( DebugLog ) Verbo( "Slot roll {0}, slot count {1}, slot {2}, component {3} status {4}", random, list.Count, slot, result, result.DamageLevel );
          AttackLog.LogCritComp( result, slot );
          return result;
       }
