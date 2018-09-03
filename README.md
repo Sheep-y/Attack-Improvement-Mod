@@ -570,6 +570,26 @@ These settings can be changed in `settings.json`.
 > As a side effect, slightly more components will be salvageable instead of being destroyed.
 
 
+**NPC Crit Multipliers**
+
+> Setting: `CritChanceEnemy` (0 or above, default 0.2) <br>
+> Setting: `CritChanceAlly` (0 or above, default 1) <br>
+>
+> Override the crit chance set by AICritChanceBaseMultiplier in CombatGameConstants.json.
+> Game default is 0.2 which lowers all NPCs' crit chance to 20% of original.
+>
+> Set to 1 for same crit chance as players, or set to 0 to prevent enemies or allies from dealing crit.
+
+
+**Non-Mech Critical Hit**
+
+> Setting: `CriChanceVsVehicle` (0 or above, default 1) <br>
+> Setting: `CritChanceVsTurret` (0 or above, default 1) <br>
+>
+> When non-zero, enable critical hit on vehicles and turrets.
+> The number is a multiplier of crit chance, e.g. 0.5 to set to half normal crit chance.
+
+
 **Crit Follows Damage Transfer**
 
 > Setting: `CritFollowDamageTransfer`  (true/false, default true)
@@ -617,12 +637,12 @@ These settings can be changed in `settings.json`.
 > But generally speaking, the imprecision has limited impact and align with the spirit of through armour crit.
 
 
-> Setting: `ThroughArmorCritChanceZeroArmor`  (0 to 1, default 0)<br>
-> Setting: `ThroughArmorCritChanceFullArmor`  (-1 to 1, default 0)<br>
+> Setting: `CritChanceZeroArmor`  (0 to 2, default 0)<br>
+> Setting: `CritChanceFullArmor`  (-1 to 1, default 0)<br>
 >
 > The two settings together determine the range of through armour base critical chance.
-> `ThroughArmorCritChanceZeroArmor` is the max chance, and `ThroughArmorCritChanceFullArmor` is the min chance.
-> When `ThroughArmorCritChanceZeroArmor` is 0, through armour critical hit is disabled.
+> `CritChanceZeroArmor` is the max chance, and `CritChanceFullArmor` is the min chance.
+> When `CritChanceZeroArmor` is 0, through armour critical hit is disabled.
 >
 > For a fixed crit chance, set both numbers to same.
 > Classic BattleTech has the chance at around 3%, or 0.03.
@@ -633,6 +653,53 @@ These settings can be changed in `settings.json`.
 >
 > When through armour critical hit happens and it is logged by this mod's Attack Log,
 > the Max HP column logs the max armour of the location instead of max structure.
+
+
+**Normal Crit Chance**
+
+> Setting: `CritChanceZeroStructure` (0 to 2, default 1)<br>
+> Setting: `CritChanceFullStructure` (-1 to 1, default 0)<br>
+> Setting: `CritChanceMin` (0 to 1, default 0.5)<br>
+> Setting: `CritChanceMax` (0 to 1, default 1)<br>
+>
+> These settings can be used to change the normal critical hit chance on structurally damaged locations.
+> CritChanceZeroStructure and CritChanceFullStructure decides the base range relative to structure%,
+> then CritChanceMin and CritChanceMax is applied to cap the chance.
+>
+> The default values are the same as game's default.
+> Using defaults, a location with 75/100 structure has 25% crit chance, raised to 50% by `CritChanceMin`.
+> This becomes the base crit chance of the location, to be modified by crit multipliers.
+
+
+**Critical Hit Reroll**
+
+> Setting: `CritIgnoreDestroyedComponent` (true or false, default false)<br>
+> Setting: `CritIgnoreEmptySlots` (true or false, default false)<br>
+>
+> When set to true, a successful critical hit will ignore destroyed components and/or empty slots.
+> These settings simulate Classic BattleTech's crit reroll that happens when the crit slot is invalid.
+
+
+**Critical Hit Location Transfer**
+
+> Setting: `CritLocationTransfer` (true or false, default false)
+>
+> When set to true and a successful critical hit happens on a location that has nothing to crit,
+> usually because of `CritIgnoreDestroyedComponent` and `CritIgnoreEmptySlots`,
+> the crit will transfer to the next location using damage transfer rule.
+>
+> For best simulation of Classic BattleTech's crit, please also set `CritFollowDamageTransfer` to true.
+
+
+**Multiple Critical Hits from Single Shot**
+
+> Setting: `MultupleCrits` (true or false, default false)
+>
+> In Classic BattleTech, critical hits may damage multiple components.
+> This setting recreate that feel in the context of BattleTech's crit system.
+>
+> When set to true, a successful crit roll is deduced from the crit chance.
+> This leftover crit chance is then rolled again, and repeated until a crit roll fails.
 
 
 
