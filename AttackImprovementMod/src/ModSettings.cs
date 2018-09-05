@@ -175,7 +175,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.",
         "Note that 100% hit chance (max) may still miss if roll correction is enabled." } ) ]
       public decimal MaxFinalHitChance = 0.95m;
-      public decimal MinFinalHitChance = 0.05m;      [ JsonComment( "Make hit chance modifier has diminishing return rather than simple add and subtract.  Default false." ) ]
+      public decimal MinFinalHitChance = 0.05m;
+
+      [ JsonComment( "Make hit chance modifier has diminishing return rather than simple add and subtract.  Default false." ) ]
       public bool DiminishingHitChanceModifier = false;
 
       [ JsonComment( new string[]{
