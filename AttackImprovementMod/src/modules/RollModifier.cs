@@ -202,7 +202,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static float GetJumpedModifier ( AbstractActor attacker ) {
          float movement = -1;
-         if ( attacker.JumpedLastRound ) {
+         if ( attacker.HasMovedThisRound && attacker.JumpedLastRound ) {
             movement = attacker.DistMovedThisRound;
          } else {
             SelectionState state = HUD?.SelectionHandler?.ActiveState;
