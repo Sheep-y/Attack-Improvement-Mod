@@ -618,11 +618,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.VeryLow ) ]
       public static void LogCritRolls ( float[] __result, int amount ) {
          if ( amount == 2 ) {
-            if ( DebugLog ) Verbo( "Crit Roll = {0} & {1}", __result[0], __result[1] );
-            thisCritRoll = __result[0];
-            thisCritSlotRoll = __result[1];
-            checkCritComp = true;
+            LogAIMCritRoll( __result[0] );
+            LogAIMSlotRoll( __result[1] );
          }
+      }
+
+      public static void LogAIMCritRoll ( float crit ) {
+         if ( DebugLog ) Verbo( "Crit Roll = {0}", crit );
+         thisCritRoll = crit;
+      }
+
+      public static void LogAIMSlotRoll ( float slot ) {
+         if ( DebugLog ) Verbo( "Slot Roll = {0}", slot );
+         thisCritSlotRoll = slot;
+         checkCritComp = true;
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]

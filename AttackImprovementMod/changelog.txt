@@ -15,6 +15,7 @@ CHANGE LOG
 * Mod: Make see-through armour compatible with Mech Engineer's composite structure.
 * Fix: Fix Turret and Building LOS are coloured by direction.
 * Fix: Fix FixBossHeadCalledShotDisplay regression.
+* Fix: Fix Jumped modifier persists into the next turn.
 * Fix: Fix first crit line in Attack Log is always an empty slot 1.
 
 2018-08-28 AIM Version 2.2.1 for BATTLETECH 1.2.0

@@ -196,11 +196,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.SkipCritingDeadMech && ( target.IsDead || target.IsFlaggedForDeath ) ) return;
          float chance = info.GetCritChance();
          for ( int i = 1 ; chance > 0 ; i++ ) {
-            float[] rolls = Combat.AttackDirector.GetRandomFromCache( info.hitInfo, 2 );
-            float critRoll = rolls[ 0 ];
+            float critRoll = Combat.NetworkRandom.Float(); // If use original code AttackDirector.GetRandomFromCache( info.hitInfo, 2 ), may run out of rolls
+            AttackLog.LogAIMCritRoll( critRoll );
             if ( DebugLog ) Verbo( "Crit {3} roll {0} < chance {1}? {2}", critRoll, chance, critRoll <= chance, i );
             if ( critRoll > chance ) break;
-            MechComponent component = FindAndCritComponent( info, rolls[ 1 ] );
+            float slotRoll = Combat.NetworkRandom.Float();
+            AttackLog.LogAIMSlotRoll( slotRoll );
+            MechComponent component = FindAndCritComponent( info, slotRoll );
             if ( i > 1 ) Verbo( "Crit x{0} on location {1} of {2} by {3}. Roll {4} <= Chance {5}. Crit'ed {6}",
                          i, component?.Location ?? hitLocation, info.target, info.weapon, critRoll, chance, component?.UIName.ToString() ?? "(None)" );
             if ( logCrit ) {
