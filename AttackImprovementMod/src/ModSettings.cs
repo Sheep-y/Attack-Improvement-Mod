@@ -335,6 +335,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero." ) ]
       public bool MultupleCrits = false;
 
+      [ JsonComment( "Set to true to kill turret and vehicles when their ammo explodes.  Default true." ) ]
+      public bool AmmoExplosionKillTurret = true;
+      public bool AmmoExplosionKillVehicle = true;
+
       //
       [ JsonSection( "Hit Resolution" ) ]
       //

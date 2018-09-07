@@ -64,6 +64,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "DamageLocation", NonPublic, "UpdateCritLocation", null );
          }
 
+         if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
+            Patch( typeof( AmmunitionBox ), "DamageComponent", null, "AmmoExplosionKillNonMech" );
+
          if ( BattleMod.FoundMod( "MechEngineer.Control" ) ) InitMechEngineerBridge();
       }
 
@@ -151,6 +154,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return target.GetAdjustedDamage( damage, weapon.Category, target.occupiedDesignMask, lineOfFireLevel, false );
       }
 
+      public static AttackDirector.AttackSequence GetAttackSequence ( WeaponHitInfo hitInfo ) {
+         return Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
+      }
+
       // ============ Generic Critical System Core ============
 
       private static Dictionary<int, float> damages = new Dictionary<int, float>(), damaged = new Dictionary<int, float>();
@@ -226,9 +233,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( DebugLog ) Verbo( "Play crit SFX and VFX on {0} ({1}) at {2}", component, component.DamageLevel, component.Location );
             PlaySFX( critInfo );
             PlayVFX( critInfo );
-            AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( critInfo.hitInfo.attackSequenceId );
-            if ( attackSequence != null )
-               attackSequence.FlagAttackScoredCrit( component as Weapon, component as AmmunitionBox );
+            AttackDirector.AttackSequence attackSequence = GetAttackSequence( critInfo.hitInfo );
+            attackSequence?.FlagAttackScoredCrit( component as Weapon, component as AmmunitionBox );
             ComponentDamageLevel newDamageLevel = GetDegradedComponentLevel( critInfo );
             if ( DebugLog ) Verbo( "Component damaged to {0}", newDamageLevel );
             component.DamageComponent( critInfo.hitInfo, newDamageLevel, true );
@@ -244,7 +250,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             PublishMessage( info.target, "{0} CRIT", component.UIName, FloatieMessage.MessageNature.CriticalHit );
          } else if ( componentDamageLevel != ComponentDamageLevel.Destroyed ) {
             componentDamageLevel = ComponentDamageLevel.Destroyed;
-            PublishMessage( info.target, "{0} DESTROYED", component.UIName, FloatieMessage.MessageNature.ComponentDestroyed );
+            if ( ! ( component is AmmunitionBox && ( GetAttackSequence( info.hitInfo )?.attackCausedAmmoExplosion ?? false ) ) )
+               PublishMessage( info.target, "{0} DESTROYED", component.UIName, FloatieMessage.MessageNature.ComponentDestroyed );
          }
          return componentDamageLevel;
       }
@@ -447,8 +454,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void EnableNonMechCrit ( AbstractActor __instance, WeaponHitInfo hitInfo ) { try {
-         AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
-         Weapon weapon = attackSequence.GetWeapon( hitInfo.attackGroupIndex, hitInfo.attackWeaponIndex );
+         AttackDirector.AttackSequence attackSequence = GetAttackSequence( hitInfo );
+         Weapon weapon = attackSequence?.GetWeapon( hitInfo.attackGroupIndex, hitInfo.attackWeaponIndex );
          //MeleeAttackType meleeAttackType = attackSequence.meleeAttackType;
          if      ( __instance is Vehicle vehicle ) CheckForAllCrits( new AIMVehicleInfo( vehicle, hitInfo, weapon ) );
          else if ( __instance is Turret  turret  ) CheckForAllCrits( new AIMTurretInfo ( turret , hitInfo, weapon ) );
@@ -576,6 +583,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( thisHitIndex < 0 || thisHitIndex >= thisHitLocations.Length ) return;
          thisHitLocations[ thisHitIndex ] = (int) aLoc;
       }
+
+      // ============ CritFollowDamageTransfer ============
+
+      public static void AmmoExplosionKillNonMech ( AmmunitionBox __instance, WeaponHitInfo hitInfo, ComponentDamageLevel damageLevel ) { try {
+         if ( __instance.parent.IsFlaggedForDeath ) return;
+         Vehicle vehicle = __instance.parent as Vehicle;
+         Turret turret = __instance.parent as Turret;
+         if ( vehicle == null && turret == null ) return;
+         if ( damageLevel != ComponentDamageLevel.Destroyed ) return;
+         AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
+         if ( attackSequence == null ) return; // May let things like area attacks slip through. Do they crit?
+         if ( ! attackSequence.attackCausedAmmoExplosion ) return;
+         if ( vehicle != null ) {
+            if ( ! Settings.AmmoExplosionKillVehicle ) return;
+         } else {
+            if ( ! Settings.AmmoExplosionKillTurret ) return;
+         }
+         attackSequence.FlagAttackCausedAmmoExplosion();
+         __instance.parent.FlagForDeath( "Ammo Explosion", DeathMethod.AmmoExplosion, DamageType.Weapon, 1, hitInfo.stackItemUID, hitInfo.attackerId, false );
+         Combat.MessageCenter.PublishMessage( new FloatieMessage( hitInfo.attackerId, __instance.parent.GUID, Strings.T("{0} EXPLOSION"), FloatieMessage.MessageNature.CriticalHit ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
 #pragma warning restore CS0162 // Restore "unreachable code" warnings
    }
 }
