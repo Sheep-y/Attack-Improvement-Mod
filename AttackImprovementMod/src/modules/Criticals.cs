@@ -135,12 +135,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static MethodInfo MechEngineerCheckCritPublishMessage, MechEngineerCheckCritPostfix, MechEngineerGetCompLocation, MechSetCombat;
 
-      public static void PublishMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
-         MessageCenterMessage msg = new AddSequenceToStackMessage( new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) );
-         if ( MechEngineerCheckCritPublishMessage != null )
-            MechEngineerCheckCritPublishMessage.Invoke( null, new object[]{ unit.Combat.MessageCenter, msg } );
-         else
-            unit.Combat.MessageCenter.PublishMessage( msg );
+      public static MessageCenterMessage GetCritMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
+         return new AddSequenceToStackMessage( new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) );
       }
 
       public static float GetWeaponDamage ( AIMCritInfo info ) {
@@ -219,12 +215,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( ! Settings.MultupleCrits ) break;
             chance -= critRoll;
          }
-         if ( logCrit ) AttackLog.LogCritResult( target, info.weapon );
-         if ( MechEngineerCheckCritPostfix != null ) {
-            Mech mech = new Mech();
-            MechSetCombat.Invoke( mech, new object[]{ Combat } );
-            MechEngineerCheckCritPostfix.Invoke( null, new object[]{ mech } );
-         }
+         PostCheckForCrit( info, logCrit );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static MechComponent FindAndCritComponent ( AIMCritInfo critInfo, float random ) {
@@ -235,27 +226,53 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             PlayVFX( critInfo );
             AttackDirector.AttackSequence attackSequence = GetAttackSequence( critInfo.hitInfo );
             attackSequence?.FlagAttackScoredCrit( component as Weapon, component as AmmunitionBox );
-            ComponentDamageLevel newDamageLevel = GetDegradedComponentLevel( critInfo );
+            ComponentDamageLevel newDamageLevel = GetDegradedComponentLevel( critInfo, out MessageCenterMessage critMessage );
             if ( DebugLog ) Verbo( "Component damaged to {0}", newDamageLevel );
+            PreDamageComponent( critMessage );
             component.DamageComponent( critInfo.hitInfo, newDamageLevel, true );
+            PostDamageComponent();
          }
          return component;
       }
 
-      public static ComponentDamageLevel GetDegradedComponentLevel ( AIMCritInfo info ) {
+      public static ComponentDamageLevel GetDegradedComponentLevel ( AIMCritInfo info, out MessageCenterMessage critMessage ) {
          MechComponent component = info.component;
          ComponentDamageLevel componentDamageLevel = component.DamageLevel;
          if ( component is Weapon && componentDamageLevel == ComponentDamageLevel.Functional ) {
             componentDamageLevel = ComponentDamageLevel.Penalized;
-            PublishMessage( info.target, "{0} CRIT", component.UIName, FloatieMessage.MessageNature.CriticalHit );
+            critMessage = GetCritMessage( info.target, "{0} CRIT", component.UIName, FloatieMessage.MessageNature.CriticalHit );
          } else if ( componentDamageLevel != ComponentDamageLevel.Destroyed ) {
             componentDamageLevel = ComponentDamageLevel.Destroyed;
-            if ( ! ( component is AmmunitionBox && ( GetAttackSequence( info.hitInfo )?.attackCausedAmmoExplosion ?? false ) ) )
-               PublishMessage( info.target, "{0} DESTROYED", component.UIName, FloatieMessage.MessageNature.ComponentDestroyed );
-         }
+            critMessage = GetCritMessage( info.target, "{0} DESTROYED", component.UIName, FloatieMessage.MessageNature.ComponentDestroyed );
+         } else
+            critMessage = null;
          return componentDamageLevel;
       }
 
+      public static MessageCenterMessage CritCompMessage;
+
+      public static void PreDamageComponent ( MessageCenterMessage critMessage ) {
+         if ( MechEngineerCheckCritPublishMessage != null ) // ME expects pre-damage call
+            MechEngineerCheckCritPublishMessage.Invoke( null, new object[]{ Combat.MessageCenter, critMessage } );
+         else
+            CritCompMessage = critMessage;
+      }
+
+      public static void PostDamageComponent () {
+         if ( CritCompMessage == null ) return; // If non-ME, we can defer and suppress the message
+         Combat.MessageCenter.PublishMessage( CritCompMessage );
+         CritCompMessage = null;
+      }
+
+      public static void PostCheckForCrit ( AIMCritInfo info, bool logCrit ) {
+         if ( logCrit ) AttackLog.LogCritResult( info.target, info.weapon );
+         if ( MechEngineerCheckCritPostfix != null ) {
+            Mech mech = new Mech();
+            MechSetCombat.Invoke( mech, new object[]{ Combat } );
+            MechEngineerCheckCritPostfix.Invoke( null, new object[]{ mech } );
+         }
+      }
+      
       public static void PlaySFX ( AIMCritInfo info ) {
          GameRepresentation GameRep = info.target.GameRep;
          if ( GameRep == null ) return;
@@ -588,21 +605,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void AmmoExplosionKillNonMech ( AmmunitionBox __instance, WeaponHitInfo hitInfo, ComponentDamageLevel damageLevel ) { try {
          if ( __instance.parent.IsFlaggedForDeath ) return;
-         Vehicle vehicle = __instance.parent as Vehicle;
-         Turret turret = __instance.parent as Turret;
-         if ( vehicle == null && turret == null ) return;
          if ( damageLevel != ComponentDamageLevel.Destroyed ) return;
          AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
          if ( attackSequence == null ) return; // May let things like area attacks slip through. Do they crit?
          if ( ! attackSequence.attackCausedAmmoExplosion ) return;
-         if ( vehicle != null ) {
+         if ( __instance.parent is Vehicle ) {
             if ( ! Settings.AmmoExplosionKillVehicle ) return;
-         } else {
+         } else if ( __instance.parent is Turret ) {
             if ( ! Settings.AmmoExplosionKillTurret ) return;
+         } else {
+            if ( __instance.parent is Mech ) CritCompMessage = null; // Mech ammo explosion already handled by vanilla and published
+            return;
          }
-         attackSequence.FlagAttackCausedAmmoExplosion();
+         Verbo( "Killing {1} because of ammo explosion.", __instance.parent );
          __instance.parent.FlagForDeath( "Ammo Explosion", DeathMethod.AmmoExplosion, DamageType.Weapon, 1, hitInfo.stackItemUID, hitInfo.attackerId, false );
-         Combat.MessageCenter.PublishMessage( new FloatieMessage( hitInfo.attackerId, __instance.parent.GUID, Strings.T("{0} EXPLOSION"), FloatieMessage.MessageNature.CriticalHit ) );
+         CritCompMessage = new FloatieMessage( hitInfo.attackerId, __instance.parent.GUID, Strings.T("{0} EXPLOSION"), FloatieMessage.MessageNature.CriticalHit );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
 #pragma warning restore CS0162 // Restore "unreachable code" warnings
