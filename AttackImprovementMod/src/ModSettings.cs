@@ -279,11 +279,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public decimal CritChanceEnemy = 0.2m;
       public decimal CritChanceAlly = 1;
 
-      [ JsonComment( "Critical rate on vehicles, relative to mech.  Set to 0 to disable." ) ]
-      public decimal CriChanceVsVehicle = 1;
+      [ JsonComment( "Critical rate on vehicles and turrets, relative to mech.  Set to 0 to disable." ) ]
+      public decimal CriChanceVsVehicle = 0.75m;
+      public decimal CritChanceVsTurret = 0.6m;
 
-      [ JsonComment( "Critical rate on turret, relative to mech.  Set to 0 to disable." ) ]
-      public decimal CritChanceVsTurret = 1;
+      [ JsonComment( "Should turrets and vehicles be killed when their ammo explodes?  Default true." ) ]
+      public bool AmmoExplosionKillTurret = true;
+      public bool AmmoExplosionKillVehicle = true;
 
       [ JsonComment( "Crit is now checked on final damaged location by following damage transfer.  Default true." ) ]
       public bool CritFollowDamageTransfer = true;
@@ -334,10 +336,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero." ) ]
       public bool MultupleCrits = false;
-
-      [ JsonComment( "Set to true to kill turret and vehicles when their ammo explodes.  Default true." ) ]
-      public bool AmmoExplosionKillTurret = true;
-      public bool AmmoExplosionKillVehicle = true;
 
       //
       [ JsonSection( "Hit Resolution" ) ]

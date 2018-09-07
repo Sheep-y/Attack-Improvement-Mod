@@ -583,11 +583,23 @@ These settings can be changed in `settings.json`.
 
 **Non-Mech Critical Hit**
 
-> Setting: `CriChanceVsVehicle` (0 or above, default 1) <br>
-> Setting: `CritChanceVsTurret` (0 or above, default 1) <br>
+> Setting: `CriChanceVsVehicle` (0 or above, default 0.75) <br>
+> Setting: `CritChanceVsTurret` (0 or above, default 0.6) <br>
 >
 > When non-zero, enable critical hit on vehicles and turrets.
-> The number is a multiplier of crit chance, e.g. 0.5 to set to half normal crit chance.
+> The numbers are multipliers of crit chance, e.g. 0.5 to set to half normal crit chance.
+>
+> Because of the very high armour to structure ration of vehicles and especially turrets,
+> The numbers will not matter much unless `CritChanceFullArmor` is higher than zero.
+> 
+> In case of that, the default chance is lower than normal,
+> for a more consistent crit level relative to mech since vehicles and turrets do not have empty slots to blunt crits.
+
+> Setting: `AmmoExplosionKillTurret`  (true/false, default true) <br>
+> Setting: `AmmoExplosionKillVehicle`  (true/false, default true) <br>
+>
+> When true, turrets and vehicles will be destroyed when any of their ammo explodes.
+> Otherwise, the game does not expects this to happen and has no code to kill the unit.
 
 
 **Crit Follows Damage Transfer**

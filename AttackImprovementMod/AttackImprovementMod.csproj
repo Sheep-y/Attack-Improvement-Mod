@@ -92,7 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="mod.json" />
+    <None Include="changelog.txt" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
