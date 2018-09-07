@@ -315,8 +315,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          MechComponent result = slot < list.Count ? list[ slot ] : null;
          if ( list.Count <= 0 && Settings.CritLocationTransfer && me is Mech mech ) {
             ArmorLocation newLocation = MechStructureRules.GetPassthroughLocation( MechStructureRules.GetArmorFromChassisLocation( (ChassisLocations) location ) & FrontArmours, AttackDirection.FromFront );
-            Verbo( "Crit list empty at {0} of {1}, transferring crit to {2}", (ChassisLocations) location, me, newLocation );
             if ( newLocation != ArmorLocation.None ) {
+               Verbo( "Crit list empty at {0} of {1}, transferring crit to {2}", (ChassisLocations) location, me, newLocation );
                ChassisLocations chassis = MechStructureRules.GetChassisLocationFromArmorLocation( newLocation );
                result = GetComponentFromRoll( me, (int) chassis, random, mech.MechDef.GetChassisLocationDef( chassis ).InventorySlots );
             }
