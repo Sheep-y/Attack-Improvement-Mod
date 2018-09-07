@@ -668,17 +668,171 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Replace the old "ShowDecimalHitChance" setting in mod version 1.0.</p>
 </blockquote>
 
-<h2 id="hitresolutionsettings">Hit Resolution Settings</h2>
+<h2 id="criticalhitsettings">Critical Hit Settings</h2>
 
 <p><strong>Skip Criting the Dead Mech</strong></p>
 
 <blockquote>
-  <p>Setting: <code>SkipCritingDeadMech</code>  (true/false, default true)<br></p>
+  <p>Setting: <code>SkipCritingDeadMech</code>  (true/false, default true)</p>
   
   <p>When true, critical hits are not rolled for dead units.
   This is mainly designed to prevent crit messages from flooding over cause of death.
-  It will also slightly increase salvaged components.</p>
+  As a side effect, slightly more components will be salvageable instead of being destroyed.</p>
 </blockquote>
+
+<p><strong>NPC Crit Multipliers</strong></p>
+
+<blockquote>
+  <p>Setting: <code>CritChanceEnemy</code> (0 or above, default 0.2) <br>
+  Setting: <code>CritChanceAlly</code> (0 or above, default 1) <br></p>
+  
+  <p>Override the crit chance set by AICritChanceBaseMultiplier in CombatGameConstants.json.
+  Game default is 0.2 which lowers all NPCs' crit chance to 20% of original.</p>
+  
+  <p>Set to 1 for same crit chance as players, or set to 0 to prevent enemies or allies from dealing crit.</p>
+</blockquote>
+
+<p><strong>Non-Mech Critical Hit</strong></p>
+
+<blockquote>
+  <p>Setting: <code>CriChanceVsVehicle</code> (0 or above, default 0.75) <br>
+  Setting: <code>CritChanceVsTurret</code> (0 or above, default 0.6) <br></p>
+  
+  <p>When non-zero, enable critical hit on vehicles and turrets.
+  The numbers are multipliers of crit chance, e.g. 0.5 to set to half normal crit chance.</p>
+  
+  <p>Because of the very high armour to structure ration of vehicles and especially turrets,
+  The numbers will not matter much unless <code>CritChanceFullArmor</code> is higher than zero.</p>
+  
+  <p>In case of that, the default chance is lower than normal,
+  for a more consistent crit level relative to mech since vehicles and turrets do not have empty slots to blunt crits.</p>
+  
+  <p>Setting: <code>AmmoExplosionKillTurret</code>  (true/false, default true) <br>
+  Setting: <code>AmmoExplosionKillVehicle</code>  (true/false, default true) <br></p>
+  
+  <p>When true, turrets and vehicles will be destroyed when any of their ammo explodes.
+  Otherwise, the game does not expects this to happen and has no code to kill the unit.</p>
+</blockquote>
+
+<p><strong>Crit Follows Damage Transfer</strong></p>
+
+<blockquote>
+  <p>Setting: <code>CritFollowDamageTransfer</code>  (true/false, default true)</p>
+  
+  <p>When true, critical hits will be rolled on last damaged location, i.e. they follows damage transfer.</p>
+  
+  <p>In un-modded game, critical hit is checked only on the rolled hit location and does not follow damage transfer.
+  For example, when a laser hits a destroyed arm and damages a side torso, crit is not rolled since the arm is already destroyed.</p>
+</blockquote>
+
+<p><strong>Fix False Positive Crits</strong></p>
+
+<blockquote>
+  <p>Setting: <code>FixFullStructureCrit</code>  (true/false, default true)</p>
+  
+  <p>When true, critical hit does not happens on locations with intact structure.</p>
+  
+  <p>In un-modded game, critical hit is rolled on all location that is hit and has zero armour.
+  This means crit is rolled even if the weapon reduces the armour to exactly zero and did not do any structural damage.
+  When this happens, a crit slot will be rolled half the time, since minimal crit chance is 50%!</p>
+  
+  <p>This setting is off when through armour critical (below) is on, in which case zero armour uses the through armour rules.</p>
+</blockquote>
+
+<p><strong>Through Armour Critical Hits</strong></p>
+
+<blockquote>
+  <p>Setting: <code>ThroughArmorCritThreshold</code>  (0 to 1000, default 9)</p>
+  
+  <p>Each weapon must deal this much damage to a location in an attack for through armour critical hit to be checked.</p>
+  
+  <p>Default is 9 which is 3 MG hits, 3 LRM hits, or 2 SRM hits to the same location when un-braced and un-covered.</p>
+  
+  <p>If the number is between 0 and 1 (exclusive), the threshold is a fraction of the max armour of the location.
+  e.g. 0.2 means a weapon must do as much damage as 20% of the max armour of the location.</p>
+  
+  <p>If the number is between 0 and -1 (inclusive), the threshold is a fraction of the current armour of the location.
+  e.g. 0.2 means a weapon must do as much damage as 20% of the current armour of the location.</p>
+  
+  <p>Note: If <code>CritFollowDamageTransfer</code> is false, damage transfer will not be counted on the final damaged location,
+  and may cause a multi-shot weapon to fail to reach threshold when it actually did.
+  (Single-shot weapon won't even check for crit when damage transfer happens - that is what the settings do.)</p>
+  
+  <p>Also, in order to keep the code simple, fraction of armour is not exact.
+  Shots with partially transferred damage are counted in full and can more easily meet the threshold.
+  Fraction of current armour is also more easily skewed when damage is partially transferred.
+  But generally speaking, the imprecision has limited impact and align with the spirit of through armour crit.</p>
+  
+  <p>Setting: <code>CritChanceZeroArmor</code>  (0 to 2, default 0)<br>
+  Setting: <code>CritChanceFullArmor</code>  (-1 to 1, default 0)<br></p>
+  
+  <p>The two settings together determine the range of through armour base critical chance.
+  <code>CritChanceZeroArmor</code> is the max chance, and <code>CritChanceFullArmor</code> is the min chance.
+  When <code>CritChanceZeroArmor</code> is 0, through armour critical hit is disabled.</p>
+  
+  <p>For a fixed crit chance, set both numbers to same.
+  Classic BattleTech has the chance at around 3%, or 0.03.</p>
+  
+  <p>When the numbers are different, the crit chance increases in proportion to armour damage.<br>
+  Example: When zero = 0.4 and Full = 0, a location with half armour has a 20% base crit chance.<br>
+  Example: When zero = 0.2 and Full = -0.1, crit may happens after armour is reduced to 2/3 or below.<br></p>
+  
+  <p>When through armour critical hit happens and it is logged by this mod's Attack Log,
+  the Max HP column logs the max armour of the location instead of max structure.</p>
+</blockquote>
+
+<p><strong>Normal Crit Chance</strong></p>
+
+<blockquote>
+  <p>Setting: <code>CritChanceZeroStructure</code> (0 to 2, default 1)<br>
+  Setting: <code>CritChanceFullStructure</code> (-1 to 1, default 0)<br>
+  Setting: <code>CritChanceMin</code> (0 to 1, default 0.5)<br>
+  Setting: <code>CritChanceMax</code> (0 to 1, default 1)<br></p>
+  
+  <p>These settings can be used to change the normal critical hit chance on structurally damaged locations.
+  CritChanceZeroStructure and CritChanceFullStructure decides the base range relative to structure%,
+  then CritChanceMin and CritChanceMax is applied to cap the chance.</p>
+  
+  <p>The default values are the same as game's default.
+  Using defaults, a location with 75/100 structure has 25% crit chance, raised to 50% by <code>CritChanceMin</code>.
+  This becomes the base crit chance of the location, to be modified by crit multipliers.</p>
+</blockquote>
+
+<p><strong>Critical Hit Reroll</strong></p>
+
+<blockquote>
+  <p>Setting: <code>CritIgnoreDestroyedComponent</code> (true or false, default false)<br>
+  Setting: <code>CritIgnoreEmptySlots</code> (true or false, default false)<br></p>
+  
+  <p>When set to true, a successful critical hit will ignore destroyed components and/or empty slots.
+  These settings simulate Classic BattleTech's crit reroll that happens when the crit slot is invalid.</p>
+</blockquote>
+
+<p><strong>Critical Hit Location Transfer</strong></p>
+
+<blockquote>
+  <p>Setting: <code>CritLocationTransfer</code> (true or false, default false)</p>
+  
+  <p>When set to true and a successful critical hit happens on a location that has nothing to crit,
+  usually because of <code>CritIgnoreDestroyedComponent</code> and <code>CritIgnoreEmptySlots</code>,
+  the crit will transfer to the next location using damage transfer rule.</p>
+  
+  <p>For best simulation of Classic BattleTech's crit, please also set <code>CritFollowDamageTransfer</code> to true.</p>
+</blockquote>
+
+<p><strong>Multiple Critical Hits from Single Shot</strong></p>
+
+<blockquote>
+  <p>Setting: <code>MultupleCrits</code> (true or false, default false)</p>
+  
+  <p>In Classic BattleTech, critical hits may damage multiple components.
+  This setting recreate that feel in the context of BattleTech's crit system.</p>
+  
+  <p>When set to true, a successful crit roll is deduced from the crit chance.
+  This leftover crit chance is then rolled again, and repeated until a crit roll fails.</p>
+</blockquote>
+
+<h2 id="hitresolutionsettings">Hit Resolution Settings</h2>
 
 <p><strong>Balance Ammo Consumption</strong></p>
 
@@ -784,14 +938,14 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 <ul>
 <li>BattleTech 1.0 - AIM 1.0.1.</li>
 
-<li>BattleTech 1.1 - AIM 1.0.1, 2.0, 2.1, and 2.1.1.</li>
+<li>BattleTech 1.1 - AIM 1.0.1 to 2.1.2.</li>
 
-<li>BattleTech 1.2 - AIM 2.2.</li>
+<li>BattleTech 1.2 - AIM 2.2 to 2.3.</li>
 </ul>
 
 <p>AIM is aware of some other mods and will behave differently in their present to meet player expectations.</p>
 
-<p>These behaviours will not change saved settings.  If you want to replace them with AIM, you may need to change AIM settings.</p>
+<p>Mod settings changed by these behaviours are not saved.  If you want to replace them with AIM, you may need to change AIM settings.</p>
 
 <p><strong><a href="https://www.nexusmods.com/battletech/mods/135">Firing Line Improvement</a></strong>
 AIM will skip line styling and arc point adjustment to not crash line drawings.</p>
@@ -800,13 +954,16 @@ AIM will skip line styling and arc point adjustment to not crash line drawings.<
 AIM will skip its own melee unlock to preserve sprint range melee.</p>
 
 <p><strong><a href="https://www.nexusmods.com/battletech/mods/90">Real Hit Chance</a></strong>
-AIM will enable corrected hit chance display and overrides this mod, since it does not support AIM features such as adjustable correction strength.</p>
+AIM will enable corrected hit chance display and override this mod, since it does not support AIM features such as adjustable correction strength.</p>
 
 <p><strong><a href="https://www.nexusmods.com/battletech/mods/100">True RNG Hit Rolls</a></strong>
 AIM will disable its own adjustable roll correction and miss streak breaker.</p>
 
 <p><strong><a href="https://github.com/McFistyBuns/CBTMovement">CBT Movement</a></strong>
 AIM will log a warning that jumping modifier feature is duplicated and one of them should be zero.</p>
+
+<p><strong><a href="https://github.com/CptMoore/MechEngineer">MechEngineer</a></strong>
+AIM will bridge crit code with MechEngineer for component crit immunity and multi-stage crit components to work as expected.</p>
 
 <p>The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.</p>
 

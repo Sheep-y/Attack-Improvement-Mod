@@ -816,11 +816,11 @@ but because the code that determine hit distribution is not designed for fractio
 
 * BattleTech 1.0 - AIM 1.0.1.
 * BattleTech 1.1 - AIM 1.0.1 to 2.1.2.
-* BattleTech 1.2 - AIM 2.2 to 2.2.1.
+* BattleTech 1.2 - AIM 2.2 to 2.3.
 
 AIM is aware of some other mods and will behave differently in their present to meet player expectations.
 
-These behaviours will not change saved settings.  If you want to replace them with AIM, you may need to change AIM settings.
+Mod settings changed by these behaviours are not saved.  If you want to replace them with AIM, you may need to change AIM settings.
 
 **[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)**
 AIM will skip line styling and arc point adjustment to not crash line drawings.
@@ -829,13 +829,16 @@ AIM will skip line styling and arc point adjustment to not crash line drawings.
 AIM will skip its own melee unlock to preserve sprint range melee.
 
 **[Real Hit Chance](https://www.nexusmods.com/battletech/mods/90)**
-AIM will enable corrected hit chance display and overrides this mod, since it does not support AIM features such as adjustable correction strength.
+AIM will enable corrected hit chance display and override this mod, since it does not support AIM features such as adjustable correction strength.
 
 **[True RNG Hit Rolls](https://www.nexusmods.com/battletech/mods/100)**
 AIM will disable its own adjustable roll correction and miss streak breaker.
 
 **[CBT Movement](https://github.com/McFistyBuns/CBTMovement)**
 AIM will log a warning that jumping modifier feature is duplicated and one of them should be zero.
+
+**[MechEngineer](https://github.com/CptMoore/MechEngineer)**
+AIM will bridge crit code with MechEngineer for component crit immunity and multi-stage crit components to work as expected.
 
 The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.
 
