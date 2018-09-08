@@ -275,7 +275,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[] {
         "Overrides AICritChanceBaseMultiplier in CombatGameConstants.json.  Default 0.2, same as game.",
-        "Set to 1 for same crit chance as players, or set to 0 to prevent enemy or allies from dealing crit." } ) ]
+        "Set to 1 for same crit chance as players, or set to 0 to prevent enemies and/or allies from dealing crit." } ) ]
       public decimal CritChanceEnemy = 0.2m;
       public decimal CritChanceAlly = 1;
 
@@ -287,10 +287,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool AmmoExplosionKillTurret = true;
       public bool AmmoExplosionKillVehicle = true;
 
-      [ JsonComment( "Crit is now checked on final damaged location by following damage transfer.  Default true." ) ]
+      [ JsonComment( "Check crit on last damaged location, following damage transfer.  Default true." ) ]
       public bool CritFollowDamageTransfer = true;
 
-      [ JsonComment( "Fix the case where a location with full sctructure but zero armour can be crit'ed.  Default true." ) ]
+      [ JsonComment( "Prevent the case where a location with full sctructure but zero armour can be crit'ed.  Default true." ) ]
       public bool FixFullStructureCrit = true;
 
       [ JsonComment( new string[]{
@@ -308,7 +308,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( new string[]{
         "Base crit chance of a location with full armour.  Must not be higher than ThroughArmorCritChanceZeroArmor.",
         "Actual through armour crit rate is between this and zero armour chance.  Default 0.  Can be -1 to 1, e.g. 0.1 for 10%.",
-        "If negative, crit will not happens until armour is sufficiently weakened." } ) ]
+        "If negative, crits will not happen until armour is sufficiently weakened." } ) ]
       public decimal CritChanceFullArmor = 0;
 
       [ JsonComment( "Base crit chance of a structurally hit location if it is at zero structure, can be 0 to 1.  Default 1, same as game." ) ]

@@ -85,7 +85,7 @@ namespace Sheepy.BattleTechMod {
          Log.Info( "Game Version {0}, Harmony Version {1}" + Environment.NewLine, VersionInfo.ProductVersion, typeof(HarmonyInstance).Assembly.GetName().Version );
       }
 
-      public static string Idify ( string text ) { return Join( string.Empty, new Regex( "\\W+" ).Split( text ), UppercaseFirst ); }
+      public static string Idify ( string text ) { return new Regex( "\\W+" ).Split( text ).Concat( string.Empty, UppercaseFirst ); }
 
       protected virtual string GetLogFile () {
          return LogDir + "Log_" + Idify( Name ) + ".txt";
@@ -158,7 +158,7 @@ namespace Sheepy.BattleTechMod {
             else if ( arg is MechComponentDef def )
                args[i] = def.Description.Id;
             else if ( arg is System.Collections.IEnumerable list )
-               args[i] = "[" + Join( ", ", list ) + "]";
+               args[i] = "[" + list.Concat() + "]";
          }
          return true;
       }
@@ -408,26 +408,6 @@ namespace Sheepy.BattleTechMod {
             .ToString();
       }
 
-      public static string Join ( string separator, System.Collections.IEnumerable list, Func<object,string> formatter = null ) {
-         if ( list == null ) return string.Empty;
-         StringBuilder result = new StringBuilder();
-         foreach ( object e in list ) {
-            if ( result.Length > 0 ) result.Append( separator );
-            result.Append( formatter == null ? e?.ToString() : formatter( e ) );
-         }
-         return result.ToString();
-      }
-
-      public static string Join<T> ( string separator, IEnumerable<T> list, Func<T,string> formatter = null ) {
-         if ( list == null ) return string.Empty;
-         StringBuilder result = new StringBuilder();
-         foreach ( T e in list ) {
-            if ( result.Length > 0 ) result.Append( separator );
-            result.Append( formatter == null ? e?.ToString() : formatter( e ) );
-         }
-         return result.ToString();
-      }
-
       public static string NullIfEmpty ( ref string value ) {
          if ( value == null ) return null;
          if ( value.Trim().Length <= 0 ) return value = null;
@@ -494,11 +474,35 @@ namespace Sheepy.BattleTechMod {
       }
    }
 
+   public static class BattleModExtensions {
+
+      public static string Concat ( this System.Collections.IEnumerable list, string separator = ", ", Func<object,string> formatter = null ) {
+         if ( list == null ) return string.Empty;
+         StringBuilder result = new StringBuilder();
+         foreach ( object e in list ) {
+            if ( result.Length > 0 ) result.Append( separator );
+            result.Append( formatter == null ? e?.ToString() : formatter( e ) );
+         }
+         return result.ToString();
+      }
+
+      public static string Concat<TSource> ( this IEnumerable<TSource> list, string separator = ", ", Func<TSource,string> formatter = null ) {
+         if ( list == null ) return string.Empty;
+         StringBuilder result = new StringBuilder();
+         foreach ( TSource e in list ) {
+            if ( result.Length > 0 ) result.Append( separator );
+            result.Append( formatter == null ? e?.ToString() : formatter( e ) );
+         }
+         return result.ToString();
+      }
+
+   }
+
    //
    // JSON serialisation
    //
 
-   [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
+   [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonSection : Attribute {
       public string Section;
       public JsonSection ( string section ) { Section = section ?? string.Empty; }

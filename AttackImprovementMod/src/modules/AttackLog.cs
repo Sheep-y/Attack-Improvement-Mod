@@ -372,7 +372,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( uid.EndsWith( "_Melee" ) ) uid = "Melee";
             else if ( uid.EndsWith( "_DFA" ) ) uid = "DFA";
          }
-         return Join( Separator, new object[]{ thisSequence, weaponName, thisWeapon?.defId, uid, thisRoll, thisCorrectedRoll + thisStreak, thisStreak, thisCorrectedRoll, thisHitChance } );
+         return new object[]{ thisSequence, weaponName, thisWeapon?.defId, uid, thisRoll, thisCorrectedRoll + thisStreak, thisStreak, thisCorrectedRoll, thisHitChance }.Concat( Separator );
       }
 
       internal static float thisCorrectedRoll;

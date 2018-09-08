@@ -33,7 +33,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void GameStarts () {
          ModLog.LogLevel = System.Diagnostics.SourceLevels.Verbose;
-         Info( "Detected Mods: " + Join( ", ", BattleMod.GetModList() ) );
+         Info( "Detected Mods: " + BattleMod.GetModList().Concat() );
       }
 
       private void SanitizeSettings ( ModSettings settings ) {

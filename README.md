@@ -600,6 +600,9 @@ These settings can be changed in `settings.json`.
 >
 > When true, turrets and vehicles will be destroyed when any of their ammo explodes.
 > Otherwise, the game does not expects this to happen and has no code to kill the unit.
+>
+> As a bonus, "XXX Ammo Destroyed" message will be suppressed when ammo explosion happens, if either option is on.
+> (Mech ammo explosion included.)
 
 
 **Crit Follows Damage Transfer**
