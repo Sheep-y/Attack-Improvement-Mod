@@ -1,5 +1,6 @@
 ﻿using BattleTech.UI;
 using BattleTech;
+using Harmony;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -16,12 +17,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Settings.UnlockMeleePositioning = false;
          }
          if ( Settings.UnlockMeleePositioning )
-            Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), "OverrideMeleeDestinations", null );
+            Patch( typeof( Pathing ), "GetMeleeDestsForTarget", typeof( AbstractActor ), null, null, "UnlockMeleeDests" );
          /*
          if ( Settings.AllowDFACalledShotVehicle ) {
             Patch( typeof( SelectionStateJump ), "SetMeleeDest", NonPublic, typeof( Vector3 ), null, "ShowDFACalledShotPopup" );
          }
          */
+      }
+
+      public static IEnumerable<CodeInstruction> UnlockMeleeDests ( IEnumerable<CodeInstruction> input ) {
+         return ReplaceIL( input,
+            ( code ) => code.opcode.Name == "ldc.r4" && code.operand != null && code.operand.Equals( 10f ),
+            ( code ) => { code.operand = 0f; return code; },
+            1, "UnlockMeleePositioning", ModLog
+            );
       }
 
       private static float MaxMeleeVerticalOffset = 8f;
@@ -37,41 +46,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( CombatConstants, con, null );
          }
       }
-
-      // Almost a direct copy of the original, only to remove melee position locking code
-      // TODO Can we do it with IL update?
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideMeleeDestinations ( ref List<PathNode> __result, Pathing __instance, AbstractActor target ) { try {
-         AbstractActor owner = __instance.OwningActor;
-         // Not skipping AI cause them to hang up
-         if ( ! owner.team.IsLocalPlayer || owner.VisibilityToTargetUnit( target ) < VisibilityLevel.LOSFull )
-            return true;
-
-         Vector3 pos = target.CurrentPosition;
-         float currentY = pos.y;
-         PathNodeGrid grids = __instance.CurrentGrid;
-
-         List<Vector3> adjacentPointsOnGrid = Combat.HexGrid.GetAdjacentPointsOnGrid( pos );
-         List<PathNode> pathNodesForPoints = Pathing.GetPathNodesForPoints( adjacentPointsOnGrid, grids );
-         for ( int i = pathNodesForPoints.Count - 1; i >= 0; i-- ) {
-            if ( Mathf.Abs( pathNodesForPoints[i].Position.y - currentY ) > MaxMeleeVerticalOffset || grids.FindBlockerReciprocal( pathNodesForPoints[i].Position, pos ) )
-               pathNodesForPoints.RemoveAt( i );
-         }
-
-         if ( pathNodesForPoints.Count > 1 ) {
-            MovementConstants moves = CombatConstants.MoveConstants;
-            if ( moves.SortMeleeHexesByPathingCost )
-               pathNodesForPoints.Sort( (a, b) => a.CostToThisNode.CompareTo( b.CostToThisNode ) );
-            else
-               pathNodesForPoints.Sort( (a, b) => Vector3.Distance( a.Position, owner.CurrentPosition ).CompareTo( Vector3.Distance( b.Position, owner.CurrentPosition ) ) );
-
-            int num = pathNodesForPoints.Count, max = moves.NumMeleeDestinationChoices;
-            if ( num > max )
-               pathNodesForPoints.RemoveRange( max - 1, num - max );
-         }
-         __result = pathNodesForPoints;
-         return false;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       /*
       public static void ShowDFACalledShotPopup ( SelectionStateJump __instance ) { try {

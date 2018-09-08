@@ -372,7 +372,31 @@ namespace Sheepy.BattleTechMod {
             Log.Info( "Harmony instance \"{0}\"", Id );
          }
          Mod.ModHarmony.Patch( patched, prefix, postfix, transpiler );
-         Log.Verbo( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
+         Log.Verbo( "Patched: {0} {1} [ {2} : {3} : {4} ]", patched.DeclaringType, patched, pre, post, transpiler );
+      }
+
+      public static IEnumerable<CodeInstruction> LogIL ( IEnumerable<CodeInstruction> input, Logger logger ) {
+         List<CodeInstruction> result = new List<CodeInstruction>( 100 );
+         foreach ( CodeInstruction code in input ) {
+            logger.Info( "{0} ({1})", code, code.operand?.GetType() );
+            result.Add( code );
+         }
+         return result;
+      }
+
+      public static IEnumerable<CodeInstruction> ReplaceIL ( IEnumerable<CodeInstruction> input, Func<CodeInstruction,bool> matcher, Func<CodeInstruction,CodeInstruction> replacer, int limit = 0, string action = "anonymous transpiler", Logger logger = null ) {
+         int found = 0;
+         List<CodeInstruction> result = new List<CodeInstruction>( 100 );
+         foreach ( CodeInstruction code in input ) {
+            if ( ( limit <= 0 || found < limit ) && matcher( code ) ) {
+               result.Add( replacer( code ) );
+               ++found;
+            } else
+               result.Add( code );
+         }
+         if ( found == 0 )
+            ( logger ?? BattleMod.BTML_LOG ).Warn( "Cannot found IL code to replace for {0}.", action );
+         return result;
       }
 
       // ============ UTILS ============
