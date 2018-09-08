@@ -23,7 +23,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             InitRangedModifiers( Settings.RangedAccuracyFactors.Split( ',' ) );
             if ( RangedModifiers.Count > 0 ) {
                Patch( typeof( ToHit ), "GetAllModifiers", new Type[]{ typeof( AbstractActor ), typeof( Weapon ), typeof( ICombatant ), typeof( Vector3 ), typeof( Vector3 ), typeof( LineOfFireLevel ), typeof( bool ) }, "OverrideRangedModifiers", null );
-               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", NonPublic, typeof( ICombatant ), "OverrideRangedToolTips", null );
+               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "OverrideRangedToolTips", null );
             }
          }
          if ( Settings.MeleeAccuracyFactors != null ) {
@@ -32,7 +32,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                contemplatingDFA = typeof( CombatHUDWeaponSlot ).GetMethod( "contemplatingDFA", NonPublic | Instance );
                if ( contemplatingDFA == null ) Warn( "CombatHUDWeaponSlot.contemplatingDFA not found, DFA will be regarded as normal melee." );
                Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
-               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "OverrideMeleeToolTips", null );
+               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", typeof( ICombatant ), "OverrideMeleeToolTips", null );
             }
          }
       }

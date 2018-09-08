@@ -327,28 +327,15 @@ namespace Sheepy.BattleTechMod {
       }
 
       protected void Patch ( Type patchedClass, string patchedMethod, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, Public | Instance, (Type[]) null, prefix, postfix );
+         Patch( patchedClass, patchedMethod, (Type[]) null, prefix, postfix );
       }
 
       protected void Patch ( Type patchedClass, string patchedMethod, Type parameterType, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, Public | Instance, new Type[]{ parameterType }, prefix, postfix );
+         Patch( patchedClass, patchedMethod, new Type[]{ parameterType }, prefix, postfix );
       }
 
       protected void Patch ( Type patchedClass, string patchedMethod, Type[] parameterTypes, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, Public | Instance, parameterTypes, prefix, postfix );
-      }
-
-      protected void Patch ( Type patchedClass, string patchedMethod, BindingFlags flags, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, flags, (Type[]) null, prefix, postfix );
-      }
-
-      protected void Patch ( Type patchedClass, string patchedMethod, BindingFlags flags, Type parameterType, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, flags, new Type[]{ parameterType }, prefix, postfix );
-      }
-
-      protected void Patch ( Type patchedClass, string patchedMethod, BindingFlags flags, Type[] parameterTypes, string prefix, string postfix ) {
-         if ( ( flags & ( Static | Instance  ) ) == 0  ) flags |= Instance;
-         if ( ( flags & ( Public | NonPublic ) ) == 0  ) flags |= Public;
+         BindingFlags flags = Public | NonPublic | Instance | Static;
          MethodInfo patched = null;
          Exception ex = null;
          try {

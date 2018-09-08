@@ -52,7 +52,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             // The settings below are built-in to generic crit system and only need to be patched when the system is not used for mech.
             if ( Settings.CritIgnoreDestroyedComponent || Settings.CritIgnoreEmptySlots || Settings.CritLocationTransfer || Settings.MultupleCrits )
-               Patch( MechType, "CheckForCrit", NonPublic, "Override_CheckForCrit", null );
+               Patch( MechType, "CheckForCrit", "Override_CheckForCrit", null );
             if ( CritChanceBase != 0 || CritChanceVar != 1 )
                Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, "Override_BaseCritChance", null );
             if ( CritChanceMax < 1 )
@@ -61,7 +61,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.CritFollowDamageTransfer ) {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
-            Patch( MechType, "DamageLocation", NonPublic, "UpdateCritLocation", null );
+            Patch( MechType, "DamageLocation", "UpdateCritLocation", null );
          }
 
          if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )

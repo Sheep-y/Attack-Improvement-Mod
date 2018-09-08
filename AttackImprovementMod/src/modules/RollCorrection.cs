@@ -36,7 +36,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( ! NoRollCorrection && ! TrueRNG ) {
             if ( RollCorrectionStrength != 1 )
-               Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", NonPublic, new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
+               Patch( typeof( AttackDirector.AttackSequence ), "GetCorrectedRoll", new Type[]{ typeof( float ), typeof( Team ) }, "OverrideRollCorrection", null );
             if ( Settings.ShowCorrectedHitChance ) {
                correctionCache = new Dictionary<float, float>(20);
                Patch( typeof( CombatHUDWeaponSlot ), "SetHitChance", typeof( float ), "ShowCorrectedHitChance", null );

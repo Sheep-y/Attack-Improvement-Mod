@@ -23,17 +23,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( currentHitTableProp == null )
                Error( "Cannot find CombatHUDCalledShotPopUp.currentHitTable, boss head called shot display not fixed. Boss should still be immune from headshot." );
             else
-               Patch( CalledShot, "UpdateMechDisplay", NonPublic, "FixBossHead", "CleanupBossHead" );
+               Patch( CalledShot, "UpdateMechDisplay", "FixBossHead", "CleanupBossHead" );
          }
 
          if ( Settings.ShowRealMechCalledShotChance || Settings.ShowRealVehicleCalledShotChance || Settings.CalledChanceFormat != null ) {
             Patch( CalledShot, "set_ShownAttackDirection", typeof( AttackDirection ), null, "RecordAttackDirection" );
 
             if ( Settings.ShowRealMechCalledShotChance || Settings.CalledChanceFormat != null )
-               Patch( CalledShot, "GetHitPercent", NonPublic, new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
+               Patch( CalledShot, "GetHitPercent", new Type[]{ typeof( ArmorLocation ), typeof( ArmorLocation ) }, "OverrideHUDMechCalledShotPercent", null );
 
             if ( Settings.ShowRealVehicleCalledShotChance || Settings.CalledChanceFormat != null )
-               Patch( CalledShot, "GetHitPercent", NonPublic, new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
+               Patch( CalledShot, "GetHitPercent", new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
          }
       }
 

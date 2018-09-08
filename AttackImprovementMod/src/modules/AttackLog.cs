@@ -64,15 +64,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( MechType, "GetComponentInSlot", null, "LogCritComp" );
                Patch( typeof( AttackDirector.AttackSequence ), "FlagAttackCausedAmmoExplosion", null, "LogAmmoExplosionFlag" );
                Patch( typeof( Pilot ), "SetNeedsInjury", null, "LogAmmoExplosionOnPilot" );
-               Patch( MechType, "CheckForCrit", NonPublic, null, "LogCritResult" );
+               Patch( MechType, "CheckForCrit", null, "LogCritResult" );
                goto case "damage";
 
             case "damage":
                DamageDummy = FillBlanks( 6 );
-               Patch( MechType, "DamageLocation", NonPublic, "RecordMechDamage", "LogMechDamage" );
-               Patch( VehiType, "DamageLocation", NonPublic, "RecordVehicleDamage", "LogVehicleDamage" );
-               Patch( TurtType, "DamageLocation", NonPublic, "RecordTurretDamage", "LogTurretDamage" );
-               Patch( BuldType, "DamageBuilding", NonPublic, "RecordBuildingDamage", "LogBuildingDamage" );
+               Patch( MechType, "DamageLocation", "RecordMechDamage", "LogMechDamage" );
+               Patch( VehiType, "DamageLocation", "RecordVehicleDamage", "LogVehicleDamage" );
+               Patch( TurtType, "DamageLocation", "RecordTurretDamage", "LogTurretDamage" );
+               Patch( BuldType, "DamageBuilding", "RecordBuildingDamage", "LogBuildingDamage" );
                LogDamage = true;
                goto case "location";
 
@@ -88,16 +88,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
             case "shot":
                LogShot = true;
-               Patch( AttackType, "GetIndividualHits", NonPublic, "RecordSequenceWeapon", null );
-               Patch( AttackType, "GetClusteredHits" , NonPublic, "RecordSequenceWeapon", null );
-               Patch( AttackType, "GetCorrectedRoll" , NonPublic, "RecordAttackRoll", "LogMissedAttack" );
-               Patch( MechType, "CheckForHeatDamage" , NonPublic, "RecordOverheatCheck", "WriteSpecialLog" );
-               Patch( MechType, "ApplyHeatDamage"    , NonPublic, "RecordOverheat", "LogOverheat" );
+               Patch( AttackType, "GetIndividualHits", "RecordSequenceWeapon", null );
+               Patch( AttackType, "GetClusteredHits" , "RecordSequenceWeapon", null );
+               Patch( AttackType, "GetCorrectedRoll" , "RecordAttackRoll", "LogMissedAttack" );
+               Patch( MechType, "CheckForHeatDamage" , "RecordOverheatCheck", "WriteSpecialLog" );
+               Patch( MechType, "ApplyHeatDamage"    , "RecordOverheat", "LogOverheat" );
                goto case "attack";
 
             case "attack":
-               Patch( ArtilleyAttackType, "PerformAttack", NonPublic, "RecordArtilleryAttack", null );
-               Patch( AttackType, "GenerateToHitInfo", NonPublic, "RecordAttack", "LogSelfAttack" );
+               Patch( ArtilleyAttackType, "PerformAttack", "RecordArtilleryAttack", null );
+               Patch( AttackType, "GenerateToHitInfo", "RecordAttack", "LogSelfAttack" );
                Patch( typeof( AttackDirector ), "OnAttackComplete", null, "WriteRollLog" );
                InitLog();
                break;

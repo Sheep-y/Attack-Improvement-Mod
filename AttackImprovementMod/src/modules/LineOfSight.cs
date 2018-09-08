@@ -43,15 +43,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( LinesChanged ) {
             Patch( Indicator, "Init", null, "CreateLOSTexture" );
-            Patch( Indicator, "DrawLine", NonPublic, "SetupLOS", "CleanupLOS" );
-            Patch( Indicator, "ShowLineToTarget", NonPublic, null, "ShowBlockedLOS" );
+            Patch( Indicator, "DrawLine", "SetupLOS", "CleanupLOS" );
+            Patch( Indicator, "ShowLineToTarget", null, "ShowBlockedLOS" );
          }
          if ( LinesChanged || Settings.ArcLinePoints != 18 )
-            Patch( Indicator, "getLine" , NonPublic, null, "FixLOSWidth" );
+            Patch( Indicator, "getLine" , null, "FixLOSWidth" );
 
          if ( Settings.ArcLinePoints != 18 ) {
-            Patch( Indicator, "GetPointsForArc", Static, "OverrideGetPointsForArc", null );
-            Patch( Indicator, "DrawLine", NonPublic, null, "SetIndirectSegments" );
+            Patch( Indicator, "GetPointsForArc", "OverrideGetPointsForArc", null );
+            Patch( Indicator, "DrawLine", null, "SetIndirectSegments" );
             Patch( typeof( CombatPathLine ), "DrawJumpPath", null, "SetJumpPathSegments" );
          }
       }

@@ -13,21 +13,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStartsOnce () {
          if ( Settings.KillZeroHpLocation ) {
-            Patch( typeof( Mech )   , "DamageLocation", NonPublic, null, "FixZombieMech" );
-            Patch( typeof( Vehicle ), "DamageLocation", NonPublic, null, "FixZombieVehicle" );
-            Patch( typeof( Turret ) , "DamageLocation", NonPublic, null, "FixZombieTurret" );
-            Patch( typeof( BattleTech.Building ), "DamageBuilding", NonPublic, null, "FixZombieBuilding" );
+            Patch( typeof( Mech )   , "DamageLocation", null, "FixZombieMech" );
+            Patch( typeof( Vehicle ), "DamageLocation", null, "FixZombieVehicle" );
+            Patch( typeof( Turret ) , "DamageLocation", null, "FixZombieTurret" );
+            Patch( typeof( BattleTech.Building ), "DamageBuilding", null, "FixZombieBuilding" );
          }
 
          if ( Settings.BalanceAmmoConsumption || Settings.BalanceEnemyAmmoConsumption ) {
             nonCenter = new List<ChassisLocations> { ChassisLocations.LeftTorso, ChassisLocations.RightTorso,
                ChassisLocations.LeftArm, ChassisLocations.RightArm, ChassisLocations.LeftLeg, ChassisLocations.RightLeg };
             Patch( typeof( Weapon ), "DecrementAmmo", "OverrideDecrementAmmo", null );
-            Patch( typeof( AttackDirector.AttackSequence ), "GenerateNumberOfShots", NonPublic, null, "ClearAmmoSort" );
+            Patch( typeof( AttackDirector.AttackSequence ), "GenerateNumberOfShots", null, "ClearAmmoSort" );
          }
 
          if ( Settings.AutoJettisonAmmo || Settings.AutoJettisonEnemyAmmo )
-            Patch( typeof( MechHeatSequence ), "setState", NonPublic, null, "AutoJettisonAmmo" );
+            Patch( typeof( MechHeatSequence ), "setState", null, "AutoJettisonAmmo" );
       }
 
       private static bool ClusterChanceNeverMultiplyHead = true;

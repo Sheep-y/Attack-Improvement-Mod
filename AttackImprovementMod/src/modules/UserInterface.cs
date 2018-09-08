@@ -24,8 +24,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          FloatingArmorColourAlly = ParseColour( Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColourPlayer != null || FloatingArmorColourEnemy != null || FloatingArmorColourAlly != null ) {
             BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
-            Patch( typeof( CombatHUDPipBar ), "ShowValue", NonPublic, new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
-            Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", NonPublic, "SetPipBarOwner", "ResetPipBarOwner" );
+            Patch( typeof( CombatHUDPipBar ), "ShowValue", new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
+            Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", "SetPipBarOwner", "ResetPipBarOwner" );
          }
       }
 
@@ -70,17 +70,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Error( "Cannot find weaponTargetIndices, SelectionStateFireMulti not patched" );
             else {
                Type MultiTargetType = typeof( SelectionStateFireMulti );
-               Patch( typeof( CombatSelectionHandler ), "BackOutOneStep", NonPublic, null, "PreventMultiTargetBackout" );
+               Patch( typeof( CombatSelectionHandler ), "BackOutOneStep", null, "PreventMultiTargetBackout" );
                Patch( MultiTargetType, "get_CanBackOut", "OverrideMultiTargetCanBackout", null );
                Patch( MultiTargetType, "BackOut", "OverrideMultiTargetBackout", null );
-               Patch( MultiTargetType, "RemoveTargetedCombatant", NonPublic, "OverrideRemoveTargetedCombatant", null );
+               Patch( MultiTargetType, "RemoveTargetedCombatant", "OverrideRemoveTargetedCombatant", null );
             }
          }
          if ( Settings.ShowHeatAndStab ) {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowHeatAndStab" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
-            Patch( typeof( CombatHUDMechTray ), "Update", NonPublic, null, "RefreshHeatAndStab" );
+            Patch( typeof( CombatHUDMechTray ), "Update", null, "RefreshHeatAndStab" );
          }
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
@@ -92,12 +92,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( MechTrayArmorHoverToolTipProp == null )
                Warn( "Cannot access CombatHUDMechTrayArmorHover.ToolTip, ammo not displayed in paperdoll tooltip." );
             else
-               Patch( typeof( CombatHUDMechTrayArmorHover ), "setToolTipInfo", NonPublic, new Type[]{ typeof( Mech ), typeof( ArmorLocation ) }, "OverridePaperDollTooltip", null );
+               Patch( typeof( CombatHUDMechTrayArmorHover ), "setToolTipInfo", new Type[]{ typeof( Mech ), typeof( ArmorLocation ) }, "OverridePaperDollTooltip", null );
          }
 
          if ( Settings.ShowBaseHitchance ) {
-            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", NonPublic, typeof( ICombatant ), "ShowBaseHitChance", null );
-            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", NonPublic, typeof( ICombatant ), "ShowBaseMeleeChance", null );
+            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
+            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
          }
       }
 
