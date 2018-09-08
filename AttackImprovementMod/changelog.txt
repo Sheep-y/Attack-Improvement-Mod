@@ -2,6 +2,7 @@ CHANGE LOG
 
 ????-??-?? AIM Version 2.3 for BATTLETECH 1.2.0
 
+* New: Show pilot stats in one-line mouseover hint, instead of only HP.
 * New: Configure friends' and foes' crit multiplier.
 * New: Vehicles and Turrets may now be crit'ed and killed by ammo explosions.
 * New: Critical hits now follows damage transfer.

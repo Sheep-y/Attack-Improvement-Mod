@@ -92,12 +92,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( CombatHUDMechTrayArmorHover ), "setToolTipInfo", new Type[]{ typeof( Mech ), typeof( ArmorLocation ) }, "OverridePaperDollTooltip", null );
          }
 
+         if ( Settings.ShowStatsInPilotHint )
+            Patch( typeof( CombatHUDMWStatus ), "RefreshPilot", null, "ShowStatsInPilotHint" );
+
          if ( Settings.ShowBaseHitchance ) {
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
          }
       }
-      
+
       public override void CombatStarts () {
          if ( Settings.ShowHeatAndStab )
             targetDisplay = HUD.TargetingComputer?.ActorInfo?.DetailsDisplay;
@@ -400,12 +403,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisBarOwner = null;
       }
 
-      // ============ Pathing ============
+      // ============ Others ============
 
       public static void FixMoveDestinationHeight ( Pathing __instance ) {
          __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
       }
 
+      public static void ShowStatsInPilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) {
+         if ( ! pilot.IsIncapacitated )
+            __instance.InjuriesItem.ShowExistingIcon( new Text( "ST {0}:{1}:{2}:{3} HP {4}/{5}", new object[]{ 
+               pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics, ( pilot.Health - pilot.Injuries ), pilot.Health } ),
+               CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
+      }
+      
       // ============ Base Hit Chances ============
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {

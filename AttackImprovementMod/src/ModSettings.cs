@@ -35,6 +35,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool ShowAmmoInTooltip = true;
       public bool ShowEnemyAmmoInTooltip = false;
 
+      [ JsonComment( "Show pilot stats when you right click a mechwarrior while in combat." ) ]
+      public bool ShowStatsInPilotHint = true;
+
       [ JsonComment( "Set armour colour of floating bar of Player / Enemy / Ally.  Default \"cyan\" for player, \"teal\" for ally.  Set to empty to not change." ) ]
       public string FloatingArmorColourPlayer = "cyan";
       public string FloatingArmorColourEnemy = "";
