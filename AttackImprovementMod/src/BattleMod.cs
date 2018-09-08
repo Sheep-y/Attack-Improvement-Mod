@@ -326,15 +326,15 @@ namespace Sheepy.BattleTechMod {
          return new HarmonyMethod( mi );
       }
 
-      protected void Patch ( Type patchedClass, string patchedMethod, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, (Type[]) null, prefix, postfix );
+      public void Patch ( Type patchedClass, string patchedMethod, string prefix, string postfix, string transpiler = null ) {
+         Patch( patchedClass, patchedMethod, (Type[]) null, prefix, postfix, transpiler );
       }
 
-      protected void Patch ( Type patchedClass, string patchedMethod, Type parameterType, string prefix, string postfix ) {
-         Patch( patchedClass, patchedMethod, new Type[]{ parameterType }, prefix, postfix );
+      public void Patch ( Type patchedClass, string patchedMethod, Type parameterType, string prefix, string postfix, string transpiler = null ) {
+         Patch( patchedClass, patchedMethod, new Type[]{ parameterType }, prefix, postfix, transpiler );
       }
 
-      protected void Patch ( Type patchedClass, string patchedMethod, Type[] parameterTypes, string prefix, string postfix ) {
+      public void Patch ( Type patchedClass, string patchedMethod, Type[] parameterTypes, string prefix, string postfix, string transpiler = null ) {
          BindingFlags flags = Public | NonPublic | Instance | Static;
          MethodInfo patched = null;
          Exception ex = null;
@@ -348,20 +348,20 @@ namespace Sheepy.BattleTechMod {
             Log.Error( "Cannot find {0}.{1}(...) to patch {2}", patchedClass.Name, patchedMethod, ex );
             return;
          }
-         Patch( patched, prefix, postfix );
+         Patch( patched, prefix, postfix, transpiler );
       }
 
-      protected void Patch ( MethodBase patched, string prefix, string postfix ) {
-         HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix );
-         if ( pre == null && post == null ) return; // MakePatch would have reported method not found
-         Patch( patched, pre, post );
+      public void Patch ( MethodBase patched, string prefix, string postfix, string transpiler = null ) {
+         HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix ), trans = MakePatch( transpiler );
+         if ( pre == null && post == null && trans == null ) return; // MakePatch would have reported method not found
+         Patch( patched, pre, post, trans );
       }
 
-      protected void Patch ( MethodBase patched, MethodInfo prefix, MethodInfo postfix ) {
-         Patch( patched, new HarmonyMethod( prefix ), new HarmonyMethod( postfix ) );
+      public void Patch ( MethodBase patched, MethodInfo prefix, MethodInfo postfix, MethodInfo transpiler = null ) {
+         Patch( patched, new HarmonyMethod( prefix ), new HarmonyMethod( postfix ), new HarmonyMethod( transpiler ) );
       }
 
-      protected void Patch ( MethodBase patched, HarmonyMethod prefix, HarmonyMethod postfix ) {
+      public void Patch ( MethodBase patched, HarmonyMethod prefix, HarmonyMethod postfix, HarmonyMethod transpiler = null ) {
          string pre = prefix?.method?.Name, post = postfix?.method?.Name;
          if ( patched == null ) {
             Log.Error( "Method not found. Cannot patch [ {0} : {1} ]", pre, post );
@@ -371,7 +371,7 @@ namespace Sheepy.BattleTechMod {
             Mod.ModHarmony = HarmonyInstance.Create( Id );
             Log.Info( "Harmony instance \"{0}\"", Id );
          }
-         Mod.ModHarmony.Patch( patched, prefix, postfix );
+         Mod.ModHarmony.Patch( patched, prefix, postfix, transpiler );
          Log.Verbo( "Patched: {0} {1} [ {2} : {3} ]", patched.DeclaringType, patched, pre, post );
       }
 
