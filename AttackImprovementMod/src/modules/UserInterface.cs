@@ -304,7 +304,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          int baseHeat = mech.CurrentHeat, newHeat = baseHeat,
             baseStab = (int) mech.CurrentStability, newStab = baseStab;
          if ( mech == HUD.SelectedActor && __instance != targetDisplay ) { // More info in selection panel
-            line1 = "·\n" + line1;
+            line1 = "Â·\n" + line1;
             CombatSelectionHandler selection = HUD?.SelectionHandler;
             newHeat += mech.TempHeat;
             if ( selection != null && selection.SelectedActor == mech ) {
@@ -411,7 +411,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ShowStatsInPilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) {
          if ( ! pilot.IsIncapacitated )
-            __instance.InjuriesItem.ShowExistingIcon( new Text( "ST {0}:{1}:{2}:{3} HP {4}/{5}", new object[]{ 
+            __instance.InjuriesItem.ShowExistingIcon( new Text( "ST:{0},{1},{2},{3} HP:{4}/{5}", new object[]{ 
                pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics, ( pilot.Health - pilot.Injuries ), pilot.Health } ),
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
       }
