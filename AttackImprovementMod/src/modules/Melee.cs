@@ -25,14 +25,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          */
       }
 
-      public static IEnumerable<CodeInstruction> UnlockMeleeDests ( IEnumerable<CodeInstruction> input ) {
-         return ReplaceIL( input,
-            ( code ) => code.opcode.Name == "ldc.r4" && code.operand != null && code.operand.Equals( 10f ),
-            ( code ) => { code.operand = 0f; return code; },
-            1, "UnlockMeleePositioning", ModLog
-            );
-      }
-
       private static float MaxMeleeVerticalOffset = 8f;
 
       public override void CombatStarts () {
@@ -45,6 +37,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                con.NumDFADestinationChoices = 6;
             typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( CombatConstants, con, null );
          }
+      }
+
+      public static IEnumerable<CodeInstruction> UnlockMeleeDests ( IEnumerable<CodeInstruction> input ) {
+         return ReplaceIL( input,
+            ( code ) => code.opcode.Name == "ldc.r4" && code.operand != null && code.operand.Equals( 10f ),
+            ( code ) => { code.operand = 0f; return code; },
+            1, "UnlockMeleePositioning", ModLog
+            );
       }
 
       /*

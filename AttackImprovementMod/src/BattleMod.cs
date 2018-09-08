@@ -377,8 +377,9 @@ namespace Sheepy.BattleTechMod {
 
       public static IEnumerable<CodeInstruction> LogIL ( IEnumerable<CodeInstruction> input, Logger logger ) {
          List<CodeInstruction> result = new List<CodeInstruction>( 100 );
+         int index = 0;
          foreach ( CodeInstruction code in input ) {
-            logger.Info( "{0} ({1})", code, code.operand?.GetType() );
+            logger.Info( "{0,3} {1}", index++, code );
             result.Add( code );
          }
          return result;

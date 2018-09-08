@@ -11,6 +11,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
    using static ChassisLocations;
    using static System.Reflection.BindingFlags;
+   using Harmony;
+   using System.Reflection.Emit;
 
    public class UserInterface : BattleModModule {
 
@@ -30,23 +32,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatStartsOnce () {
-         if ( Settings.FixPaperDollRearStructure || Settings.ShowUnderArmourDamage ) TryRun( Log, () => {
-            outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
-            armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
-            structureProp = typeof( HUDMechArmorReadout ).GetProperty( "structureCached", NonPublic | Instance );
-            outlineRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineRearCached", NonPublic | Instance );
-            armorRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorRearCached", NonPublic | Instance );
-            structureRearProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
-            timeSinceStructureDamagedProp = typeof( HUDMechArmorReadout ).GetProperty( "timeSinceStructureDamaged", NonPublic | Instance );
-         } );
-         if ( Settings.FixPaperDollRearStructure ) {
-            LookAndColor = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
-            if ( LookAndColor == null || structureRearProp == null || timeSinceStructureDamagedProp == null )
-               Error( "Cannot find UIManager.UILookAndColorConstants, HUDMechArmorReadout.structureRearCached, and/or HUDMechArmorReadout.timeSinceStructureDamaged, paper doll rear structures not fixed." );
-            else
-               Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, "FixRearStructureDisplay" );
-         }
+         if ( Settings.FixPaperDollRearStructure )
+            Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
          if ( Settings.ShowUnderArmourDamage ) {
+            TryRun( Log, () => {
+               outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
+               armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
+               structureProp = typeof( HUDMechArmorReadout ).GetProperty( "structureCached", NonPublic | Instance );
+               outlineRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineRearCached", NonPublic | Instance );
+               armorRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorRearCached", NonPublic | Instance );
+               structureRearProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
+            } );
             if ( outlineProp == null || armorProp == null || structureProp == null || outlineRearProp == null || armorRearProp == null || structureRearProp == null )
                Error( "Cannot find outline, armour, and/or structure colour cache of HUDMechArmorReadout.  Cannot make paper dolls divulge under skin damage." );
             else {
@@ -100,7 +96,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
          }
       }
-
+      
       public override void CombatStarts () {
          if ( Settings.ShowHeatAndStab )
             targetDisplay = HUD.TargetingComputer?.ActorInfo?.DetailsDisplay;
@@ -112,7 +108,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Paper Doll ============
 
-      private static PropertyInfo outlineProp, armorProp, structureProp, outlineRearProp, armorRearProp, structureRearProp, timeSinceStructureDamagedProp;
+      private static PropertyInfo outlineProp, armorProp, structureProp, outlineRearProp, armorRearProp, structureRearProp;
       private static readonly ChassisLocations[] Normal  = new ChassisLocations[]{ Head, LeftArm , LeftTorso , CenterTorso, RightTorso, RightArm, LeftLeg , RightLeg };
       private static readonly ChassisLocations[] Flipped = new ChassisLocations[]{ Head, RightArm, RightTorso, CenterTorso, LeftTorso , LeftArm , RightLeg, LeftLeg  };
 
@@ -175,36 +171,27 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static UILookAndColorConstants LookAndColor;
-
-      public static void FixRearStructureDisplay ( HUDMechArmorReadout __instance, AttackDirection shownAttackDirection ) { try {
-         HUDMechArmorReadout me = __instance;
-         float[] timeSinceStructureDamaged = (float[]) timeSinceStructureDamagedProp.GetValue( me, null );
-         Color[] structureRear = (Color[]) structureRearProp.GetValue( me, null );
-
-         float flashPeriod = 1f;
-         Color flashColour = Color.white;
-         if ( LookAndColor != null ) {
-            flashPeriod = LookAndColor.FlashArmorTime;
-            flashColour = LookAndColor.ArmorFlash.color;
-         }
-         Dictionary<ArmorLocation, int> dictionary = null;
-         bool mayDisableParts = shownAttackDirection != AttackDirection.None && me.UseForCalledShots;
-         if ( mayDisableParts )
-            dictionary = HUD.Combat.HitLocation.GetMechHitTable( shownAttackDirection, false );
-
-         for ( int i = 0 ; i < 8 ; i++ ) {
-            float structureFlash = Mathf.Clamp01( 1f - timeSinceStructureDamaged[i] / flashPeriod );
-            Color structureColor = structureRear[ i ]; // The first line that has typo in original code
-            if ( mayDisableParts ) {
-               ArmorLocation rearLocation = HUDMechArmorReadout.GetArmorLocationFromIndex( i, true, me.flipRearDisplay );
-               bool isIntact = dictionary.ContainsKey( rearLocation ) && dictionary[ rearLocation ] != 0;
-               if ( ! isIntact )                       // And the second typo line
-                  structureColor = Color.Lerp( structureColor, Color.black, me.hiddenColorLerp );
+      public static IEnumerable<CodeInstruction> FixRearStructureDisplay ( IEnumerable<CodeInstruction> input ) {
+         List<CodeInstruction> result = new List<CodeInstruction>( 100 );
+         int count12 = 0, count13 = 0, last12 = -1, last13 = -1;
+         foreach ( CodeInstruction code in input ) {
+            if ( code.opcode.Name == "ldloc.s" && code.operand != null && code.operand is LocalBuilder local ) {
+               if ( local.LocalIndex == 12 ) {
+                  count12++;
+                  last12 = result.Count();
+               } else if ( local.LocalIndex == 13 ) {
+                  count13++;
+                  last13 = result.Count();
+               }
             }
-            UIHelpers.SetImageColor( me.StructureRear[ i ], Color.Lerp( structureColor, flashColour, structureFlash ) );
+            result.Add( code );
          }
-      }                 catch ( Exception ex ) { Error( ex ); } }
+         if ( count12 == count13 + 2 )
+            result[ last13 ] = result[ last12 ];
+         else
+            Warn( "Cannot find correct flags to transpile. FixRearStructureDisplay not applied." );
+         return result;
+      }
 
       private static PropertyInfo MechTrayArmorHoverToolTipProp;
 
