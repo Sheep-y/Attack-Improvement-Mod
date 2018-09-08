@@ -32,23 +32,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatStartsOnce () {
+         Type ReadoutType = typeof( HUDMechArmorReadout );
          if ( Settings.FixPaperDollRearStructure )
-            Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
+            Patch( ReadoutType, "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
          if ( Settings.ShowUnderArmourDamage ) {
             TryRun( Log, () => {
-               outlineProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineCached", NonPublic | Instance );
-               armorProp = typeof( HUDMechArmorReadout ).GetProperty( "armorCached", NonPublic | Instance );
-               structureProp = typeof( HUDMechArmorReadout ).GetProperty( "structureCached", NonPublic | Instance );
-               outlineRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorOutlineRearCached", NonPublic | Instance );
-               armorRearProp = typeof( HUDMechArmorReadout ).GetProperty( "armorRearCached", NonPublic | Instance );
-               structureRearProp = typeof( HUDMechArmorReadout ).GetProperty( "structureRearCached", NonPublic | Instance );
+               outlineProp = ReadoutType.GetProperty( "armorOutlineCached", NonPublic | Instance );
+               armorProp = ReadoutType.GetProperty( "armorCached", NonPublic | Instance );
+               structureProp = ReadoutType.GetProperty( "structureCached", NonPublic | Instance );
+               outlineRearProp = ReadoutType.GetProperty( "armorOutlineRearCached", NonPublic | Instance );
+               armorRearProp = ReadoutType.GetProperty( "armorRearCached", NonPublic | Instance );
+               structureRearProp = ReadoutType.GetProperty( "structureRearCached", NonPublic | Instance );
             } );
             if ( outlineProp == null || armorProp == null || structureProp == null || outlineRearProp == null || armorRearProp == null || structureRearProp == null )
                Error( "Cannot find outline, armour, and/or structure colour cache of HUDMechArmorReadout.  Cannot make paper dolls divulge under skin damage." );
             else {
                if ( ! Settings.FixPaperDollRearStructure )
                   Warn( "PaperDollDivulgeUnderskinDamage does not imply FixPaperDollRearStructure. Readout may still be bugged." );
-               Patch( typeof( HUDMechArmorReadout ), "RefreshMechStructureAndArmor", null, "ShowStructureDamageThroughArmour" );
+               Patch( ReadoutType, "RefreshMechStructureAndArmor", null, "ShowStructureDamageThroughArmour" );
             }
          }
          if ( Settings.FixMultiTargetBackout ) {
