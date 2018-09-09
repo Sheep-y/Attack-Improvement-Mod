@@ -3,6 +3,7 @@ using BattleTech;
 using Harmony;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
@@ -24,6 +25,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( InitMaxVerticalOffset() ) {
                Patch( PathingType, "GetMeleeDestsForTarget", "SetMeleeTarget", "ClearMeleeTarget" );
                Patch( PathingType, "GetPathNodesForPoints", null, "CheckMeleeVerticalOffset" );
+               Patch( typeof( JumpPathing ), "GetDFADestsForTarget", new Type[]{ typeof( AbstractActor ), typeof( List<AbstractActor> ) }, "SetDFATarget", "ClearMeleeTarget" );
+               Patch( typeof( JumpPathing ), "GetPathNodesForPoints", null, "CheckMeleeVerticalOffset" );
             }
       }
 
@@ -51,9 +54,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Vertical Offset ============
 
       private static float[] MaxMeleeVerticalOffsetByClass;
+      private static AbstractActor thisMeleeAttacker, thisMeleeTarget;
+      private static PropertyInfo JumpMechProp;
 
       private bool InitMaxVerticalOffset () {
          MaxMeleeVerticalOffsetByClass = null;
+         JumpMechProp = typeof( JumpPathing ).GetProperty( "Mech", NonPublic | Instance );
+         if ( JumpMechProp == null ) {
+            Warn( "Can't find JumpPathing.Mech. MaxMeleeVerticalOffsetByClass not patched." );
+            return false;
+         }
          List<float> list = new List<float>();
          foreach ( string e in Settings.MaxMeleeVerticalOffsetByClass.Split( ',' ) ) try {
             if ( list.Count >= 4 ) break;
@@ -72,24 +82,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return true;
       }
 
-      private static AbstractActor thisMeleeAttacker, thisMeleeTarget;
-
       [ HarmonyPriority( Priority.High ) ]
       public static void SetMeleeTarget ( Pathing __instance, AbstractActor target ) {
          thisMeleeAttacker = __instance.OwningActor;
          thisMeleeTarget = target;
       }
 
+      [ HarmonyPriority( Priority.High ) ]
+      public static void SetDFATarget ( JumpPathing __instance, AbstractActor target ) {
+         thisMeleeAttacker = JumpMechProp.GetValue( __instance, null ) as AbstractActor;
+         thisMeleeTarget = target;
+      }
+
       public static void ClearMeleeTarget () {
-         thisMeleeTarget = null;
+         thisMeleeAttacker = thisMeleeTarget = null;
       }
 
       // Set the game's MaxMeleeVerticalOffset to very high, then filter nodes at GetPathNodesForPoints
-      public static void CheckMeleeVerticalOffset ( List<PathNode> __result ) {
-         if ( thisMeleeTarget == null ) return;
+      public static void CheckMeleeVerticalOffset ( List<PathNode> __result ) { try {
+         if ( thisMeleeTarget == null || __result == null || __result.Count <= 0 ) return;
+         //Verbo( "Checking {0} offsets", __result.Count );
          float targetY = thisMeleeTarget.CurrentPosition.y, maxY = 0;
          WeightClass lowerClass = 0;
-			for (int i = __result.Count ; i >= 0 ; i-- ) {
+			for (int i = __result.Count - 1 ; i >= 0 ; i-- ) {
             float attackerY = __result[ i ].Position.y;
             if ( attackerY > targetY )
                lowerClass = thisMeleeTarget is Mech mech ? mech.weightClass : WeightClass.LIGHT;
@@ -103,9 +118,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                case WeightClass.HEAVY  : maxY = MaxMeleeVerticalOffsetByClass[2]; break;
                case WeightClass.ASSAULT: maxY = MaxMeleeVerticalOffsetByClass[3]; break;
             }
+            //Verbo( "Offset {0}: class {1}, maxY {2}, diff {3}, attacker {4}, target {5}", i, lowerClass, maxY, attackerY - targetY, attackerY, targetY );
             if ( Math.Abs( attackerY - targetY ) > maxY )
                __result.RemoveAt( i );
          }
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
