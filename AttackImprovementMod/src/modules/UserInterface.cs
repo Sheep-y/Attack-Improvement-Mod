@@ -1,18 +1,18 @@
 using BattleTech.UI;
 using BattleTech;
+using Harmony;
 using Localize;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
    using static ChassisLocations;
    using static System.Reflection.BindingFlags;
-   using Harmony;
-   using System.Reflection.Emit;
 
    public class UserInterface : BattleModModule {
 

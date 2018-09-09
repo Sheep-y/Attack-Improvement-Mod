@@ -177,6 +177,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          NullIfEmpty( ref Settings.RangedAccuracyFactors );
          NullIfEmpty( ref Settings.MeleeAccuracyFactors );
+
+         NullIfEmpty( ref Settings.MaxMeleeVerticalOffsetByClass );
+
          NullIfEmpty( ref Settings.AttackLogLevel );
       }
 

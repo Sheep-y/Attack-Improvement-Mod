@@ -259,6 +259,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Break the restriction that one must stay still to melee adjacent mech." ) ]
       public bool UnlockMeleePositioning = true;
 
+      [ JsonComment( new string[]{
+        "Max vertical offset of melee attack, by the mech class of the unit at a lower position.  Set to \"\" to disable.",
+        "Non-mechs are same as light.  Default \"8,11,14,17\" which allows bigger mechs to hit and be hit from more locations." } ) ]
+      public string MaxMeleeVerticalOffsetByClass = "8,11,14,17";
+
       /* [ JsonComment( "Allow melee attack on sprint.  Default false." ) ]
       public bool AllowChargeAttack = false;
 
