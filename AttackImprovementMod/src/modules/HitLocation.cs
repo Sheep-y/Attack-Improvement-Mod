@@ -1,12 +1,11 @@
 using BattleTech;
+using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using Harmony;
    using static ArmorLocation;
-   using static BindingFlags;
    using static Mod;
 
    public class HitLocation : BattleModModule {

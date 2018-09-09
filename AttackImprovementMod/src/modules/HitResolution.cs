@@ -1,12 +1,10 @@
 using BattleTech;
 using System.Collections.Generic;
-using System.Reflection;
 using System;
 using System.Linq;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static ArmorLocation;
-   using static BindingFlags;
    using static Mod;
 
    public class HitResolution : BattleModModule {

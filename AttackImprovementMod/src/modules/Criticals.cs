@@ -272,7 +272,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             MechEngineerCheckCritPostfix.Invoke( null, new object[]{ mech } );
          }
       }
-      
+
       public static void PlaySFX ( AIMCritInfo info ) {
          GameRepresentation GameRep = info.target.GameRep;
          if ( GameRep == null ) return;

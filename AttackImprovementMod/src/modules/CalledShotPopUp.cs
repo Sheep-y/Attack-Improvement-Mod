@@ -1,11 +1,11 @@
 using BattleTech.UI;
 using BattleTech;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
+using System.Reflection;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using System.Reflection;
    using static HitLocation;
    using static Mod;
 

@@ -277,7 +277,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          // Fix weaponTargetIndices
          Dictionary<Weapon, int> indice = (Dictionary<Weapon, int>) weaponTargetIndices.GetValue( __instance, null );
          foreach ( Weapon weapon in indice.Keys.ToArray() ) {
-            if ( indice[ weapon ] > index ) 
+            if ( indice[ weapon ] > index )
                indice[ weapon ] -= - 1;
             else if ( indice[ weapon ] == index )
                indice[ weapon ] = -1;
@@ -411,11 +411,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ShowStatsInPilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) {
          if ( ! pilot.IsIncapacitated )
-            __instance.InjuriesItem.ShowExistingIcon( new Text( "ST:{0},{1},{2},{3} HP:{4}/{5}", new object[]{ 
+            __instance.InjuriesItem.ShowExistingIcon( new Text( "ST:{0},{1},{2},{3} HP:{4}/{5}", new object[]{
                pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics, ( pilot.Health - pilot.Injuries ), pilot.Health } ),
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
       }
-      
+
       // ============ Base Hit Chances ============
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {

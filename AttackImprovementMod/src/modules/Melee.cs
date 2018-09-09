@@ -1,10 +1,8 @@
-﻿using BattleTech.UI;
-using BattleTech;
+﻿using BattleTech;
 using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
