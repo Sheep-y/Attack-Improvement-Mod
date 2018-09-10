@@ -80,7 +80,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDMechTray ), "Update", null, "RefreshHeatAndStab" );
          }
-         Pacth( typeof( Mech ), "get_AdjustedHeatsinkCapacity", null, "CorrectProjectedHeat" );
+         Patch( typeof( Mech ), "get_AdjustedHeatsinkCapacity", null, "CorrectProjectedHeat" );
 
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
@@ -370,7 +370,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static MapEncounterLayerDataCell[] GetEncounterCellsAtPosition ( Vector3 position ) {
          MapEncounterLayerDataCell cellAt = Combat?.EncounterLayerData?.GetCellAt( position );
-         if ( cellAt == 0 ) return null;
+         if ( cellAt == null ) return null;
          return new MapEncounterLayerDataCell[]{ cellAt };
       }
 
@@ -380,17 +380,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return Combat?.MapMetaData?.GetPriorityDesignMask( cells[0].relatedTerrainCell );
       }
 
-      public static void CorrectProjectedHeat ( Mech __instance, ref __result ) {
+      public static void CorrectProjectedHeat ( Mech __instance, ref float __result ) {
          if ( __instance.HasMovedThisRound ) return;
-         if ( ! HUD.SelectionHandler is SelectionStateSprint sprint && ! HUD.SelectionHandler is SelectionStateMove move && ! HUD.SelectionHandler is SelectionStateJump jump ) return;
-         float occupiedMaskHeatSinkMultiplier = __instance.occupiedDesignMask?.heatSinkMultiplier ?? 1f;
-         if ( Mathf.Approximately( occupiedMaskHeatSinkMultiplier, 1f ) ) occupiedMaskHeatSinkMultiplier = 1f;
-         Vector3 position = sprint.PreviewPos ?? move.PreviewPos ?? jump.PreviewPos ?? null;
-         if ( position == null ) return;
-         float projectedHeatSinkMultiplier = GetDesignMasksAtPosition( position )?.heatSinkMultiplier ?? 1f;
-         if ( Mathf.Approximately( projectedHeatSinkMultiplier, 1f ) ) projectedHeatSinkMultiplier = 1f;
-         if ( occupiedMaskHeatSinkMultiplier == projectedHeatSinkMultiplier ) return;
-         __result *= projectedHeatSinkMultiplier / occupiedMaskHeatSinkMultiplier;
+         SelectionState state = HUD?.SelectionHandler?.ActiveState;
+         Vector3 position;
+         if      ( state is SelectionStateSprint sprint ) position = sprint.PreviewPos;
+         else if ( state is SelectionStateMove move ) position = move.PreviewPos;
+         else if ( state is SelectionStateJump jump ) position = jump.PreviewPos;
+         else return;
+         DesignMaskDef local = __instance.occupiedDesignMask, preview = GetDesignMasksAtPosition( position );
+         if ( ReferenceEquals( local, preview ) ) return;
+         float here = local?.heatSinkMultiplier ?? 1f, there = preview?.heatSinkMultiplier ?? 1f;
+         if ( here == there ) return;
+         __result *= here / there;
       }
 
       // ============ Floating Nameplate ============
