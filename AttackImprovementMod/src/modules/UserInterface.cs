@@ -73,12 +73,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( MultiTargetType, "RemoveTargetedCombatant", "OverrideRemoveTargetedCombatant", null );
             }
          }
+
          if ( Settings.ShowHeatAndStab ) {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowHeatAndStab" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDMechTray ), "Update", null, "RefreshHeatAndStab" );
          }
+         Pacth( typeof( Mech ), "get_AdjustedHeatsinkCapacity", null, "CorrectProjectedHeat" );
+
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
          if ( Settings.FixLosPreviewHeight )
@@ -363,6 +366,31 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( !needRefresh ) return;
          __instance?.ActorInfo?.DetailsDisplay?.RefreshInfo();
          needRefresh = false;
+      }
+
+      public static MapEncounterLayerDataCell[] GetEncounterCellsAtPosition ( Vector3 position ) {
+         MapEncounterLayerDataCell cellAt = Combat?.EncounterLayerData?.GetCellAt( position );
+         if ( cellAt == 0 ) return null;
+         return new MapEncounterLayerDataCell[]{ cellAt };
+      }
+
+      public static DesignMaskDef GetDesignMasksAtPosition ( Vector3 position ) {
+         MapEncounterLayerDataCell[] cells = GetEncounterCellsAtPosition( position );
+         if ( cells == null || cells.Length <= 0 ) return null;
+         return Combat?.MapMetaData?.GetPriorityDesignMask( cells[0].relatedTerrainCell );
+      }
+
+      public static void CorrectProjectedHeat ( Mech __instance, ref __result ) {
+         if ( __instance.HasMovedThisRound ) return;
+         if ( ! HUD.SelectionHandler is SelectionStateSprint sprint && ! HUD.SelectionHandler is SelectionStateMove move && ! HUD.SelectionHandler is SelectionStateJump jump ) return;
+         float occupiedMaskHeatSinkMultiplier = __instance.occupiedDesignMask?.heatSinkMultiplier ?? 1f;
+         if ( Mathf.Approximately( occupiedMaskHeatSinkMultiplier, 1f ) ) occupiedMaskHeatSinkMultiplier = 1f;
+         Vector3 position = sprint.PreviewPos ?? move.PreviewPos ?? jump.PreviewPos ?? null;
+         if ( position == null ) return;
+         float projectedHeatSinkMultiplier = GetDesignMasksAtPosition( position )?.heatSinkMultiplier ?? 1f;
+         if ( Mathf.Approximately( projectedHeatSinkMultiplier, 1f ) ) projectedHeatSinkMultiplier = 1f;
+         if ( occupiedMaskHeatSinkMultiplier == projectedHeatSinkMultiplier ) return;
+         __result *= projectedHeatSinkMultiplier / occupiedMaskHeatSinkMultiplier;
       }
 
       // ============ Floating Nameplate ============
