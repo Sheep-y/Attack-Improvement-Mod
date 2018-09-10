@@ -67,7 +67,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
             Patch( typeof( AmmunitionBox ), "DamageComponent", null, "AmmoExplosionKillNonMech" );
 
-         if ( BattleMod.FoundMod( "MechEngineer.Control" ) ) InitMechEngineerBridge();
+         if ( HasMod( "MechEngineer.Control" ) ) InitMechEngineerBridge();
       }
 
       public override void CombatStarts () {

@@ -199,6 +199,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return null;
       }
 
+      public static bool HasMod ( params string[] mods ) { try {
+         return BattleMod.FoundMod( mods );
+      } catch ( Exception ex ) {
+         Error( ex );
+         return false;
+      } }
+
       // ============ Logging ============
 
       internal static string ModLogDir = ""; // A static variable for roll log

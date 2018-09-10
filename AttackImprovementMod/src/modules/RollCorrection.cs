@@ -20,11 +20,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float RollCorrectionStrength, MissStreakBreakerThreshold, MissStreakBreakerDivider;
 
       public override void CombatStartsOnce () {
-         if ( BattleMod.FoundMod( "Battletech.realitymachina.NoCorrections", "NoCorrectedRoll.InitClass" ) ) {
+         if ( HasMod( "Battletech.realitymachina.NoCorrections", "NoCorrectedRoll.InitClass" ) ) {
             BattleMod.BTML_LOG.Warn( Mod.Name + " detected realitymachina's True RNG (NoCorrections) mod, roll correction and streak breaker disabled." );
             TrueRNG = true;
          }
-         if ( BattleMod.FoundMod( "aa.battletech.realhitchance", "RealHitChance.Loader" ) ) {
+         if ( HasMod( "aa.battletech.realhitchance", "RealHitChance.Loader" ) ) {
             BattleMod.BTML_LOG.Warn( Mod.Name + " detected casualmods's Real Hit Chance mod, which should be REMOVED because it does not support AIM's features. Just remember to set AIM's ShowCorrectedHitChance to true!" );
             Settings.ShowCorrectedHitChance = true;
          }

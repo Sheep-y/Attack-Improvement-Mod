@@ -12,7 +12,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStartsOnce () {
          Type PathingType = typeof( Pathing );
-         if ( Settings.UnlockMeleePositioning && BattleMod.FoundMod( "de.morphyum.MeleeMover", "MeleeMover.MeleeMover" ) ) {
+         if ( Settings.UnlockMeleePositioning && HasMod( "de.morphyum.MeleeMover", "MeleeMover.MeleeMover" ) ) {
             BattleMod.BTML_LOG.Warn( Mod.Name + " detected morphyum's MeleeMover, melee positioning unlock left in MeleeMover's hands." );
             Settings.UnlockMeleePositioning = false;
          }
