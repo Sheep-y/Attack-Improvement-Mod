@@ -41,7 +41,8 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Show Ammo Count in paper doll hover.
 * Show Heat and Stability Numbers.
 * Show Base Hit Chance in accuracy modifier popup.
-* Post-Move To-Hit Penalties (default none) factored in action preview.
+* Show MechWarrior stats in right-click summary hint.
+* Post-Move To-Hit Penalties and Cooldown factored in action preview.
 * (Optional) Show Mech Tonnage.
 * (Optional) Show Corrected Hit chance and Called Shot Chance.
 
@@ -57,7 +58,19 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Remove Melee Position Cap.
 * Ammo Loader AI that balance ammo usage for less explosion.
 * Auto Jettison useless ammo.
+
+## New Critical Hit System ##
+
 * Skip Criting the Dead Mechs.
+* Allow vehicles and turrets to suffer critical hit.
+* Critical Hit now follows and happen after damage transfer.
+* Prevent critical hit on locations with intact structure.
+* NPC allies now has normal crit chance.  NPC enemies adjustable.
+* Adjust normal critical hit chances and mix/max cap.
+* (Optional) Allow Through Armour Critical hit (TAC).
+* (Optional) Allow critical hit reroll and location transfer.
+* (Optional) Allow multiple critical hits per weapon.
+
 
 ## Other Adjustables ##
 
@@ -159,6 +172,14 @@ These settings can be changed in `settings.json`.
 > When set to true, show ammo count in the list of components when you mouseover a location on the paper doll.
 >
 > The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
+
+
+**Show MechWarrior Stats in Tooltip**
+
+> Setting: `ShowStatsInPilotHint`  
+(true/false, default true)
+>
+> When true, show mechwarrior stats in their one-line hint that pops up on right-click, instead of showing only injuries.
 
 
 **Fix Multi-Target Back Out**
@@ -326,7 +347,7 @@ These settings can be changed in `settings.json`.
 ## Melee and DFA Settings
 
 
-**Allow free Melee and DFA positioning**
+**Unlock Melee and DFA Positioning**
 
 > Setting: `IncreaseMeleePositionChoice`  (true/false, default true)<br>
 > Setting: `IncreaseDFAPositionChoice`  (true/false, default true)
@@ -337,6 +358,19 @@ These settings can be changed in `settings.json`.
 > Setting: `UnlockMeleePositioning`  (true/false, default true)
 >
 > When enabled, free player units from standing still when target is already in melee range.  Auto-disable to avoid conflict when MeleeMover is used.
+
+
+**Adjust Max Melee Height Offset by Mech Class**
+
+> Settings: MaxMeleeVerticalOffsetByClass  (comma separated positive number, default "8,11,14,17")
+>
+> When non-empty, adjust `MaxMeleeVerticalOffset` by the class of the attacker or target, whoever is at the lower ground.
+> Value is for Light, Medium, Heavy, and Assault mechs.  Non-mechs are considered Light for the purpose of this setting.
+>
+> Game default is all 8.  Mod default allows bigger mechs to hit and be hit across higher height differences.
+>
+> This setting applies to both Melee and DFA.
+> If a value is missing or invalid, it will be set to the same as lighter class, or "8" if it is the first value.
 
 
 

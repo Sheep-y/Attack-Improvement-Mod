@@ -3,6 +3,8 @@ CHANGE LOG
 ????-??-?? AIM Version 2.3 for BATTLETECH 1.2.0
 
 * New: Show pilot stats in one-line mouseover hint, instead of only HP.
+* New: Adjust max melee height difference by mech class.
+* New: Fix heat projection on move/jump/sprint preview.
 * New: Configure friends' and foes' crit multiplier.
 * New: Vehicles and Turrets may now be crit'ed and killed by ammo explosions.
 * New: Critical hits now follows damage transfer.
@@ -11,10 +13,12 @@ CHANGE LOG
 * New: Critical hits may optionally ignore destroyed component and space.
 * New: Critical hits may optionally be transferred inward when there is nothing to crit.
 * New: Critical hits may optionally be rolled until there is no more crit chance.
-* New: Exclude intact structures from crits. (When through armour crit is disabled.)
+* New: Prevent critical hit on locations with intact structure.
 * New: Attack Log now logs DFA self-damage and overheat self-damage.
 * Mod: Make see-through armour compatible with Mech Engineer's composite structure.
-* Fix: Turret and Building LOS are not always coloured as frontal direction.
+* Mod: Assume mod not found when mod compatibility check is executed at the wrong time.
+* Mod: UnlockMeleePositioning and FixPaperDollRearStructure switched to IL code patch.
+* Fix: Turret and Building LOS are now always coloured as front attack, instead of side or rear.
 * Fix: Fix FixBossHeadCalledShotDisplay regression.
 * Fix: Jumped modifier should no longer persist into next turn.
 * Fix: First line in Attack Log will no longer be an empty crit on slot 1.
