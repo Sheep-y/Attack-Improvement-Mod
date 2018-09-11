@@ -38,8 +38,8 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Coloured facing ring and floating armour bar.
 * Multi-Target Back Out fixed.
 * Make sure 0 HP means dead, never zombie.
+* Fix and Enhance Heat and Stability Preview.
 * Show Ammo Count in paper doll hover.
-* Show Heat and Stability Numbers.
 * Show Base Hit Chance in accuracy modifier popup.
 * Show MechWarrior stats in right-click summary hint.
 * Post-Move To-Hit Penalties and Cooldown factored in action preview.
@@ -52,7 +52,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Called Shots cluster around called mech location.
 * Precise Hit Distribution that improves SRM and MG called shot.
 * More Melee Modifiers, and fixes the absent of stood up penalty.
-* Directional Attack Bonus.
+* Flank and Rear Attack Bonus.
 * Allow Net Bonus Hit modifiers.
 * Allow Negative Height Modifier.
 * Remove Melee Position Cap.
@@ -71,7 +71,6 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * (Optional) Allow critical hit reroll and location transfer.
 * (Optional) Allow multiple critical hits per weapon.
 
-
 ## Other Adjustables ##
 
 * Tabular Attack Log that can be opened directly in Excel.
@@ -80,6 +79,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Adjustable Miss Streak Breaker.
 * Adjustable Base Hit Chance.
 * Adjustable Hit Chance stepping and min/max cap.
+* Adjustable Attack Modifier List.
 * Control Display Precision of hit chance and called shot chance.
 
 
@@ -148,11 +148,16 @@ These settings can be changed in `settings.json`.
 > Not sure why the game didn't do this.  When set to true, armour of damaged location will have a striped pattern instead of solid.
 
 
-**Show Heat and Stability Numbers**
+**Enhance Heat and Stability Preview**
 
 > Setting: `ShowHeatAndStab`  (true/false, default true)
 >
 > When set to true, display heat and stability numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.  Predictions supplied by the game and is subject to all its quirks and bugs and mods.
+
+> Setting: `FixHeatPreview`  (true/false, default true)
+>
+> When set to true, previewed move destination's terrain will be factored heat preview.  For example, moving into water will result in higher predicted cooldown and vice versa.
+> This allows more accurate overheat prediction when moving across terrain of different cooldown rates.
 
 
 **Show Unit Tonnage**

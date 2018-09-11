@@ -28,6 +28,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true." ) ]
       public bool ShowHeatAndStab = true;
 
+      [ JsonComment( "Factor in heat multiplier at target location when previewing movement.  Default true." ) ]
+      public bool FixHeatPreview = true;
+
       [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
       public bool FixLosPreviewHeight = true;
 

@@ -80,7 +80,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDMechTray ), "Update", null, "RefreshHeatAndStab" );
          }
-         Patch( typeof( Mech ), "get_AdjustedHeatsinkCapacity", null, "CorrectProjectedHeat" );
+         if ( Settings.FixHeatPreview )
+            Patch( typeof( Mech ), "get_AdjustedHeatsinkCapacity", null, "CorrectProjectedHeat" );
 
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
@@ -392,7 +393,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ReferenceEquals( local, preview ) ) return;
          float here = local?.heatSinkMultiplier ?? 1f, there = preview?.heatSinkMultiplier ?? 1f;
          if ( here == there ) return;
-         __result *= here / there;
+         __result *= there / here;
       }
 
       // ============ Floating Nameplate ============
