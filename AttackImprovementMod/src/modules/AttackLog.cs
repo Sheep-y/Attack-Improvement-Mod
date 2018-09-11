@@ -99,7 +99,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( ArtilleyAttackType, "PerformAttack", "RecordArtilleryAttack", null );
                Patch( AttackType, "GenerateToHitInfo", "RecordAttack", "LogSelfAttack" );
                Patch( typeof( AttackDirector ), "OnAttackComplete", null, "WriteRollLog" );
-               InitLog();
+               TryRun( ModLog, InitLog );
                break;
 
             default:
@@ -112,7 +112,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatEnds () {
-         ForceWriteLog();
+         TryRun( ModLog, ForceWriteLog );
       }
 
       public static void InitLog () {
@@ -159,9 +159,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ForceWriteLog () {
          if ( log.Count <= 0 ) return;
+         if ( DebugLog ) Verbo( "Force write {0} lines of log.\n", log.Count );
          ROLL_LOG.Info( string.Join( Environment.NewLine, log.ToArray() ) );
          log.Clear();
-         if ( DebugLog ) Verbo( "Log written\n" );
+         ROLL_LOG.Flush();
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]

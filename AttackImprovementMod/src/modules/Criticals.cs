@@ -27,7 +27,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStartsOnce () {
          Type[] ResolveParams = new Type[]{ typeof( WeaponHitInfo ), typeof( Weapon ), typeof( MeleeAttackType ) };
          MethodInfo ResolveWeaponDamage = MechType.GetMethod( "ResolveWeaponDamage", ResolveParams );
-         InitCritChance();
+         TryRun( ModLog, InitCritChance );
 
          if ( Settings.SkipCritingDeadMech )
             Patch( ResolveWeaponDamage, "Skip_BeatingDeadMech", null );
@@ -43,7 +43,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ThroughArmorCritEnabled = Settings.CritChanceZeroArmor > 0 ) {
             Patch( ResolveWeaponDamage, "ReplaceCritHandling", null );
             Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", "Skip_ConsolidateCriticalHitInfo", null );
-            InitThroughArmourCrit();
+            TryRun( ModLog, InitThroughArmourCrit );
 
          } else {
             if ( Settings.FixFullStructureCrit ) {
@@ -67,7 +67,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
             Patch( typeof( AmmunitionBox ), "DamageComponent", null, "AmmoExplosionKillNonMech" );
 
-         if ( HasMod( "MechEngineer.Control" ) ) InitMechEngineerBridge();
+         if ( HasMod( "MechEngineer.Control" ) ) TryRun( ModLog, InitMechEngineerBridge );
       }
 
       public override void CombatStarts () {

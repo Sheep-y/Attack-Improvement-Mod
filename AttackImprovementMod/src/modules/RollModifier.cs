@@ -25,15 +25,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( ToHitType, "GetBaseToHitChance", new Type[]{ typeof( AbstractActor ) }, null, "ModifyBaseHitChance" );
          if ( MeleeHitChanceModifier != 0 )
             Patch( ToHitType, "GetBaseMeleeToHitChance", new Type[]{ typeof( Mech ) }, null, "ModifyBaseMeleeHitChance" );
-         /*
-         if ( Settings.FixModifierTargetHeight ) {
-            Patch( ToHitType, "GetAllModifiers", "FixAllModifiersTargetHeight", null );
-            Patch( ToHitType, "GetAllMeleeModifiers", "FixAllModifiersTargetHeight", null ); // Should be always using CurrentPosition, but really won't hurt
-            Patch( ToHitType, "GetAllModifiersDescription", "FixAllModifiersTargetHeight", null );
-         }
-         Patch( ToHitType, "GetAllModifiers", "LogModifiers", null );
-         Patch( ToHitType, "GetHeightModifier", "LogHeightModifier", null );
-         */
 
          if ( Settings.HitChanceStep != 0.05m || Settings.MaxFinalHitChance != 0.95m || Settings.MinFinalHitChance != 0.05m || Settings.DiminishingHitChanceModifier ) {
             if ( ! Settings.DiminishingHitChanceModifier )
@@ -42,7 +33,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( ToHitType, "GetUMChance", new Type[]{ typeof( float ), typeof( float ) }, "OverrideHitChanceDiminishing", null );
                diminishingBonus = new float[ Settings.DiminishingBonusMax ];
                diminishingPenalty = new float[ Settings.DiminishingPenaltyMax ];
-               FillDiminishingModifiers();
+               TryRun( ModLog, FillDiminishingModifiers );
             }
          }
 
@@ -64,7 +55,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             typeof( CombatGameConstants ).GetProperty( "ToHit" ).SetValue( CombatConstants, con, null );
          }
          if ( Settings.AllowNetBonusModifier && steppingModifier == null && ! Settings.DiminishingHitChanceModifier )
-            FillSteppedModifiers(); // Use Combat Constants and must be lazily loaded
+            TryRun( ModLog, FillSteppedModifiers );
       }
 
       // ============ Preparations ============

@@ -18,7 +18,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( SetColors == null ) {
                Warn( "Cannot find AttackDirectionIndicator.SetColors, direction marker colors not patched." );
             } else {
-               InitDirectionColors();
+               TryRun( ModLog, InitDirectionColors );
                Patch( typeof( AttackDirectionIndicator ), "ShowAttackDirection", "SaveDirectionMarker", "SetDirectionMarker" );
             }
          }
@@ -27,7 +27,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             BattleMod.BTML_LOG.Warn( Mod.Name + " detected joelmeador's BTMLColorLOSMod, LOS and arc styling disabled and left in the hands of BTMLColorLOSMod." );
             return;
          }
-         InitSettings();
+         TryRun( ModLog, InitSettings );
 
          bool LinesChanged = Settings.LOSIndirectDotted || parsedColor.ContainsKey( Line.Indirect ) ||
                                 Settings.LOSMeleeDotted || parsedColor.ContainsKey( Line.Melee ) ||

@@ -124,7 +124,7 @@ namespace Sheepy.BattleTechMod {
          settings = config;
       }
 
-      protected void SaveSettings ( Settings settings_object ) {
+      protected void SaveSettings<Settings> ( Settings settings_object ) {
          SaveSettings( JsonConvert.SerializeObject( settings_object, Formatting.Indented ) );
       }
 

@@ -83,7 +83,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static HashSet<string> InitModifiers ( List<Func<AttackModifier>> list, Func<string,Func<AttackModifier>> mapper, string[] factors ) {
          HashSet<string> Factors = new HashSet<string>();
-         foreach ( string e in factors ) Factors.Add( e.Trim().ToLower() );
+         foreach ( string e in factors ) Factors.Add( e?.Trim().ToLower() );
          foreach ( string e in Factors ) try {
             Func<AttackModifier> factor = mapper( e );
             if ( factor == null ) factor = GetCommonModifierFactor( e );
