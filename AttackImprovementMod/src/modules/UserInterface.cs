@@ -334,13 +334,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                newStab = (int) selection.ProjectedStabilityForState;
             }
 
-            //movement = "Move " + ( (int) mech.MaxWalkDistance ) + "/" + ( (int) mech.MaxSprintDistance );
-            //if ( jets > 0 ) movement += ", Jump " + (int) mech.JumpDistance;
+            if ( selection.ActiveState is SelectionStateMove move ) {
+               float maxCost = move is SelectionStateSprint sprint ? mech.MaxSprintDistance : mech.MaxWalkDistance;
+               mech.Pathing.CurrentGrid.GetPathTo( move.PreviewPos, mech.Pathing.CurrentDestination, maxCost, null, out float costLeft, out Vector3 ResultDestination, out float lockedAngle, false, 0f, 0f, 0f, true, false );
+               movement = move is SelectionStateSprint ? "SPRINT " : "MOVE ";
+               movement += (int) costLeft + "/" + (int) maxCost;
+            } else if ( selection.ActiveState is SelectionStateJump jump ) {
+               float maxCost = mech.JumpDistance, cost = Vector3.Distance( jump.PreviewPos, mech.CurrentPosition );
+               movement = "JUMP " + (int) ( maxCost - cost ) + "/" + (int) maxCost;
+            }
             
          } else {  // Target panel or non-selection. Show min/max numbers and distance.
-            //movement = "Move " + ( (int) mech.MaxWalkDistance ) + "/" + ( (int) mech.MaxSprintDistance );
-            //if ( jets > 0 ) movement += ", Jump " + (int) mech.JumpDistance;
-
             Vector3? position;
             if      ( selection.ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
             else if ( selection.ActiveState is SelectionStateMove move ) position = move.PreviewPos;
