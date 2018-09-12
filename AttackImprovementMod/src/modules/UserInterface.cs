@@ -75,8 +75,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
 
-         if ( Settings.ShowHeatAndStab ) {
-            Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowHeatAndStab" );
+         if ( Settings.ShowNumericInfo ) {
+            Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowNumericInfo" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
             // Force heat/stab number refresh
@@ -115,7 +115,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatStarts () {
-         if ( Settings.ShowHeatAndStab ) {
+         if ( Settings.ShowNumericInfo ) {
             targetDisplay = HUD?.TargetingComputer?.ActorInfo?.DetailsDisplay;
             HUD?.MechTray?.ActorInfo?.DetailsDisplay?.transform?.transform?.Translate( 0, -15, 0 );
          }
@@ -309,7 +309,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static CombatHUDActorDetailsDisplay targetDisplay = null;
 
-      public static void ShowHeatAndStab ( CombatHUDActorDetailsDisplay __instance ) { try {
+      public static void ShowNumericInfo ( CombatHUDActorDetailsDisplay __instance ) { try {
          // Only override mechs. Other actors are unimportant to us.
          if ( !( __instance.DisplayedActor is Mech mech ) ) return;
 
@@ -352,6 +352,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                text.Append( "Dist " ).Append( baseDist );
                if ( baseDist != newDist )
                   text.Append( " >> " ).Append( newDist );
+               text.Append( '\n' );
+            } else {
+               movement = "Move " + ( (int) mech.MaxWalkDistance ) + "/" + ( (int) mech.MaxSprintDistance );
+               if ( jets > 0 ) movement += "\nJump " + (int) mech.JumpDistance;
             }
          }
 

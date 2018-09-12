@@ -25,8 +25,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense." ) ]
       public bool ShowUnitTonnage = false;
 
-      [ JsonComment( "Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true." ) ]
-      public bool ShowHeatAndStab = true;
+      [ JsonComment( "Show heat, stability, and distance / movement number in selection panel (bottom left) and target panel (top).  Default true." ) ]
+      public bool ShowNumericInfo = true;
 
       [ JsonComment( "Factor in heat multiplier at target location when previewing movement.  Default true." ) ]
       public bool FixHeatPreview = true;
@@ -391,6 +391,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int? SettingVersion = null;
 
 
+      [ Obsolete( "[v2.5] Default true. Replaced by ShowNumericInfo." ) ]
+      public bool? ShowHeatAndStab = true;
       [ Obsolete( "[v2.3 pre 20180827] Default 0. Replaced by CritChanceZeroArmor." ) ]
       public decimal? ThroughArmorCritChanceZeroArmor = null;
       [ Obsolete( "[v2.3 pre 20180827] Default 0. Replaced by CritChanceFullArmor." ) ]

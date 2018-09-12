@@ -22,7 +22,7 @@ For BATTLETECH 1.2.0
 - [Credits](#credits)
 
 
-AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show heat and stability numbers, or a detailed attack log.  The default settings aims to not deviate too far from vanilla.
+AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show distance numbers, or a detailed attack log.  The default settings aims to not deviate too far from vanilla.
 
 This mod does *not* modify game data.  Saves made with this mod on will *not* be affected by disabling or removing this mod.
 
@@ -148,11 +148,15 @@ These settings can be changed in `settings.json`.
 > Not sure why the game didn't do this.  When set to true, armour of damaged location will have a striped pattern instead of solid.
 
 
-**Enhance Heat and Stability Preview**
+**Show Numeric Combat Data**
 
-> Setting: `ShowHeatAndStab`  (true/false, default true)
+> Setting: `ShowNumericInfo`  (true/false, default true)
 >
-> When set to true, display heat and stability numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.  Predictions supplied by the game and is subject to all its quirks and bugs and mods.
+> When set to true, display heat, stability, movement, and distance numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.
+> Prediction numbers are supplied by the game and is subject to all its quirks and bugs and mods, such as `FixHeatPreview`.
+
+
+**Fix Heat Meter Prediction**
 
 > Setting: `FixHeatPreview`  (true/false, default true)
 >

@@ -74,7 +74,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          settings.ShowCorrectedHitChance = settings.ShowRealWeaponHitChance.GetValueOrDefault( settings.ShowCorrectedHitChance );
          if ( settings.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )
             settings.CalledChanceFormat = "{0:0.0}%"; // Keep digits consistent
-         // if ( old.ShowDecimalHitChance == true ); // Same as new default, don't change
+         // if ( old.ShowDecimalHitChance == true ); // Use new default either way, don't change
          if ( settings.LogHitRolls == true && ( settings.AttackLogLevel == null || settings.AttackLogLevel.Trim().ToLower() == "none" ) )
             settings.AttackLogLevel = "All";
 
@@ -82,6 +82,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             settings.CritChanceZeroArmor = settings.ThroughArmorCritChanceZeroArmor.GetValueOrDefault( 0 );
          if ( settings.ThroughArmorCritChanceFullArmor != null )
             settings.CritChanceFullArmor = settings.ThroughArmorCritChanceFullArmor.GetValueOrDefault( 0 );
+         if ( settings.ShowHeatAndStab == false )
+            settings.ShowNumericInfo = false;
 #pragma warning restore CS0618
 
          RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
