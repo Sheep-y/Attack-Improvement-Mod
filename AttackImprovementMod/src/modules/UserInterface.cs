@@ -96,8 +96,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( CombatHUDMechTrayArmorHover ), "setToolTipInfo", new Type[]{ typeof( Mech ), typeof( ArmorLocation ) }, "OverridePaperDollTooltip", null );
          }
 
-         if ( Settings.ShowStatsInPilotHint )
+         if ( Settings.ShowStatsInPilotHint ) {
+            PilotStatus = new Dictionary<CombatHUDMWStatus, Pilot>(4);
+            Patch( typeof( CombatHUDMWStatus ), "OnPortraitRightClicked", null, "RefreshPilotHint" );
+            Patch( typeof( CombatHUDMWStatus ), "ForceUnexpend", null, "RefreshPilotHint" );
             Patch( typeof( CombatHUDMWStatus ), "RefreshPilot", null, "ShowStatsInPilotHint" );
+         }
 
          if ( Settings.ShowBaseHitchance ) {
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
@@ -114,6 +118,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatEnds () {
          BarOwners?.Clear();
+         PilotStatus?.Clear();
       }
 
       // ============ Paper Doll ============
@@ -442,8 +447,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
       }
 
+
+      private static Dictionary<CombatHUDMWStatus, Pilot> PilotStatus;
+
+      // Force update on portrait right click and forced unexpansion.
+      public static void RefreshPilotHint ( CombatHUDMWStatus __instance ) {
+         if ( PilotStatus.TryGetValue( __instance, out Pilot pilot ) )
+            __instance.RefreshPilot( pilot );
+      }
+
       public static void ShowStatsInPilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) {
-         if ( ! pilot.IsIncapacitated )
+         if ( ! PilotStatus.ContainsKey( __instance ) )
+            PilotStatus.Add( __instance, pilot );
+         if ( ( HUD.SelectedActor != null || ! __instance.IsExpanded ) && ! pilot.IsIncapacitated )
             __instance.InjuriesItem.ShowExistingIcon( new Text( "ST:{0},{1},{2},{3} HP:{4}/{5}", new object[]{
                pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics, ( pilot.Health - pilot.Injuries ), pilot.Health } ),
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
