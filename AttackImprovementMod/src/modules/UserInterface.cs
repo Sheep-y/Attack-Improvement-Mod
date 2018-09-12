@@ -320,11 +320,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          text.Append( '\n' );
 
          CombatSelectionHandler selection = HUD?.SelectionHandler;
-         int baseHeat = mech.CurrentHeat, newHeat = baseHeat + mech.TempHeat,
+         int baseHeat = mech.CurrentHeat, newHeat = baseHeat,
              baseStab = (int) mech.CurrentStability, newStab = baseStab;
          string movement = "";
          if ( selection != null && selection.SelectedActor == mech && __instance != targetDisplay ) { // Show predictions in selection panel
-            if ( selection.SelectedActor == mech ) {
+            newHeat += mech.TempHeat;
+
+            if ( selection.SelectedActor == mech ) try {
                newHeat += selection.ProjectedHeatForState;
                if ( ! mech.HasMovedThisRound )
                   newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
@@ -332,9 +334,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   newHeat -= mech.AdjustedHeatsinkCapacity;
                newHeat = Math.Min( newHeat, mech.MaxHeat );
                newStab = (int) selection.ProjectedStabilityForState;
-            }
+            } catch ( Exception ex ) { Error( ex ); }
 
-            if ( selection.ActiveState is SelectionStateMove move ) {
+            try { if ( selection.ActiveState is SelectionStateMove move ) {
                float maxCost = move is SelectionStateSprint sprint ? mech.MaxSprintDistance : mech.MaxWalkDistance;
                mech.Pathing.CurrentGrid.GetPathTo( move.PreviewPos, mech.Pathing.CurrentDestination, maxCost, null, out float costLeft, out Vector3 ResultDestination, out float lockedAngle, false, 0f, 0f, 0f, true, false );
                movement = move is SelectionStateSprint ? "SPRINT " : "MOVE ";
@@ -342,15 +344,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             } else if ( selection.ActiveState is SelectionStateJump jump ) {
                float maxCost = mech.JumpDistance, cost = Vector3.Distance( jump.PreviewPos, mech.CurrentPosition );
                movement = "JUMP " + (int) ( maxCost - cost ) + "/" + (int) maxCost;
-            }
+            } } catch ( Exception ex ) { Error( ex ); }
 
-         } else if ( selection != null ) {  // Target panel or non-selection. Show min/max numbers and distance.
+         } else if ( selection != null ) try {  // Target panel or non-selection. Show min/max numbers and distance.
             Vector3? position;
             if      ( selection.ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
             else if ( selection.ActiveState is SelectionStateMove move ) position = move.PreviewPos;
             else if ( selection.ActiveState is SelectionStateJump jump ) position = jump.PreviewPos;
-            else position = HUD.SelectedActor.CurrentPosition;
-            if ( position != null ) {
+            else position = HUD.SelectedActor?.CurrentPosition;
+            if ( position != null && HUD.SelectedActor != null ) {
                int baseDist = (int) Vector3.Distance( HUD.SelectedActor.CurrentPosition, mech.CurrentPosition ),
                    newDist = (int) Vector3.Distance( position.GetValueOrDefault(), mech.CurrentPosition );
                text.Append( "Dist " ).Append( baseDist );
@@ -361,7 +363,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                movement = "Move " + ( (int) mech.MaxWalkDistance ) + "/" + ( (int) mech.MaxSprintDistance );
                if ( jets > 0 ) movement += "\nJump " + (int) mech.JumpDistance;
             }
-         }
+         } catch ( Exception ex ) { Error( ex ); }
 
          text.Append( "Heat " ).Append( baseHeat );
          if ( baseHeat == newHeat )
