@@ -264,8 +264,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "Max vertical offset of melee attack, by the mech class of the unit at a lower position.  Set to \"\" to disable.",
-        "Non-mechs are same as light.  Default \"8,11,14,17\" which allows bigger mechs to hit and be hit from more locations." } ) ]
-      public string MaxMeleeVerticalOffsetByClass = "8,11,14,17";
+        "Non-mechs are same as light.  Default \"8,12,16,20\" which allows bigger mechs to hit and be hit from more locations." } ) ]
+      public string MaxMeleeVerticalOffsetByClass = "8,12,16,20";
 
       /* [ JsonComment( "Allow melee attack on sprint.  Default false." ) ]
       public bool AllowChargeAttack = false;

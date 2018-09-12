@@ -65,12 +65,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( settings.LOSWidthBlockedMultiplier != null && settings.LOSWidthBlockedMultiplier != 3 )
             settings.LOSWidthBlocked = settings.LOSWidthBlockedMultiplier.GetValueOrDefault( 3 ) * 0.75m;
 
-         // Add SelfTerrainMelee and spacing to 2.0 default
-         if ( settings.MeleeAccuracyFactors == "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy" )
-            settings.MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
-         else if ( settings.MeleeAccuracyFactors.ToLower().Contains( "selfwalked" ) )
-            settings.MeleeAccuracyFactors = Regex.Replace( settings.MeleeAccuracyFactors, "SelfWalked", "Walked", RegexOptions.IgnoreCase );
-
          settings.ShowCorrectedHitChance = settings.ShowRealWeaponHitChance.GetValueOrDefault( settings.ShowCorrectedHitChance );
          if ( settings.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )
             settings.CalledChanceFormat = "{0:0.0}%"; // Keep digits consistent
@@ -143,6 +137,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( (float) settings.DiminishingBonusPowerBase == 0.8f ) settings.DiminishingBonusPowerBase = 0.8m;
             if ( (float) settings.DiminishingPenaltyPowerBase == 0.8f ) settings.DiminishingPenaltyPowerBase = 0.8m;
             if ( (float) settings.DiminishingPenaltyPowerDivisor == 3.3f) settings.DiminishingPenaltyPowerDivisor = 3.3m;
+            // Add SelfTerrainMelee and spacing to 2.0 default
+            if ( settings.MeleeAccuracyFactors == "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy" )
+               settings.MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
+            else if ( settings.MeleeAccuracyFactors.ToLower().Contains( "selfwalked" ) )
+               settings.MeleeAccuracyFactors = Regex.Replace( settings.MeleeAccuracyFactors, "SelfWalked", "Walked", RegexOptions.IgnoreCase );
             settings.AttackLogLevel = "All"; // Log is now enabled by default with new background logger
             settings.SettingVersion = 2_001_000;
          }

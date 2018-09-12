@@ -35,10 +35,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( MultiplierEnemy != 0.2 || MultiplierAlly != 0.2 )
             Patch( typeof( CritChanceRules ), "GetCritMultiplier", "SetNPCCritMultiplier", null );
 
-         if ( Settings.CritChanceVsTurret > 0 )
-            Patch( typeof( Turret ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
-         if ( Settings.CriChanceVsVehicle > 0 )
-            Patch( typeof( Vehicle ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
+         if ( Settings.CritChanceVsTurret > 0 || Settings.CriChanceVsVehicle > 0 ) {
+            if ( Settings.CritChanceVsTurret > 0 )
+               Patch( typeof( Turret ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
+            if ( Settings.CriChanceVsVehicle > 0 )
+               Patch( typeof( Vehicle ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
+            if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
+               Patch( typeof( AmmunitionBox ), "DamageComponent", null, "AmmoExplosionKillNonMech" );
+         }
 
          if ( ThroughArmorCritEnabled = Settings.CritChanceZeroArmor > 0 ) {
             Patch( ResolveWeaponDamage, "ReplaceCritHandling", null );
@@ -63,9 +67,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
             Patch( MechType, "DamageLocation", "UpdateCritLocation", null );
          }
-
-         if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
-            Patch( typeof( AmmunitionBox ), "DamageComponent", null, "AmmoExplosionKillNonMech" );
 
          if ( HasMod( "MechEngineer.Control" ) ) TryRun( ModLog, InitMechEngineerBridge );
       }
