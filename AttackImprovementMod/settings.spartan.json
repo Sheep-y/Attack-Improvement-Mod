@@ -25,9 +25,13 @@
 
   "ShowUnitTonnage": true,
 
-  /* Show heat and stability number in selection panel (bottom left) and target panel (top).  Default true. */
+  /* Show heat, stability, and distance / movement number in selection panel (bottom left) and target panel (top).  Default true. */
 
-  "ShowHeatAndStab": true,
+  "ShowNumericInfo": true,
+
+  /* Factor in heat multiplier at target location when previewing movement.  Default true. */
+
+  "FixHeatPreview": true,
 
   /* Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results. */
 
@@ -37,6 +41,10 @@
 
   "ShowAmmoInTooltip": true,
   "ShowEnemyAmmoInTooltip": false,
+
+  /* Show pilot stats when you right click a mechwarrior while in combat. */
+
+  "ShowStatsInPilotHint": true,
 
   /* Set armour colour of floating bar of Player / Enemy / Ally.  Default "cyan" for player, "teal" for ally.  Set to empty to not change. */
 
@@ -50,7 +58,7 @@
 
   /* Make lines wider or thinner.  Default 2 and 1.5 times of game default.  Set to 0 to not mess with it. */
 
-  "LOSWidth": 2.0,
+  "LOSWidth": 2,
   "LOSWidthBlocked": 1.5,
 
   /* Make obstruction marker bigger or smaller by multiplying its height and width.  Default 1.5.
@@ -84,7 +92,7 @@
 
   "ArcLinePoints": 48,
 
-  /* Change marker colour of the facing indicator. Colorus are for Front, Left, Right, Back, Prone. */
+  /* Change marker colour of the facing indicator. Colours are for Front, Left, Right, Back, Prone. */
 
   "FacingMarkerPlayerColors": "#FFFF,#CFCF,#CFCF,#AFAF,#FF8F",
   "FacingMarkerEnemyColors": "#FFFF,#FCCF,#FCCF,#FAAF,#FF8F",
@@ -132,11 +140,11 @@
 
   /* Modify base weapon hit chance.  -0.05 to make all base accuracy -5%, 0.1 to make them +10% etc.  Default 0. */
 
-  "BaseHitChanceModifier": 0.0,
+  "BaseHitChanceModifier": 0,
 
   /* Modify base melee hit chance.  -0.05 to make all melee and DFA accuracy -5%, 0.1 to make them +10% etc.  Default 0. */
 
-  "MeleeHitChanceModifier": 0.0,
+  "MeleeHitChanceModifier": 0,
 
   /* Allow attacks from low ground to high ground to incur accuracy penalty.  Default true. */
 
@@ -153,7 +161,7 @@
 
   /* Hit modifier after jumping, added on top of movement modifier (if any).  Effective only if "Jumped" is in the modifier factor list(s).  Default 0. */
 
-  "ToHitSelfJumped": 2,
+  "ToHitSelfJumped": 3,
 
   //
   // Net To Hit Modifiers
@@ -166,13 +174,13 @@
   /* Step of hit chance.  Game default is 0.05, or 5%.  Hit chance is always rounded down.
    * Default 0 to remove hit chance step, so that odd gunnery stats can enjoy their +2.5% hit chance. */
 
-  "HitChanceStep": 0.0,
+  "HitChanceStep": 0,
 
   /* Max and min hit chance after all modifiers but before roll correction. Default 0.95 and 0.05, same as game default.
    * Note that 100% hit chance (max) may still miss if roll correction is enabled. */
 
-  "MaxFinalHitChance": 1.0,
-  "MinFinalHitChance": 0.0,
+  "MaxFinalHitChance": 1,
+  "MinFinalHitChance": 0,
 
   /* Make hit chance modifier has diminishing return rather than simple add and subtract.  Default false. */
 
@@ -182,7 +190,7 @@
    * Example: +3 Bonus @ 80% Base ToHit == 1.1 x 0.8 == 88% Hit */
 
   "DiminishingBonusPowerBase": 0.8,
-  "DiminishingBonusPowerDivisor": 6.0,
+  "DiminishingBonusPowerDivisor": 6,
   "DiminishingBonusMax": 16,
 
   /* Diminishing Penalty: Base^(Penalty/Divisor).  Default 0.8^(Penalty/3.3) and caps at +32.
@@ -211,18 +219,18 @@
   /* Increase or decrease roll correction strength.  0 to disable roll correction, 1 is original strength, max is 2 for double strength.
    * Default is 0.5 for less correction. */
 
-  "RollCorrectionStrength": 0.0,
+  "RollCorrectionStrength": 0,
 
   /* Set miss streak breaker threshold.  Only attacks with hit rate above the threshold will add to streak breaker.
    * Default is 0.5, same as game default.  Set to 1 to disable miss streak breaker. */
 
-  "MissStreakBreakerThreshold": 1.0,
+  "MissStreakBreakerThreshold": 1,
 
   /* Set miss streak breaker divider.  Set to negative integer or zero to make it a constant bonus, e.g. -5 = 5% bonus per miss.
    * Otherwise, MissStreakBreakerThreshold is deduced from triggering attack's hit rate, then divided by this much, then added to streak breaker's chance modifier.
    * Default is 5, same as game default. */
 
-  "MissStreakBreakerDivider": 5.0,
+  "MissStreakBreakerDivider": 5,
 
   //
   // Modifiers Preview
@@ -259,13 +267,97 @@
 
   "UnlockMeleePositioning": true,
 
+  /* Max vertical offset of melee attack, by the mech class of the unit at a lower position.  Set to "" to disable.
+   * Non-mechs are same as light.  Default "8,12,16,20" which allows bigger mechs to hit and be hit from more locations. */
+
+  "MaxMeleeVerticalOffsetByClass": "8,12,16,20",
+
+  //
+  // Critical Hits
+  //
+
+  /* Skip critical checks if target is dead.  Default true.  Applies to vehicle and turret too. */
+
+  "SkipCritingDeadMech": false,
+
+  /* Overrides AICritChanceBaseMultiplier in CombatGameConstants.json.  Default 0.2, same as game.
+   * Set to 1 for same crit chance as players, or set to 0 to prevent enemies and/or allies from dealing crit. */
+
+  "CritChanceEnemy": 0.5,
+  "CritChanceAlly": 1,
+
+  /* Critical rate on vehicles and turrets, relative to mech.  Set to 0 to disable. */
+
+  "CriChanceVsVehicle": 0.75,
+  "CritChanceVsTurret": 0.6,
+
+  /* Should turrets and vehicles be killed when their ammo explodes?  Default true. */
+
+  "AmmoExplosionKillTurret": true,
+  "AmmoExplosionKillVehicle": true,
+
+  /* Check crit on last damaged location, following damage transfer.  Default true. */
+
+  "CritFollowDamageTransfer": true,
+
+  /* Prevent the case where a location with full sctructure but zero armour can be crit'ed.  Default true. */
+
+  "FixFullStructureCrit": true,
+
+  /* A weapon must deal this much total damage to a location for through armour crit to roll.  Default 9.  Set to 0 for no threshold.
+   * A number between 0 and 1 (exclusive) means a fraction of max armour, 0 and -1 means a fraction of current armour,
+   * while 1 and above means a fixed damage threshold. */
+
+  "ThroughArmorCritThreshold": 9,
+
+  /* Base crit chance of a location with zero armour but full structure.  Works by fully replacing mech crit system.
+   * Set to 0 to disable through armour critical.  Default 0.  Can be 0 to 1, e.g. 0.2 for 20%.
+   * When logging through armour crits, the Max HP column logs the max armour. */
+
+  "CritChanceZeroArmor": 0.05,
+
+  /* Base crit chance of a location with full armour.  Must not be higher than ThroughArmorCritChanceZeroArmor.
+   * Actual through armour crit rate is between this and zero armour chance.  Default 0.  Can be -1 to 1, e.g. 0.1 for 10%.
+   * If negative, crits will not happen until armour is sufficiently weakened. */
+
+  "CritChanceFullArmor": 0,
+
+  /* Base crit chance of a structurally hit location if it is at zero structure, can be 0 to 1.  Default 1, same as game. */
+
+  "CritChanceZeroStructure": 0.5,
+
+  /* Base crit chance of a structurally hit location if it is at full structure, can be -1 to 1.  Default 0, same as game. */
+
+  "CritChanceFullStructure": 0,
+
+  /* Min crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 0.5, same as game.
+   * This setting simply overrides ResolutionConstants.MinCritChance in CombatGameConstants.json. */
+
+  "CritChanceMin": 0,
+
+  /* Max crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 1, same as game. */
+
+  "CritChanceMax": 1,
+
+  /* Ignore (reroll) destroyed component when rolling crit. */
+
+  "CritIgnoreDestroyedComponent": true,
+
+  /* Ignore (reroll) empty slots when rolling crit. */
+
+  "CritIgnoreEmptySlots": true,
+
+  /* Roll on next damage transfer location if a location has nothing to crit. */
+
+  "CritLocationTransfer": true,
+
+  /* Deduce rolled crit from crit% and keep rolling crit until crit% is zero. */
+
+  "MultupleCrits": true,
+
   //
   // Hit Resolution
   //
-
-  /* Skip critical checks if target is dead.  Default true. */
-
-  "SkipCritingDeadMech": false,
 
   /* Yang has improved autoloader's algorithm to balance ammo draw to minimise ammo explosion chance.  Default true for friends. */
 
@@ -277,7 +369,7 @@
   "AutoJettisonAmmo": true,
   "AutoJettisonEnemyAmmo": true,
 
-  /* Increase hit distribution precision for degrading called shots.  Default true.  Fix hit distribution bug on game ver 1.1.0 and below. */
+  /* Increase hit distribution precision for degrading called shots.  Default true. */
 
   "FixHitDistribution": true,
 
