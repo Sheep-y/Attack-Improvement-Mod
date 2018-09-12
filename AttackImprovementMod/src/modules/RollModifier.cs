@@ -99,7 +99,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          for ( int i = 1 ; i <= Settings.DiminishingPenaltyMax ; i++ )
             diminishingPenalty[ i-1 ] = (float) Math.Pow( penaltyBase, i / penaltyDiv );
          Info( "Diminishing hit% multipliers (bonus) {0}", diminishingBonus );
-         Info( "Diminishing hit% multipliers (penalty) {1}", diminishingPenalty );
+         Info( "Diminishing hit% multipliers (penalty) {0}", diminishingPenalty );
       }
 
       // ============ Fixes ============
