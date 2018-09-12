@@ -212,6 +212,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Info( "Ranged modifiers ({0}): {1}", RangedModifiers.Count, Factors );
       }
 
+      private static string smartRange ( float min, float range, float max ) {
+         if ( range-min > max-range )
+            return " (<" + max + "m)";
+         return " (>" + min + "m)";
+      }
+
       public static Func<AttackModifier> GetRangedModifierFactor ( string factorId ) {
          switch ( factorId ) {
          case "armmounted":
@@ -219,16 +225,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          case "range":
             return () => {
-               float modifier = Hit.GetRangeModifier( AttackWeapon, AttackPos, TargetPos );
+               Weapon w = AttackWeapon;
+               float modifier = Hit.GetRangeModifier( w, AttackPos, TargetPos );
                AttackModifier result = new AttackModifier( modifier );
                float range = Vector3.Distance( AttackPos, TargetPos );
                int shownRange = (int) Math.Floor( range );
-               if ( range < AttackWeapon.MinRange ) return result.SetName( $"MIN RANGE ({shownRange}m)" );
-               if ( range < AttackWeapon.ShortRange ) return result.SetName( $"SHORT RANGE ({shownRange}m)" );
-               if ( range < AttackWeapon.MediumRange ) return result.SetName( $"MEDIUM RANGE ({shownRange}m)" );
-               if ( range < AttackWeapon.LongRange ) return result.SetName( $"LONG RANGE ({shownRange}m)" );
-               if ( range < AttackWeapon.MaxRange ) return result.SetName( $"MAX RANGE ({shownRange}m)" );
-               return result.SetName( $"OUT OF RANGE ({shownRange}m)" );
+               if ( range < w.MinRange ) return result.SetName( $"MIN RANGE (<{w.MinRange}m)" );
+               if ( range < w.ShortRange ) return result.SetName( "SHORT RANGE" + smartRange( w.MinRange, range, w.ShortRange ) );
+               if ( range < w.MediumRange ) return result.SetName( "MED RANGE" + smartRange( w.ShortRange, range, w.MediumRange ) );
+               if ( range < w.LongRange ) return result.SetName( "LONG RANGE" + smartRange( w.MediumRange, range, w.LongRange ) );
+               if ( range < w.MaxRange ) return result.SetName( "MAX RANGE" + smartRange( w.LongRange, range, w.MaxRange ) );
+               return result.SetName( $"OUT OF RANGE (>{w.MaxRange}m)" );
             };
 
          case "height":
