@@ -323,8 +323,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          int baseHeat = mech.CurrentHeat, newHeat = baseHeat + mech.TempHeat,
              baseStab = (int) mech.CurrentStability, newStab = baseStab;
          string movement = "";
-         if ( mech == HUD.SelectedActor && __instance != targetDisplay ) { // Show predictions in selection panel
-            if ( selection != null && selection.SelectedActor == mech ) {
+         if ( selection != null && selection.SelectedActor == mech && __instance != targetDisplay ) { // Show predictions in selection panel
+            if ( selection.SelectedActor == mech ) {
                newHeat += selection.ProjectedHeatForState;
                if ( ! mech.HasMovedThisRound )
                   newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
@@ -343,8 +343,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                float maxCost = mech.JumpDistance, cost = Vector3.Distance( jump.PreviewPos, mech.CurrentPosition );
                movement = "JUMP " + (int) ( maxCost - cost ) + "/" + (int) maxCost;
             }
-            
-         } else {  // Target panel or non-selection. Show min/max numbers and distance.
+
+         } else if ( selection != null ) {  // Target panel or non-selection. Show min/max numbers and distance.
             Vector3? position;
             if      ( selection.ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
             else if ( selection.ActiveState is SelectionStateMove move ) position = move.PreviewPos;
