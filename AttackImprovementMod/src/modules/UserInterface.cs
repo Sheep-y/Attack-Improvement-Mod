@@ -7,6 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
@@ -78,7 +79,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowHeatAndStab" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
+            // Force heat/stab number refresh
             Patch( typeof( CombatHUDMechTray ), "Update", null, "RefreshHeatAndStab" );
+            // Force move/distance number refresh
+            Patch( typeof( SelectionStateMove ), "ProcessMousePos", null, "RefreshMoveAndDist" );
+            Patch( typeof( SelectionStateJump ), "ProcessMousePos", null, "RefreshMoveAndDist" );
          }
          if ( Settings.FixHeatPreview )
             Patch( typeof( Mech ), "get_AdjustedHeatsinkCapacity", null, "CorrectProjectedHeat" );
@@ -309,14 +314,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( !( __instance.DisplayedActor is Mech mech ) ) return;
 
          int jets = mech.WorkingJumpjets;
-         string line1 = mech.weightClass.ToString(), line2 = null;
-         if ( jets > 0 ) line1 += ", " + jets + " JETS";
+         StringBuilder text = new StringBuilder( 100 );
+         text.Append( mech.weightClass );
+         if ( jets > 0 ) text.Append( ", " ).Append( jets ).Append( " JETS" );
+         text.Append( '\n' );
 
-         int baseHeat = mech.CurrentHeat, newHeat = baseHeat,
+         CombatSelectionHandler selection = HUD?.SelectionHandler;
+         int baseHeat = mech.CurrentHeat, newHeat = baseHeat + mech.TempHeat,
              baseStab = (int) mech.CurrentStability, newStab = baseStab;
+         string movement = "";
          if ( mech == HUD.SelectedActor && __instance != targetDisplay ) { // Show predictions in selection panel
-            CombatSelectionHandler selection = HUD?.SelectionHandler;
-            newHeat += mech.TempHeat;
             if ( selection != null && selection.SelectedActor == mech ) {
                newHeat += selection.ProjectedHeatForState;
                if ( ! mech.HasMovedThisRound )
@@ -326,15 +333,48 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                newHeat = Math.Min( newHeat, mech.MaxHeat );
                newStab = (int) selection.ProjectedStabilityForState;
             }
-         } else {  // Show distance in target panel
+
+            //movement = "Move " + ( (int) mech.MaxWalkDistance ) + "/" + ( (int) mech.MaxSprintDistance );
+            //if ( jets > 0 ) movement += ", Jump " + (int) mech.JumpDistance;
+            
+         } else {  // Target panel or non-selection. Show min/max numbers and distance.
+            //movement = "Move " + ( (int) mech.MaxWalkDistance ) + "/" + ( (int) mech.MaxSprintDistance );
+            //if ( jets > 0 ) movement += ", Jump " + (int) mech.JumpDistance;
+
+            Vector3? position;
+            if      ( selection.ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
+            else if ( selection.ActiveState is SelectionStateMove move ) position = move.PreviewPos;
+            else if ( selection.ActiveState is SelectionStateJump jump ) position = jump.PreviewPos;
+            else position = HUD.SelectedActor.CurrentPosition;
+            if ( position != null ) {
+               int baseDist = (int) Vector3.Distance( HUD.SelectedActor.CurrentPosition, mech.CurrentPosition ),
+                   newDist = (int) Vector3.Distance( position.GetValueOrDefault(), mech.CurrentPosition );
+               text.Append( "Dist " ).Append( baseDist );
+               if ( baseDist != newDist )
+                  text.Append( " >> " ).Append( newDist );
+            }
          }
 
-         line2 = "Heat " + baseHeat;
-         if ( baseHeat == newHeat ) line2 += "/" + mech.MaxHeat; else line2 += " >> " + ( newHeat < 0 ? $"({-newHeat})" : newHeat.ToString() );
-         line2 += "\nStab " + baseStab;
-         if ( baseStab == newStab ) line2 += "/" + mech.MaxStability; else line2 += " >> " + newStab;
+         text.Append( "Heat " ).Append( baseHeat );
+         if ( baseHeat == newHeat )
+            text.Append( '/' ).Append( mech.MaxHeat );
+         else {
+            text.Append( " >> " );
+            if ( newHeat < 0 ) text.Append( '(' ).Append( -newHeat ).Append( ')' );
+            else text.Append( newHeat );
+         }
+         text.Append( '\n' );
 
-         __instance.ActorWeightText.text = line1 + "\n" + line2;
+         text.Append( "Stab " ).Append( baseStab );
+         if ( baseStab == newStab )
+            text.Append( '/' ).Append( mech.MaxStability );
+         else
+            text.Append( " >> " ).Append( newStab );
+         text.Append( '\n' );
+
+         text.Append( movement );
+
+         __instance.ActorWeightText.text = text.ToString();
          __instance.JumpJetsHolder.SetActive( false );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
@@ -371,9 +411,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void RefreshHeatAndStab ( CombatHUDMechTray __instance ) {
-         if ( !needRefresh ) return;
+         if ( ! needRefresh ) return;
          __instance?.ActorInfo?.DetailsDisplay?.RefreshInfo();
          needRefresh = false;
+      }
+
+      public static void RefreshMoveAndDist () {
+         HUD?.TargetingComputer?.ActorInfo?.DetailsDisplay?.RefreshInfo();
+         HUD?.MechTray?.ActorInfo?.DetailsDisplay?.RefreshInfo();
       }
 
       public static MapEncounterLayerDataCell[] GetEncounterCellsAtPosition ( Vector3 position ) {
