@@ -106,8 +106,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatStarts () {
-         if ( Settings.ShowHeatAndStab )
-            targetDisplay = HUD.TargetingComputer?.ActorInfo?.DetailsDisplay;
+         if ( Settings.ShowHeatAndStab ) {
+            targetDisplay = HUD?.TargetingComputer?.ActorInfo?.DetailsDisplay;
+            HUD?.MechTray?.ActorInfo?.DetailsDisplay?.transform?.transform?.Translate( 0, -15, 0 );
+         }
       }
 
       public override void CombatEnds () {
@@ -306,9 +308,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( jets > 0 ) line1 += ", " + jets + " JETS";
 
          int baseHeat = mech.CurrentHeat, newHeat = baseHeat,
-            baseStab = (int) mech.CurrentStability, newStab = baseStab;
-         if ( mech == HUD.SelectedActor && __instance != targetDisplay ) { // More info in selection panel
-            line1 = "·\n" + line1;
+             baseStab = (int) mech.CurrentStability, newStab = baseStab;
+         if ( mech == HUD.SelectedActor && __instance != targetDisplay ) { // Show predictions in selection panel
             CombatSelectionHandler selection = HUD?.SelectionHandler;
             newHeat += mech.TempHeat;
             if ( selection != null && selection.SelectedActor == mech ) {
@@ -320,6 +321,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                newHeat = Math.Min( newHeat, mech.MaxHeat );
                newStab = (int) selection.ProjectedStabilityForState;
             }
+         } else {  // Show distance in target panel
          }
 
          line2 = "Heat " + baseHeat;
