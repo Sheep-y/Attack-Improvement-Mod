@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 2.3 development #
+# AIM - Attack Improvement Mod 2.5 #
 For BATTLETECH 1.2.0
 
 - [Features Overview](#features-overview)
@@ -6,7 +6,7 @@ For BATTLETECH 1.2.0
 - [Configuration](#configuration)
 - [Settings](#settings)
   * [User Interface Settings](#user-interface-settings)
-  * [Targeting Line Settings](#targeting-line-settings)
+  * [Targeting Line and Facing Ring Settings](#targeting-line-and-facing-ring-settings)
   * [Called Shot Settings](#called-shot-settings)
   * [Melee and DFA Settings](#melee-and-dfa-settings)
   * [Individual Modifier Settings](#individual-modifier-settings)
@@ -22,7 +22,7 @@ For BATTLETECH 1.2.0
 - [Credits](#credits)
 
 
-AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show distance numbers, or a detailed attack log.  The default settings aims to not deviate too far from vanilla.
+AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show distance numbers, or a detailed attack log.  The default settings aim to preserve the balance of vanilla game.
 
 This mod does *not* modify game data.  Saves made with this mod on will *not* be affected by disabling or removing this mod.
 
@@ -32,62 +32,58 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 
 ## Game Bugs Fixed and HUD Enhancements ##
 
-* Damaged Structure Display fixed and enhanced.
-* Grey Head Disease fixed.
-* Line of Fire fixed and stylised by type and direction.
+* Grey head disease fixed.
+* Line of fire fixed and stylised: Dotted = indirect, Cyan = flank, Green = rear.
 * Coloured facing ring and floating armour bar.
+* Damaged Structure Display fixed and enhanced.
 * Multi-Target Back Out fixed.
 * Make sure 0 HP means dead, never zombie.
-* Fix and Enhance Heat and Stability Preview.
-* Show Ammo Count in paper doll hover.
-* Show Base Hit Chance in accuracy modifier popup.
-* Show MechWarrior stats in right-click summary hint.
-* Post-Move To-Hit Penalties and Cooldown factored in action preview.
+* Show heat, instability, distance, and movement numbers.
+* Show ammo count in paper doll hover.
+* Show base hit chance in accuracy modifier popup.
+* Show mechwarrior stats in hover/right-click hint.
+* Post-move to-hit penalties and heat factored in action preview.
 * (Optional) Show Mech Tonnage.
 * (Optional) Show Corrected Hit chance and Called Shot Chance.
 
 ## Mechanic Enhancements ##
 
-* Unlock Hit Chance Stepping to make odd piloting useful.
-* Called Shots cluster around called mech location.
-* Precise Hit Distribution that improves SRM and MG called shot.
-* More Melee Modifiers, and fixes the absent of stood up penalty.
-* Flank and Rear Attack Bonus.
-* Allow Net Bonus Hit modifiers.
-* Allow Negative Height Modifier.
-* Remove Melee Position Cap.
-* Ammo Loader AI that balance ammo usage for less explosion.
-* Auto Jettison useless ammo.
+* Unlock hit chance stepping (make odd Gunnery useful).
+* Called shots cluster around called mech location.
+* Precise hit distribution that improves SRM and MG called shot.
+* More melee modifiers, and fixes the absent of stood up penalty.
+* Flank and rear attack Bonus.
+* Allow net bonus hit modifiers.
+* Allow negative height modifier.
+* Remove melee position locking.
+* Ammo loader AI that balance ammo usage to minimise explosion.
+* Auto jettison useless ammo.
 
 ## New Critical Hit System ##
 
-* Skip Criting the Dead Mechs.
-* Allow vehicles and turrets to suffer critical hit.
-* Critical Hit now follows and happen after damage transfer.
+* Skip criting the dead mechs.
+* Vehicle and turret critical hits.
+* Critical hits follow damage transfer.
 * Prevent critical hit on locations with intact structure.
-* NPC allies now has normal crit chance.  NPC enemies adjustable.
-* Adjust normal critical hit chances and mix/max cap.
+* Give normal crit chance to NPC allies.  Enemies adjustable.
+* (Optional) Adjust normal critical hit chances and mix/max cap.
 * (Optional) Allow Through Armour Critical hit (TAC).
 * (Optional) Allow critical hit reroll and location transfer.
 * (Optional) Allow multiple critical hits per weapon.
 
 ## Other Adjustables ##
 
-* Tabular Attack Log that can be opened directly in Excel.
-* Old Attack Log are archived and auto-deleted.
-* Adjustable Roll Correction Strength, default halved.
-* Adjustable Miss Streak Breaker.
-* Adjustable Base Hit Chance.
-* Adjustable Hit Chance stepping and min/max cap.
-* Adjustable Attack Modifier List.
-* Control Display Precision of hit chance and called shot chance.
+* Tabular attack log that can be opened directly in Excel.
+* Old attack logs are archived and auto-deleted in background.
+* Adjustable roll correction strength, default halved.
+* Adjustable miss streak breaker.
+* Adjustable base hit chances.
+* Adjustable hit chance stepping and min/max cap.
+* Adjustable attack modifier list.
+* Control display precision of hit chance and called shot chance.
 
 
 # Installation
-
-<span style="color:red">
-**IMPORTANT Note on upgrading FROM mod version 1.0**:</span>
-Rename your old `mod.json` to `settings.json` to keep old settings.
 
 1. Install [BTML and ModTek](https://github.com/janxious/ModTek/wiki/The-Drop-Dead-Simple-Guide-to-Installing-BTML-&-ModTek-&-ModTek-mods).
 2. [Download this mod](https://github.com/Sheep-y/Attack-Improvement-Mod/releases), extract in the mod folder. i.e. You should see `BATTLETECH\Mods\AttackImprovementMod\mod.json`
@@ -97,14 +93,15 @@ Rename your old `mod.json` to `settings.json` to keep old settings.
 
 # Configuration
 
-When the mod is first loaded by the game, it will try to read settings.json and validate its settings.
+When the mod is loaded, it will read `settings.json` and validate its.
+If the setting file does not exist, it will be created.
 
-Some configurations are bundled with the mod.  You may copy or rename a setting to `settings.json` to apply it.
+Several presets are bundled with this mod.  You may copy or rename a setting to `settings.json` to apply it.
 
 * `settings.default.json` - Out of box default.  Game is subtly enhanced, such as lower roll correction, hit stepping and melee position unlock, flanking bonus, and critical hit on non-mechs.
 * `settings.spartan.json` - Enable diminishing modifier, more bonus and penalties, through armour crit, crit reroll, enemy ammo balancing and jettison, and disables roll correction and streak breaker.
-* `settings.fix-enhance.json` - Only enable game fixes and user interface enhancements for an improved vanilla experience.  Game mechanic is not changed beyond bug fixes.
-* `settings.fix-only.json` - Only enable game fixes for a bug-free vanilla experience.  Enhancements need to be enabled manually.
+* `settings.ui-enhance.json` - Only enable game fixes and user interface enhancements.  Game mechanic is not changed beyond bug fixes.
+* `settings.fix-only.json` - Only enable game fixes for a bug-free, pure vanilla experience.
 * `settings.log-only.json` - An old preset that should be deleted.  Use fix-only instead.
 
 Note that `settings.json` is auto-managed.  Old settings will be upgraded and removed, out of range settings will be corrected, and the formats and comments cannot be changed.
@@ -125,87 +122,81 @@ These settings can be changed in `settings.json`.
 ## User Interface Settings
 
 
-**Colour Floating Armour Bars**
+**Armour Bars**
 
 >  Setting: `FloatingArmorColourPlayer`  (color string, default "cyan")<br>
 >  Setting: `FloatingArmorColourEnemy`  (color string, default "")<br>
 >  Setting: `FloatingArmorColourAlly`  (color string, default "teal")<br>
 >
->  When non-empty, change colour of armour bars floating above field units, making it easier to tell friends from foes.
+>  When non-empty, change colours of armour bars, making it easier to tell friends from foes.
 
 
-**Fix Rear Structure Display**
+**Paper Dolls**
 
 > Setting: `FixPaperDollRearStructure`  (true/false, default true)
 >
-> The rear structure of the paper dolls are showing front structure on the reverse side because of a typo in the code.  If the front has armour, it means the damaged structure will not be displayed.
->
-> When set to true, this mod can fix all paper dolls, including selection panel, target panel, called shot panel, post-mission status, and in mech bay.
-
-
-**Show Under-Armour Damage**
+> The rear structures of the paper dolls are displayed incorrectly because of a typo in game code.
+> When true, fix the bug.
+<br>
 
 > Setting: `ShowUnderArmourDamage `  (true/false, default true)
 >
-> Not sure why the game didn't do this.  When set to true, armour of damaged location will have a striped pattern instead of solid.
+> When true, armour of damaged location will have a striped pattern instead of solid.
+
+> Both settings apply to all paper dolls: selection panel, target panel, called shot popup, mech bay, deploy, post-mission report etc.
 
 
-**Show Numeric Combat Data**
 
-> Setting: `ShowNumericInfo`  (true/false, default true)
->
-> When set to true, display heat, stability, movement, and distance numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.
-> Prediction numbers are supplied by the game and is subject to all its quirks and bugs and mods, such as `FixHeatPreview`.
-
-
-**Fix Heat Meter Prediction**
+**Combat Data**
 
 > Setting: `FixHeatPreview`  (true/false, default true)
 >
-> When set to true, previewed move destination's terrain will be factored heat preview.  For example, moving into water will result in higher predicted cooldown and vice versa.
-> This allows more accurate overheat prediction when moving across terrain of different cooldown rates.
+> When true, previewed move destination's terrain will be factored in heat preview.
+> For example, moving into water will predict more cooldown and vice versa.
+<br>
 
-
-**Show Unit Tonnage**
+> Setting: `ShowNumericInfo`  (true/false, default true)
+>
+> When true, display heat, stability, movement, and distance numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.
+> Prediction numbers are supplied by the game and is subject to all its quirks and bugs and mods, such as `FixHeatPreview`.
+<br>
 
 > Setting: `ShowUnitTonnage`  (true/false, default false)
 >
-> When set to true, show mech and vehicle tonnage in selection and target panel.
+> When true, show mech and vehicle tonnage in selection and target panel.
 >
-> Duplicates with Extended Information, but AIM override it and use a shorter form for mechs to fit in heat and stability numbers.  Default false because the short form can overwhelm inexperienced players.
-
-
-**Show Ammo In Tooltip**
+> Duplicates with Extended Information, but AIM override it and use a shorter form for mechs to fit `ShowNumericInfo`.
+> Default false because the short form may overwhelm inexperienced players.
+<br>
 
 > Setting: `ShowAmmoInTooltip`  (true/false, default true)<br>
 > Setting: `ShowEnemyAmmoInTooltip`  (true/false, default false)<br>
 >
-> When set to true, show ammo count in the list of components when you mouseover a location on the paper doll.
+> When true, show ammo count in the component lists when you mouseover a location on the paper doll.
 >
 > The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
-
-
-**Show MechWarrior Stats in Tooltip**
+<br>
 
 > Setting: `ShowStatsInPilotHint`  
 (true/false, default true)
 >
-> When true, show mechwarrior stats in their one-line hint that pops up on right-click, instead of showing only injuries.
+> When true, show mechwarrior stats in their one-line hint that pops up on mouseover and right-click, instead of showing only injuries.
 
 
-**Fix Multi-Target Back Out**
+**Multi-Target**
 
 > Setting: `FixMultiTargetBackout`  (true/false, default true)
 >
-> The game's Muti-Target back out (escape/right click) is bugged. Backing out from first target will cancel the action, and second back out (regardless of target) will always cancel the whole thing.
+> The game's Muti-Target back out (escape/right click) is bugged
+> Backing out from first target will cancel the action, and second back out will always cancel the whole thing (regardless of target).
 >
-> When set to true, this mod will make Multi-Target back out deselect targets one by one as expected.
+> When true, this mod will make Multi-Target back out from selected targets one by one as expected.
 
 
 
-## Targeting Line Settings
+## Targeting Line and Facing Ring Settings
 
-**Change Widths of Targeting Lines**
+**LoS Widths**
 
 > Setting: `LOSWidth`  (0 to 10, default 2, game default 1)
 >
@@ -220,7 +211,7 @@ These settings can be changed in `settings.json`.
 > When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
 
 
-**Styles and Colours Targeting Lines**
+**LoS Styles and Colours**
 
 > Setting: `LOSIndirectDotted`  (default true, game default false)<br>
 > Setting: `LOSNoAttackDotted`  (default true)<br>
@@ -235,52 +226,56 @@ These settings can be changed in `settings.json`.
 > Setting: `LOSIndirectColors`  (default "")<br>
 > Setting: `LOSNoAttackColors`  (default "")<br>
 >
-> Set the colour and style of various targeting lines.
+> When non-empty, set the colour and style of various targeting lines.
 > Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.
 >
 > Colours are either empty or in HTML hash syntax.  For example `"#F00"` = red, `"#0F0"` = green, `"#00F"` = blue, `"#FFF"` = white, `"#888"` = grey, `"#000"` = black.
 > Four parts means RGBA, while three parts mean full opacity RGB.  Supports full and short form. e.g. #28B = #2288BB = #2288BBFF.
 >
-> Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in order.
+> Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in this order.
 > If less colours are specified than direction, the missing directions will use the last colour.
 > For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
 >
 > When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
+> Note that Firing Line Improvement does not have directional styling.
 
 
-**Colours Facing Rings**
+**Facing Rings Colours**
 
-> Setting: `FacingMarkerPlayerColors`  (default "#FFFF,#CCFF,#CCFF,#BFBF,#FFBF")<br>
-> Setting: `FacingMarkerEnemyColors`  (default "#FFFF,#CCFF,#CCFF,#FBBF,#FFBF")<br>
+> Setting: `FacingMarkerPlayerColors`  (default "#FFFB,#CCFB,#CCFB,#BFBB,#FFBB")<br>
+> Setting: `FacingMarkerEnemyColors`  (default "#FFFB,#CCFB,#CCFB,#FBBB,#FFBB")<br>
 > Setting: `FacingMarkerTargetColors`  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br>
 >
 > When non-empty, change the colours of each arc for friends, foes, and targeted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.
 
 
-**Change Widths of Obstruction Marker**
+**Widths of Obstruction Marker**
 
 > Setting: `LOSMarkerBlockedMultiplier`  (0 to 10, default 1.5)
 >
-> Scale the obstruction marker of targeting lines, the "light dot" that split the obstructed line into two. 2 means double width and height, 0.5 means half-half.  Set to 1 to leave at game default.  Set to 0 will not remove them from game but will effectively hide them.
+> Scale the obstruction marker of targeting lines, the "light dot" that split the obstructed line into two. 2 means double width and height, 0.5 means half-half.
+> Set to 1 to leave at game default.  Set to 0 will not remove them from game but will effectively hide them.
 >
 > When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
 
 
-**Refine or Rough Fire Arc and Jump Arc**
+**Refine or Roughen Fire Arc and Jump Arc**
 
 > Setting: `ArcLinePoints`  (2 to 1000, default 48, game default 18)
 >
-> On a high resolution monitor it is easy to see the hard corners of the arc of indirect targeting lines.  Lines are quick to draw, so this mod will happily improves their qualities for you.
+> To some sharp eyes, it is easy to see the hard corners of the arc of indirect targeting lines.
+> Lines are quick to draw, so this mod will happily improves their qualities for you.
 > Set to 2 to make them flat like other lines.  Set to 18 to leave at game default.
 >
 > When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
 
 
-**Fix LoS Inconsistency between Walk and Jump**
+**Fix LoS Inconsistency**
 
 > Setting: `FixLosPreviewHeight`  (true/false, default true)
 >
-> Walk and Jump will sometimes predicts different Line of Sight, because the walking preview height is slightly different from jumping preview height.  Set to true to make them the same.
+> Walk and Jump will sometimes predicts different Line of Sight, because their preview height is slightly different from each other.
+> When true, they will be made the same.
 
 
 
@@ -291,35 +286,35 @@ These settings can be changed in `settings.json`.
 
 > Setting: `FixGreyHeadDisease`  (true/false, default true)
 >
-> Set to true to confine the grey head disease to the boss and not spread.
+> When true, confine the grey head disease to the boss so that it does not spread around.
 >
-> When anyone, friends or foes, attacks a headshot immune character, all attacks from the same direction will never hit the head ever again.  Every one's head will be grey.  I call it the grey head disease.  It lasts until you load the game.
+> Otherwise, when anyone (friend or foe) attacks a headshot immune character, all attacks from the same direction will never hit any head ever again.
+> Every one's head will be grey.  I call it the grey head disease.  It lasts until you load a game, which resets the hit tables.
 <br>
 
 > Setting: `FixBossHeadCalledShotDisplay`  (true/false, default true)
 >
-> Set to true to make sure boss head is always unselectable.
+> When true, boss head is always unselectable in called shot.
 >
-> Did you know that grey head in called shot popup is actually a bug?
-(I hope it is a bug.)
+> Did you know that grey head in called shot popup is actually a bug?  (I hope it is a bug.)
 > If you try to call shot the boss before any headshot-immune unit is attacked, such as right after a load, the head is actually selectable!
 > This is most apparent with FixGreyHeadDisease on, since the head will be always available.
 >
-> If `FixGreyHeadDisease` is true but `FixBossHeadCalledShotDisplay` is false, the boss's head will be selectable for called shot, but it is false hope.  Your shots will never hit the head.
+> If `FixGreyHeadDisease` is true but `FixBossHeadCalledShotDisplay` is false, the boss's head will be selectable for called shot, but you will never hit the head.
 
 
 **Enable Clustering Called Shot**
 
 > Setting: `CalledShotUseClustering` (true/false, default true)
 >
-> When set to true, called shot has a higher chance to hit adjacent locations.
+> When true, called shot has a higher chance to hit adjacent locations.
 >
 > For example, head called shot would bias the head, but also the three torsos to a lesser degree.
 >
-> This is the default behaviour on and before game version 1.0.4, which was bugged and caused very low called head shot chances since head is excluded from clustering.  The bug is one of the driving forces of this mod's initial creation.  This mod can recreate the clustering effect without the bug.
+> This is the default behaviour on and before game version 1.0.4, which was bugged and caused very low called head shot chances since head is excluded from clustering.
+> The bug is one of the driving forces of this mod's initial creation.  This mod can recreate the clustering effect without the bug.
 >
-> Note that this does not apply to Vehicle called shot; the default vehicle clustering is only half done, and even when fixed there are too few locations to have meaningful cluster.
-
+> Note that this does not apply to Vehicle called shot; vehicles have too few locations to have meaningful clustering.
 
 
 **Adjust Called Shot Weight**
@@ -332,18 +327,16 @@ These settings can be changed in `settings.json`.
 
 > Setting: `VehicleCalledShotMultiplier`  (0 to 1024.0, default 0.75)
 >
-> Called shot didn't work on vehicles without modding.  Once that is fixed, unmodified called shot is pretty powerful on vehicles because of its low number of locations.  This setting tries to balance that.
+> Unmodified called shot is pretty powerful on vehicles because of its low number of locations.  This setting tries to balance that.
 
 
-**Show Modded Called Shot Chance**
+**Update and Format Called Shot Display**
 
 > Setting: `ShowRealMechCalledShotChance`  (true/false, default true)<br>
 > Setting: `ShowRealVehicleCalledShotChance`  (true/false, default true)
 >
-> When enabled, the popups will reflect modded hit distribution.  Also, if vehicle called shot fix is disabled, vehicle called shot chance will be updated to reflect disabled called shot.
-
-
-(Advanced) **Format Called Shot Hit Distribution Chances**
+> When true, the popups will reflect modded hit distribution such as clustering and multiplier effect.
+<br>
 
 > Setting: `CalledChanceFormat`  (string, default "")
 >
@@ -363,17 +356,18 @@ These settings can be changed in `settings.json`.
 > Setting: `IncreaseMeleePositionChoice`  (true/false, default true)<br>
 > Setting: `IncreaseDFAPositionChoice`  (true/false, default true)
 >
-> When set to true, melee and DFA can use all available positions, instead of nearest three.  Compatible with MeleeMover.
->
->
+> When true, melee and DFA can use all available positions, instead of nearest three.  Compatible with MeleeMover.
+<br>
+
 > Setting: `UnlockMeleePositioning`  (true/false, default true)
 >
-> When enabled, free player units from standing still when target is already in melee range.  Auto-disable to avoid conflict when MeleeMover is used.
+> When true, player units may move to another melee position when target is already in melee range.
+> When the mod "MeleeMover" is detected, this setting will be disabled to avoid conflicts.
 
 
-**Adjust Max Melee Height Offset by Mech Class**
+**Adjust Max Height Offset**
 
-> Settings: MaxMeleeVerticalOffsetByClass  (comma separated positive number, default "8,11,14,17")
+> Settings: MaxMeleeVerticalOffsetByClass  (comma separated positive number, default "8,12,16,20")
 >
 > When non-empty, adjust `MaxMeleeVerticalOffset` by the class of the attacker or target, whoever is at the lower ground.
 > Value is for Light, Medium, Heavy, and Assault mechs.  Non-mechs are considered Light for the purpose of this setting.
@@ -388,15 +382,7 @@ These settings can be changed in `settings.json`.
 ## Individual Modifier Settings
 
 
-**Allow Height Diff Penalty**
-
-> Setting: `AllowLowElevationPenalty`  (true/false, default true)
->
-> When set to true, attacking from low ground to high ground will incur an accuracy penalty that is the exact reverse of attacking from high ground to low.
-> Game default is false.
-
-
-**Modify Base Hit Chance**
+**Base Hit Chance**
 
 > Setting: `BaseHitChanceModifier` (-10.0 to 10.0, default 0)<br>
 > Setting: `MeleeHitChanceModifier` (-10.0 to 10.0, default 0)
@@ -405,7 +391,7 @@ These settings can be changed in `settings.json`.
 > e.g. -0.05 to lower base accuracy by 5%, 0.1 to increase it 10%.
 
 
-**Directional Modifier**
+**Directional Modifiers**
 
 > Setting: `ToHitMechFromFront`  (-20 to 20, default 0)<br>
 > Setting: `ToHitMechFromSide`  (-20 to 20, default -1)<br>
@@ -415,16 +401,25 @@ These settings can be changed in `settings.json`.
 > Setting: `ToHitVehicleFromRear`  (-20 to 20, default -2)<br>
 >
 > Determine the modifier for attacking from side or rear.
-> Effective only if "Ditection" is in the modifier lists.
+> Effective only if "Direction" is in the modifier lists.
+
+
+**Height Modifier**
+
+> Setting: `AllowLowElevationPenalty`  (true/false, default true)
+>
+> When true, attacking from low ground to high ground will incur an accuracy penalty that is the exact reverse of attacking from high ground to low.
+> Game default is false.
 
 
 **Jumped Modifier**
 
 > Settings: `ToHitSelfJumped` (-20 to 20, default 0)
 >
-> The game has self moved modifier and self sprint modifier in CombatGameConstants.json, but not self jumped modifier.
-> You may set it with this mod if you want to.
-
+> The game has self moved modifier and self sprint modifier in `CombatGameConstants.json`, but not self jumped modifier.
+> You may set it with this mod if you want to.  It will be factored in attack preview.
+>
+> Effective only if "Jumped" is in the modifier lists.
 
 
 ## Net Hit Modifier Settings
@@ -433,10 +428,12 @@ These settings can be changed in `settings.json`.
 
 > Setting: `AllowNetBonusModifier`  (true/false, default true)
 >
-> When set to true, total modifier of an attack can be a net bonus that increases the hit chance beyond the attacker's base hit chance (but still subjects to 95% cap unless lifted by the `MaxFinalHitChance` settings).
+> When true, total modifier of an attack can be a net bonus that increases the hit chance beyond the attacker's base hit chance
+> (but still subjects to 95% cap unless lifted by the `MaxFinalHitChance` settings).
 > Game default is false.
 >
-> When the net modifier is a bonus, it will use the same handling as penalty but reversed: first 10 modifiers are ±5% each, and subsequence modifiers are ±2.5% each.
+> When the net modifier is a bonus, it will use the same handling as penalty but reversed.
+> Default is stepped, which means first 10 modifiers are ±5% each, and subsequence modifiers are ±2.5% each.
 
 
 **Unlock Modifier Stepping and Range**
@@ -446,20 +443,21 @@ These settings can be changed in `settings.json`.
 > The game will round down final hit chance to lower 5% by default.
 > This affects some calculations, such as rendering odd gunnery stats and piloting stats less effective then they should be.
 > Set this to 0 to remove all stepping.  Set it to 0.005 will step the accuracy by 0.5%, and so on.
->
->
+<br>
+
 > Setting: `MaxFinalHitChance`  (0.1 to 1.0, default 0.95)<br>
 > Setting: `MinFinalHitChance`  (0.0 to 1.0, default 0.0)
 >
 > Use this to set max and min hit chance after all modifiers but before roll correction.
 > Note that 100% hit chance may still miss if roll correction is enabled.
 
+
 **Diminishing Hit Chance Modifier**
 
 > Setting: `DiminishingHitChanceModifier`  (true/false, default false)
 >
 > Set this to true to enable diminishing return of modifiers, instead of simple add and subtract.
-> As a result, small penalties have a bigger effect, but very large penalties may be more bearable.
+> As a result, small penalties have a bigger effect, but very large penalties become more bearable.
 <br>
 
 > Setting: `DiminishingBonusPowerBase`  (default 0.8)<br>
@@ -479,7 +477,8 @@ These settings can be changed in `settings.json`.
 > Setting: `DiminishingBonusMax`  (default 16)
 > Setting: `DiminishingPenaltyMax`  (default 32)
 >
-> The modifiers are pre-calculated to run faster.  These settings determine how many results are cached.  Modifiers beyond the max will be regarded as same as max.
+> The modifiers are pre-calculated to run faster.  These settings determine how many results are cached.
+> Modifiers beyond the max will be regarded as same as max.
 
 
 **Change Modifiers List**
@@ -489,7 +488,7 @@ These settings can be changed in `settings.json`.
 >
 > A list of hit modifiers of ranged / melee and DFA attacks.  Leave empty to keep unchanged.  Order and letter case does not matter.
 >
-> Since this feature will override both mouseover display and actual modifier calculation, this will fix the bug that SelfStoodUp is displayed in melee mouseover but not counted in melee modifier.
+> Since this feature will override both mouseover display and actual modifier calculation, this will fix the bug that SelfStoodUp is displayed in melee mouseover but not counted in net modifier.
 >
 > Ranged default is "ArmMounted, Direction, Height, Indirect, Inspired, Jumped, LocationDamage, Obstruction, Precision, Range, Refire, SelfHeat, SelfStoodUp, SelfTerrain, SensorImpaired, SensorLock, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrain, Walked, WeaponAccuracy, WeaponDamage".
 > Melee default is "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy".
@@ -511,6 +510,7 @@ These settings can be changed in `settings.json`.
 > **SelfHeat** - Apply overheat penalty. <br>
 > **SelfStoodUp** - Apply stood up penalty. <br>
 > **SelfTerrain** - Apply self terrain penalty as if this is a ranged attack. <br>
+> **SelfTerrainMelee** - Apply self terrain penalty as if this is a melee attack. <br>
 > **SensorImpaired** - Apply sensor impaired penalty. <br>
 > **SensorLock** - Apply sensor lock bonus. <br>
 > **Sprint** - Apply sprint penalty, if somehow you can attack after sprint. <br>
@@ -536,9 +536,12 @@ These settings can be changed in `settings.json`.
 
 > Setting: `RollCorrectionStrength`  (0.0 to 2.0, default 0.5)
 >
-> It is no secret that the game fudge all hit rolls, called a "correction".  As a result, real hit chances are shifted away from 50%, for example 75% becomes 84% while 25% becomes 16%.  This can create a rift between what you see and what you get, especially on low chance shots.
+> It is no secret that the game fudge all hit rolls, called a "correction".
+> As a result, real hit chances are shifted away from 50%, for example 75% becomes 84% while 25% becomes 16%.
+> This can create a rift between what you see and what you get, especially on low chance shots.
 >
-> This mod does not aim to completely disable roll adjustment, and thus default to half its strength.  You can set the strength to 0 to disable it, 1 to use original formula, 2 to amplify it, or any value between 0 and 2.
+> This mod does not aim to completely disable roll adjustment, and thus default to half its strength.
+> You can set the strength to 0 to disable it, 1 to use original formula, 2 to amplify it, or any value between 0 and 2.
 >
 > If the "True RNG Hit Rolls" mod is detected, this setting will be switched to 0 for consistency.
 
@@ -547,9 +550,12 @@ These settings can be changed in `settings.json`.
 
 > Setting: `MissStreakBreakerThreshold`  (0.0 to 1.0, default 0.5)
 >
-> In addition to roll adjustment, the game also has a "miss streak breaker".  Whenever you miss an attack of which uncorrected hit chance > 50%, the streak breaker will adjust your hit chance up on top of roll correction.  The bonus accumulates until you land a hit (regards of hit chance), at which point it resets to 0.
+> In addition to roll adjustment, the game also has a "miss streak breaker".
+> Whenever you miss an attack of which uncorrected hit chance > 50%, the streak breaker will adjust your hit chance up on top of roll correction.
+> The bonus accumulates until you land a hit (regards of hit chance), at which point it resets to 0.
 >
-> This setting let you adjust the threshold.  0.75 means it applies to attack of which hit chance > 75% (excluding 75%).  Set to 0 enable it for all attacks, or set to 1 to disable it.  Default is 0.5 which is the game's default.
+> This setting let you adjust the threshold.  0.75 means it applies to attack of which hit chance > 75% (excluding 75%).
+> Set to 0 enable it for all attacks, or set to 1 to disable it.  Default is 0.5 which is the game's default.
 >
 > If the "True RNG Hit Rolls" mod is detected, this setting will be switched to 1 for consistency.
 
@@ -558,11 +564,15 @@ These settings can be changed in `settings.json`.
 
 > Setting: `MissStreakBreakerDivider`  (-100.0 to 100.0, default 5.0)
 >
-> For every miss that crosses the streak breaker threshold, the threshold is deduced from hit chance, then divided by 5.  The result is then added as streak breaker bonus.
+> For every miss that crosses the streak breaker threshold, the threshold is deduced from hit chance, then divided by 5.
+> The result is then added as streak breaker bonus.
 >
-> Set this setting to a positive number to override the divider.  For example at threshold 0.5 and divider 3, a 95% miss result in (95%-0.5)/3 = 15% bonus to subsequence shots until hit.  Default is 5 which is the game's default.
+> Set this setting to a positive number to override the divider.
+> For example at threshold 0.5 and divider 3, a 95% miss result in (95%-0.5)/3 = 15% bonus to subsequence shots until hit.
+> Default is 5 which is the game's default.
 >
-> Set this setting to zero or negative integer to replace it with a constant value.  For example -5 means each triggering miss adds 5% bonus, and -100 will make sure the next shot always hit.
+> Set this setting to zero or negative integer to replace it with a constant value.
+> For example -5 means each triggering miss adds 5% bonus, and -100 will make sure the next shot always hit.
 
 
 
@@ -586,8 +596,7 @@ These settings can be changed in `settings.json`.
 > It's one thing to fudge the rolls.  It is another to let you know.
 > Set this to true to show the corrected hit chance in weapon panel.
 >
-> Renamed from old "ShowRealWeaponHitChance" setting since version 2.0.
-> If the "Real Hit Chance" mod is detected, this settings will be switched to on and overrides that mods.
+> When the "Real Hit Chance" mod is detected, this settings will be switched to on and overrides that mods.
 
 
 **Format Hit Chance** (default "")
@@ -736,7 +745,7 @@ These settings can be changed in `settings.json`.
 > Setting: `CritIgnoreDestroyedComponent` (true or false, default false)<br>
 > Setting: `CritIgnoreEmptySlots` (true or false, default false)<br>
 >
-> When set to true, a successful critical hit will ignore destroyed components and/or empty slots.
+> When true, a successful critical hit will ignore destroyed components and/or empty slots.
 > These settings simulate Classic BattleTech's crit reroll that happens when the crit slot is invalid.
 
 
@@ -744,7 +753,7 @@ These settings can be changed in `settings.json`.
 
 > Setting: `CritLocationTransfer` (true or false, default false)
 >
-> When set to true and a successful critical hit happens on a location that has nothing to crit,
+> When true and a successful critical hit happens on a location that has nothing to crit,
 > usually because of `CritIgnoreDestroyedComponent` and `CritIgnoreEmptySlots`,
 > the crit will transfer to the next location using damage transfer rule.
 >
@@ -758,7 +767,7 @@ These settings can be changed in `settings.json`.
 > In Classic BattleTech, critical hits may damage multiple components.
 > This setting recreate that feel in the context of BattleTech's crit system.
 >
-> When set to true, a successful crit roll is deduced from the crit chance.
+> When true, a successful crit roll is deduced from the crit chance.
 > This leftover crit chance is then rolled again, and repeated until a crit roll fails.
 
 
@@ -771,7 +780,7 @@ These settings can be changed in `settings.json`.
 > Setting: `BalanceAmmoConsumption`  (true/false, default true)<br>
 > Setting: `BalanceEnemyAmmoConsumption`  (true/false, default false)
 >
-> When set to true, mechs will draw ammo in an intelligent way to minimise chance of ammo explosion.
+> When true, mechs will draw ammo in an intelligent way to minimise chance of ammo explosion.
 > After that is done, the AI will then minimise risk of losing ammo to crits and destroyed locations.
 >
 > The AI is pretty smart, but it can't shift ammo, so manually spreading ammo around can help it does its job.
@@ -782,7 +791,7 @@ These settings can be changed in `settings.json`.
 > Setting: `AutoJettisonAmmo`  (true/false, default true)<br>
 > Setting: `AutoJettisonEnemyAmmo`  (true/false, default false)
 >
-> When set to true, mechs will jettison useless ammo at end of its turn,
+> When true, mechs will jettison useless ammo at end of its turn,
 > provided it has not moved, is not prone, and is not shutdown.
 > (The jettison doors are at the rear, so no prone jettisons.)
 >
@@ -812,21 +821,25 @@ but because the code that determine hit distribution is not designed for fractio
 > This mod can detect these cases and boosts the final damage just enough to finish the job.
 
 
+
 ## Attack Log Settings
 
-(Advanced) **Attack Log**
+**Log Level**
 
 > Setting: `AttackLogLevel`  ("None", "Attack", "Shot", "Location", "Damage", "Critical", or "All", default "All")
 >
-> When not None, the mod will writes to an attack log in the mod's folder, called Log_Attack.txt.
+> When not "None", the mod will writes an attack log in the mod's folder, called `Log_Attack.csv` by default.
 >
-> The levels are progressive.  Attack info is fully included by Shot level, Shot info is fully included by Location level, etc.  The deeper the level, the more the mod needs to eavesdrops and the higher the chance things will go wrong because of game update or interference from other mods.
+> The levels are progressive.  Attack info is fully included by Shot level, Shot info is fully included by Location level, etc.
+> The deeper the level, the more the mod needs to eavesdrops and the higher the chance things will go wrong because of game update or interference from other mods.
 >
 > **None** - It is a bug if you see a log file at this log level.  That or the file is a ghost that comes back to haunt you, in which case you should seek the church.
 >
-> **Attack** - Time, Attacker (team, pilot, mech), Target (team, pilot, mech), Direction, Range, Combat Id, and Action Id. The Ids can be used to consolidate data by-combat or by-action.  For example a Multi-Target attack may have three attacks that share the same Action Id.
+> **Attack** - Time, Attacker (team, pilot, mech), Target (team, pilot, mech), Direction, Range, Combat Id, and Action Id. The Ids can be used to consolidate data by-combat or by-action.
+> For example a Multi-Target attack will log two or three different targets with the same Action Id.
 >
-> **Shot** - For each shot, log the Weapons, Weapon Template, Weapon Id, Attack Roll, Hit Chance, related info, and either Hit or Miss.  Weapon Id is unique *per mech*, and can be used to consolidate data by weapon.
+> **Shot** - For each shot, log the Weapons, Weapon Template, Weapon Id, Attack Roll, Hit Chance, related info, and either Hit or Miss.
+> Weapon Id is unique *per mech*, and can be combined to consolidate data by weapon.
 >
 > **Location** - Location Roll, Hit Table, Called Shot, and the Hit Location.
 >
@@ -836,16 +849,17 @@ but because the code that determine hit distribution is not designed for fractio
 > **Critical** - Crit Location, Crit Roll, Crit Slot, Crit Component, and the result of the crit.
 > Crit is determined in yet another phase, so the log code is *very fun* to write.
 >
-> **All** - same as Critical for now.  More info may be added in the future, though I am not sure I wouldn't go crazy.  Would you believe logging is the most complicated feature of this mod?
+> **All** - same as Critical for now.  More info may be added in the future, though I am not sure I wouldn't go crazy.
+> Would you believe logging is the most complicated feature of this mod?
 >
-> Default AttackLogLevel was None in mod version 2.0, but mod 2.1 switched to a multi-thread logging system so it now defaults to All.
+> Default was "None" in mod version 1.0 and 2.0, but mod 2.1 switched to a multi-thread logging system so it now defaults to "All".
 
 
 (Advanced) **Log Options**
 
 > Setting: `AttackLoFormat`  ("csv", "tsv", "txt", default "csv")
 >
-> Set the format and extension of attack log.  Default is csv which can be opened directly by Excel.
+> Set the format and extension of attack log.  Default is "csv" which can be opened directly by Excel.
 <br>
 
 > Setting: `AttackLogArchiveMaxMB`  (0 to 1 million, default 4)
@@ -864,7 +878,7 @@ but because the code that determine hit distribution is not designed for fractio
 
 * BattleTech 1.0 - AIM 1.0.1.
 * BattleTech 1.1 - AIM 1.0.1 to 2.1.2.
-* BattleTech 1.2 - AIM 2.2 to 2.3.
+* BattleTech 1.2 - AIM 2.2 to 2.5.
 
 AIM is aware of some other mods and will behave differently in their present to meet player expectations.
 
@@ -890,7 +904,9 @@ AIM will bridge crit code with MechEngineer for component crit immunity and mult
 
 The first thing to check when you suspect any compatibility problems with the game or with other mods is to remove or disable the mods.
 
-You can also check the mod log (`BATTLETECH\Mods\AttackImprovementMod\Log_AIMAttackImprovementMod.log`), BTML log (`BATTLETECH\Mods\*.log`), and the game's own log (`BATTLETECH\`).  The keyword is "Exception".  It is almost always followed by lots of code.  If you see *any* exception with "AttackImprovementMod" in the code below it, please [file an issue](https://github.com/Sheep-y/Attack-Improvement-Mod/issues/new) and attach the log.
+You can also check the mod log (`BATTLETECH\Mods\AttackImprovementMod\Log_AIMAttackImprovementMod.log`), BTML log (`BATTLETECH\Mods\*.log`), and the game's own log (`BATTLETECH\`).
+The keyword is "Exception".  It is almost always followed by lots of code.
+If you see *any* exception with "AttackImprovementMod" in the code below it, please [file an issue](https://github.com/Sheep-y/Attack-Improvement-Mod/issues/new) and attach the log.
 
 
 # The Story of AIM
@@ -899,7 +915,9 @@ If you asked me whether I would play a hardcore mech game like BattleTech, a mon
 
 This is my first serious game modding attempt, and is totally unexpected.
 
-One day in summer 2018 when I pay the online game shops a visit, I noticed that one single game is is on the top of top sellers on GOG, Humble Store, and Steam.  The game is BATTLETECH.  It is not exactly my cup of tea, but I don't see that happens often either.  The game has just been launched, and Steam has a pretty big discount in my local currency.
+One day in summer 2018 when I pay the online game shops a visit, I noticed that one single game is is on the top of top sellers on GOG, Humble Store, and Steam.
+The game is BATTLETECH.  It is not exactly my cup of tea, but I don't see that happens often either.
+The game has just been launched, and Steam has a pretty big discount in my local currency.
 
 By the time I finished the campaign, I have written a [GameFAQ guide](https://gamefaqs.gamespot.com/pc/205058-battletech/faqs/75955) and a [data miner](https://github.com/Sheep-y/Sheep-y.github.io/tree/dev/battletech/parser) in Node.js.
 
@@ -916,7 +934,8 @@ The result is not pretty.  And I don't mean to the crabs.
 
 Called shot at the head not only has lower chance to hit the head than non-called shots, but the head is biased in virtually all attacks and has double chance to be hit than intended by normal attacks.
 
-Baffled by the result, I learned how to use programing tools to see game code.  Finding the bugs is the easy part.  Fixing it is the hard part, since I knew *nothing* about BattleTech, paper or code, and I *never* hijacked any code before.
+Baffled by the result, I learned how to use programing tools to see game code.  Finding the bugs is the easy part.
+Fixing it is the hard part, since I knew *nothing* about BattleTech, paper or code, and I *never* hijacked any code before.
 
 I started by injecting loggings into the system, to learn the process.
 These logs later become the Attack Log feature.
@@ -924,16 +943,22 @@ How about the roll correction?  A mod kills it.  Can I tune it down instead? (Pl
 Hmm, now I need to show the modified hit chance. (Re-learn algebra and coded perhaps the most complicated formula in all BattleTech mods.)
 
 Eventually I fixed the two bugs I intended to fix, plus fixing vehicle called shot. (Fixed in 1.2.0 beta, two months after AIM is released.)
-When I am mostly done, game updates 1.1 landed just the day before I plan to release, and it changed how called shot works.  Took me two whole days to update the mod, before I went back to enjoy the game.
+When I am mostly done, game updates 1.1 landed just the day before I plan to release, and it changed how called shot works.
+Took me two days to update the mod, before I went back to enjoy the game.
 
 Or so I hoped.
 
 In reality, I now see game bugs everywhere, and many many ways to improve the game.
-I want to fix Multi-Target back out.  I want to fix the paper doll.  I want to see more information.  I want to colour the lines and open source it.  LadyAlekto of RogueTech also *helpfully* reported more game bug in form of feature wishes.
+I want to fix Multi-Target back out.  I want to fix the paper doll.  I want to see more information.  I want to colour the lines and open source it.
+LadyAlekto of RogueTech also *helpfully* reported more game bugs in form of feature wishes.
 
-All the bug fixes and new features and enhancements is much bigger than what I originally envisioned.  Even as I tie up AIM version 2.0, the ever expanding idea list grow at an even greater pace.  If there is an end in sight, it is an abrupt one when a game that I like better come out, such as Phoenix Point.
+All the bug fixes and new features and enhancements is much bigger than what I originally envisioned.
+Even as I tie up AIM version 2.0, the ever expanding idea list grow at an even greater pace.
+If there is an end in sight, it is an abrupt one when a game that I like better come out, such as Phoenix Point.
 
-This is the story of how I went from "stay away from BattleTech" to "wrote 3500 lines of BattleTech mod" in three month's time.  Now let me see whether Paradox is hiring remote freelancer.
+This is the story of how I went from "stay away from BattleTech" to "wrote 3500 lines of BattleTech mod" in three month's time.
+Now let me see whether Paradox is hiring remote freelancer.
+
 
 # Learn to Mod
 
@@ -943,20 +968,22 @@ License: [AGPL v3](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
 Follow these steps to see game code and learn how BATTLETECH mod works:
 
-1. Install [Visual Studio](https://www.visualstudio.com/downloads/) which is free. This mod is developed with VS 2017 Community Edition. You'll need the ".NET desktop development" workload.
+1. Install [Visual Studio](https://www.visualstudio.com/downloads/) which is free.  This mod is developed with VS 2017 Community Edition.  You only need the ".NET desktop development" workload.
 1. Down and Run [DnSpy](https://github.com/0xd4d/dnSpy/releases)
 1. Select File > Open, and find `BATTLETECH\BattleTech_Data\Managed\Assembly-CSharp.dll`.  This will load the assembly.  It contains most BATTLETECH code.
 1. You may now search and browse the assembly!  For example in Edit > Search you can type "GetCorrectedRoll" to find the method.  Clicking on it will show you the roll correction code.
 1. Right click on method name (or any identifier) and click "Analyse".  It'll help you find where and how the method is called, or its override hierarchy.
 1. Analyse is very fast because it works with compiled code.  It is not 100% accurate, though, sometimes you'll want to exported code and search there instead.
 1. Left click the assembly, then File > Export to Project.  This will decompile all code which you can browse with other editor or IDE.
-1. Head to the [ModTek wiki](https://github.com/Mpstark/ModTek/wiki) to learn how to make a mod.  For a code mode like this one, you need to compile a [dll](https://github.com/Mpstark/ModTek/wiki/Writing-ModTek-DLL-mods) and perhaps a [`mod.json`](https://github.com/Mpstark/ModTek/wiki/The-mod.json-Format).
+1. Head to the [ModTek wiki](https://github.com/janxious/ModTek/wiki/) to learn how to make a mod.  For a code mode like this one, you need to compile a [dll](https://github.com/janxious/ModTek/wiki/Writing-ModTek-DLL-mods) and perhaps a [`mod.json`](https://github.com/janxious/ModTek/wiki/The-mod.json-Format).
 1. The code of this mod is available on GitHub: https://github.com/Sheep-y/Attack-Improvement-Mod/ and you can also find other people's mods such as [Firing Line Improvement](https://github.com/janxious/BTMLColorLOSMod) or [MeleeMover](https://github.com/Morphyum/MeleeMover) and we all use different licenses.
-1. You may notice that this patch manually calls Harmony to patch things, instead of using annotations. This gives me much better control. Read [Harmony wiki](https://github.com/pardeike/Harmony/wiki) to learn how it works.
+1. You may notice that this patch manually calls Harmony to patch things, instead of using annotations.  This gives me much finer control.  Read [Harmony wiki](https://github.com/pardeike/Harmony/wiki) to learn how it works.
+
 
 # Credits
 
 * Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.
 * Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.
+* And many more players on the BattleTechGame discord that gave comments and ideas.
 
 Despite feature overlap with some mods, this mod does not reference or use their code due to lack of license, and in most cases the approaches are different.

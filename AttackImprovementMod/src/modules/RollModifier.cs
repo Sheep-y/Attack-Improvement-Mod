@@ -195,7 +195,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float movement = -1;
          if ( attacker.HasMovedThisRound && attacker.JumpedLastRound ) {
             movement = attacker.DistMovedThisRound;
-         } else {
+         } else if ( Settings.FixSelfSpeedModifierPreview ) {
             SelectionState state = HUD?.SelectionHandler?.ActiveState;
             if ( state != null && state is SelectionStateJump jump )
                movement = 100; // Vector3.Distance( attacker.CurrentPosition, jump.PreviewPos );

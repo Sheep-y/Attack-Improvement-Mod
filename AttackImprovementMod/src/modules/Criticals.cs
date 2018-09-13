@@ -42,7 +42,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( Vehicle ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
             if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
                Patch( typeof( AmmunitionBox ), "DamageComponent", null, "AmmoExplosionKillNonMech" );
-         }
+         } else if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
+            Warn( "AmmoExplosionKillTurret / AmmoExplosionKillVehicle disabled because crit chance is zero." );
 
          if ( ThroughArmorCritEnabled = Settings.CritChanceZeroArmor > 0 ) {
             Patch( ResolveWeaponDamage, "ReplaceCritHandling", null );
