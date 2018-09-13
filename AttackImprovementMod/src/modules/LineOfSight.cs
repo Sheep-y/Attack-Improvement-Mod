@@ -218,7 +218,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          WeaponRangeIndicators me = __instance;
          int dirIndex = 0;
          if ( target is Mech || target is Vehicle ) {
-            bool canSee = selectedActor.VisibilityToTargetUnit( target ) == VisibilityLevel.LOSFull;
+            bool canSee = selectedActor.HasLOSToTargetUnit( target );
             dirIndex = canSee ? Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) ) : 0;
          }
          if ( dirIndex != lastDirIndex && Mats[ NoAttack ] != null ) {
