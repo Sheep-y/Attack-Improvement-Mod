@@ -5,7 +5,7 @@ CHANGE LOG
 * New: Show pilot stats in one-line mouseover hint, instead of only HP.
 * New: Adjust max melee height difference by mech class.
 * New: Fix heat projection on move/jump/sprint preview.
-* New: Show distance number in target panel.
+* New: Show distance number in target panel, and movement point in selection panel.
 * New: Configure friends' and foes' crit multiplier.
 * New: Vehicles and Turrets may now be crit'ed and killed by ammo explosions.
 * New: Critical hits now follows damage transfer.

@@ -46,22 +46,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string FloatingArmorColourEnemy = "";
       public string FloatingArmorColourAlly = "teal";
 
-      /* Fix heat projection when moving into or away from terrain that affects cooldown.  Default true. *
-      public bool FixHeatPrediction = true;
-
-      /* Float heat number after jump, ranged attack, or end of turn (Brace, Melee, or DFA). Default true. *
-      public bool FloatHeatAfterJump   = true;
-      public bool FloatHeatAfterAttack = true;
-      public bool FloatHeatAtTurnEnd   = true;
-
-      /* Float target stability number after attack. Default true. *
-      public bool FloatTargetStability = true;
-
-      /* Float self stability number after DFA attack or end of turn. *
-      public bool FloatStabilityAfterDFA  = true;
-      public bool FloatStabilityAtTurnEnd = true;
-      /**/
-
       //
       [ JsonSection( "Line of Sight" ) ]
       //
@@ -99,10 +83,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int ArcLinePoints = 48;
 
       [ JsonComment( "Change marker colour of the facing indicator. Colours are for Front, Left, Right, Back, Prone." ) ]
-      //public string FacingMarkerPlayerColors = "#FFFF,#AAFD,#AAFD,#BFBF,#FFBF"; // Darker sides and green back
-      //public string FacingMarkerEnemyColors  = "#FFFF,#AAFD,#AAFD,#FBBF,#FFBF"; // Darker sides and red back
-      public string FacingMarkerPlayerColors = "#FFFF,#CFCF,#CFCF,#AFAF,#FF8F";
-      public string FacingMarkerEnemyColors  = "#FFFF,#FCCF,#FCCF,#FAAF,#FF8F";
+      public string FacingMarkerPlayerColors = "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A";
+      public string FacingMarkerEnemyColors  = "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A";
       public string FacingMarkerTargetColors = "#F41F,#F41F,#F41F,#F41F,#F41F";
 
       //
