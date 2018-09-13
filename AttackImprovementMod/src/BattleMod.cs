@@ -136,7 +136,7 @@ namespace Sheepy.BattleTechMod {
          if ( line == null ) return true;
          object[] args = line?.args;
          // Convert Log( data ) to Log( "{0}", data ) so that it can be formatted
-         if ( ! ( line.message is string ) && ( args == null || args.Length == 0 ) ) {
+         if ( ! ( line.message is string ) && ( args == null || args.Length == 0 ) && ! ( line.message is Exception ) ) {
             line.args = args = new object[]{ line.message };
             line.message = "{0}";
          } else if ( args == null ) 
