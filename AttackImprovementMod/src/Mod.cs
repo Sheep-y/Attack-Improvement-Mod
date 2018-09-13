@@ -143,7 +143,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else if ( settings.MeleeAccuracyFactors.ToLower().Contains( "selfwalked" ) )
                settings.MeleeAccuracyFactors = Regex.Replace( settings.MeleeAccuracyFactors, "SelfWalked", "Walked", RegexOptions.IgnoreCase );
             settings.AttackLogLevel = "All"; // Log is now enabled by default with new background logger
-            settings.SettingVersion = 2_001_000;
+         }
+         if ( settings.SettingVersion < 2_005_000 ) { // Reducing facing ring opacity
+            if ( settings.FacingMarkerPlayerColors == "#FFFF,#CFCF,#CFCF,#AFAF,#FF8F" )
+               settings.FacingMarkerPlayerColors = "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A";
+            if ( settings.FacingMarkerEnemyColors == "#FFFF,#FCCF,#FCCF,#FAAF,#FF8F" )
+               settings.FacingMarkerEnemyColors = "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A";
+            settings.SettingVersion = 2_005_000;
          }
       }
 
