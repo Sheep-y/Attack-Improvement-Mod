@@ -92,10 +92,11 @@
 
   "ArcLinePoints": 48,
 
-  /* Change marker colour of the facing indicator. Colours are for Front, Left, Right, Back, Prone. */
+  /* Change marker colour of the facing indicator. Colours are for Front, Left, Right, Back, Prone.
+   * Default Player "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A", Enemy "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A", Target "#F41F,#F41F,#F41F,#F41F,#F41F". */
 
-  "FacingMarkerPlayerColors": "#FFFF,#CFCF,#CFCF,#AFAF,#FF8F",
-  "FacingMarkerEnemyColors": "#FFFF,#FCCF,#FCCF,#FAAF,#FF8F",
+  "FacingMarkerPlayerColors": "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A",
+  "FacingMarkerEnemyColors": "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A",
   "FacingMarkerTargetColors": "#F41F,#F41F,#F41F,#F41F,#F41F",
 
   //
@@ -401,5 +402,5 @@
 
   /* Used to determine which settings should be updated and how.  Please do not change. */
 
-  "SettingVersion": 2001000
+  "SettingVersion": 2005000
 }

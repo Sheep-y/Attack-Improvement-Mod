@@ -23,7 +23,7 @@
 
   /* Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense. */
 
-  "ShowUnitTonnage": true,
+  "ShowUnitTonnage": false,
 
   /* Show heat, stability, and distance / movement number in selection panel (bottom left) and target panel (top).  Default true. */
 
@@ -58,13 +58,13 @@
 
   /* Make lines wider or thinner.  Default 2 and 1.5 times of game default.  Set to 0 to not mess with it. */
 
-  "LOSWidth": 1,
-  "LOSWidthBlocked": 0.75,
+  "LOSWidth": 2,
+  "LOSWidthBlocked": 1.5,
 
   /* Make obstruction marker bigger or smaller by multiplying its height and width.  Default 1.5.
    * Set to 1 to use game default, or 0 to hide the marker. */
 
-  "LOSMarkerBlockedMultiplier": 1,
+  "LOSMarkerBlockedMultiplier": 1.5,
 
   /* Controls whether indirect attack lines / can't attack lines are dotted.  Default both true. */
 
@@ -81,22 +81,23 @@
   /* Change fire line colour (html syntax). "#FF0000" is red, "#00FF00" is green etc.  Set to empty to leave alone.
    * The colour orders are Front, Left, Right, Back, Prone.  Set to empty string to use game default. */
 
-  "LOSMeleeColors": "",
-  "LOSClearColors": "",
-  "LOSBlockedPreColors": "",
-  "LOSBlockedPostColors": "",
-  "LOSIndirectColors": "",
+  "LOSMeleeColors": "#F00,#0FF,#0FF,#0F8,#F00",
+  "LOSClearColors": "#F00,#0FF,#0FF,#0F8,#F00",
+  "LOSBlockedPreColors": "#D0F,#D0F,#D0F,#D0F,#D0F",
+  "LOSBlockedPostColors": "#C8E,#C8E,#C8E,#C8E,#C8E",
+  "LOSIndirectColors": "#F00,#0FF,#0FF,#0F8,#F00",
   "LOSNoAttackColors": "",
 
   /* Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve. */
 
-  "ArcLinePoints": 18,
+  "ArcLinePoints": 48,
 
-  /* Change marker colour of the facing indicator. Colours are for Front, Left, Right, Back, Prone. */
+  /* Change marker colour of the facing indicator. Colours are for Front, Left, Right, Back, Prone.
+   * Default Player "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A", Enemy "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A", Target "#F41F,#F41F,#F41F,#F41F,#F41F". */
 
-  "FacingMarkerPlayerColors": "",
-  "FacingMarkerEnemyColors": "",
-  "FacingMarkerTargetColors": "",
+  "FacingMarkerPlayerColors": "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A",
+  "FacingMarkerEnemyColors": "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A",
+  "FacingMarkerTargetColors": "#F41F,#F41F,#F41F,#F41F,#F41F",
 
   //
   // Called Shots
@@ -401,5 +402,5 @@
 
   /* Used to determine which settings should be updated and how.  Please do not change. */
 
-  "SettingVersion": 2001000
+  "SettingVersion": 2005000
 }
