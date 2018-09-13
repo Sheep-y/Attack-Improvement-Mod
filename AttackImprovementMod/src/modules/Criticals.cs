@@ -274,7 +274,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
-      public static void PlaySFX ( AIMCritInfo info ) {
+      public static void PlaySFX ( AIMCritInfo info ) { try {
          GameRepresentation GameRep = info.target.GameRep;
          if ( GameRep == null ) return;
          if ( info.weapon.weaponRep != null && info.weapon.weaponRep.HasWeaponEffect )
@@ -284,9 +284,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, GameRep.audioObject );
          WwiseManager.PostEvent<AudioEventList_impact>( AudioEventList_impact.impact_weapon, GameRep.audioObject, null, null );
          WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, GameRep.audioObject, null, null );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void PlayVFX ( AIMCritInfo info ) {
+      public static void PlayVFX ( AIMCritInfo info ) { try {
          ICombatant target = info.target;
          if ( target.GameRep == null ) return;
          MechComponent component = info.component;
@@ -299,7 +299,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             MechRep.PlayComponentCritVFX( info.GetCritLocation() );
          if ( isAmmo && component.DamageLevel > ComponentDamageLevel.Functional )
             target.GameRep.PlayVFX( info.GetCritLocation(), Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static float GetAdjustedChance ( AIMCritInfo info ) {
          if ( info.target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
