@@ -30,13 +30,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDPipBar ), "ShowValue", new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
             Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", "SetPipBarOwner", "ResetPipBarOwner" );
          }
-      }
-
-      public override void CombatStartsOnce () {
-         Type ReadoutType = typeof( HUDMechArmorReadout );
-         if ( Settings.FixPaperDollRearStructure )
-            Patch( ReadoutType, "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
          if ( Settings.ShowUnderArmourDamage ) {
+            Type ReadoutType = typeof( HUDMechArmorReadout );
             TryRun( Log, () => {
                outlineProp = ReadoutType.GetProperty( "armorOutlineCached", NonPublic | Instance );
                armorProp = ReadoutType.GetProperty( "armorCached", NonPublic | Instance );
@@ -53,6 +48,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( ReadoutType, "RefreshMechStructureAndArmor", null, "ShowStructureDamageThroughArmour" );
             }
          }
+      }
+
+      public override void CombatStartsOnce () {
+         if ( Settings.FixPaperDollRearStructure )
+            Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
          if ( Settings.FixMultiTargetBackout ) {
             TryRun( Log, () => {
                weaponTargetIndices = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
