@@ -38,8 +38,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool ShowAmmoInTooltip = true;
       public bool ShowEnemyAmmoInTooltip = false;
 
-      [ JsonComment( "Show pilot stats when you right click a mechwarrior while in combat." ) ]
-      public bool ShowStatsInPilotHint = true;
+      [ JsonComment( new string[]{
+        "Format of short mechwarrior hint that shows up when you mouseover/right-click the portrait.",
+        "Default \"HP:{1}/{2} ST:{3},{4},{5},{6}\" which summarise both health and stats.  Set to empty to leave at game default." } ) ]
+      public string ShortPilotHint = "HP:{1}/{2} ST:{3},{4},{5},{6}";
 
       [ JsonComment( "Set armour colour of floating bar of Player / Enemy / Ally.  Default \"cyan\" for player, \"teal\" for ally.  Set to empty to not change." ) ]
       public string FloatingArmorColourPlayer = "cyan";

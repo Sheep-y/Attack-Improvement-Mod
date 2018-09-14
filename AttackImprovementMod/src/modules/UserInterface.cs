@@ -101,11 +101,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( CombatHUDMechTrayArmorHover ), "setToolTipInfo", new Type[]{ typeof( Mech ), typeof( ArmorLocation ) }, "OverridePaperDollTooltip", null );
          }
 
-         if ( Settings.ShowStatsInPilotHint ) {
+         if ( Settings.ShortPilotHint != null ) {
             PilotStatus = new Dictionary<CombatHUDMWStatus, Pilot>(4);
             Patch( typeof( CombatHUDMWStatus ), "OnPortraitRightClicked", null, "RefreshPilotHint" );
             Patch( typeof( CombatHUDMWStatus ), "ForceUnexpend", null, "RefreshPilotHint" );
-            Patch( typeof( CombatHUDMWStatus ), "RefreshPilot", null, "ShowStatsInPilotHint" );
+            Patch( typeof( CombatHUDMWStatus ), "RefreshPilot", null, "ReplacePilotHint" );
          }
 
          if ( Settings.ShowBaseHitchance ) {
@@ -511,12 +511,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             __instance.RefreshPilot( pilot );
       }
 
-      public static void ShowStatsInPilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) {
+      public static void ReplacePilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) {
          if ( ! PilotStatus.ContainsKey( __instance ) )
             PilotStatus.Add( __instance, pilot );
          if ( ( HUD.SelectedActor != null || ! __instance.IsExpanded ) && ! pilot.IsIncapacitated )
-            __instance.InjuriesItem.ShowExistingIcon( new Text( "ST:{0},{1},{2},{3} HP:{4}/{5}", new object[]{
-               pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics, ( pilot.Health - pilot.Injuries ), pilot.Health } ),
+            __instance.InjuriesItem.ShowExistingIcon( new Text( Settings.ShortPilotHint, new object[]{
+               pilot.Injuries, ( pilot.Health - pilot.Injuries ), pilot.Health, pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics } ),
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
       }
 

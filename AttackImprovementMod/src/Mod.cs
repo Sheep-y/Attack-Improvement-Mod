@@ -164,6 +164,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       /* Changes that we don't want to write back to settings.json */
       private void NormaliseSettings () {
+         NullIfEmpty( ref Settings.ShortPilotHint );
          NullIfEmpty( ref Settings.FloatingArmorColourPlayer );
          NullIfEmpty( ref Settings.FloatingArmorColourEnemy );
          NullIfEmpty( ref Settings.FloatingArmorColourAlly );
