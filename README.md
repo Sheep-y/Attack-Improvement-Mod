@@ -177,10 +177,14 @@ These settings can be changed in `settings.json`.
 > The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
 <br>
 
-> Setting: `ShowStatsInPilotHint`  
-(true/false, default true)
+> Setting: `ShortPilotHint`  (string, default "HP:{1}/{2} ST:{3},{4},{5},{6}")
 >
-> When true, show mechwarrior stats in their one-line hint that pops up on mouseover and right-click, instead of showing only injuries.
+> When non-empty, replace mechwarrior's summary hint. The parameters are: <br>
+> {0}, {1}, {2} - Wound, Health - Wound, and Health. <br>
+> {3}, {4}, {5}, {6} - Gunnery, Piloting, Gut, and Tactic.
+>
+> This only applies to the one-line hint that pops up on mouseover and right-click.
+> The original hint, which shows only wounds and health, will be preserved when the hint is fully expanded (i.e. when no mech is selected).
 
 
 **Multi-Target**
@@ -648,6 +652,7 @@ These settings can be changed in `settings.json`.
 > 
 > In case of that, the default chance is lower than normal,
 > for a more consistent crit level relative to mech since vehicles and turrets do not have empty slots to blunt crits.
+<br>
 
 > Setting: `AmmoExplosionKillTurret`  (true/false, default true) <br>
 > Setting: `AmmoExplosionKillVehicle`  (true/false, default true) <br>
@@ -656,7 +661,7 @@ These settings can be changed in `settings.json`.
 > Otherwise, the game does not expects this to happen and has no code to kill the unit.
 >
 > As a bonus, "XXX Ammo Destroyed" message will be suppressed when ammo explosion happens, if either option is on.
-> (Mech ammo explosion included.)
+> (Mech ammo explosion included, if one of the crit system replacing options is enabled.)
 
 
 **Crit Follows Damage Transfer**
@@ -704,7 +709,7 @@ These settings can be changed in `settings.json`.
 > Shots with partially transferred damage are counted in full and can more easily meet the threshold.
 > Fraction of current armour is also more easily skewed when damage is partially transferred.
 > But generally speaking, the imprecision has limited impact and align with the spirit of through armour crit.
-
+<br>
 
 > Setting: `CritChanceZeroArmor`  (0 to 2, default 0)<br>
 > Setting: `CritChanceFullArmor`  (-1 to 1, default 0)<br>
@@ -808,7 +813,7 @@ These settings can be changed in `settings.json`.
 >
 > Game version 1.1 introduced degrading called shot effect for SRM and MG,
 but because the code that determine hit distribution is not designed for fraction called shot weight, the actual distribution is slightly bugged.
-
+<br>
 
 **Kill Zombies**
 

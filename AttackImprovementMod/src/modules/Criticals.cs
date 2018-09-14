@@ -40,10 +40,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( Turret ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
             if ( Settings.CriChanceVsVehicle > 0 )
                Patch( typeof( Vehicle ), "ResolveWeaponDamage", typeof( WeaponHitInfo ), null, "EnableNonMechCrit" );
-            if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
-               Patch( typeof( AmmunitionBox ), "DamageComponent", null, "AmmoExplosionKillNonMech" );
-         } else if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
-            Warn( "AmmoExplosionKillTurret / AmmoExplosionKillVehicle disabled because crit chance is zero." );
+         }
 
          if ( ThroughArmorCritEnabled = Settings.CritChanceZeroArmor > 0 ) {
             Patch( ResolveWeaponDamage, "ReplaceCritHandling", null );
@@ -68,6 +65,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechType, "TakeWeaponDamage", "RecordHitInfo", "ClearHitInfo" );
             Patch( MechType, "DamageLocation", "UpdateCritLocation", null );
          }
+
+         if ( Settings.AmmoExplosionKillTurret || Settings.AmmoExplosionKillVehicle )
+            Patch( typeof( AmmunitionBox ), "DamageComponent", null, "AmmoExplosionKillNonMech" );
 
          if ( HasMod( "MechEngineer.Control" ) ) TryRun( ModLog, InitMechEngineerBridge );
       }
