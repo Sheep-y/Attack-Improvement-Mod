@@ -32,7 +32,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.SkipCritingDeadMech )
             Patch( ResolveWeaponDamage, "Skip_BeatingDeadMech", null );
 
-         if ( MultiplierEnemy != 0.2 || MultiplierAlly != 0.2 )
+         if ( MultiplierEnemy != 0.2f || MultiplierAlly != 0.2f )
             Patch( typeof( CritChanceRules ), "GetCritMultiplier", "SetNPCCritMultiplier", null );
 
          if ( Settings.CritChanceVsTurret > 0 || Settings.CriChanceVsVehicle > 0 ) {
@@ -85,8 +85,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          MultiplierAlly = (float) Settings.CritChanceAlly;
          CritChanceMin = (float) Settings.CritChanceMin;
          CritChanceMax = (float) Settings.CritChanceMax;
-         CritChanceBase = (float) Settings.CritChanceZeroStructure;
-         CritChanceVar = (float) Settings.CritChanceFullStructure - CritChanceBase;
+         CritChanceBase = (float) Settings.CritChanceFullStructure;
+         CritChanceVar = (float) Settings.CritChanceZeroStructure - CritChanceBase;
          if ( Settings.CritLocationTransfer ) {
             if ( ! Settings.CritIgnoreDestroyedComponent || ! Settings.CritIgnoreEmptySlots )
                Warn( "Not enabling CritIgnoreDestroyedComponent and CritIgnoreEmptySlots will make CritLocationTransfer hard to happens." );
