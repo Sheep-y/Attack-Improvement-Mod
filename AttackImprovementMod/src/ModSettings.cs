@@ -250,8 +250,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "Max vertical offset of melee attack, by the mech class of the unit at a lower position.  Set to \"\" to disable.",
-        "Non-mechs are same as light.  Default \"8,12,16,20\" which allows bigger mechs to hit and be hit from more locations." } ) ]
-      public string MaxMeleeVerticalOffsetByClass = "8,12,16,20";
+        "Non-mechs are same as light.  Default \"8,11,14,17\" which allows bigger mechs to hit and be hit from more locations." } ) ]
+      public string MaxMeleeVerticalOffsetByClass = "8,11,14,17";
 
       /* [ JsonComment( "Allow melee attack on sprint.  Default false." ) ]
       public bool AllowChargeAttack = false;
@@ -322,17 +322,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Max crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 1, same as game." ) ]
       public decimal CritChanceMax = 1;
 
-      [ JsonComment( "Ignore (reroll) destroyed component when rolling crit." ) ]
+      [ JsonComment( "Ignore (reroll) destroyed component when rolling crit.  Default false." ) ]
       public bool CritIgnoreDestroyedComponent = false;
 
-      [ JsonComment( "Ignore (reroll) empty slots when rolling crit." ) ]
+      [ JsonComment( "Ignore (reroll) empty slots when rolling crit.  Default false." ) ]
       public bool CritIgnoreEmptySlots = false;
 
-      [ JsonComment( "Roll on next damage transfer location if a location has nothing to crit." ) ]
+      [ JsonComment( "Roll on next damage transfer location if a location has nothing to crit.  Default false." ) ]
       public bool CritLocationTransfer = false;
 
-      [ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero." ) ]
-      public bool MultupleCrits = false;
+      [ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero.  Default true." ) ]
+      public bool MultupleCrits = true;
 
       //
       [ JsonSection( "Hit Resolution" ) ]

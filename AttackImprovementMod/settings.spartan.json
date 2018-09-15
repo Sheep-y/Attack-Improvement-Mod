@@ -42,9 +42,10 @@
   "ShowAmmoInTooltip": true,
   "ShowEnemyAmmoInTooltip": false,
 
-  /* Show pilot stats when you right click a mechwarrior while in combat. */
+  /* Format of short mechwarrior hint that shows up when you mouseover/right-click the portrait.
+   * Default "HP:{1}/{2} ST:{3},{4},{5},{6}" which summarise both health and stats.  Set to empty to leave at game default. */
 
-  "ShowStatsInPilotHint": true,
+  "ShortPilotHint": "G{3} P{4} G{5} T{6}",
 
   /* Set armour colour of floating bar of Player / Enemy / Ally.  Default "cyan" for player, "teal" for ally.  Set to empty to not change. */
 
@@ -269,9 +270,9 @@
   "UnlockMeleePositioning": true,
 
   /* Max vertical offset of melee attack, by the mech class of the unit at a lower position.  Set to "" to disable.
-   * Non-mechs are same as light.  Default "8,12,16,20" which allows bigger mechs to hit and be hit from more locations. */
+   * Non-mechs are same as light.  Default "8,11,14,17" which allows bigger mechs to hit and be hit from more locations. */
 
-  "MaxMeleeVerticalOffsetByClass": "8,12,16,20",
+  "MaxMeleeVerticalOffsetByClass": "8,11,14,17",
 
   //
   // Critical Hits
@@ -315,7 +316,7 @@
    * Set to 0 to disable through armour critical.  Default 0.  Can be 0 to 1, e.g. 0.2 for 20%.
    * When logging through armour crits, the Max HP column logs the max armour. */
 
-  "CritChanceZeroArmor": 0.05,
+  "CritChanceZeroArmor": 0.02,
 
   /* Base crit chance of a location with full armour.  Must not be higher than ThroughArmorCritChanceZeroArmor.
    * Actual through armour crit rate is between this and zero armour chance.  Default 0.  Can be -1 to 1, e.g. 0.1 for 10%.
@@ -325,11 +326,11 @@
 
   /* Base crit chance of a structurally hit location if it is at zero structure, can be 0 to 1.  Default 1, same as game. */
 
-  "CritChanceZeroStructure": 0.5,
+  "CritChanceZeroStructure": 0.4,
 
   /* Base crit chance of a structurally hit location if it is at full structure, can be -1 to 1.  Default 0, same as game. */
 
-  "CritChanceFullStructure": 0,
+  "CritChanceFullStructure": 0.02,
 
   /* Min crit chance of a structurally hit location, after factoring structure% but before multiplier.  Default 0.5, same as game.
    * This setting simply overrides ResolutionConstants.MinCritChance in CombatGameConstants.json. */
@@ -340,19 +341,19 @@
 
   "CritChanceMax": 1,
 
-  /* Ignore (reroll) destroyed component when rolling crit. */
+  /* Ignore (reroll) destroyed component when rolling crit.  Default false. */
 
   "CritIgnoreDestroyedComponent": true,
 
-  /* Ignore (reroll) empty slots when rolling crit. */
+  /* Ignore (reroll) empty slots when rolling crit.  Default false. */
 
   "CritIgnoreEmptySlots": true,
 
-  /* Roll on next damage transfer location if a location has nothing to crit. */
+  /* Roll on next damage transfer location if a location has nothing to crit.  Default false. */
 
   "CritLocationTransfer": true,
 
-  /* Deduce rolled crit from crit% and keep rolling crit until crit% is zero. */
+  /* Deduce rolled crit from crit% and keep rolling crit until crit% is zero.  Default true. */
 
   "MultupleCrits": true,
 

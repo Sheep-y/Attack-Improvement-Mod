@@ -42,9 +42,10 @@
   "ShowAmmoInTooltip": false,
   "ShowEnemyAmmoInTooltip": false,
 
-  /* Show pilot stats when you right click a mechwarrior while in combat. */
+  /* Format of short mechwarrior hint that shows up when you mouseover/right-click the portrait.
+   * Default "HP:{1}/{2} ST:{3},{4},{5},{6}" which summarise both health and stats.  Set to empty to leave at game default. */
 
-  "ShowStatsInPilotHint": false,
+  "ShortPilotHint": "",
 
   /* Set armour colour of floating bar of Player / Enemy / Ally.  Default "cyan" for player, "teal" for ally.  Set to empty to not change. */
 
@@ -269,7 +270,7 @@
   "UnlockMeleePositioning": false,
 
   /* Max vertical offset of melee attack, by the mech class of the unit at a lower position.  Set to "" to disable.
-   * Non-mechs are same as light.  Default "8,12,16,20" which allows bigger mechs to hit and be hit from more locations. */
+   * Non-mechs are same as light.  Default "8,11,14,17" which allows bigger mechs to hit and be hit from more locations. */
 
   "MaxMeleeVerticalOffsetByClass": "",
 
@@ -340,19 +341,19 @@
 
   "CritChanceMax": 1,
 
-  /* Ignore (reroll) destroyed component when rolling crit. */
+  /* Ignore (reroll) destroyed component when rolling crit.  Default false. */
 
   "CritIgnoreDestroyedComponent": false,
 
-  /* Ignore (reroll) empty slots when rolling crit. */
+  /* Ignore (reroll) empty slots when rolling crit.  Default false. */
 
   "CritIgnoreEmptySlots": false,
 
-  /* Roll on next damage transfer location if a location has nothing to crit. */
+  /* Roll on next damage transfer location if a location has nothing to crit.  Default false. */
 
   "CritLocationTransfer": false,
 
-  /* Deduce rolled crit from crit% and keep rolling crit until crit% is zero. */
+  /* Deduce rolled crit from crit% and keep rolling crit until crit% is zero.  Default true. */
 
   "MultupleCrits": false,
 

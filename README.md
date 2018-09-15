@@ -246,8 +246,8 @@ These settings can be changed in `settings.json`.
 
 **Facing Rings Colours**
 
-> Setting: `FacingMarkerPlayerColors`  (default "#FFFB,#CCFB,#CCFB,#BFBB,#FFBB")<br>
-> Setting: `FacingMarkerEnemyColors`  (default "#FFFB,#CCFB,#CCFB,#FBBB,#FFBB")<br>
+> Setting: `FacingMarkerPlayerColors`  (default "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A")<br>
+> Setting: `FacingMarkerEnemyColors`  (default "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A")<br>
 > Setting: `FacingMarkerTargetColors`  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br>
 >
 > When non-empty, change the colours of each arc for friends, foes, and targeted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.
@@ -371,7 +371,7 @@ These settings can be changed in `settings.json`.
 
 **Adjust Max Height Offset**
 
-> Settings: MaxMeleeVerticalOffsetByClass  (comma separated positive number, default "8,12,16,20")
+> Settings: MaxMeleeVerticalOffsetByClass  (comma separated positive number, default "8,11,14,17")
 >
 > When non-empty, adjust `MaxMeleeVerticalOffset` by the class of the attacker or target, whoever is at the lower ground.
 > Value is for Light, Medium, Heavy, and Assault mechs.  Non-mechs are considered Light for the purpose of this setting.
