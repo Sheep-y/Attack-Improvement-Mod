@@ -231,7 +231,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             ComponentDamageLevel newDamageLevel = GetDegradedComponentLevel( critInfo, out MessageCenterMessage critMessage );
             if ( DebugLog ) Verbo( "Component damaged to {0}", newDamageLevel );
             PreDamageComponent( critMessage );
-            component.DamageComponent( critInfo.hitInfo, newDamageLevel, true );
+            try {
+               component.DamageComponent( critInfo.hitInfo, newDamageLevel, true );
+            } catch ( Exception ex ) { Error( ex ); }
             PostDamageComponent();
          }
          return component;

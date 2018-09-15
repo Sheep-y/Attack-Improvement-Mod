@@ -341,7 +341,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Combat.TurnDirector.CurrentPhase + Separator +
             thisSequenceId + Separator +
             direction + Separator + "0" + Separator + // Direction and distance
-            cause + Separator + "Sepcial Damage" + FillBlanks( 5 );
+            cause + Separator + "Sepcial Damage" + FillBlanks( 6 );
       }
 
       // ============ Shot Log ============
@@ -415,7 +415,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          string line = thisSequence;
          if ( DebugLog ) Verbo( "Overheat damage {1} to {0}", location, damageAmount );
          if ( LogLocation ) {
-            line += FillBlanks( 11 ) + Separator + "(Miss)";
+            line += FillBlanks( 11 ) + Separator + "--";
             if ( LogDamage ) {
                line += Separator + damageAmount
                      + Separator + location // stops at

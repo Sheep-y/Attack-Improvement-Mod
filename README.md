@@ -30,7 +30,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 
 **ALL features can be enabled or disabled individually.**
 
-## Game Bugs Fixed and HUD Enhancements ##
+## Bug Fixes and HUD Enhancements ##
 
 * Grey head disease fixed.
 * Line of fire fixed and stylised: Dotted = indirect, Cyan = flank, Green = rear.
