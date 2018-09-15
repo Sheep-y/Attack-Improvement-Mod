@@ -341,7 +341,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Combat.TurnDirector.CurrentPhase + Separator +
             thisSequenceId + Separator +
             direction + Separator + "0" + Separator + // Direction and distance
-            cause + Separator + "Sepcial Damage" + FillBlanks( 6 );
+            cause + Separator + "Special Damage" + FillBlanks( 6 );
       }
 
       // ============ Shot Log ============
@@ -402,7 +402,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void RecordOverheatCheck ( Mech __instance, string attackerID ) {
          if ( ! __instance.IsOverheated ) return;
          AbstractActor attacker = attackerID != __instance.GUID ? Combat.FindActorByGUID( attackerID ) : __instance;
-         BuildSpecialSequenceLine( attacker, __instance, "Internal", "Overheat" );
+         BuildSpecialSequenceLine( attacker, __instance, "Internal", __instance.IsShutDown ? "Shutdown" : "Overheat" );
       }
 
       [ HarmonyPriority( Priority.VeryHigh ) ]

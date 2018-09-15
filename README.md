@@ -844,7 +844,7 @@ but because the code that determine hit distribution is not designed for fractio
 > For example a Multi-Target attack will log two or three different targets with the same Action Id.
 >
 > **Shot** - For each shot, log the Weapons, Weapon Template, Weapon Id, Attack Roll, Hit Chance, related info, and either Hit or Miss.
-> Weapon Id is unique *per mech*, and can be combined to consolidate data by weapon.
+> Weapon Id is unique *per mech*, and can be combined to consolidate data by weapon.  This level and above also logs overheat damage and DFA self-damage.
 >
 > **Location** - Location Roll, Hit Table, Called Shot, and the Hit Location.
 >
