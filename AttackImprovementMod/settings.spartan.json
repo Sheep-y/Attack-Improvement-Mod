@@ -326,7 +326,7 @@
 
   /* Base crit chance of a structurally hit location if it is at zero structure, can be 0 to 1.  Default 1, same as game. */
 
-  "CritChanceZeroStructure": 0.4,
+  "CritChanceZeroStructure": 0.5,
 
   /* Base crit chance of a structurally hit location if it is at full structure, can be -1 to 1.  Default 0, same as game. */
 

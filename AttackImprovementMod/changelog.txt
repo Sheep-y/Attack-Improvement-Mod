@@ -2,7 +2,7 @@ CHANGE LOG
 
 2018-09-15 AIM Version 2.5 for BATTLETECH 1.2.0
 
-* New: Fix heat projection on move/jump/sprint preview.
+* New: Fix heat prediction on move/jump/sprint preview.
 * New: Show distance number in target panel, and movement point in selection panel.
 * New: Show pilot stats in one-line mouseover hint, instead of only HP.
 * New: Variable melee height difference limit by mech class.
