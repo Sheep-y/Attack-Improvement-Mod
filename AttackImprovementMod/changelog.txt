@@ -1,6 +1,6 @@
 CHANGE LOG
 
-????-??-?? AIM Version 2.3 for BATTLETECH 1.2.0
+2018-09-15 AIM Version 2.5 for BATTLETECH 1.2.0
 
 * New: Fix heat projection on move/jump/sprint preview.
 * New: Show distance number in target panel, and movement point in selection panel.
@@ -37,7 +37,7 @@ CHANGE LOG
 2018-08-23 AIM Version 2.1.1 for BATTLETECH 1.1.2
 
 * Fix: LOS of unknown targets now always use front colour.
-* Fix: Ammo AI no longer leave too many ammo in bins.
+* Fix: Ammo AI no longer leaves too many ammo in bins.
 * Mod: Better compatibility with mods that change explosion rules.
 
 2018-08-18 AIM Version 2.1 for BATTLETECH 1.1.2
