@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 2.5 #
+# AIM - Attack Improvement Mod 2.6 Development #
 For BATTLETECH 1.2.0
 
 - [Features Overview](#features-overview)
