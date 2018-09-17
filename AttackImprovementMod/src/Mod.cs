@@ -10,6 +10,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void Init ( string directory, string settingsJSON ) {
          new Mod().Start( ref ModLog );
+         ModLog.LogLevel = System.Diagnostics.SourceLevels.Verbose;
       }
 
       public override void ModStarts () {
@@ -31,8 +32,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Add( new AttackLog(){ Name = "Logger" } );
       }
 
-      public override void GameStarts () {
-         ModLog.LogLevel = System.Diagnostics.SourceLevels.Verbose;
+      public override void GameStartsOnce () {
          Info( "Detected Mods: " + BattleMod.GetModList().Concat() );
       }
 
