@@ -207,6 +207,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return null;
       }
 
+      public static UnityEngine.Color?[] ParseColours ( params string[] htmlColours ) {
+         UnityEngine.Color?[] result = new UnityEngine.Color?[ htmlColours.Length ];
+         bool hasColour = false;
+         for ( int i = 0, len = result.Length - 1 ; i < len ; i++ ) {
+            result[ i ] = ParseColour( htmlColours[ i ] );
+            if ( result[ i ] != null ) hasColour = true;
+         }
+         return hasColour ? result : null;
+      }
+
       public static bool HasMod ( params string[] mods ) { try {
          return BattleMod.FoundMod( mods );
       } catch ( Exception ex ) {
