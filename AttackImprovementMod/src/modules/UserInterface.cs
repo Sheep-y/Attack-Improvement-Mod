@@ -27,8 +27,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          FloatingArmorColourAlly = ParseColour( Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColourPlayer != null || FloatingArmorColourEnemy != null || FloatingArmorColourAlly != null ) {
             BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
-            Patch( typeof( CombatHUDPipBar ), "ShowValue", new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "ShowValue", null );
-            Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo", "SetPipBarOwner", "ResetPipBarOwner" );
+            Patch( typeof( CombatHUDPipBar ), "ShowValue", new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "CombatHUDLifeBarPips", null );
+            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetPipBarOwner", null );
          }
          if ( Settings.ShowUnderArmourDamage ) {
             Type ReadoutType = typeof( HUDMechArmorReadout );
@@ -461,19 +461,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Floating Nameplate ============
 
       private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
-      private static ICombatant thisBarOwner;
 
-      public static void ShowValue ( CombatHUDPipBar __instance, ref Color shownColor ) {
-         if ( ! ( __instance is CombatHUDLifeBarPips me ) || me.Mode != CombatHUDLifeBarPips.PipMode.Armor ) return;
+      public static void CombatHUDLifeBarPips ( CombatHUDPipBar __instance, ref Color shownColor ) {
+         if ( ! ( __instance is CombatHUDLifeBarPips me ) || ! BarOwners.TryGetValue( __instance, out ICombatant owner ) ) return;
 
-         ICombatant owner = null;
-         if ( thisBarOwner != null ) {
-            owner = thisBarOwner;
-            BarOwners[ __instance ] = owner;
-         } else {
-            if ( ! BarOwners.TryGetValue( __instance, out owner ) )
-               return;
-         }
          Team team = owner?.team;
          if ( team == null || owner.IsDead ) return;
 
@@ -488,12 +479,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
-      public static void SetPipBarOwner ( CombatHUDActorInfo __instance ) {
-         thisBarOwner = __instance.DisplayedCombatant;
-      }
-
-      public static void ResetPipBarOwner () {
-         thisBarOwner = null;
+      public static void SetPipBarOwner ( CombatHUDNumFlagHex __instance ) {
+         ICombatant owner = __instance.DisplayedCombatant;
+         CombatHUDLifeBarPips bar = __instance.ActorInfo.ArmorBar;
+         BarOwners[ bar ] = owner;
       }
 
       // ============ Others ============
