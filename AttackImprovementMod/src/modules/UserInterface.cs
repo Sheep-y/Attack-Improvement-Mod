@@ -104,7 +104,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShortPilotHint != null ) {
             PilotStatus = new Dictionary<CombatHUDMWStatus, Pilot>(4);
             Patch( typeof( CombatHUDMWStatus ), "OnPortraitRightClicked", null, "RefreshPilotHint" );
-            Patch( typeof( CombatHUDMWStatus ), "ForceUnexpend", null, "RefreshPilotHint" );
+            Patch( typeof( CombatHUDMWStatus ), "ForceUnexpand", null, "RefreshPilotHint" );
             Patch( typeof( CombatHUDMWStatus ), "RefreshPilot", null, "ReplacePilotHint" );
          }
 
