@@ -74,7 +74,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          for ( int i = 0 ; i < LOSDirectionCount ; i++ ) {
             if ( player != null && player.Length > i )
                FacingMarkerPlayerColors[ i ] = ParseColour( player[ i ] );
-            if ( player != null && enemy.Length > i )
+            if ( enemy  != null && enemy.Length > i )
                FacingMarkerEnemyColors [ i ] = ParseColour( enemy [ i ] );
             if ( active != null && active.Length > i )
                FacingMarkerTargetColors[ i ] = ParseColour( active[ i ] );
