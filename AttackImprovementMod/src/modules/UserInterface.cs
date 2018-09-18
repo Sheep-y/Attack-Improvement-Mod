@@ -17,11 +17,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class UserInterface : BattleModModule {
 
+      private static Color?[] NameplateColours = new Color?[ 3 ];
       private static Color?[] FloatingArmorColours = new Color?[ 3 ];
-      private static Color? FloatingArmorColourEnemy;
-      private static Color? FloatingArmorColourAlly;
 
       public override void GameStartsOnce () {
+         NameplateColours = ParseColours( Settings.NameplateColourPlayer, Settings.NameplateColourEnemy, Settings.NameplateColourAlly );
+         if ( NameplateColours != null )
+            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetNameplateColor", null );
          FloatingArmorColours = ParseColours( Settings.FloatingArmorColourPlayer, Settings.FloatingArmorColourEnemy, Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColours != null ) {
             BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
@@ -458,8 +460,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Floating Nameplate ============
 
-      private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
-
       // Colours are Player, Enemy, and Ally
       private static Color? GetTeamColour ( ICombatant owner, Color?[] Colours ) {
          Team team = owner?.team;
@@ -467,25 +467,36 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( team.IsLocalPlayer ) return Colours[0];
          if ( team.IsEnemy( BattleTechGame?.Combat?.LocalPlayerTeam ) ) return Colours[1];
-         if ( FloatingArmorColourAlly != null && team.IsFriendly( BattleTechGame?.Combat?.LocalPlayerTeam ) ) return Colours[2];
+         if ( team.IsFriendly( BattleTechGame?.Combat?.LocalPlayerTeam ) ) return Colours[2];
          return null;
+      }
+
+      public static void SetNameplateColor ( CombatHUDNumFlagHex __instance ) {
+         Color? colour = GetTeamColour( __instance.DisplayedCombatant, NameplateColours );
+         if ( colour == null ) return;
+         CombatHUDActorNameDisplay names = __instance.ActorInfo?.NameDisplay;
+         if ( names == null ) return;
+         names.PilotNameText.color = colour.GetValueOrDefault();
+         names.MechNameText.color = colour.GetValueOrDefault();
+      }
+
+      private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
+
+      public static void SetPipBarOwner ( CombatHUDNumFlagHex __instance ) {
+         ICombatant owner = __instance.DisplayedCombatant;
+         CombatHUDLifeBarPips bar = __instance.ActorInfo?.ArmorBar;
+         if ( bar == null ) return;
+         if ( owner != null )
+            BarOwners[ bar ] = owner;
+         else if ( BarOwners.ContainsKey( bar ) )
+            BarOwners.Remove( bar );
       }
 
       public static void CombatHUDLifeBarPips ( CombatHUDPipBar __instance, ref Color shownColor ) {
          if ( ! ( __instance is CombatHUDLifeBarPips me ) || ! BarOwners.TryGetValue( __instance, out ICombatant owner ) ) return;
-         Color? color = GetTeamColour( owner, FloatingArmorColours );
-         if ( color != null )
-            shownColor = color.GetValueOrDefault();
-      }
-
-      public static void SetPipBarOwner ( CombatHUDNumFlagHex __instance ) {
-         ICombatant owner = __instance.DisplayedCombatant;
-         CombatHUDLifeBarPips bar = __instance.ActorInfo.ArmorBar;
-         if ( owner != null ) {
-            BarOwners[ bar ] = owner;
-            Info( __instance.ActorInfo.NameDisplay.MechNameText.color );
-         } else if ( BarOwners.ContainsKey( bar ) )
-            BarOwners.Remove( bar );
+         Color? colour = GetTeamColour( owner, FloatingArmorColours );
+         if ( colour != null )
+            shownColor = colour.GetValueOrDefault();
       }
 
       // ============ Others ============

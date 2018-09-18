@@ -165,6 +165,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       /* Changes that we don't want to write back to settings.json */
       private void NormaliseSettings () {
          NullIfEmpty( ref Settings.ShortPilotHint );
+         NullIfEmpty( ref Settings.NameplateColourPlayer );
+         NullIfEmpty( ref Settings.NameplateColourEnemy );
+         NullIfEmpty( ref Settings.NameplateColourAlly );
          NullIfEmpty( ref Settings.FloatingArmorColourPlayer );
          NullIfEmpty( ref Settings.FloatingArmorColourEnemy );
          NullIfEmpty( ref Settings.FloatingArmorColourAlly );
@@ -210,7 +213,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static UnityEngine.Color?[] ParseColours ( params string[] htmlColours ) {
          UnityEngine.Color?[] result = new UnityEngine.Color?[ htmlColours.Length ];
          bool hasColour = false;
-         for ( int i = 0, len = result.Length - 1 ; i < len ; i++ ) {
+         for ( int i = 0, len = result.Length ; i < len ; i++ ) {
             result[ i ] = ParseColour( htmlColours[ i ] );
             if ( result[ i ] != null ) hasColour = true;
          }

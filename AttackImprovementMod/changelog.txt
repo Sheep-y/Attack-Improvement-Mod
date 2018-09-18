@@ -2,6 +2,7 @@ CHANGE LOG
 
 ????-??-?? AIM Version 2.6 development for BATTLETECH 1.2.0
 
+* New: Set nameplate text colour.
 * Fix: FacingMarkerEnemyColors not applied when FacingMarkerPlayerColors is empty.
 * Fix: NPE when FacingMarkerPlayerColors is non-empty but FacingMarkerEnemyColors is empty.
 * Fix: FloatingArmorColours no longer applies to target panel and runs faster.

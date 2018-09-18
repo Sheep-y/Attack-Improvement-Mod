@@ -43,10 +43,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default \"HP:{1}/{2} ST:{3},{4},{5},{6}\" which summarise both health and stats.  Set to empty to leave at game default." } ) ]
       public string ShortPilotHint = "HP:{1}/{2} ST:{3},{4},{5},{6}";
 
-      [ JsonComment( "Set armour colour of floating bar of Player / Enemy / Ally.  Default \"cyan\" for player, \"teal\" for ally.  Set to empty to not change." ) ]
-      public string FloatingArmorColourPlayer = "cyan";
-      public string FloatingArmorColourEnemy = "";
-      public string FloatingArmorColourAlly = "teal";
+      [ JsonComment( "Set name colour of overhead nameplate of Player / Enemy / Ally.  Set to empty to not change." ) ]
+      public string NameplateColourPlayer = "#8FF";
+      public string NameplateColourEnemy = "#FBB";
+      public string NameplateColourAlly = "#BFB";
+
+      [ JsonComment( "Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default \"cyan\" for player, \"teal\" for ally.  Set to empty to not change." ) ]
+      public string FloatingArmorColourPlayer = "#8FF";
+      public string FloatingArmorColourEnemy = "#FBB";
+      public string FloatingArmorColourAlly = "#BFB";
 
       //
       [ JsonSection( "Line of Sight" ) ]
