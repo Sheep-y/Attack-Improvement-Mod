@@ -22,8 +22,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void GameStartsOnce () {
          NameplateColours = ParseColours( Settings.NameplateColourPlayer, Settings.NameplateColourEnemy, Settings.NameplateColourAlly );
-         if ( Settings.ShowEnemyWounds != null || Settings.ShowNPCHealth != null )
+         if ( Settings.ShowEnemyWounds != null || Settings.ShowNPCHealth != null ) {
             Patch( typeof( CombatHUDActorNameDisplay ), "RefreshInfo", typeof( VisibilityLevel ), null, "ShowNPCWounds" );
+            Patch( typeof( Pilot ), "InjurePilot", null, "RefreshPilotNames" );
+         }
          if ( NameplateColours != null )
             Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", null, "SetNameplateColor" );
          FloatingArmorColours = ParseColours( Settings.FloatingArmorColourPlayer, Settings.FloatingArmorColourEnemy, Settings.FloatingArmorColourAlly );
@@ -462,7 +464,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Floating Nameplate ============
 
-      private static void ShowNPCWounds ( CombatHUDActorNameDisplay __instance, VisibilityLevel visLevel ) { try {
+      public static void ShowNPCWounds ( CombatHUDActorNameDisplay __instance, VisibilityLevel visLevel ) { try {
          AbstractActor actor = __instance.DisplayedCombatant as AbstractActor;
          Pilot pilot = actor?.GetPilot();
          Team team = actor?.team;
@@ -478,6 +480,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( format == null || ( ! format.StartsWith( "{0}" ) && pilot.Injuries <= 0 ) ) return;
          __instance.PilotNameText.SetText( Translate( format, args ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void RefreshPilotNames ( Pilot __instance ) { try {
+         if ( __instance.IsIncapacitated ) return;
+         AbstractActor actor = Combat.AllActors.First( e => e.GetPilot() == __instance );
+         if ( actor == null ) return;
+         HUD.InWorldMgr.GetNumFlagForCombatant( actor )?.ActorInfo?.NameDisplay?.RefreshInfo();
+         //if ( HUD.SelectedActor == actor )
+         //   HUD.MechTray.ActorInfo.NameDisplay.RefreshInfo();
+         if ( HUD.SelectedTarget == actor )
+            HUD.TargetingComputer.ActorInfo.NameDisplay.RefreshInfo();
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       // Colours are Player, Enemy, and Ally
