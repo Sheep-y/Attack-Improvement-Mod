@@ -225,6 +225,9 @@ namespace Sheepy.BattleTechMod {
 
       private static void RunCombatEnds ( CombatHUD __instance ) {
          CallAllModules( module => module.CombatEnds() );
+         CombatConstants = null;
+         Combat = null;
+         HUD = null;
       }
 
       private static void CallAllModules ( Action<BattleModModule> task ) {

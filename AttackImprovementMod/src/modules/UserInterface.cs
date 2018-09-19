@@ -8,6 +8,7 @@ using System.Reflection;
 using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using System.Diagnostics;
    using static Mod;
    using static System.Reflection.BindingFlags;
 
@@ -70,10 +71,44 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
+
+         Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
       }
 
       public override void CombatEnds () {
          BarOwners?.Clear();
+         Combat.MessageCenter.RemoveSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
+      }
+
+      // ============ Keyboard Input ============
+
+      private static string LastKeyPressed;
+      private static int KeyPressedTime;
+
+      public static void KeyPressed ( MessageCenterMessage message ) { try {
+         if ( Combat == null ) return;
+         string key = ( message as KeyPressedMessage )?.KeyCode;
+         switch ( key ) {
+            case "Alpha1": CheckDoublePress( key, 1 ); break;
+            case "Alpha2": CheckDoublePress( key, 2 ); break;
+            case "Alpha3": CheckDoublePress( key, 3 ); break;
+            case "Alpha4": CheckDoublePress( key, 4 ); break;
+         }
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static void CheckDoublePress( string key, int index ) {
+         int now = Environment.TickCount & Int32.MaxValue;
+         if ( key == LastKeyPressed ) {
+            if ( now - KeyPressedTime < 800 ) {
+               List<AbstractActor> units = Combat?.LocalPlayerTeam?.units;
+               if ( units == null || index > units.Count ) return;
+               AbstractActor target = units[ index - 1 ];
+               if ( target == null || target.IsDead ) return;
+               HUD.MechWarriorTray.FindPortraitForActor( target.GUID ).OnClicked();
+            }
+         } else
+            LastKeyPressed = key;
+         KeyPressedTime = Environment.TickCount & Int32.MaxValue;
       }
 
       // ============ Multi-Target ============
