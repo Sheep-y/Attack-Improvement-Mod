@@ -21,19 +21,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Color?[] FloatingArmorColours = new Color?[ 3 ];
 
       public override void GameStartsOnce () {
-         NameplateColours = ParseColours( Settings.NameplateColourPlayer, Settings.NameplateColourEnemy, Settings.NameplateColourAlly );
-         if ( Settings.ShowEnemyWounds != null || Settings.ShowNPCHealth != null ) {
-            Patch( typeof( CombatHUDActorNameDisplay ), "RefreshInfo", typeof( VisibilityLevel ), null, "ShowNPCWounds" );
-            Patch( typeof( Pilot ), "InjurePilot", null, "RefreshPilotNames" );
-         }
-         if ( NameplateColours != null )
-            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", null, "SetNameplateColor" );
-         FloatingArmorColours = ParseColours( Settings.FloatingArmorColourPlayer, Settings.FloatingArmorColourEnemy, Settings.FloatingArmorColourAlly );
-         if ( FloatingArmorColours != null ) {
-            BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
-            Patch( typeof( CombatHUDPipBar ), "ShowValue", new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "CombatHUDLifeBarPips", null );
-            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetPipBarOwner", null );
-         }
+         // Done on game load to be effective in campaign mech bay
          if ( Settings.ShowUnderArmourDamage ) {
             Type ReadoutType = typeof( HUDMechArmorReadout );
             TryRun( Log, () => {
@@ -55,6 +43,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatStartsOnce () {
+         NameplateColours = ParseColours( Settings.NameplateColourPlayer, Settings.NameplateColourEnemy, Settings.NameplateColourAlly );
+         if ( Settings.ShowEnemyWounds != null || Settings.ShowNPCHealth != null ) {
+            Patch( typeof( CombatHUDActorNameDisplay ), "RefreshInfo", typeof( VisibilityLevel ), null, "ShowNPCWounds" );
+            Patch( typeof( Pilot ), "InjurePilot", null, "RefreshPilotNames" );
+         }
+         if ( NameplateColours != null )
+            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", null, "SetNameplateColor" );
+         FloatingArmorColours = ParseColours( Settings.FloatingArmorColourPlayer, Settings.FloatingArmorColourEnemy, Settings.FloatingArmorColourAlly );
+         if ( FloatingArmorColours != null ) {
+            BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
+            Patch( typeof( CombatHUDPipBar ), "ShowValue", new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "CombatHUDLifeBarPips", null );
+            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetPipBarOwner", null );
+         }
          if ( Settings.FixPaperDollRearStructure )
             Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
          if ( Settings.FixMultiTargetBackout ) {
