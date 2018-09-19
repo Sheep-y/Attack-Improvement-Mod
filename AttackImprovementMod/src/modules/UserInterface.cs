@@ -477,6 +477,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          CombatHUDActorNameDisplay names = __instance.ActorInfo?.NameDisplay;
          if ( names == null ) return;
          names.PilotNameText.faceColor = colour.GetValueOrDefault();
+         if ( colour != Color.black ) {
+            names.MechNameText.outlineWidth = 0.2f;
+            names.MechNameText.outlineColor = Color.black;
+         }
          names.MechNameText.faceColor = colour.GetValueOrDefault();
       }
 
