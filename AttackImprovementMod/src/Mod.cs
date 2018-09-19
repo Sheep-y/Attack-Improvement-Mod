@@ -176,6 +176,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       /* Changes that we don't want to write back to settings.json */
       private void NormaliseSettings () {
          NullIfEmpty( ref Settings.ShortPilotHint );
+         NullIfEmpty( ref Settings.WeaponRangeFormat );
          NullIfEmpty( ref Settings.ShowEnemyWounds );
          NullIfEmpty( ref Settings.ShowNPCHealth );
          NullIfEmpty( ref Settings.NameplateColourPlayer );

@@ -43,8 +43,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default \"G:{3} P:{4} G:{5} T:{6}\" which summarise his/her stats.  Set to empty to leave at game default." } ) ]
       public string ShortPilotHint = "G:{3} P:{4} G:{5} T:{6}";
 
-      [ JsonComment( "Show weapon range in meters instead of \"Short\" or \"Very Long\" in weapon mouseover.  Default true." ) ]
-      public bool ShowWeaponRangeInMeter = true;
+      [ JsonComment( "Show weapon range in meters instead of \"Short\" or \"Very Long\" in weapon mouseover.  Default \"Min {0} : Long {2} : Max {4}\"." ) ]
+      public string WeaponRangeFormat = "Min {0} : Long {2} : Max {4}";
 
       [ JsonComment( new string[]{
         "Format pilot name to show wounds (enemies) and health (ally) after their names.",

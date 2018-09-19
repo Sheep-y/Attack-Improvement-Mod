@@ -3,6 +3,8 @@ CHANGE LOG
 ????-??-?? AIM Version 2.6 development for BATTLETECH 1.2.0
 
 * New: Set nameplate text colour.
+* New: Set weapon range in meters in weapon mouseover.
+* New: Show short range in hit modifier breakdown.
 * Mod: ShortPilotHint now hides HP by default, to avoid line wrapping on elite mechwarriors.
 * Fix: FacingMarkerEnemyColors not applied when FacingMarkerPlayerColors is empty.
 * Fix: NPE when FacingMarkerPlayerColors is non-empty but FacingMarkerEnemyColors is empty.

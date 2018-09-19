@@ -112,17 +112,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDMWStatus ), "RefreshPilot", null, "ReplacePilotHint" );
          }
 
+         Type slotType = typeof( CombatHUDWeaponSlot );
          if ( Settings.ShowBaseHitchance ) {
-            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
-            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
+            Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
+            Patch( slotType, "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
          }
          if ( Settings.ShowShortRangeInBreakdown ) {
             rangedPenalty = ModifierList.GetRangedModifierFactor( "range" );
             if ( rangedPenalty == null )
                Warn( "Cannot get range penalty. ShowShortRangeInBreakdown disabled." );
             else
-               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "ShowOptimalRange", null );
+               Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowOptimalRange", null );
          }
+         if ( Settings.WeaponRangeFormat != null )
+            Patch( slotType, "GenerateToolTipStrings", null, "ShowWeaponRanges" );
       }
 
       public override void CombatStarts () {
@@ -567,7 +570,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      // ============ Extra breakdowns ============
+      // ============ Weapon hint ============
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
@@ -586,11 +589,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Func<ModifierList.AttackModifier> rangedPenalty;
 
       public static void ShowOptimalRange ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
-         if ( HUD.SelectedActor is Mech mech ) {
-            ModifierList.AttackModifier range = rangedPenalty();
-            if ( range.Value != 0 ) return;
-            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( range.DisplayName ) );
-         }
+         ModifierList.AttackModifier range = rangedPenalty();
+         if ( range.Value != 0 ) return;
+         __instance.ToolTipHoverElement.BuffStrings.Add( new Text( range.DisplayName ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ShowWeaponRanges ( CombatHUDWeaponSlot __instance ) { try {
+         Weapon weapon = __instance.DisplayedWeapon;
+         List<Text> spec = __instance.ToolTipHoverElement?.WeaponStrings;
+         if ( weapon == null || spec == null || spec.Count != 3 ) return;
+         spec[2] = new Text( Settings.WeaponRangeFormat, weapon.MinRange, weapon.ShortRange, weapon.MediumRange, weapon.LongRange, weapon.MaxRange );
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
