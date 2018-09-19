@@ -213,7 +213,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static string smartRange ( float min, float range, float max ) {
-         if ( range-min > max-range )
+         if ( range-min > max-range || min <= 0 )
             return " (<" + max + "m)";
          return " (>" + min + "m)";
       }

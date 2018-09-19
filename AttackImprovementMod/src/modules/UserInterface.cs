@@ -116,6 +116,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
             Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
          }
+         if ( Settings.ShowShortRangeInBreakdown ) {
+            rangedPenalty = ModifierList.GetRangedModifierFactor( "range" );
+            if ( rangedPenalty == null )
+               Warn( "Cannot get range penalty. ShowShortRangeInBreakdown disabled." );
+            else
+               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "ShowOptimalRange", null );
+         }
       }
 
       public override void CombatStarts () {
@@ -560,19 +567,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      // ============ Base Hit Chances ============
+      // ============ Extra breakdowns ============
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseToHitChance( HUD.SelectedActor ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( Translate( "GUNNERY" ) + " " + mech.SkillGunnery + string.Format( " = {0:0.#}%", baseChance ) ) );
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "GUNNERY {0} = {1:0.#}%", mech.SkillGunnery, baseChance ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowBaseMeleeChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseMeleeToHitChance( mech ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( Translate( "PILOTING" ) + " " + mech.SkillPiloting + string.Format( " = {0:0.#}%", baseChance ) ) );
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "PILOTING {0} = {1:0.#}%", mech.SkillPiloting, baseChance ) );
+         }
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static Func<ModifierList.AttackModifier> rangedPenalty;
+
+      public static void ShowOptimalRange ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+         if ( HUD.SelectedActor is Mech mech ) {
+            ModifierList.AttackModifier range = rangedPenalty();
+            if ( range.Value != 0 ) return;
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( range.DisplayName ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
