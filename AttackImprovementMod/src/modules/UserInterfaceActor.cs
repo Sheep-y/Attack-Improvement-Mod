@@ -29,7 +29,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                armorRearProp = ReadoutType.GetProperty( "armorRearCached", NonPublic | Instance );
                structureRearProp = ReadoutType.GetProperty( "structureRearCached", NonPublic | Instance );
             } );
-            if ( outlineProp == null || armorProp == null || structureProp == null || outlineRearProp == null || armorRearProp == null || structureRearProp == null )
+            if ( AnyNull( outlineProp, armorProp, structureProp, outlineRearProp, armorRearProp, structureRearProp ) )
                Error( "Cannot find outline, armour, and/or structure colour cache of HUDMechArmorReadout.  Cannot make paper dolls divulge under skin damage." );
             else {
                if ( ! Settings.FixPaperDollRearStructure )
@@ -37,12 +37,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( ReadoutType, "RefreshMechStructureAndArmor", null, "ShowStructureDamageThroughArmour" );
             }
          }
+         if ( Settings.FixPaperDollRearStructure )
+            Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
       }
 
       public override void CombatStartsOnce () {
-         if ( Settings.FixPaperDollRearStructure )
-            Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
-
          if ( Settings.ShowNumericInfo ) {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowNumericInfo" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
@@ -332,7 +331,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static DesignMaskDef GetDesignMasksAtPosition ( Vector3 position ) {
          MapEncounterLayerDataCell[] cells = GetEncounterCellsAtPosition( position );
-         if ( cells == null || cells.Length <= 0 ) return null;
+         if ( cells.IsNullOrEmpty() ) return null;
          return Combat?.MapMetaData?.GetPriorityDesignMask( cells[0].relatedTerrainCell );
       }
 

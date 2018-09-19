@@ -117,7 +117,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          MechEngineerCheckCritPostfix = MechCheckForCritPatch?.GetMethod( "Postfix", Static | Public );
          MechEngineerGetCompLocation = MechEngineer?.GetType( "MechEngineer.DamageIgnoreHelper" )?.GetMethod( "OverrideLocation" );
          MechSetCombat = typeof( Mech ).GetMethod( "set_Combat", NonPublic | Instance );
-         if ( MechEngineerCheckCritPublishMessage == null || MechEngineerCheckCritPostfix == null || MechEngineerGetCompLocation == null || MechSetCombat == null ) {
+         if ( AnyNull( MechEngineerCheckCritPublishMessage, MechEngineerCheckCritPostfix, MechEngineerGetCompLocation, MechSetCombat ) ) {
             MechEngineerCheckCritPublishMessage = MechEngineerCheckCritPostfix = MechEngineerGetCompLocation = MechSetCombat = null;
             throw new NullReferenceException();
          }

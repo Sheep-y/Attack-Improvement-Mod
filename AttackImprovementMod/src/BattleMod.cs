@@ -136,7 +136,7 @@ namespace Sheepy.BattleTechMod {
          if ( line == null ) return true;
          object[] args = line?.args;
          // Convert Log( data ) to Log( "{0}", data ) so that it can be formatted
-         if ( ! ( line.message is string ) && ( args == null || args.Length == 0 ) && ! ( line.message is Exception ) ) {
+         if ( ! ( line.message is string ) && args.IsNullOrEmpty() && ! ( line.message is Exception ) ) {
             line.args = args = new object[]{ line.message };
             line.message = "{0}";
          } else if ( args == null ) 
@@ -353,7 +353,7 @@ namespace Sheepy.BattleTechMod {
 
       public void Patch ( MethodBase patched, string prefix, string postfix, string transpiler = null ) {
          HarmonyMethod pre = MakePatch( prefix ), post = MakePatch( postfix ), trans = MakePatch( transpiler );
-         if ( pre == null && post == null && trans == null ) return; // MakePatch would have reported method not found
+         if ( AllNull( pre, post, trans ) ) return; // MakePatch would have reported method not found
          Patch( patched, pre, post, trans );
       }
 
@@ -448,6 +448,18 @@ namespace Sheepy.BattleTechMod {
          return map[ key ];
       }
 
+      public static bool AllNull ( params object[] objects ) {
+         for ( int i = 0, len = objects.Length ; i < len ; i++ )
+            if ( objects[ i ] != null ) return false;
+         return true;
+      }
+
+      public static bool AnyNull ( params object[] objects ) {
+         for ( int i = 0, len = objects.Length ; i < len ; i++ )
+            if ( objects[ i ] == null ) return true;
+         return false;
+      }
+
       public static T ValueCheck<T> ( ref T value, T fallback = default, Func<T,bool> validate = null ) {
          if ( value == null ) value = fallback;
          else if ( validate != null && ! validate( value ) ) value = fallback;
@@ -489,6 +501,10 @@ namespace Sheepy.BattleTechMod {
 
    public static class BattleModExtensions {
 
+      public static bool IsNullOrEmpty ( this Array array ) {
+          return array == null || array.Length <= 0;
+      }
+      
       public static string Concat ( this System.Collections.IEnumerable list, string separator = ", ", Func<object,string> formatter = null ) {
          if ( list == null ) return string.Empty;
          StringBuilder result = new StringBuilder();
