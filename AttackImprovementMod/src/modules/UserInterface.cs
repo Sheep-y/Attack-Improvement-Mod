@@ -22,6 +22,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void GameStartsOnce () {
          NameplateColours = ParseColours( Settings.NameplateColourPlayer, Settings.NameplateColourEnemy, Settings.NameplateColourAlly );
+         if ( Settings.ShowEnemyWounds != null || Settings.ShowNPCHealth != null )
+            Patch( typeof( CombatHUDActorNameDisplay ), "RefreshInfo", typeof( VisibilityLevel ), null, "ShowNPCWounds" );
          if ( NameplateColours != null )
             Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", null, "SetNameplateColor" );
          FloatingArmorColours = ParseColours( Settings.FloatingArmorColourPlayer, Settings.FloatingArmorColourEnemy, Settings.FloatingArmorColourAlly );
@@ -443,7 +445,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return Combat?.MapMetaData?.GetPriorityDesignMask( cells[0].relatedTerrainCell );
       }
 
-      public static void CorrectProjectedHeat ( Mech __instance, ref float __result ) {
+      public static void CorrectProjectedHeat ( Mech __instance, ref float __result ) { try {
          if ( __instance.HasMovedThisRound ) return;
          SelectionState state = HUD?.SelectionHandler?.ActiveState;
          Vector3 position;
@@ -456,9 +458,27 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float here = local?.heatSinkMultiplier ?? 1f, there = preview?.heatSinkMultiplier ?? 1f;
          if ( here == there ) return;
          __result *= there / here;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Floating Nameplate ============
+
+      private static void ShowNPCWounds ( CombatHUDActorNameDisplay __instance, VisibilityLevel visLevel ) { try {
+         AbstractActor actor = __instance.DisplayedCombatant as AbstractActor;
+         Pilot pilot = actor?.GetPilot();
+         Team team = actor?.team;
+         if ( pilot == null || ( team != null && team.IsLocalPlayer ) ) return;
+         string format = null;
+         object[] args = null;
+         if ( team.IsFriendly( BattleTechGame?.Combat?.LocalPlayerTeam ) ) {
+            format = Settings.ShowNPCHealth;
+            args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, pilot.Health - pilot.Injuries, pilot.Health };
+         } else if ( visLevel == VisibilityLevel.LOSFull ) {
+            format = Settings.ShowEnemyWounds;
+            args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, "?", "?" };
+         }
+         if ( format == null || ( ! format.StartsWith( "{0}" ) && pilot.Injuries <= 0 ) ) return;
+         __instance.PilotNameText.SetText( Translate( format, args ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // Colours are Player, Enemy, and Ally
       private static Color? GetTeamColour ( ICombatant owner, Color?[] Colours ) {
@@ -471,7 +491,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return null;
       }
 
-      public static void SetNameplateColor ( CombatHUDNumFlagHex __instance ) {
+      public static void SetNameplateColor ( CombatHUDNumFlagHex __instance ) { try {
          Color? colour = GetTeamColour( __instance.DisplayedCombatant, NameplateColours );
          if ( colour == null ) return;
          CombatHUDActorNameDisplay names = __instance.ActorInfo?.NameDisplay;
@@ -482,7 +502,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             names.MechNameText.outlineColor = Color.black;
          }
          names.MechNameText.faceColor = colour.GetValueOrDefault();
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
 
@@ -496,12 +516,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             BarOwners.Remove( bar );
       }
 
-      public static void CombatHUDLifeBarPips ( CombatHUDPipBar __instance, ref Color shownColor ) {
+      public static void CombatHUDLifeBarPips ( CombatHUDPipBar __instance, ref Color shownColor ) { try {
          if ( ! ( __instance is CombatHUDLifeBarPips me ) || ! BarOwners.TryGetValue( __instance, out ICombatant owner ) ) return;
          Color? colour = GetTeamColour( owner, FloatingArmorColours );
          if ( colour != null )
             shownColor = colour.GetValueOrDefault();
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Others ============
 
@@ -518,14 +538,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             __instance.RefreshPilot( pilot );
       }
 
-      public static void ReplacePilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) {
+      public static void ReplacePilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) { try {
          if ( ! PilotStatus.ContainsKey( __instance ) )
             PilotStatus.Add( __instance, pilot );
          if ( ( HUD.SelectedActor != null || ! __instance.IsExpanded ) && ! pilot.IsIncapacitated )
             __instance.InjuriesItem.ShowExistingIcon( new Text( Settings.ShortPilotHint, new object[]{
                pilot.Injuries, ( pilot.Health - pilot.Injuries ), pilot.Health, pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics } ),
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Base Hit Chances ============
 

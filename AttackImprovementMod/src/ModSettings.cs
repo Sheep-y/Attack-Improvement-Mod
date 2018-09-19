@@ -43,6 +43,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default \"G:{3} P:{4} G:{5} T:{6}\" which summarise his/her stats.  Set to empty to leave at game default." } ) ]
       public string ShortPilotHint = "G:{3} P:{4} G:{5} T:{6}";
 
+      [ JsonComment( new string[]{
+        "Format pilot name to show wounds (enemies) and health (ally) after their names.",
+        "{0} is pilot name, {1} is injury, {2} is health - injuery, and {3} is health.  Set to empty to not change game default." } ) ]
+      public string ShowEnemyWounds = "{0}, Wounds {1}";
+      public string ShowNPCHealth = "{0}, HP {2}/{3}";
+
       [ JsonComment( "Set name colour of overhead nameplate of Player / Enemy / Ally.  Default \"#8FF\", \"#FBB\", \"#BFB\".  Set to empty to not change (leave at white)." ) ]
       public string NameplateColourPlayer = "#8FF";
       public string NameplateColourEnemy = "#FBB";

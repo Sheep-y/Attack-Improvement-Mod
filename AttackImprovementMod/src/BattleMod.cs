@@ -402,8 +402,9 @@ namespace Sheepy.BattleTechMod {
 
       // ============ UTILS ============
 
-      public static string Translate ( string s ) {
-         return new Text( s, new object[0] ).ToString( true );
+      public static string Translate ( string s, params object[] augs ) {
+         if ( augs == null ) augs = new object[0];
+         return new Text( s, augs ).ToString( true );
       }
 
       public static string UppercaseFirst ( string s ) {
