@@ -574,15 +574,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
-            float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseToHitChance( HUD.SelectedActor ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "GUNNERY {0} = {1:0.#}%", mech.SkillGunnery, baseChance ) );
+            float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseToHitChance( mech ) ) * 100;
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "{0} {1} = {2:0}%", Translate( Pilot.PILOTSTAT_GUNNERY ), mech.SkillGunnery, baseChance ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowBaseMeleeChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseMeleeToHitChance( mech ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "PILOTING {0} = {1:0.#}%", mech.SkillPiloting, baseChance ) );
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "{0} {1} = {2:0}%", Translate( Pilot.PILOTSTAT_PILOTING ), mech.SkillPiloting, baseChance ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
