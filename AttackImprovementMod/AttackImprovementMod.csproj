@@ -87,6 +87,7 @@
     <Compile Include="src\modules\RollCorrection.cs" />
     <Compile Include="src\modules\RollModifier.cs" />
     <Compile Include="src\modules\HitLocation.cs" />
+    <Compile Include="src\modules\UserInterfaceActor.cs" />
     <Compile Include="src\modules\UserInterface.cs" />
     <Compile Include="src\Test.cs" />
   </ItemGroup>

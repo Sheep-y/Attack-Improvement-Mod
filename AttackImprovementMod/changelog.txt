@@ -2,8 +2,9 @@ CHANGE LOG
 
 ????-??-?? AIM Version 2.6 development for BATTLETECH 1.2.0
 
+* New: Show enemy wounds and ally health in mechwarrior names.
 * New: Set nameplate text colour.
-* New: Set weapon range in meters in weapon mouseover.
+* New: Show rare weapon properties and weapon range in meters in weapon mouseover.
 * New: Show short range in hit modifier breakdown.
 * Mod: ShortPilotHint now hides HP by default, to avoid line wrapping on elite mechwarriors.
 * Fix: FacingMarkerEnemyColors not applied when FacingMarkerPlayerColors is empty.
@@ -14,7 +15,7 @@ CHANGE LOG
 
 * New: Fix heat prediction on move/jump/sprint preview.
 * New: Show distance number in target panel, and movement point in selection panel.
-* New: Show pilot stats in one-line mouseover hint, instead of only HP.
+* New: Show mechwarrior stats in one-line mouseover hint, instead of only HP.
 * New: Variable melee height difference limit by mech class.
 * New: Configure friends' and foes' crit multiplier.
 * New: Vehicles and Turrets may now be crit'ed and killed by ammo explosions.

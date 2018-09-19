@@ -19,7 +19,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NormaliseSettings();
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
 
-         Add( new UserInterface(){ Name = "User Interface" } );
+         Add( new UserInterfaceActor(){ Name = "User Interface (Actor)" } );
+         Add( new UserInterface(){ Name = "User Interface (Combat)" } );
          Add( new LineOfSight(){ Name = "Line of Fire" } );
          Add( new CalledShotPopUp(){ Name = "Called Shot HUD" } );
          Add( new Melee(){ Name = "Melee" } );
