@@ -82,33 +82,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Keyboard Input ============
 
-      private static string LastKeyPressed;
-      private static int KeyPressedTime;
-
       public static void KeyPressed ( MessageCenterMessage message ) { try {
          if ( Combat == null ) return;
          string key = ( message as KeyPressedMessage )?.KeyCode;
          switch ( key ) {
-            case "Alpha1": CheckDoublePress( key, 1 ); break;
-            case "Alpha2": CheckDoublePress( key, 2 ); break;
-            case "Alpha3": CheckDoublePress( key, 3 ); break;
-            case "Alpha4": CheckDoublePress( key, 4 ); break;
+            case "F1": SelectPC( 0 ); break;
+            case "F2": SelectPC( 1 ); break;
+            case "F3": SelectPC( 2 ); break;
+            case "F4": SelectPC( 3 ); break;
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static void CheckDoublePress( string key, int index ) {
-         int now = Environment.TickCount & Int32.MaxValue;
-         if ( key == LastKeyPressed ) {
-            if ( now - KeyPressedTime < 800 ) {
-               List<AbstractActor> units = Combat?.LocalPlayerTeam?.units;
-               if ( units == null || index > units.Count ) return;
-               AbstractActor target = units[ index - 1 ];
-               if ( target == null || target.IsDead ) return;
-               HUD.MechWarriorTray.FindPortraitForActor( target.GUID ).OnClicked();
-            }
-         } else
-            LastKeyPressed = key;
-         KeyPressedTime = Environment.TickCount & Int32.MaxValue;
+      private static void SelectPC ( int index ) {
+         List<AbstractActor> units = Combat?.LocalPlayerTeam?.units;
+         if ( units == null || index >= units.Count || units[ index ] == null ) return;
+         HUD.MechWarriorTray.FindPortraitForActor( units[ index ].GUID ).OnClicked();
       }
 
       // ============ Multi-Target ============
