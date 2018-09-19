@@ -23,7 +23,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void GameStartsOnce () {
          NameplateColours = ParseColours( Settings.NameplateColourPlayer, Settings.NameplateColourEnemy, Settings.NameplateColourAlly );
          if ( NameplateColours != null )
-            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetNameplateColor", null );
+            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", null, "SetNameplateColor" );
          FloatingArmorColours = ParseColours( Settings.FloatingArmorColourPlayer, Settings.FloatingArmorColourEnemy, Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColours != null ) {
             BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
@@ -476,8 +476,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( colour == null ) return;
          CombatHUDActorNameDisplay names = __instance.ActorInfo?.NameDisplay;
          if ( names == null ) return;
-         names.PilotNameText.color = colour.GetValueOrDefault();
-         names.MechNameText.color = colour.GetValueOrDefault();
+         names.PilotNameText.faceColor = colour.GetValueOrDefault();
+         names.MechNameText.faceColor = colour.GetValueOrDefault();
       }
 
       private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
