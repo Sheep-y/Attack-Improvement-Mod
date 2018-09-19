@@ -124,8 +124,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowOptimalRange", null );
          }
-         if ( Settings.WeaponRangeFormat != null )
-            Patch( slotType, "GenerateToolTipStrings", null, "ShowWeaponRanges" );
+         if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
+            Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
       }
 
       public override void CombatStarts () {
@@ -594,11 +594,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __instance.ToolTipHoverElement.BuffStrings.Add( new Text( range.DisplayName ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void ShowWeaponRanges ( CombatHUDWeaponSlot __instance ) { try {
+      public static void UpdateWeaponTooltip ( CombatHUDWeaponSlot __instance ) { try {
          Weapon weapon = __instance.DisplayedWeapon;
          List<Text> spec = __instance.ToolTipHoverElement?.WeaponStrings;
          if ( weapon == null || spec == null || spec.Count != 3 ) return;
-         spec[2] = new Text( Settings.WeaponRangeFormat, weapon.MinRange, weapon.ShortRange, weapon.MediumRange, weapon.LongRange, weapon.MaxRange );
+         if ( Settings.ShowWeaponProp && ! string.IsNullOrEmpty( weapon.weaponDef.BonusValueA ) )
+            spec[0] = new Text( string.IsNullOrEmpty( weapon.weaponDef.BonusValueB ) ? "{0}" : "{0}, {1}", weapon.weaponDef.BonusValueA, weapon.weaponDef.BonusValueB );
+         if ( Settings.WeaponRangeFormat != null )
+            spec[2] = new Text( Settings.WeaponRangeFormat, weapon.MinRange, weapon.ShortRange, weapon.MediumRange, weapon.LongRange, weapon.MaxRange );
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
