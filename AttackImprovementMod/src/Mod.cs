@@ -121,7 +121,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          // Is 1TB a reasonable limit of how many logs to keep?
          RangeCheck( "AttackLogArchiveMaxMB", ref settings.AttackLogArchiveMaxMB, 0, 1024*1024 );
 
-         if ( settings.SettingVersion == null ) settings.SettingVersion = 0;
+         if ( settings.SettingVersion == null ) settings.SettingVersion = 0; // Pre-2.1 settings does not have SettingVersion
          if ( settings.SettingVersion < 2_001_000 ) { // Pre-2.1.0
             Info( "Upgrading settings to 2.1" );
             if ( settings.LOSMeleeColors == string.Empty) settings.LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00";
@@ -137,7 +137,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( (float) settings.DiminishingBonusPowerBase == 0.8f ) settings.DiminishingBonusPowerBase = 0.8m;
             if ( (float) settings.DiminishingPenaltyPowerBase == 0.8f ) settings.DiminishingPenaltyPowerBase = 0.8m;
             if ( (float) settings.DiminishingPenaltyPowerDivisor == 3.3f) settings.DiminishingPenaltyPowerDivisor = 3.3m;
-            // Add SelfTerrainMelee and spacing to 2.0 default
+            // Add SelfTerrainMelee and spacing
             if ( settings.MeleeAccuracyFactors == "DFA,Height,Inspired,SelfChassis,SelfHeat,SelfStoodUp,SelfWalked,Sprint,TargetEffect,TargetEvasion,TargetProne,TargetShutdown,TargetSize,TargetTerrainMelee,WeaponAccuracy" )
                settings.MeleeAccuracyFactors = "Direction, DFA, Height, Inspired, Jumped, SelfChassis, SelfHeat, SelfStoodUp, SelfTerrainMelee, Sprint, TargetEffect, TargetEvasion, TargetProne, TargetShutdown, TargetSize, TargetTerrainMelee, Walked, WeaponAccuracy";
             else if ( settings.MeleeAccuracyFactors.ToLower().Contains( "selfwalked" ) )
@@ -149,7 +149,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                settings.FacingMarkerPlayerColors = "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A";
             if ( settings.FacingMarkerEnemyColors == "#FFFF,#FCCF,#FCCF,#FAAF,#FF8F" )
                settings.FacingMarkerEnemyColors = "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A";
-            settings.SettingVersion = 2_005_000;
+         }
+         if ( settings.SettingVersion < 2_006_000 ) {
+            // Old hint was too long for elites and cause line wrapping
+            if ( settings.ShortPilotHint == "HP:{1}/{2} ST:{3},{4},{5},{6}" )
+               settings.ShortPilotHint = "G:{3} P:{4} G:{5} T:{6}";
+            // Update floating armour colour to match nameplate text
+            if ( settings.FloatingArmorColourPlayer == "cyan" && string.IsNullOrEmpty( settings.FloatingArmorColourEnemy ) && settings.FloatingArmorColourAlly == "teal" ) {
+               settings.FloatingArmorColourPlayer = "#8FF";
+               settings.FloatingArmorColourEnemy = "#FBB";
+               settings.FloatingArmorColourAlly = "#BFB";
+            }
+            settings.SettingVersion = 2_006_000;
          }
       }
 

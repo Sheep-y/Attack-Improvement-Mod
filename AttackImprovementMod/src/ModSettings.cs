@@ -40,15 +40,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "Format of short mechwarrior hint that shows up when you mouseover/right-click the portrait.",
-        "Default \"HP:{1}/{2} ST:{3},{4},{5},{6}\" which summarise both health and stats.  Set to empty to leave at game default." } ) ]
-      public string ShortPilotHint = "HP:{1}/{2} ST:{3},{4},{5},{6}";
+        "Default \"G:{3} P:{4} G:{5} T:{6}\" which summarise his/her stats.  Set to empty to leave at game default." } ) ]
+      public string ShortPilotHint = "G:{3} P:{4} G:{5} T:{6}";
 
-      [ JsonComment( "Set name colour of overhead nameplate of Player / Enemy / Ally.  Set to empty to not change." ) ]
+      [ JsonComment( "Set name colour of overhead nameplate of Player / Enemy / Ally.  Default \"#8FF\", \"#FBB\", \"#BFB\".  Set to empty to not change (leave at white)." ) ]
       public string NameplateColourPlayer = "#8FF";
       public string NameplateColourEnemy = "#FBB";
       public string NameplateColourAlly = "#BFB";
 
-      [ JsonComment( "Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default \"cyan\" for player, \"teal\" for ally.  Set to empty to not change." ) ]
+      [ JsonComment( "Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default \"#8FF\", \"#FBB\", \"#BFB\".  Set to empty to not change (leave at white)." ) ]
       public string FloatingArmorColourPlayer = "#8FF";
       public string FloatingArmorColourEnemy = "#FBB";
       public string FloatingArmorColourAlly = "#BFB";
