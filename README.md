@@ -166,7 +166,7 @@ These settings can be changed in `settings.json`.
 
 > Setting: `FixHeatPreview`  (true/false, default true)
 >
-> When true, previewed move destination's terrain will be factored in heat preview.
+> When true, previewed move destination's terrain will be factored in heat preview, plus any heat effects en-route.
 > For example, moving into water will predict more cooldown and vice versa.
 <br>
 
