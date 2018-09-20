@@ -72,12 +72,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
 
-         Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
+         if ( Settings.FunctionKeySelectPC )
+            Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
       }
 
       public override void CombatEnds () {
          BarOwners?.Clear();
-         Combat.MessageCenter.RemoveSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
+         if ( Settings.FunctionKeySelectPC )
+            Combat.MessageCenter.RemoveSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
       }
 
       // ============ Keyboard Input ============
@@ -86,14 +88,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Combat == null ) return;
          string key = ( message as KeyPressedMessage )?.KeyCode;
          switch ( key ) {
-            case "F1": SelectPC( 0 ); break;
-            case "F2": SelectPC( 1 ); break;
-            case "F3": SelectPC( 2 ); break;
-            case "F4": SelectPC( 3 ); break;
+            case "F1": SelectPC( 0, InControl.Key.F1 ); break;
+            case "F2": SelectPC( 1, InControl.Key.F2 ); break;
+            case "F3": SelectPC( 2, InControl.Key.F3 ); break;
+            case "F4": SelectPC( 3, InControl.Key.F4 ); break;
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static void SelectPC ( int index ) {
+      private static void SelectPC ( int index, InControl.Key key ) {
+         if ( BTInput.Instance?.FindActionBoundto( new InControl.KeyBindingSource( key ) ) != null ) return;
          List<AbstractActor> units = Combat?.LocalPlayerTeam?.units;
          if ( units == null || index >= units.Count || units[ index ] == null ) return;
          HUD.MechWarriorTray.FindPortraitForActor( units[ index ].GUID ).OnClicked();

@@ -13,6 +13,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "You can still quickly switch out of Multi-Target by pressing another action." } ) ]
       public bool FixMultiTargetBackout = true;
 
+      [ JsonComment( "Select player mechs with F1 to F4 key.  Default true." ) ]
+      public bool FunctionKeySelectPC = true;
+
       [ JsonComment( "Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game." ) ]
       public bool FixGreyHeadDisease = true;
 

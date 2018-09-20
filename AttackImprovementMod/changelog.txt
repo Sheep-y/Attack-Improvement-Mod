@@ -4,6 +4,7 @@ CHANGE LOG
 
 * New: Show enemy wounds and ally health in mechwarrior names.
 * New: Set nameplate text colour.
+* New: Press F1 to F4 to select player mech.
 * New: Show rare weapon properties and weapon range in meters in weapon mouseover.
 * New: Show short range in hit modifier breakdown.
 * Mod: ShortPilotHint now hides HP by default, to avoid line wrapping on elite mechwarriors.
