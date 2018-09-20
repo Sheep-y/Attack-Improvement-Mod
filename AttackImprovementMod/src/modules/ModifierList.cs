@@ -3,6 +3,7 @@ using BattleTech;
 using Localize;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static System.Reflection.BindingFlags;
@@ -21,14 +22,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.RangedAccuracyFactors != null ) {
             InitRangedModifiers( Settings.RangedAccuracyFactors.Split( ',' ) );
-            if ( RangedModifiers.Count > 0 ) {
+            if ( RangedModifiers != null ) {
                Patch( typeof( ToHit ), "GetAllModifiers", new Type[]{ typeof( AbstractActor ), typeof( Weapon ), typeof( ICombatant ), typeof( Vector3 ), typeof( Vector3 ), typeof( LineOfFireLevel ), typeof( bool ) }, "OverrideRangedModifiers", null );
                Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "OverrideRangedToolTips", null );
             }
          }
          if ( Settings.MeleeAccuracyFactors != null ) {
             InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
-            if ( MeleeModifiers.Count > 0 ) {
+            if ( MeleeModifiers != null ) {
                contemplatingDFA = typeof( CombatHUDWeaponSlot ).GetMethod( "contemplatingDFA", NonPublic | Instance );
                if ( contemplatingDFA == null ) Warn( "CombatHUDWeaponSlot.contemplatingDFA not found, DFA will be regarded as normal melee." );
                Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
@@ -59,8 +60,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static List<Func<AttackModifier>> RangedModifiers, MeleeModifiers;
+      private static HashSet<string> RangedFactors, MeleeFactors;
       private static CombatHUDTooltipHoverElement tip;
       private static string thisModifier;
+
+      public static bool HasRangedModifier ( string modifier = null ) { return HasModifier( modifier, RangedFactors ); }
+      public static bool HasMeleeModifier ( string modifier = null ) { return HasModifier( modifier, MeleeFactors ); }
+      private static bool HasModifier ( string modifier, HashSet<string> Factors ) {
+         if ( string.IsNullOrEmpty( modifier ) ) return Factors != null;
+         return Factors.Contains( modifier.ToLower() );
+      }
 
       public  static ToHit Hit { get; private set; }
       public  static ICombatant Target { get; private set; }
@@ -81,18 +90,23 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          TargetPos = targetPosition;
       }
 
-      internal static HashSet<string> InitModifiers ( List<Func<AttackModifier>> list, Func<string,Func<AttackModifier>> mapper, string[] factors ) {
+      internal static HashSet<string> InitModifiers ( ref List<Func<AttackModifier>> list, Func<string,Func<AttackModifier>> mapper, string[] factors ) {
          HashSet<string> Factors = new HashSet<string>();
          foreach ( string e in factors ) Factors.Add( e?.Trim().ToLower() );
-         foreach ( string e in Factors ) try {
-            Func<AttackModifier> factor = mapper( e );
-            if ( factor == null ) factor = GetCommonModifierFactor( e );
-            if ( factor == null )
-               Warn( "Unknown accuracy component \"{0}\"", e );
-            else
+         foreach ( string e in Factors.ToArray() ) {
+            Func<AttackModifier> factor = null;
+            try {
+               factor = mapper( e ) ?? GetCommonModifierFactor( e );
+            } catch ( Exception ex ) { Error( ex ); }
+            if ( factor == null ) {
+               Warn( "Unknown accuracy factor \"{0}\"", e );
+               Factors.Remove( e );
+            } else
                list.Add( factor );
-         } catch ( Exception ex ) { Error( ex ); }
-         return Factors;
+         }
+         if ( list.Count > 0 ) return Factors;
+         list = null;
+         return null;
       }
 
       public static Func<AttackModifier> GetCommonModifierFactor ( string factorId ) {
@@ -208,8 +222,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static void InitRangedModifiers ( string[] factors ) {
          RangedModifiers = new List<Func<AttackModifier>>();
-         HashSet<string> Factors = InitModifiers( RangedModifiers, GetRangedModifierFactor, factors );
-         Info( "Ranged modifiers ({0}): {1}", RangedModifiers.Count, Factors );
+         RangedFactors = InitModifiers( ref RangedModifiers, GetRangedModifierFactor, factors );
+         if ( RangedFactors != null ) Info( "Ranged modifiers ({0}): {1}", RangedFactors.Count, RangedFactors );
       }
 
       private static string smartRange ( float min, float range, float max ) {
@@ -314,8 +328,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static void InitMeleeModifiers ( string[] factors ) {
          MeleeModifiers = new List<Func<AttackModifier>>();
-         HashSet<string> Factors = InitModifiers( MeleeModifiers, GetMeleeModifierFactor, factors );
-         Info( "Melee and DFA modifiers ({0}): {1}", MeleeModifiers.Count, Factors );
+         MeleeFactors = InitModifiers( ref MeleeModifiers, GetMeleeModifierFactor, factors );
+         if ( MeleeFactors != null ) Info( "Melee and DFA modifiers ({0}): {1}", MeleeFactors.Count, MeleeFactors );
       }
 
       public static Func<AttackModifier> GetMeleeModifierFactor ( string factorId ) {
