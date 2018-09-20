@@ -323,19 +323,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          HUD?.MechTray?.ActorInfo?.DetailsDisplay?.RefreshInfo();
       }
 
-      public static MapEncounterLayerDataCell[] GetEncounterCellsAtPosition ( Vector3 position ) {
-         MapEncounterLayerDataCell cellAt = Combat?.EncounterLayerData?.GetCellAt( position );
-         if ( cellAt == null ) return null;
-         return new MapEncounterLayerDataCell[]{ cellAt };
-      }
-
-      // TODO: Replace with MapMetaData.GetPriorityDesignMaskAtPos
-      public static DesignMaskDef GetDesignMasksAtPosition ( Vector3 position ) {
-         MapEncounterLayerDataCell[] cells = GetEncounterCellsAtPosition( position );
-         if ( cells.IsNullOrEmpty() ) return null;
-         return Combat?.MapMetaData?.GetPriorityDesignMask( cells[0].relatedTerrainCell );
-      }
-
       // TODO: Use CombatHUDStatusPanel.GetStickyMasksForWaypoints to get heat-affecting effects
       public static void CorrectProjectedHeat ( Mech __instance, ref float __result ) { try {
          if ( __instance.HasMovedThisRound ) return;
@@ -345,7 +332,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( state is SelectionStateMove move ) position = move.PreviewPos;
          else if ( state is SelectionStateJump jump ) position = jump.PreviewPos;
          else return;
-         DesignMaskDef local = __instance.occupiedDesignMask, preview = GetDesignMasksAtPosition( position );
+         DesignMaskDef local = __instance.occupiedDesignMask, preview = Combat.MapMetaData.GetPriorityDesignMaskAtPos( position );
          if ( ReferenceEquals( local, preview ) ) return;
          float here = local?.heatSinkMultiplier ?? 1f, there = preview?.heatSinkMultiplier ?? 1f;
          if ( here == there ) return;
