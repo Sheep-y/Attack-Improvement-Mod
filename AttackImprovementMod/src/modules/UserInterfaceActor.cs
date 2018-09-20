@@ -329,12 +329,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return new MapEncounterLayerDataCell[]{ cellAt };
       }
 
+      // TODO: Replace with MapMetaData.GetPriorityDesignMaskAtPos
       public static DesignMaskDef GetDesignMasksAtPosition ( Vector3 position ) {
          MapEncounterLayerDataCell[] cells = GetEncounterCellsAtPosition( position );
          if ( cells.IsNullOrEmpty() ) return null;
          return Combat?.MapMetaData?.GetPriorityDesignMask( cells[0].relatedTerrainCell );
       }
 
+      // TODO: Use CombatHUDStatusPanel.GetStickyMasksForWaypoints to get heat-affecting effects
       public static void CorrectProjectedHeat ( Mech __instance, ref float __result ) { try {
          if ( __instance.HasMovedThisRound ) return;
          SelectionState state = HUD?.SelectionHandler?.ActiveState;

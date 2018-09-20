@@ -34,15 +34,17 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 
 * Grey head disease fixed.
 * Line of fire fixed and stylised: Dotted = indirect, Cyan = flank, Green = rear.
-* Coloured facing ring and floating armour bar.
-* Damaged Structure Display fixed and enhanced.
+* Coloured nameplate, facing ring, and floating armour bar.
+* Damaged Structure Display fixed and enhanced. Enemy injuries shown.
 * Multi-Target Back Out fixed.
 * Make sure 0 HP means dead, never zombie.
-* Show heat, instability, distance, and movement numbers.
+* Show heat, instability, distance, movement numbers.
 * Show ammo count in paper doll hover.
+* Show weapon range (in meters) and properties such as +50% crit.
 * Show base hit chance in accuracy modifier popup.
 * Show mechwarrior stats in hover/right-click hint.
 * Post-move to-hit penalties and heat factored in action preview.
+* Press F1 to F4 to select mech.
 * (Optional) Show Mech Tonnage.
 * (Optional) Show Corrected Hit chance and Called Shot Chance.
 
@@ -121,14 +123,27 @@ These settings can be changed in `settings.json`.
 
 ## User Interface Settings
 
+**Hotkeys**
 
-**Armour Bars**
-
->  Setting: `FloatingArmorColourPlayer`  (color string, default "cyan")<br>
->  Setting: `FloatingArmorColourEnemy`  (color string, default "")<br>
->  Setting: `FloatingArmorColourAlly`  (color string, default "teal")<br>
+> Setting: `FunctionKeySelectPC`  (true/false, default true)
 >
->  When non-empty, change colours of armour bars, making it easier to tell friends from foes.
+> When true, F1 to F4 keys can be used to select player mechs.
+>
+> The keys will stop to work if they are already binded.
+> Also, because the keys are hard-coded and not keybinds, this will not change game settings or game profile.
+
+
+**Nameplates**
+
+> Setting: `NameplateColourPlayer`  (color string, default "#8FF")<br>
+> Setting: `NameplateColourEnemy`  (color string, default "#FBB")<br>
+> Setting: `NameplateColourAlly`  (color string, default "#BFB")<br>
+> Setting: `FloatingArmorColourPlayer`  (color string, default "#8FF")<br>
+> Setting: `FloatingArmorColourEnemy`  (color string, default "#FBB")<br>
+> Setting: `FloatingArmorColourAlly`  (color string, default "#BFB")<br>
+>
+> When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.
+
 
 
 **Paper Dolls**
@@ -147,7 +162,7 @@ These settings can be changed in `settings.json`.
 
 
 
-**Combat Data**
+**Mech Info**
 
 > Setting: `FixHeatPreview`  (true/false, default true)
 >
@@ -169,6 +184,32 @@ These settings can be changed in `settings.json`.
 > Default false because the short form may overwhelm inexperienced players.
 <br>
 
+
+**MechWarrior Info**
+
+> Setting: `ShowEnemyWounds`  (string, default "{0}, Wounds {1}")<br>
+> Setting: `ShowNPCHealth`  (string, default "{0}, HP {2}/{3}")<br>
+>
+> When non-empty, NPCs who are wounded will have its injuries or health displayed.
+> {0} is pilot name, {1} is injury, {2} is (health - injury), and {3} is health.
+>
+> Note that enemy's health is unknown to players by design.  {2} and {3} will show "?" when used.
+<br>
+
+> Setting: `ShortPilotHint`  (string, default "G:{3} P:{4} G:{5} T:{6}")
+>
+> When non-empty, replace mechwarrior's summary hint. The parameters are: <br>
+> {0}, {1}, {2} - Wound, Health - Wound, and Health. <br>
+> {3}, {4}, {5}, {6} - Gunnery, Piloting, Gut, and Tactic.
+>
+> This only applies to the one-line hint that pops up on mouseover and right-click.
+> The original hint, which shows only wounds and health, will be preserved when the hint is fully expanded (i.e. when no mech is selected).
+>
+> If the line is too long, for example when HP is included, the line will wrap.
+
+
+**Weapon Info**
+
 > Setting: `ShowAmmoInTooltip`  (true/false, default true)<br>
 > Setting: `ShowEnemyAmmoInTooltip`  (true/false, default false)<br>
 >
@@ -177,14 +218,18 @@ These settings can be changed in `settings.json`.
 > The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
 <br>
 
-> Setting: `ShortPilotHint`  (string, default "HP:{1}/{2} ST:{3},{4},{5},{6}")
+> Setting: `ShowWeaponProp`  (true/false, default true)<br>
+> Setting: `WeaponRangeFormat`  (string, default "Min {0} : Long {2} : Max {4}")<br>
 >
-> When non-empty, replace mechwarrior's summary hint. The parameters are: <br>
-> {0}, {1}, {2} - Wound, Health - Wound, and Health. <br>
-> {3}, {4}, {5}, {6} - Gunnery, Piloting, Gut, and Tactic.
+> These two settings override the weapon information displayed when you mouseover a weapon in combat.
 >
-> This only applies to the one-line hint that pops up on mouseover and right-click.
-> The original hint, which shows only wounds and health, will be preserved when the hint is fully expanded (i.e. when no mech is selected).
+> `ShowWeaponProp` overrides the full weapon name with weapon properties, if the weapon is rare (+ to +++).
+> For example, an "M Laser++" may display "+1 ACC, +25% CRIT" instead of "MEDIUM LASER".
+>
+> `WeaponRangeFormat` replaces the weapon range with actual meters when non-empty.
+> The string {0} to {4} will be replaced by a weapon's MinRange, ShortRange, MediumRange, LongRange, and MaxRange.
+> Most of them are unused by vanilla game, so this mod use MinRange, MediumRange, and MaxRange by default.
+> But if a mod is installed that make use of them, the range display can be customised, such as "{0}:{1}:{2}:{3}:{4}".
 
 
 **Multi-Target**
@@ -586,6 +631,11 @@ These settings can be changed in `settings.json`.
 > Setting: `ShowBaseHitchance`  (true/false, default true)
 >
 > Show the mechwarrior's base hit chance in modifier tooltip.
+
+
+> Setting: `ShowShortRangeInBreakdown`  (true/false, default true)
+>
+> When true, show range category in modifier tooltip even the range has no modifiers (short range).
 
 
 > Setting: `FixSelfSpeedModifierPreview`  (true/false, default true)

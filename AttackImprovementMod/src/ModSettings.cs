@@ -54,7 +54,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( new string[]{
         "Format pilot name to show wounds (enemies) and health (ally) after their names.",
-        "{0} is pilot name, {1} is injury, {2} is health - injuery, and {3} is health.  Set to empty to not change game default." } ) ]
+        "{0} is pilot name, {1} is injury, {2} is health - injury, and {3} is health.  Set to empty to not change game default." } ) ]
       public string ShowEnemyWounds = "{0}, Wounds {1}";
       public string ShowNPCHealth = "{0}, HP {2}/{3}";
 
