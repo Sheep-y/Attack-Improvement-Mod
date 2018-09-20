@@ -8,7 +8,6 @@ using System.Reflection;
 using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using System.Diagnostics;
    using static Mod;
    using static System.Reflection.BindingFlags;
 
@@ -62,9 +61,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
             Patch( slotType, "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
          }
-         if ( Settings.ShowShortRangeInBreakdown ) {
+         if ( Settings.ShowNeutralRangeInBreakdown ) {
             rangedPenalty = ModifierList.GetRangedModifierFactor( "range" );
-            Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowOptimalRange", null );
+            Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowNeutralRange", null );
          }
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
@@ -264,7 +263,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static Func<ModifierList.AttackModifier> rangedPenalty;
 
-      public static void ShowOptimalRange ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+      public static void ShowNeutralRange ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          ModifierList.AttackModifier range = rangedPenalty();
          if ( range.Value != 0 ) return;
          __instance.ToolTipHoverElement.BuffStrings.Add( new Text( range.DisplayName ) );

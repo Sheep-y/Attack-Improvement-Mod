@@ -234,7 +234,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          case "armmounted":
             return () => new AttackModifier( "ARM MOUNTED", Hit.GetSelfArmMountedModifier( AttackWeapon ) );
 
-         case "range":
+         case "range": // Depended by ShowNeutralRangeInBreakdown
             return () => {
                Weapon w = AttackWeapon;
                float range = Vector3.Distance( AttackPos, TargetPos ), modifier = Hit.GetRangeModifierForDist( w, range );

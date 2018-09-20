@@ -245,8 +245,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Display base hit chance in weapon mouseover hint.  Default true." ) ]
       public bool ShowBaseHitchance = true;
 
-      [ JsonComment( "Show \"Short Range +0\" in hit modifier breakdown. Default true." ) ]
-      public bool ShowShortRangeInBreakdown = true;
+      [ JsonComment( "Show \"Short Range\" in hit modifier breakdown, or whichever range is at +0.  Default true." ) ]
+      public bool ShowNeutralRangeInBreakdown = true;
 
       [ JsonComment( "Apply self moved modifier during preview, before the move actually take place.  Default true." ) ]
       public bool FixSelfSpeedModifierPreview = true;

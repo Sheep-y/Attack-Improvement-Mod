@@ -633,9 +633,10 @@ These settings can be changed in `settings.json`.
 > Show the mechwarrior's base hit chance in modifier tooltip.
 
 
-> Setting: `ShowShortRangeInBreakdown`  (true/false, default true)
+> Setting: `ShowNeutralRangeInBreakdown`  (true/false, default true)
 >
-> When true, show range category in modifier tooltip even the range has no modifiers (short range).
+> When true, show range category in modifier tooltip even the range has no modifiers.
+> This is usually the "Short Range" unless modded.
 
 
 > Setting: `FixSelfSpeedModifierPreview`  (true/false, default true)
