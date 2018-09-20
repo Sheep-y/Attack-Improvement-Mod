@@ -64,10 +64,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.ShowShortRangeInBreakdown ) {
             rangedPenalty = ModifierList.GetRangedModifierFactor( "range" );
-            if ( rangedPenalty == null )
-               Warn( "Cannot get range penalty. ShowShortRangeInBreakdown disabled." );
-            else
-               Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowOptimalRange", null );
+            Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowOptimalRange", null );
          }
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );

@@ -59,16 +59,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public AttackModifier SetName  ( string penalty, string bonus ) { DisplayName = Value >= 0 ? penalty : bonus; return this; }
       }
 
-      private static List<Func<AttackModifier>> RangedModifiers, MeleeModifiers;
-      private static HashSet<string> RangedFactors, MeleeFactors;
+      private static Dictionary<string, Func<AttackModifier>> RangedModifiers, MeleeModifiers;
       private static CombatHUDTooltipHoverElement tip;
       private static string thisModifier;
 
-      public static bool HasRangedModifier ( string modifier = null ) { return HasModifier( modifier, RangedFactors ); }
-      public static bool HasMeleeModifier ( string modifier = null ) { return HasModifier( modifier, MeleeFactors ); }
-      private static bool HasModifier ( string modifier, HashSet<string> Factors ) {
+      public static bool HasRangedModifier ( string modifier = null ) { return HasModifier( modifier, RangedModifiers ); }
+      public static bool HasMeleeModifier ( string modifier = null ) { return HasModifier( modifier, MeleeModifiers ); }
+      private static bool HasModifier ( string modifier, Dictionary<string, Func<AttackModifier>> Factors ) {
          if ( string.IsNullOrEmpty( modifier ) ) return Factors != null;
-         return Factors.Contains( modifier.ToLower() );
+         return Factors.ContainsKey( modifier.ToLower() );
       }
 
       public  static ToHit Hit { get; private set; }
@@ -90,23 +89,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          TargetPos = targetPosition;
       }
 
-      internal static HashSet<string> InitModifiers ( ref List<Func<AttackModifier>> list, Func<string,Func<AttackModifier>> mapper, string[] factors ) {
+      internal static void InitModifiers ( ref Dictionary<string, Func<AttackModifier>> list, Func<string,Func<AttackModifier>> mapper, string[] factors ) {
+         list = new Dictionary<string, Func<AttackModifier>>();
          HashSet<string> Factors = new HashSet<string>();
          foreach ( string e in factors ) Factors.Add( e?.Trim().ToLower() );
-         foreach ( string e in Factors.ToArray() ) {
+         foreach ( string e in Factors ) {
             Func<AttackModifier> factor = null;
             try {
                factor = mapper( e ) ?? GetCommonModifierFactor( e );
             } catch ( Exception ex ) { Error( ex ); }
-            if ( factor == null ) {
+            if ( factor == null )
                Warn( "Unknown accuracy factor \"{0}\"", e );
-               Factors.Remove( e );
-            } else
-               list.Add( factor );
+            else
+               list.Add( e, factor );
          }
-         if ( list.Count > 0 ) return Factors;
+         if ( list.Count > 0 ) return;
          list = null;
-         return null;
       }
 
       public static Func<AttackModifier> GetCommonModifierFactor ( string factorId ) {
@@ -172,14 +170,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return null;
       }
 
-      public static void SetToolTips ( CombatHUDWeaponSlot slot, List<Func<AttackModifier>> factors ) { try {
+      public static void SetToolTips ( CombatHUDWeaponSlot slot, Dictionary<string, Func<AttackModifier>> factors ) { try {
          AttackPos = HUD.SelectionHandler.ActiveState.PreviewPos;
          tip = slot.ToolTipHoverElement;
          thisModifier = "(Init)";
          int TotalModifiers = 0;
          foreach ( var modifier in factors ) {
-            AttackModifier mod = modifier();
-            thisModifier = mod.DisplayName;
+            thisModifier = modifier.Key;
+            AttackModifier mod = modifier.Value();
             TotalModifiers += AddToolTipDetail( mod );
          }
          if ( TotalModifiers < 0 && ! CombatConstants.ResolutionConstants.AllowTotalNegativeModifier )
@@ -192,12 +190,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          throw;
       } }
 
-      public static float SumModifiers ( List<Func<AttackModifier>> factors ) {
+      public static float SumModifiers ( Dictionary<string, Func<AttackModifier>> factors ) {
          thisModifier = "(Init)";
          int TotalModifiers = 0;
          foreach ( var modifier in factors ) {
-            AttackModifier mod = modifier();
-            thisModifier = mod.DisplayName;
+            thisModifier = modifier.Key;
+            AttackModifier mod = modifier.Value();
             TotalModifiers += Mathf.RoundToInt( mod.Value );
          }
          if ( TotalModifiers < 0 && ! CombatConstants.ResolutionConstants.AllowTotalNegativeModifier )
@@ -221,9 +219,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public  static LineOfFireLevel LineOfFire { get; private set; } // Ranged only. Do not use for melee
 
       internal static void InitRangedModifiers ( string[] factors ) {
-         RangedModifiers = new List<Func<AttackModifier>>();
-         RangedFactors = InitModifiers( ref RangedModifiers, GetRangedModifierFactor, factors );
-         if ( RangedFactors != null ) Info( "Ranged modifiers ({0}): {1}", RangedFactors.Count, RangedFactors );
+         InitModifiers( ref RangedModifiers, GetRangedModifierFactor, factors );
+         if ( RangedModifiers != null ) Info( "Ranged modifiers ({0}): {1}", RangedModifiers.Count, RangedModifiers.Keys );
       }
 
       private static string SmartRange ( float min, float range, float max ) {
@@ -305,7 +302,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          SetToolTips( slot, RangedModifiers );
          return false;
       } catch ( Exception ex ) {
-         return Error( new ApplicationException( "Error in the ranged modifier *after* '" + thisModifier + "'", ex ) );
+         return Error( new ApplicationException( "Error in ranged modifier '" + thisModifier + "'", ex ) );
       } }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
@@ -316,7 +313,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result = SumModifiers( RangedModifiers );
          return false;
       } catch ( Exception ex ) {
-         return Error( new ApplicationException( "Error in the ranged modifier *after* '" + thisModifier + "'", ex ) );
+         return Error( new ApplicationException( "Error in ranged modifier '" + thisModifier + "'", ex ) );
       } }
 
       // ============ Melee ============
@@ -325,9 +322,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public  static MeleeAttackType AttackType { get; private set; }
 
       internal static void InitMeleeModifiers ( string[] factors ) {
-         MeleeModifiers = new List<Func<AttackModifier>>();
-         MeleeFactors = InitModifiers( ref MeleeModifiers, GetMeleeModifierFactor, factors );
-         if ( MeleeFactors != null ) Info( "Melee and DFA modifiers ({0}): {1}", MeleeFactors.Count, MeleeFactors );
+         InitModifiers( ref MeleeModifiers, GetMeleeModifierFactor, factors );
+         if ( MeleeModifiers != null ) Info( "Melee and DFA modifiers ({0}): {1}", MeleeModifiers.Count, MeleeModifiers.Keys );
       }
 
       public static Func<AttackModifier> GetMeleeModifierFactor ( string factorId ) {
@@ -387,7 +383,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          SetToolTips( __instance, MeleeModifiers );
          return false;
       } catch ( Exception ex ) {
-         return Error( new ApplicationException( "Error in the melee modifier *after* '" + thisModifier + "'", ex ) );
+         return Error( new ApplicationException( "Error in melee modifier '" + thisModifier + "'", ex ) );
       } }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
@@ -398,7 +394,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result = SumModifiers( MeleeModifiers );
          return false;
       } catch ( Exception ex ) {
-         return Error( new ApplicationException( "Error in the melee modifier *after* '" + thisModifier + "'", ex ) );
+         return Error( new ApplicationException( "Error in melee modifier '" + thisModifier + "'", ex ) );
       } }
    }
 }
