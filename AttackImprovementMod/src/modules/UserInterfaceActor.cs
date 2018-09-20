@@ -331,19 +331,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( state is SelectionStateMove move ) position = move.PreviewPos;
          else if ( state is SelectionStateJump jump ) position = jump.PreviewPos;
          else return;
+         HashSet<DesignMaskDef> masks = new HashSet<DesignMaskDef>();
          DesignMaskDef local = __instance.occupiedDesignMask, preview = Combat.MapMetaData.GetPriorityDesignMaskAtPos( position );
-         float here = local?.heatSinkMultiplier ?? 1, there = preview?.heatSinkMultiplier ?? 1, extra = preview?.heatPerTurn ?? 0;
+         if ( preview != null ) masks.Add( preview );
+         float here = local?.heatSinkMultiplier ?? 1, there = 1, extra = 0;
          if ( state is SelectionStateMove ) { // If walk or sprint, Check geothermal and radiation field.
             Pathing path = __instance.Pathing;
-            List<DesignMaskDef> debuffs = CombatHUDStatusPanel.GetStickyMasksForWaypoints( Combat,
-               ActorMovementSequence.ExtractWaypointsFromPath( __instance, path.CurrentPath, path.ResultDestination, path.CurrentMeleeTarget, path.MoveType ) );
-            debuffs.Remove( preview );
-            if ( debuffs.Count > 0 ) {
-               foreach ( DesignMaskDef mask in debuffs ) {
-                  there *= mask.heatSinkMultiplier;
-                  extra += mask.heatPerTurn;
-               }
-            }
+            masks.UnionWith( CombatHUDStatusPanel.GetStickyMasksForWaypoints( Combat,
+               ActorMovementSequence.ExtractWaypointsFromPath( __instance, path.CurrentPath, path.ResultDestination, path.CurrentMeleeTarget, path.MoveType ) ) );
+         }
+         foreach ( DesignMaskDef mask in masks ) {
+            there *= mask.heatSinkMultiplier;
+            extra += mask.heatPerTurn;
          }
          if ( here == there && extra == 0 ) return;
          __result = ( ( __result / here ) + extra ) * there;
