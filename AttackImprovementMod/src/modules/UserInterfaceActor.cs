@@ -323,7 +323,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          HUD?.MechTray?.ActorInfo?.DetailsDisplay?.RefreshInfo();
       }
 
-      // TODO: Use CombatHUDStatusPanel.GetStickyMasksForWaypoints to get heat-affecting effects
       public static void CorrectProjectedHeat ( Mech __instance, ref float __result ) { try {
          if ( __instance.HasMovedThisRound ) return;
          SelectionState state = HUD?.SelectionHandler?.ActiveState;
@@ -333,10 +332,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( state is SelectionStateJump jump ) position = jump.PreviewPos;
          else return;
          DesignMaskDef local = __instance.occupiedDesignMask, preview = Combat.MapMetaData.GetPriorityDesignMaskAtPos( position );
-         if ( ReferenceEquals( local, preview ) ) return;
-         float here = local?.heatSinkMultiplier ?? 1f, there = preview?.heatSinkMultiplier ?? 1f;
-         if ( here == there ) return;
-         __result *= there / here;
+         float here = local?.heatSinkMultiplier ?? 1, there = preview?.heatSinkMultiplier ?? 1, extra = preview?.heatPerTurn ?? 0;
+         if ( state is SelectionStateMove ) { // If walk or sprint, Check geothermal and radiation field.
+            Pathing path = __instance.Pathing;
+            List<DesignMaskDef> debuffs = CombatHUDStatusPanel.GetStickyMasksForWaypoints( Combat,
+               ActorMovementSequence.ExtractWaypointsFromPath( __instance, path.CurrentPath, path.ResultDestination, path.CurrentMeleeTarget, path.MoveType ) );
+            debuffs.Remove( preview );
+            if ( debuffs.Count > 0 ) {
+               foreach ( DesignMaskDef mask in debuffs ) {
+                  there *= mask.heatSinkMultiplier;
+                  extra += mask.heatPerTurn;
+               }
+            }
+         }
+         if ( here == there && extra == 0 ) return;
+         __result = ( ( __result / here ) + extra ) * there;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Mech Tray ============

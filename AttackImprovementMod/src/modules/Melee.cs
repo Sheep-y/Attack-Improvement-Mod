@@ -98,7 +98,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // Set the game's MaxMeleeVerticalOffset to very high, then filter nodes at GetPathNodesForPoints
       public static void CheckMeleeVerticalOffset ( List<PathNode> __result ) { try {
-         if ( thisMeleeTarget == null || __result == null || __result.Count <= 0 ) return;
+         if ( thisMeleeTarget == null || __result.IsNullOrEmpty() ) return;
          //Verbo( "Checking {0} offsets", __result.Count );
          float targetY = thisMeleeTarget.CurrentPosition.y, maxY = 0;
          WeightClass lowerClass = 0;

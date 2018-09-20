@@ -508,6 +508,10 @@ namespace Sheepy.BattleTechMod {
           return array == null || array.Length <= 0;
       }
       
+      public static bool IsNullOrEmpty ( this System.Collections.ICollection collection ) {
+          return collection == null || collection.Count <= 0;
+      }
+
       public static string Concat ( this System.Collections.IEnumerable list, string separator = ", ", Func<object,string> formatter = null ) {
          if ( list == null ) return string.Empty;
          StringBuilder result = new StringBuilder();
