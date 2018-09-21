@@ -103,6 +103,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                //Log( $"Direction {direction}, Index {dirIndex}, Color {colors[ dirIndex ]}" );
             }
          } else {
+            if ( HUD.SelectionHandler.ActiveState == null ) return;
             FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( me.Owner );
             orig = info.HasLOF ? ( FacingMarkerTargetColors[4] ?? me.ColorActive ) : ( activeColors[4] ?? me.ColorInactive );
             colors = new object[]{ orig, orig, orig, orig };

@@ -359,7 +359,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ! PilotStatus.ContainsKey( __instance ) )
             PilotStatus.Add( __instance, pilot );
          if ( ( HUD.SelectedActor != null || ! __instance.IsExpanded ) && ! pilot.IsIncapacitated )
-            __instance.InjuriesItem.ShowExistingIcon( new Text( Settings.ShortPilotHint, new object[]{
+            __instance.InjuriesItem?.ShowExistingIcon( new Text( Settings.ShortPilotHint, new object[]{
                pilot.Injuries, ( pilot.Health - pilot.Injuries ), pilot.Health, pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics } ),
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
