@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
+   using static FiringPreviewManager.TargetAvailability;
 
    public class RollModifier : BattleModModule {
 
@@ -35,6 +36,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                diminishingPenalty = new float[ Settings.DiminishingPenaltyMax ];
                TryRun( ModLog, FillDiminishingModifiers );
             }
+         }
+
+         if ( Settings.SmartIndirectFire ) {
+            Patch( typeof( FiringPreviewManager ), "GetPreviewInfo", null, "SmartIndirectFireLoF" );
          }
 
          if ( Settings.FixSelfSpeedModifierPreview ) {
@@ -166,6 +171,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return chance;
       }
 
+      // ============ Smart Indirect Fire ============
+
+      [ Harmony.HarmonyPriority( Harmony.Priority.High ) ] // Earlier than LineOfSight.SetupLOS
+      public static void SmartIndirectFireLoF ( FiringPreviewManager __instance, ref FiringPreviewManager.PreviewInfo __result, ICombatant target ) {
+         FiringPreviewManager.PreviewInfo me = __result;
+         AbstractActor actor = HUD?.SelectedActor;
+         if ( ! me.HasLOF || me.LOFLevel > LineOfFireLevel.LOFObstructed || actor == null || HUD.SelectionHandler.ActiveState == null ) return;
+         if ( Combat.ToHit.GetIndirectModifier( actor ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return;
+         float dist = Vector3.Distance( HUD.SelectionHandler.ActiveState.PreviewPos, target.CurrentPosition );
+         foreach ( Weapon w in actor.Weapons )
+            if ( dist < w.MaxRange && ! w.IsDisabled && w.IsEnabled && ! w.IndirectFireCapable ) return;
+               //Verbo( "Smart indirect blocked by {0}: {1}, {2}, {3}, {4}, {5}", w, dist, w.MaxRange, w.IsDisabled, w.IsEnabled, w.IndirectFireCapable );
+         if ( __result.availability == PossibleDirect )
+            __result.availability = PossibleIndirect;
+         else
+            __result.availability = NeedRotationIndirect;
+      }
+
       // ============ Previews ============
 
       // Set self walked modifier when previewing movement
@@ -176,10 +199,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float movement = Vector3.Distance( mech.CurrentPosition, state.PreviewPos );
          if ( movement <= 10 ) return;
          switch ( mech.weightClass ) {
-            case WeightClass.LIGHT : __result = CombatConstants.ToHit.ToHitSelfWalkLight; break;
-            case WeightClass.MEDIUM : __result = CombatConstants.ToHit.ToHitSelfWalkMedium; break;
-            case WeightClass.HEAVY   : __result = CombatConstants.ToHit.ToHitSelfWalkHeavy; break;
-            case WeightClass.ASSAULT  : __result = CombatConstants.ToHit.ToHitSelfWalkAssault; break;
+            case WeightClass.LIGHT   : __result = CombatConstants.ToHit.ToHitSelfWalkLight  ; break;
+            case WeightClass.MEDIUM  : __result = CombatConstants.ToHit.ToHitSelfWalkMedium ; break;
+            case WeightClass.HEAVY   : __result = CombatConstants.ToHit.ToHitSelfWalkHeavy  ; break;
+            case WeightClass.ASSAULT : __result = CombatConstants.ToHit.ToHitSelfWalkAssault; break;
          }
       }
 
@@ -200,7 +223,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( state != null && state is SelectionStateJump jump )
                movement = 100; // Vector3.Distance( attacker.CurrentPosition, jump.PreviewPos );
          }
-         if ( movement < 0 ) return 0;
+         if ( movement <= 0 ) return 0;
          return Settings.ToHitSelfJumped;
       }
    }
