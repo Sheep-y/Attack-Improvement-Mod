@@ -175,18 +175,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ Harmony.HarmonyPriority( Harmony.Priority.High ) ] // Earlier than LineOfSight.SetupLOS
       public static void SmartIndirectFireLoF ( FiringPreviewManager __instance, ref FiringPreviewManager.PreviewInfo __result, ICombatant target ) {
-         FiringPreviewManager.PreviewInfo me = __result;
+         if ( __result.availability != PossibleDirect ) return;
          AbstractActor actor = HUD?.SelectedActor;
-         if ( ! me.HasLOF || me.LOFLevel > LineOfFireLevel.LOFObstructed || actor == null || HUD.SelectionHandler.ActiveState == null ) return;
-         if ( Combat.ToHit.GetIndirectModifier( actor ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return;
-         float dist = Vector3.Distance( HUD.SelectionHandler.ActiveState.PreviewPos, target.CurrentPosition );
-         foreach ( Weapon w in actor.Weapons )
-            if ( dist < w.MaxRange && ! w.IsDisabled && w.IsEnabled && ! w.IndirectFireCapable ) return;
+         SelectionState selection = HUD.SelectionHandler.ActiveState;
+         float dist = Vector3.Distance( selection.PreviewPos, target.CurrentPosition );
+         foreach ( Weapon w in actor.Weapons ) // Don't change LoF if any direct weapon is enabled and can shot
+            if ( ! w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire ) return;
                //Verbo( "Smart indirect blocked by {0}: {1}, {2}, {3}, {4}, {5}", w, dist, w.MaxRange, w.IsDisabled, w.IsEnabled, w.IndirectFireCapable );
-         if ( __result.availability == PossibleDirect )
-            __result.availability = PossibleIndirect;
-         else
-            __result.availability = NeedRotationIndirect;
+         if ( ! ShouldSmartIndirect( actor, selection.PreviewPos, selection.PreviewRot, target ) ) return;
+         __result.availability = PossibleIndirect;
+      }
+
+      private static bool ShouldSmartIndirect ( AbstractActor attacker, Vector3 attackPosition, Quaternion attackRotation, ICombatant target ) {
+         if ( Combat.ToHit.GetIndirectModifier( attacker ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return false;
+         Vector3 targetPos = target.CurrentPosition;
+         if ( ! attacker.IsTargetPositionInFiringArc( target, attackPosition, attackRotation, targetPos ) ) return false;
+         float dist = Vector3.Distance( attackPosition, targetPos );
+         foreach ( Weapon w in attacker.Weapons ) // Do we have any indirect weapon that can shot?
+            if ( w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire ) {
+               LineOfFireLevel lof = Combat.LOFCache.GetLineOfFire( attacker, attackPosition, target, target.CurrentPosition, target.CurrentRotation, out _ );
+               return lof == LineOfFireLevel.LOFObstructed;
+            }
+         return false;
       }
 
       // ============ Previews ============
