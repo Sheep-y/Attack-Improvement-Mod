@@ -186,7 +186,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             string componentName = mechComponent.UIName.ToString();
             int allAmmo = 1;
             if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
-               componentName += " (" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
+               componentName += " (x" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
             else if ( mechComponent is AmmunitionBox ammo )
                componentName += " (" + ammo.CurrentAmmo + "/" + ammo.AmmoCapacity + ")";
             if ( mechComponent.DamageLevel >= ComponentDamageLevel.NonFunctional || allAmmo <= 0 )
@@ -251,9 +251,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                if ( baseDist != newDist )
                   text.Append( " >> " ).Append( newDist );
                text.Append( '\n' );
-            } else {
-               movement = "Move " + ( (int) mech.MaxWalkDistance ) + "/" + ( (int) mech.MaxSprintDistance );
-               if ( jets > 0 ) movement += "\nJump " + (int) mech.JumpDistance;
             }
          } catch ( Exception ex ) { Error( ex ); }
 
