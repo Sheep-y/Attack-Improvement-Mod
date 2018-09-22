@@ -40,6 +40,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.SmartIndirectFire ) {
             Patch( typeof( FiringPreviewManager ), "GetPreviewInfo", null, "SmartIndirectFireLoF" );
+            Patch( typeof( ToHit ), "GetCoverModifier", null, "SmartIndirectReplaceCover" );
             if ( Settings.SmartIndirectFireRequiresMultiTarget )
                PilotMultiTarget = new Dictionary<string, bool>();
          }
@@ -181,7 +182,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static Dictionary<string, bool> PilotMultiTarget;
 
-      [ Harmony.HarmonyPriority( Harmony.Priority.High ) ] // Earlier than LineOfSight.SetupLOS
       public static void SmartIndirectFireLoF ( FiringPreviewManager __instance, ref FiringPreviewManager.PreviewInfo __result, ICombatant target ) {
          if ( __result.availability != PossibleDirect ) return;
          AbstractActor actor = HUD?.SelectedActor;
@@ -192,6 +192,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                //Verbo( "Smart indirect blocked by {0}: {1}, {2}, {3}, {4}, {5}", w, dist, w.MaxRange, w.IsDisabled, w.IsEnabled, w.IndirectFireCapable );
          if ( ! ShouldSmartIndirect( actor, selection.PreviewPos, selection.PreviewRot, target ) ) return;
          __result.availability = PossibleIndirect;
+      }
+
+      public static void SmartIndirectReplaceCover ( ToHit __instance, ref float __result, AbstractActor attacker, ICombatant target ) {
+         if ( __result == 0 ) return;
+         if ( ! ShouldSmartIndirect( attacker, target ) ) return;
+         if ( attacker.team.IsLocalPlayer ) __result = 0;
+         else __result = __instance.GetIndirectModifier( attacker );
+      }
+
+      private static bool ShouldSmartIndirect ( AbstractActor attacker, ICombatant target ) {
+         return ShouldSmartIndirect( attacker, attacker.CurrentPosition, attacker.CurrentRotation, target );
       }
 
       private static bool ShouldSmartIndirect ( AbstractActor attacker, Vector3 attackPosition, Quaternion attackRotation, ICombatant target ) {

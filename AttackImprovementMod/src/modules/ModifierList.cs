@@ -22,10 +22,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.RangedAccuracyFactors != null ) {
             InitRangedModifiers( Settings.RangedAccuracyFactors.Split( ',' ) );
-            if ( RangedModifiers != null ) {
+            if ( HasRangedModifier() ) {
                Patch( typeof( ToHit ), "GetAllModifiers", new Type[]{ typeof( AbstractActor ), typeof( Weapon ), typeof( ICombatant ), typeof( Vector3 ), typeof( Vector3 ), typeof( LineOfFireLevel ), typeof( bool ) }, "OverrideRangedModifiers", null );
                Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "OverrideRangedToolTips", null );
             }
+         }
+         if ( HasRangedModifier() || Settings.SmartIndirectFire ) {
+            Patch( typeof( ToHit ), "GetAllModifiers", new Type[]{ typeof( AbstractActor ), typeof( Weapon ), typeof( ICombatant ), typeof( Vector3 ), typeof( Vector3 ), typeof( LineOfFireLevel ), typeof( bool ) }, "SaveRangedModifierState", null );
+            Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", typeof( ICombatant ), "SaveRangedToolTipState", null );
          }
          if ( Settings.MeleeAccuracyFactors != null ) {
             InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
@@ -293,23 +297,31 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return null;
       }
 
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideRangedToolTips ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+      [ Harmony.HarmonyPriority( Harmony.Priority.VeryHigh ) ]
+      public static void SaveRangedToolTipState ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          CombatHUDWeaponSlot slot = __instance;
          LineOfFire = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( target as AbstractActor ).LOFLevel;
          IsMoraleAttack = HUD.SelectionHandler.ActiveState.SelectionType == SelectionType.FireMorale;
          SaveStates( HUD.SelectedActor, target, slot.DisplayedWeapon );
-         SetToolTips( slot, RangedModifiers );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
+      public static bool OverrideRangedToolTips ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+         SetToolTips( __instance, RangedModifiers );
          return false;
       } catch ( Exception ex ) {
          return Error( new ApplicationException( "Error in ranged modifier '" + thisModifier + "'", ex ) );
       } }
 
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideRangedModifiers ( ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot ) { try {
+      [ Harmony.HarmonyPriority( Harmony.Priority.VeryHigh ) ]
+      public static void SaveRangedModifierState ( ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot ) { try {
          LineOfFire = lofLevel;
          IsMoraleAttack = isCalledShot;
          SaveStates( attacker, target, weapon );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
+      public static bool OverrideRangedModifiers ( ref float __result, AbstractActor attacker, Weapon weapon, ICombatant target, Vector3 attackPosition, Vector3 targetPosition, LineOfFireLevel lofLevel, bool isCalledShot ) { try {
          __result = SumModifiers( RangedModifiers );
          return false;
       } catch ( Exception ex ) {
