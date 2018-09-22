@@ -41,7 +41,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.SmartIndirectFire ) {
             Patch( typeof( FiringPreviewManager ), "GetPreviewInfo", null, "SmartIndirectFireLoF" );
             Patch( typeof( ToHit ), "GetCoverModifier", null, "SmartIndirectReplaceCover" );
-            if ( Settings.SmartIndirectFireRequiresMultiTarget )
+            Patch( typeof( ToHit ), "GetIndirectModifier", new Type[]{ typeof( AbstractActor ), typeof( bool ) }, null, "SmartIndirectReplaceIndirect" );
+            if ( Settings.MixingIndirectFire.Equals( "MultiFire" ) )
                PilotMultiTarget = new Dictionary<string, bool>();
          }
 
@@ -195,10 +196,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void SmartIndirectReplaceCover ( ToHit __instance, ref float __result, AbstractActor attacker, ICombatant target ) {
-         if ( __result == 0 ) return;
+         if ( __result == 0 || ! ModifierList.AttackWeapon.IndirectFireCapable ) return;
          if ( ! ShouldSmartIndirect( attacker, target ) ) return;
          if ( attacker.team.IsLocalPlayer ) __result = 0;
          else __result = __instance.GetIndirectModifier( attacker );
+      }
+
+      public static void SmartIndirectReplaceIndirect ( ToHit __instance, ref float __result, AbstractActor attacker, bool isIndirect ) {
+         if ( isIndirect || ! ModifierList.AttackWeapon.IndirectFireCapable || ! attacker.team.IsLocalPlayer ) return;
+         if ( ! ShouldSmartIndirect( attacker, ModifierList.Target ) ) return;
+         __result = __instance.GetIndirectModifier( attacker );
       }
 
       private static bool ShouldSmartIndirect ( AbstractActor attacker, ICombatant target ) {
@@ -209,8 +216,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Combat.ToHit.GetIndirectModifier( attacker ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return false;
          Vector3 targetPos = target.CurrentPosition;
          if ( ! attacker.IsTargetPositionInFiringArc( target, attackPosition, attackRotation, targetPos ) ) return false;
-         if ( ! PassMultiTarget( attacker ) ) return false;
          float dist = Vector3.Distance( attackPosition, targetPos );
+         if ( ! PassMultiTarget( attacker, dist ) ) return false;
          foreach ( Weapon w in attacker.Weapons ) // Check that we have any indirect weapon that can shot
             if ( w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire ) {
                LineOfFireLevel lof = Combat.LOFCache.GetLineOfFire( attacker, attackPosition, target, target.CurrentPosition, target.CurrentRotation, out _ );
@@ -219,16 +226,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }
 
-      private static bool PassMultiTarget ( AbstractActor attacker ) {
-         if ( ! Settings.SmartIndirectFireRequiresMultiTarget ) return true;
-         if ( ! PilotMultiTarget.TryGetValue( attacker.GetPilot().GUID, out bool hasMultiTarget ) ) {
-            foreach ( Ability ability in attacker.GetPilot().ActiveAbilities )
-               if ( ability.Def.Targeting == AbilityDef.TargetingType.MultiFire ) {
-                  PilotMultiTarget[ attacker.GetPilot().GUID ] = hasMultiTarget = true;
-                  break;
-               }
-         }
-         return hasMultiTarget;
+      private static bool PassMultiTarget ( AbstractActor attacker, float dist ) {
+         if ( Settings.MixingIndirectFire == "Always" ) return true;
+         foreach ( Weapon w in attacker.Weapons )
+            if ( ! w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire )
+               return Settings.MixingIndirectFire != "Never" && PilotHasMultiTarget( attacker.GetPilot() );
+         return true; // No direct weapon
+      }
+
+      private static bool PilotHasMultiTarget ( Pilot pilot ) {
+         string guid = pilot.GUID;
+         if ( PilotMultiTarget.TryGetValue( guid, out bool hasMultiTarget ) )
+            return hasMultiTarget;
+         foreach ( Ability ability in pilot.ActiveAbilities )
+            if ( ability.Def.Targeting == AbilityDef.TargetingType.MultiFire )
+               return PilotMultiTarget[ guid ] = true;
+         return PilotMultiTarget[ guid ] = false;
       }
 
       // ============ Previews ============

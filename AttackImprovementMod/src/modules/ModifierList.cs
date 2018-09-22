@@ -17,7 +17,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( HasMod( "io.github.guetler.CBTMovement" ) ) // Don't log to BTML unless we're sure CBTMovement is nonzero
             Warn( "CBTMovement detected.  Both jump modifier will apply; please make sure either is zero. (AIM modfiier is factored in preview; CBT Movement does not.)" );
 
-         if ( Settings.RangedAccuracyFactors != null || Settings.MeleeAccuracyFactors != null )
+         if ( Settings.RangedAccuracyFactors != null || Settings.MeleeAccuracyFactors != null || Settings.SmartIndirectFire )
             Patch( typeof( ToHit ), "GetToHitChance", "RecordAttackPosition", null );
 
          if ( Settings.RangedAccuracyFactors != null ) {
@@ -33,7 +33,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.MeleeAccuracyFactors != null ) {
             InitMeleeModifiers( Settings.MeleeAccuracyFactors.Split( ',' ) );
-            if ( MeleeModifiers != null ) {
+            if ( HasMeleeModifier() ) {
                contemplatingDFA = typeof( CombatHUDWeaponSlot ).GetMethod( "contemplatingDFA", NonPublic | Instance );
                if ( contemplatingDFA == null ) Warn( "CombatHUDWeaponSlot.contemplatingDFA not found, DFA will be regarded as normal melee." );
                Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
