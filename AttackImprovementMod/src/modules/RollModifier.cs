@@ -40,6 +40,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.SmartIndirectFire ) {
             Patch( typeof( FiringPreviewManager ), "GetPreviewInfo", null, "SmartIndirectFireLoF" );
+            if ( Settings.SmartIndirectFireRequiresMultiTarget )
+               PilotMultiTarget = new Dictionary<string, bool>();
          }
 
          if ( Settings.FixSelfSpeedModifierPreview ) {
@@ -61,6 +63,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.AllowNetBonusModifier && steppingModifier == null && ! Settings.DiminishingHitChanceModifier )
             TryRun( ModLog, FillSteppedModifiers );
+      }
+
+      public override void CombatEnds () {
+         PilotMultiTarget?.Clear();
       }
 
       // ============ Preparations ============
@@ -173,6 +179,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Smart Indirect Fire ============
 
+      private static Dictionary<string, bool> PilotMultiTarget;
+
       [ Harmony.HarmonyPriority( Harmony.Priority.High ) ] // Earlier than LineOfSight.SetupLOS
       public static void SmartIndirectFireLoF ( FiringPreviewManager __instance, ref FiringPreviewManager.PreviewInfo __result, ICombatant target ) {
          if ( __result.availability != PossibleDirect ) return;
@@ -190,13 +198,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Combat.ToHit.GetIndirectModifier( attacker ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return false;
          Vector3 targetPos = target.CurrentPosition;
          if ( ! attacker.IsTargetPositionInFiringArc( target, attackPosition, attackRotation, targetPos ) ) return false;
+         if ( ! PassMultiTarget( attacker ) ) return false;
          float dist = Vector3.Distance( attackPosition, targetPos );
-         foreach ( Weapon w in attacker.Weapons ) // Do we have any indirect weapon that can shot?
+         foreach ( Weapon w in attacker.Weapons ) // Check that we have any indirect weapon that can shot
             if ( w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire ) {
                LineOfFireLevel lof = Combat.LOFCache.GetLineOfFire( attacker, attackPosition, target, target.CurrentPosition, target.CurrentRotation, out _ );
                return lof == LineOfFireLevel.LOFObstructed;
             }
          return false;
+      }
+
+      private static bool PassMultiTarget ( AbstractActor attacker ) {
+         if ( ! Settings.SmartIndirectFireRequiresMultiTarget ) return true;
+         if ( ! PilotMultiTarget.TryGetValue( attacker.GetPilot().GUID, out bool hasMultiTarget ) ) {
+            foreach ( Ability ability in attacker.GetPilot().ActiveAbilities )
+               if ( ability.Def.Targeting == AbilityDef.TargetingType.MultiFire ) {
+                  PilotMultiTarget[ attacker.GetPilot().GUID ] = hasMultiTarget = true;
+                  break;
+               }
+         }
+         return hasMultiTarget;
       }
 
       // ============ Previews ============
