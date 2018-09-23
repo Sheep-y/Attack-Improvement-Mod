@@ -43,8 +43,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( ToHit ), "GetCoverModifier", null, "SmartIndirectReplaceCover" );
             Patch( typeof( ToHit ), "GetIndirectModifier", new Type[]{ typeof( AbstractActor ), typeof( bool ) }, null, "SmartIndirectReplaceIndirect" );
             //Patch( typeof( AttackDirector.AttackSequence ), "GenerateHitInfo", null, "SmartIndirectFireArc" );
-            if ( Settings.MixingIndirectFire.Equals( "MultiFire" ) )
-               PilotMultiTarget = new Dictionary<string, bool>();
          }
 
          if ( Settings.FixSelfSpeedModifierPreview ) {
@@ -66,10 +64,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.AllowNetBonusModifier && steppingModifier == null && ! Settings.DiminishingHitChanceModifier )
             TryRun( ModLog, FillSteppedModifiers );
-      }
-
-      public override void CombatEnds () {
-         PilotMultiTarget?.Clear();
       }
 
       // ============ Preparations ============
@@ -182,8 +176,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Smart Indirect Fire ============
 
-      private static Dictionary<string, bool> PilotMultiTarget;
-
       public static void SmartIndirectFireLoF ( FiringPreviewManager __instance, ref FiringPreviewManager.PreviewInfo __result, ICombatant target ) { try {
          if ( __result.availability != PossibleDirect ) return;
          AbstractActor actor = HUD?.SelectedActor;
@@ -227,7 +219,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ! attacker.IsTargetPositionInFiringArc( target, attackPosition, attackRotation, targetPos ) ) return false; // Abort if can't shot
          float dist = Vector3.Distance( attackPosition, targetPos );
          if ( checkWeapon && ! CanFireIndirectWeapon( attacker, target, dist ) ) return false; // Abort if no indirect weapon can fire at target
-         if ( ! PassMultiTarget( attacker, target, dist ) ) return false; // Abort if pilot is required to have multi-target and does not
          LineOfFireLevel lof = Combat.LOFCache.GetLineOfFire( attacker, attackPosition, target, targetPos, target.CurrentRotation, out _ );
          return lof == LineOfFireLevel.LOFObstructed;
       }
@@ -237,24 +228,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire )
                return true;
          return false;
-      }
-
-      private static bool PassMultiTarget ( AbstractActor attacker, ICombatant target, float dist ) {
-         if ( Settings.MixingIndirectFire == "Always" ) return true;
-         foreach ( Weapon w in attacker.Weapons )
-            if ( ! w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire )
-               return Settings.MixingIndirectFire != "Never" && PilotHasMultiTarget( attacker.GetPilot() );
-         return true; // No direct weapon
-      }
-
-      private static bool PilotHasMultiTarget ( Pilot pilot ) {
-         string guid = pilot.GUID;
-         if ( PilotMultiTarget.TryGetValue( guid, out bool hasMultiTarget ) )
-            return hasMultiTarget;
-         foreach ( Ability ability in pilot.ActiveAbilities )
-            if ( ability.Def.Targeting == AbilityDef.TargetingType.MultiFire )
-               return PilotMultiTarget[ guid ] = true;
-         return PilotMultiTarget[ guid ] = false;
       }
 
       // ============ Previews ============

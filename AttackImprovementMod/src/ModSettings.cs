@@ -160,9 +160,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Use indirect fire when direct LoF is obstructed and indirect is better.  Default true." ) ]
       public bool SmartIndirectFire = true;
 
-      [ JsonComment( "Can smart indirect fire be mixed with direct fire?  Can be \"Never\", \"MultiFire\", or \"Always\".  Default \"MultiFire\"." ) ]
-      public string MixingIndirectFire = "MultiFire";
-
       [ JsonComment( "Directional to hit modifiers.  Effective only if \"Direction\" is in the modifier factor list(s).  Default front 0, side -1, back -2." ) ]
       public int ToHitMechFromFront = 0;
       public int ToHitMechFromSide = -1;

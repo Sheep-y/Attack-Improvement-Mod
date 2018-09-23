@@ -66,9 +66,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( settings.LOSWidthBlockedMultiplier != null && settings.LOSWidthBlockedMultiplier != 3 )
             settings.LOSWidthBlocked = settings.LOSWidthBlockedMultiplier.GetValueOrDefault( 3 ) * 0.75m;
 
-         if ( settings.MixingIndirectFire == null || ( settings.MixingIndirectFire != "Never" && settings.MixingIndirectFire != "Always" ) )
-            settings.MixingIndirectFire = "MultiFire";
-
          settings.ShowCorrectedHitChance = settings.ShowRealWeaponHitChance.GetValueOrDefault( settings.ShowCorrectedHitChance );
          if ( settings.ShowDecimalCalledChance == true && settings.CalledChanceFormat == "" )
             settings.CalledChanceFormat = "{0:0.0}%"; // Keep digits consistent
