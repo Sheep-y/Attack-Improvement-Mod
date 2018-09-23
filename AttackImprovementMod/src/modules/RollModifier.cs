@@ -42,7 +42,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( FiringPreviewManager ), "GetPreviewInfo", null, "SmartIndirectFireLoF" );
             Patch( typeof( ToHit ), "GetCoverModifier", null, "SmartIndirectReplaceCover" );
             Patch( typeof( ToHit ), "GetIndirectModifier", new Type[]{ typeof( AbstractActor ), typeof( bool ) }, null, "SmartIndirectReplaceIndirect" );
-            //Patch( typeof( AttackDirector.AttackSequence ), "GenerateHitInfo", null, "SmartIndirectFireArc" );
+            Patch( typeof( MissileLauncherEffect ), "SetupMissiles", null, "SmartIndirectFireArc" );
          }
 
          if ( Settings.FixSelfSpeedModifierPreview ) {
@@ -201,13 +201,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result = __instance.GetIndirectModifier( attacker );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      /*
-      public static void SmartIndirectFireArc ( AttackDirector.AttackSequence __instance, WeaponHitInfo __result, Weapon weapon, bool indirectFire ) {
-         if ( indirectFire || ! weapon.IndirectFireCapable ) return;
-         if ( ! ShouldSmartIndirect( __instance.attacker, __instance.target ) ) return;
-         __result.
+      public static void SmartIndirectFireArc ( MissileLauncherEffect __instance, ref bool ___isIndirect ) {
+         if ( ___isIndirect || ! __instance.weapon.IndirectFireCapable ) return;
+         if ( ! ShouldSmartIndirect( __instance.weapon.parent, Combat.FindCombatantByGUID( __instance.hitInfo.targetId ) ) ) return;
+         ___isIndirect = true;
       }
-      */
 
       private static bool ShouldSmartIndirect ( AbstractActor attacker, ICombatant target ) {
          return CanSmartIndirect( attacker, attacker.CurrentPosition, attacker.CurrentRotation, target, false );
@@ -217,8 +215,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Combat.ToHit.GetIndirectModifier( attacker ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return false; // Abort if it is pointless
          Vector3 targetPos = target.CurrentPosition;
          if ( ! attacker.IsTargetPositionInFiringArc( target, attackPosition, attackRotation, targetPos ) ) return false; // Abort if can't shot
-         float dist = Vector3.Distance( attackPosition, targetPos );
-         if ( checkWeapon && ! CanFireIndirectWeapon( attacker, target, dist ) ) return false; // Abort if no indirect weapon can fire at target
+         if ( checkWeapon ) {
+            float dist = Vector3.Distance( attackPosition, targetPos );
+            if ( ! CanFireIndirectWeapon( attacker, target, dist ) ) return false; // Abort if no indirect weapon can fire at target
+         }
          LineOfFireLevel lof = Combat.LOFCache.GetLineOfFire( attacker, attackPosition, target, targetPos, target.CurrentRotation, out _ );
          return lof == LineOfFireLevel.LOFObstructed;
       }
