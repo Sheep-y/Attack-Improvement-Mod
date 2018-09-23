@@ -2,6 +2,7 @@ CHANGE LOG
 
 ????-??-?? AIM Version 2.6 development for BATTLETECH 1.2.0
 
+* New: Use indirect fire when better than direct fire.
 * New: Show enemy wounds and ally health in mechwarrior names.
 * New: Set nameplate text colour.
 * New: Press F1 to F4 to select player mech.

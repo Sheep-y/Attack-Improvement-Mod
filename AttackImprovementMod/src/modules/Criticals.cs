@@ -93,6 +93,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( ! Settings.CritFollowDamageTransfer )
                Warn( "Disabling CritFollowDamageTransfer will cause less crit to be checked, diminishing CritLocationTransfer." );
          }
+         // SFX enums have varied between 1.2 and 1.2-skill-preview.  Throws if value not found and must be caught.
+         laser_medium = (AudioSwitch_weapon_type) Enum.Parse( typeof( AudioSwitch_weapon_type ), "laser_medium" );
+         mech_critical_hit = (AudioSwitch_surface_type) Enum.Parse( typeof( AudioSwitch_surface_type ), "mech_critical_hit" );
+         impact_weapon = (AudioEventList_impact) Enum.Parse( typeof( AudioEventList_impact  ), "impact_weapon" );
+         explosion_small = (AudioEventList_explosion) Enum.Parse( typeof( AudioEventList_explosion ), "explosion_small" );
       }
 
       private void InitThroughArmourCrit () {
@@ -136,6 +141,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Generic Critical System Support ============
 
       private static MethodInfo MechEngineerCheckCritPublishMessage, MechEngineerCheckCritPostfix, MechEngineerGetCompLocation, MechSetCombat;
+      private static AudioSwitch_weapon_type laser_medium;
+      private static AudioSwitch_surface_type mech_critical_hit;
+      private static AudioEventList_impact impact_weapon;
+      private static AudioEventList_explosion explosion_small;
 
       public static MessageCenterMessage GetCritMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
          return new AddSequenceToStackMessage( new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) );
@@ -281,12 +290,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          GameRepresentation GameRep = info.target.GameRep;
          if ( GameRep == null ) return;
          if ( info.weapon.weaponRep != null && info.weapon.weaponRep.HasWeaponEffect )
-            WwiseManager.SetSwitch<AudioSwitch_weapon_type>( info.weapon.weaponRep.WeaponEffect.weaponImpactType, GameRep.audioObject );
-         else
-            WwiseManager.SetSwitch<AudioSwitch_weapon_type>( AudioSwitch_weapon_type.laser_medium, GameRep.audioObject );
-         WwiseManager.SetSwitch<AudioSwitch_surface_type>( AudioSwitch_surface_type.mech_critical_hit, GameRep.audioObject );
-         WwiseManager.PostEvent<AudioEventList_impact>( AudioEventList_impact.impact_weapon, GameRep.audioObject, null, null );
-         WwiseManager.PostEvent<AudioEventList_explosion>( AudioEventList_explosion.explosion_small, GameRep.audioObject, null, null );
+            WwiseManager.SetSwitch( info.weapon.weaponRep.WeaponEffect.weaponImpactType, GameRep.audioObject );
+         else if ( laser_medium != 0 )
+            WwiseManager.SetSwitch( laser_medium, GameRep.audioObject );
+         if ( mech_critical_hit != 0 ) WwiseManager.SetSwitch( mech_critical_hit, GameRep.audioObject );
+         if ( impact_weapon    != 0 ) WwiseManager.PostEvent( impact_weapon, GameRep.audioObject, null, null );
+         if ( explosion_small != 0 ) WwiseManager.PostEvent( explosion_small, GameRep.audioObject, null, null );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void PlayVFX ( AIMCritInfo info ) { try {
