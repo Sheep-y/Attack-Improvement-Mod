@@ -41,7 +41,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool ShowDamageInLoadout = false;
 
       [ JsonComment( "Show alpha/melee&dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
-      public string ShowAlphaDamageInLoadout = "Alpha {2}+{3}";
+      public string ShowAlphaDamageInLoadout = "Close {2} : Long {3}";
 
       [ JsonComment( "Show melee & dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
       public bool ShowMeleeDamageInLoadout = true;
