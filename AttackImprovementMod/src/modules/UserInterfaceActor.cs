@@ -228,10 +228,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                far += damage;
          }
          if ( Settings.ShowAlphaDamageInLoadout != null ) {
-            for ( int i = Math.Min( ___weaponNames.Count - 1, weapons.Count ) - 1 ; i >= 0 ; i-- )
-               SetWeapon( ___weaponNames[ i + 1 ], ___weaponNames[ i ].color, ___weaponNames[ i ].text );
-            SetWeapon( ___weaponNames[ 0 ], colours.gold, Settings.ShowAlphaDamageInLoadout, support + close + far, support, close, far );
-            ___weaponNames[ 0 ].fontStyle = TMPro.FontStyles.Normal;
+            TMPro.TextMeshProUGUI loadout = GameObject.Find( "tgtWeaponsLabel" )?.GetComponent<TMPro.TextMeshProUGUI>();
+            if ( loadout != null ) {
+               Verbo( Logging.Logger.Stacktrace );
+               loadout.fontStyle = TMPro.FontStyles.Normal;
+               loadout.color = colours.white;
+               loadout.text = string.Format( Settings.ShowAlphaDamageInLoadout, support + close + far, support, close, far, close + far );
+            }
          }
          if ( Settings.ShowMeleeDamageInLoadout && actor is Mech mech ) {
             int start = weapons.Count;
