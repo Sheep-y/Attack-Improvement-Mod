@@ -37,9 +37,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
       public bool FixLosPreviewHeight = true;
 
-      [ JsonComment( "Show alpha/per-weapon/melee&dfa damage in weapon loadout list in targetting computer.  Default true." ) ]
-      public bool ShowAlphaDamageInLoadout = true;
-      public bool ShowDamageInLoadout = true;
+      [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default false." ) ]
+      public bool ShowDamageInLoadout = false;
+
+      [ JsonComment( "Show alpha/melee&dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
+      public string ShowAlphaDamageInLoadout = "Alpha {2}+{3}";
+
+      [ JsonComment( "Show melee & dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
       public bool ShowMeleeDamageInLoadout = true;
 
       [ JsonComment( "Show ammo count in the list of components when you mouseover the paper doll.  Default true for friends." ) ]

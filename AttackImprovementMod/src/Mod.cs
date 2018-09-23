@@ -180,6 +180,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NullIfEmpty( ref Settings.WeaponRangeFormat );
          NullIfEmpty( ref Settings.ShowEnemyWounds );
          NullIfEmpty( ref Settings.ShowNPCHealth );
+         NullIfEmpty( ref Settings.ShowAlphaDamageInLoadout );
+
          NullIfEmpty( ref Settings.NameplateColourPlayer );
          NullIfEmpty( ref Settings.NameplateColourEnemy );
          NullIfEmpty( ref Settings.NameplateColourAlly );
