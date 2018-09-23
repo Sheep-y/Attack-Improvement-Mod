@@ -42,6 +42,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( FiringPreviewManager ), "GetPreviewInfo", null, "SmartIndirectFireLoF" );
             Patch( typeof( ToHit ), "GetCoverModifier", null, "SmartIndirectReplaceCover" );
             Patch( typeof( ToHit ), "GetIndirectModifier", new Type[]{ typeof( AbstractActor ), typeof( bool ) }, null, "SmartIndirectReplaceIndirect" );
+            //Patch( typeof( AttackDirector.AttackSequence ), "GenerateHitInfo", null, "SmartIndirectFireArc" );
             if ( Settings.MixingIndirectFire.Equals( "MultiFire" ) )
                PilotMultiTarget = new Dictionary<string, bool>();
          }
@@ -183,7 +184,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static Dictionary<string, bool> PilotMultiTarget;
 
-      public static void SmartIndirectFireLoF ( FiringPreviewManager __instance, ref FiringPreviewManager.PreviewInfo __result, ICombatant target ) {
+      public static void SmartIndirectFireLoF ( FiringPreviewManager __instance, ref FiringPreviewManager.PreviewInfo __result, ICombatant target ) { try {
          if ( __result.availability != PossibleDirect ) return;
          AbstractActor actor = HUD?.SelectedActor;
          SelectionState selection = HUD.SelectionHandler.ActiveState;
@@ -191,42 +192,54 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          foreach ( Weapon w in actor.Weapons ) // Don't change LoF if any direct weapon is enabled and can shot
             if ( ! w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire ) return;
                //Verbo( "Smart indirect blocked by {0}: {1}, {2}, {3}, {4}, {5}", w, dist, w.MaxRange, w.IsDisabled, w.IsEnabled, w.IndirectFireCapable );
-         if ( ! ShouldSmartIndirect( actor, selection.PreviewPos, selection.PreviewRot, target ) ) return;
+         if ( ! CanSmartIndirect( actor, selection.PreviewPos, selection.PreviewRot, target ) ) return;
          __result.availability = PossibleIndirect;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void SmartIndirectReplaceCover ( ToHit __instance, ref float __result, AbstractActor attacker, ICombatant target ) {
+      public static void SmartIndirectReplaceCover ( ToHit __instance, ref float __result, AbstractActor attacker, ICombatant target ) { try {
          if ( __result == 0 || ! ModifierList.AttackWeapon.IndirectFireCapable ) return;
          if ( ! ShouldSmartIndirect( attacker, target ) ) return;
          if ( attacker.team.IsLocalPlayer ) __result = 0;
          else __result = __instance.GetIndirectModifier( attacker );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void SmartIndirectReplaceIndirect ( ToHit __instance, ref float __result, AbstractActor attacker, bool isIndirect ) {
+      public static void SmartIndirectReplaceIndirect ( ToHit __instance, ref float __result, AbstractActor attacker, bool isIndirect ) { try {
          if ( isIndirect || ! ModifierList.AttackWeapon.IndirectFireCapable || ! attacker.team.IsLocalPlayer ) return;
          if ( ! ShouldSmartIndirect( attacker, ModifierList.Target ) ) return;
          __result = __instance.GetIndirectModifier( attacker );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      /*
+      public static void SmartIndirectFireArc ( AttackDirector.AttackSequence __instance, WeaponHitInfo __result, Weapon weapon, bool indirectFire ) {
+         if ( indirectFire || ! weapon.IndirectFireCapable ) return;
+         if ( ! ShouldSmartIndirect( __instance.attacker, __instance.target ) ) return;
+         __result.
       }
+      */
 
       private static bool ShouldSmartIndirect ( AbstractActor attacker, ICombatant target ) {
-         return ShouldSmartIndirect( attacker, attacker.CurrentPosition, attacker.CurrentRotation, target );
+         return CanSmartIndirect( attacker, attacker.CurrentPosition, attacker.CurrentRotation, target, false );
       }
 
-      private static bool ShouldSmartIndirect ( AbstractActor attacker, Vector3 attackPosition, Quaternion attackRotation, ICombatant target ) {
-         if ( Combat.ToHit.GetIndirectModifier( attacker ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return false;
+      private static bool CanSmartIndirect ( AbstractActor attacker, Vector3 attackPosition, Quaternion attackRotation, ICombatant target, bool checkWeapon = true ) {
+         if ( Combat.ToHit.GetIndirectModifier( attacker ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return false; // Abort if it is pointless
          Vector3 targetPos = target.CurrentPosition;
-         if ( ! attacker.IsTargetPositionInFiringArc( target, attackPosition, attackRotation, targetPos ) ) return false;
+         if ( ! attacker.IsTargetPositionInFiringArc( target, attackPosition, attackRotation, targetPos ) ) return false; // Abort if can't shot
          float dist = Vector3.Distance( attackPosition, targetPos );
-         if ( ! PassMultiTarget( attacker, dist ) ) return false;
+         if ( checkWeapon && ! CanFireIndirectWeapon( attacker, target, dist ) ) return false; // Abort if no indirect weapon can fire at target
+         if ( ! PassMultiTarget( attacker, target, dist ) ) return false; // Abort if pilot is required to have multi-target and does not
+         LineOfFireLevel lof = Combat.LOFCache.GetLineOfFire( attacker, attackPosition, target, targetPos, target.CurrentRotation, out _ );
+         return lof == LineOfFireLevel.LOFObstructed;
+      }
+
+      private static bool CanFireIndirectWeapon ( AbstractActor attacker, ICombatant target, float dist ) {
          foreach ( Weapon w in attacker.Weapons ) // Check that we have any indirect weapon that can shot
-            if ( w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire ) {
-               LineOfFireLevel lof = Combat.LOFCache.GetLineOfFire( attacker, attackPosition, target, target.CurrentPosition, target.CurrentRotation, out _ );
-               return lof == LineOfFireLevel.LOFObstructed;
-            }
+            if ( w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire )
+               return true;
          return false;
       }
 
-      private static bool PassMultiTarget ( AbstractActor attacker, float dist ) {
+      private static bool PassMultiTarget ( AbstractActor attacker, ICombatant target, float dist ) {
          if ( Settings.MixingIndirectFire == "Always" ) return true;
          foreach ( Weapon w in attacker.Weapons )
             if ( ! w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire )
