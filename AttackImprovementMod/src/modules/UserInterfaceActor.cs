@@ -58,6 +58,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
 
+         if ( Settings.ShowAlphaDamageInLoadout || Settings.ShowDamageInLoadout || Settings.ShowMeleeDamageInLoadout )
+            Patch( typeof( CombatHUDTargetingComputer ), "RefreshWeaponList", null, "EnhanceWeaponLoadout" );
+
          if ( Settings.ShowAmmoInTooltip || Settings.ShowEnemyAmmoInTooltip ) {
             MechTrayArmorHoverToolTipProp = typeof( CombatHUDMechTrayArmorHover ).GetProperty( "ToolTip", NonPublic | Instance );
             if ( MechTrayArmorHoverToolTipProp == null )
@@ -196,6 +199,31 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      // ============ Weapon Loadout ============
+
+      public static void EnhanceWeaponLoadout ( CombatHUDTargetingComputer __instance, List<TMPro.TextMeshProUGUI> ___weaponNames ) {
+         AbstractActor actor = __instance.ActivelyShownCombatant as AbstractActor;
+         List<Weapon> weapons = actor.Weapons;
+         float alphaMin = 0, alphaMax = 0;
+         if ( Settings.ShowDamageInLoadout ) {
+            for ( int i = weapons.Count - 1 ; i >= 0 ; i-- ) {
+               Weapon w = weapons[ i ];
+               if ( ! w.CanFire ) continue;
+               float min = Math.Max( 0, w.DamagePerShot - w.DamageVariance ), max = w.DamagePerShot + w.DamageVariance;
+               string damage = min == max ? min.ToString() : ( min + "-" + max );
+               if ( w.ShotsWhenFired <= 1 ) {
+                  ___weaponNames[ i ].text += " (" + damage + ")";
+                  alphaMin += min;
+                  alphaMax += max;
+               } else {
+                  ___weaponNames[ i ].text += " (" + w.ShotsWhenFired + "x" + damage + ")";
+                  alphaMin += w.ShotsWhenFired * min;
+                  alphaMax += w.ShotsWhenFired * max;
+               }
+            }
+         }
+      }
 
       // ============ Heat and Stability ============
 
