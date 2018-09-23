@@ -1038,6 +1038,8 @@ Follow these steps to see game code and learn how BATTLETECH mod works:
 
 # Credits
 
+* LogGuiTree code taken from CptMoore's [MechEngineer](https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99).
+
 * Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.
 * Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.
 * And many more players on the BattleTechGame discord that gave comments and ideas.

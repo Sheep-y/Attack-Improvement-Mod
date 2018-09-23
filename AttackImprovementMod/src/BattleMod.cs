@@ -132,6 +132,8 @@ namespace Sheepy.BattleTechMod {
          TryRun( Log, () => File.WriteAllText( BaseDir + "settings.json", settings ) );
       }
 
+      // ============ Logging ============
+
       private static bool FormatParameters ( Logger.LogEntry line ) {
          if ( line == null ) return true;
          object[] args = line?.args;
@@ -310,10 +312,32 @@ namespace Sheepy.BattleTechMod {
       public string Id { get; protected internal set; } = "org.example.mod.module";
       public string Name { get; protected internal set; } = "Module";
 
+      // ============ Logging ============
+
       private Logger _Logger;
       protected Logger Log {
          get { return _Logger ?? BattleMod.BTML_LOG; }
          set { _Logger = value; }
+      }
+      
+      public void LogGuiTree ( UnityEngine.Transform root ) { LogGuiTree( Log, root ); }
+      public static void LogGuiTree ( Logger Log, UnityEngine.Transform root ) {
+         StringBuilder buf = new StringBuilder( '\n' );
+         buf.EnsureCapacity( 1024 * 16 );
+         LogGuiTree( root, buf, "" );
+         Log.Info( buf.ToString() );
+      }
+
+      // From CptMoore's MechEngineer: https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99
+      public static void LogGuiTree ( UnityEngine.Transform transform, StringBuilder buf, string indent = "" ) {
+         buf.Append( indent ).AppendFormat( "{0} world={1} local={2}", transform.gameObject.name, transform.position, transform.localPosition );
+         if ( transform.GetComponent<UnityEngine.RectTransform>() is UnityEngine.RectTransform rect )
+            buf.AppendFormat( " rect={0} anchor={1}", rect.rect, rect.anchoredPosition );
+         if ( transform.GetComponent<TMPro.TextMeshProUGUI>() is TMPro.TextMeshProUGUI textComponent )
+            buf.AppendFormat( " color={0} font={1} text={2}", UnityEngine.ColorUtility.ToHtmlStringRGBA( textComponent.color ), textComponent.font.name, textComponent.text );
+         if ( indent.Length > 60 ) return;
+         foreach ( UnityEngine.Transform current in transform )
+            LogGuiTree( current, buf.Append( '\n' ), indent + "   " );
       }
 
       // ============ Harmony ============
