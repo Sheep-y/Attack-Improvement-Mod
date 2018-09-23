@@ -37,11 +37,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
       public bool FixLosPreviewHeight = true;
 
+      [ JsonComment( "Colour weapon loadout by weapon type in targetting computer.  Default true." ) ]
+      public bool ColouredLoadout = true;
+
       [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default false." ) ]
       public bool ShowDamageInLoadout = false;
 
       [ JsonComment( "Show alpha/melee&dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
-      public string ShowAlphaDamageInLoadout = "Close {2} : Long {3}";
+      public string ShowAlphaDamageInLoadout = "Short {2} : Long {3}";
 
       [ JsonComment( "Show melee & dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
       public bool ShowMeleeDamageInLoadout = true;

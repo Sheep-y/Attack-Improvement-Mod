@@ -58,7 +58,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
 
-         if ( Settings.ShowAlphaDamageInLoadout != null || Settings.ShowDamageInLoadout || Settings.ShowMeleeDamageInLoadout )
+         if ( Settings.ColouredLoadout || Settings.ShowDamageInLoadout || Settings.ShowMeleeDamageInLoadout || Settings.ShowAlphaDamageInLoadout != null )
             Patch( typeof( CombatHUDTargetingComputer ), "RefreshWeaponList", null, "EnhanceWeaponLoadout" );
 
          if ( Settings.ShowAmmoInTooltip || Settings.ShowEnemyAmmoInTooltip ) {
@@ -203,6 +203,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Weapon Loadout ============
 
       public static void EnhanceWeaponLoadout ( CombatHUDTargetingComputer __instance, List<TMPro.TextMeshProUGUI> ___weaponNames, UIManager ___uiManager ) {
+         UIColorRefs colours = ___uiManager.UIColorRefs;
          AbstractActor actor = __instance.ActivelyShownCombatant as AbstractActor;
          List<Weapon> weapons = actor.Weapons;
          float support = 0, close = 0, far = 0;
@@ -212,6 +213,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             float damage = w.DamagePerShot * w.ShotsWhenFired;
             if ( Settings.ShowDamageInLoadout )
                ___weaponNames[ i ].text = ___weaponNames[ i ].text.Replace( " +", "+" ) + " (" + damage + ")";
+            if ( Settings.ColouredLoadout && ___weaponNames[ i ].color == colours.qualityA ) {
+               Color c = Color.clear;
+               switch ( w.Category ) {
+                  case WeaponCategory.Energy : c = colours.energyColor; break;
+                  case WeaponCategory.Missile : c = colours.missileColor; break;
+                  case WeaponCategory.Ballistic : c = colours.ballisticColor; break;
+                  case WeaponCategory.AntiPersonnel : c = colours.smallColor; break;
+               }
+               if ( c != Color.clear ) {
+                  c.a = 1;
+                  ___weaponNames[ i ].color = Color.Lerp( c, colours.white, 0.5f );
+               }
+            }
             if ( w.MaxRange <= 90 )
                support += damage;
             else if ( w.MaxRange <= 360 )
@@ -222,19 +236,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowAlphaDamageInLoadout != null ) {
             for ( int i = Math.Min( ___weaponNames.Count - 1, weapons.Count ) - 1 ; i >= 0 ; i-- )
                SetWeapon( ___weaponNames[ i + 1 ], ___weaponNames[ i ].color, ___weaponNames[ i ].text );
-            SetWeapon( ___weaponNames[ 0 ], ___uiManager.UIColorRefs.goldHalf, Settings.ShowAlphaDamageInLoadout, support + close + far, support, close, far );
+            SetWeapon( ___weaponNames[ 0 ], colours.gold, Settings.ShowAlphaDamageInLoadout, support + close + far, support, close, far );
             ___weaponNames[ 0 ].fontStyle = TMPro.FontStyles.Normal;
          }
          if ( Settings.ShowMeleeDamageInLoadout && actor is Mech mech ) {
             int start = weapons.Count;
             if ( Settings.ShowAlphaDamageInLoadout != null ) ++start;
-            string format = Settings.ShowDamageInLoadout ? "{0} ({1})" : "{0} {1}";
+            string format = Settings.ShowDamageInLoadout ? "{0}  ({1})" : "{0}  {1}";
+            Color c = Settings.ColouredLoadout ? colours.medGray : colours.white;
             if ( start < ___weaponNames.Count )
-               SetWeapon( ___weaponNames[ start ], ___uiManager.UIColorRefs.medGray, format,
-                          Translate( "Melee" ), mech.MeleeWeapon.DamagePerShot * mech.MeleeWeapon.ShotsWhenFired );
+               SetWeapon( ___weaponNames[ start ], c, format, Translate( "Melee" ), mech.MeleeWeapon.DamagePerShot * mech.MeleeWeapon.ShotsWhenFired );
             if ( start + 1 < ___weaponNames.Count )
-               SetWeapon( ___weaponNames[ start + 1 ], ___uiManager.UIColorRefs.medGray, format,
-                          Translate( "DFA" ), mech.DFAWeapon.DamagePerShot * mech.DFAWeapon.ShotsWhenFired );
+               SetWeapon( ___weaponNames[ start + 1 ], c, format, Translate( "DFA" ), mech.DFAWeapon.DamagePerShot * mech.DFAWeapon.ShotsWhenFired );
          }
       }
 
