@@ -17,6 +17,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class UserInterfaceActor : BattleModModule {
 
+      private const string MetaColour = "<#888888FF>";
+
       public override void GameStartsOnce () {
          // Done on game load to be effective in campaign mech bay
          if ( Settings.ShowUnderArmourDamage ) {
@@ -206,25 +208,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          UIColorRefs colours = ___uiManager.UIColorRefs;
          AbstractActor actor = __instance.ActivelyShownCombatant as AbstractActor;
          List<Weapon> weapons = actor.Weapons;
+         Color[] ByType = LerpWeaponColours( colours );
          float support = 0, close = 0, far = 0;
          for ( int i = Math.Min( ___weaponNames.Count, weapons.Count ) - 1 ; i >= 0 ; i-- ) {
             Weapon w = weapons[ i ];
             if ( ! w.CanFire ) continue;
             float damage = w.DamagePerShot * w.ShotsWhenFired;
             if ( Settings.ShowDamageInLoadout )
-               ___weaponNames[ i ].text = ___weaponNames[ i ].text.Replace( " +", "+" ) + " (" + damage + ")";
+               ___weaponNames[ i ].text = ___weaponNames[ i ].text.Replace( " +", "+" ) + MetaColour + " (" + damage + ")";
             if ( Settings.ColouredLoadout && ___weaponNames[ i ].color == colours.qualityA ) {
-               Color c = Color.clear;
-               switch ( w.Category ) {
-                  case WeaponCategory.Energy : c = colours.energyColor; break;
-                  case WeaponCategory.Missile : c = colours.missileColor; break;
-                  case WeaponCategory.Ballistic : c = colours.ballisticColor; break;
-                  case WeaponCategory.AntiPersonnel : c = colours.smallColor; break;
-               }
-               if ( c != Color.clear ) {
-                  c.a = 1;
-                  ___weaponNames[ i ].color = Color.Lerp( c, colours.white, 0.5f );
-               }
+               if ( (int) w.Category < ByType.Length )
+                  ___weaponNames[ i ].color = ByType[ (int) w.Category ];
             }
             if ( w.MaxRange <= 90 )
                support += damage;
@@ -242,13 +236,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowMeleeDamageInLoadout && actor is Mech mech ) {
             int start = weapons.Count;
             if ( Settings.ShowAlphaDamageInLoadout != null ) ++start;
-            string format = Settings.ShowDamageInLoadout ? "{0}  ({1})" : "{0}  {1}";
-            Color c = Settings.ColouredLoadout ? colours.medGray : colours.white;
+            string format = Settings.ShowDamageInLoadout ? "{0} {1}({2})" : "{0} {1}{2}";
             if ( start < ___weaponNames.Count )
-               SetWeapon( ___weaponNames[ start ], c, format, Translate( "Melee" ), mech.MeleeWeapon.DamagePerShot * mech.MeleeWeapon.ShotsWhenFired );
-            if ( start + 1 < ___weaponNames.Count )
-               SetWeapon( ___weaponNames[ start + 1 ], c, format, Translate( "DFA" ), mech.DFAWeapon.DamagePerShot * mech.DFAWeapon.ShotsWhenFired );
+               SetWeapon( ___weaponNames[ start ], colours.white, format, Translate( "Melee" ), MetaColour, mech.MeleeWeapon.DamagePerShot * mech.MeleeWeapon.ShotsWhenFired );
+            if ( actor.WorkingJumpjets > 0 && start + 1 < ___weaponNames.Count )
+               SetWeapon( ___weaponNames[ start + 1 ], colours.white, format, Translate( "DFA" ), MetaColour, mech.DFAWeapon.DamagePerShot * mech.DFAWeapon.ShotsWhenFired );
          }
+      }
+
+      private static Color[] LerpWeaponColours ( UIColorRefs ui ) {
+         if ( ! Settings.ColouredLoadout ) return null;
+         Color[] colours = new Color[]{ Color.clear, ui.ballisticColor, ui.energyColor, ui.missileColor, ui.smallColor };
+         for ( int i = colours.Length - 1 ; i > 0 ; i-- ) {
+            Color.RGBToHSV( colours[ i ], out float h, out float s, out float v );
+            colours[ i ] = Color.HSVToRGB( h, i == 3 ? 0.4f : 0.6f, 1 );
+         }
+         return colours;
       }
 
       private static void SetWeapon ( TMPro.TextMeshProUGUI ui, Color color, string text, params object[] augs ) {

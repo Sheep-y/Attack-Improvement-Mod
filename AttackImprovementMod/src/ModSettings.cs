@@ -40,11 +40,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Colour weapon loadout by weapon type in targetting computer.  Default true." ) ]
       public bool ColouredLoadout = true;
 
-      [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default false." ) ]
-      public bool ShowDamageInLoadout = false;
+      [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default true." ) ]
+      public bool ShowDamageInLoadout = true;
 
       [ JsonComment( "Show alpha/melee&dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
-      public string ShowAlphaDamageInLoadout = "Short {2} : Long {3}";
+      public string ShowAlphaDamageInLoadout = "Short {2} + Long {3}";
 
       [ JsonComment( "Show melee & dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
       public bool ShowMeleeDamageInLoadout = true;
