@@ -209,7 +209,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          AbstractActor actor = __instance.ActivelyShownCombatant as AbstractActor;
          List<Weapon> weapons = actor.Weapons;
          Color[] ByType = LerpWeaponColours( colours );
-         float support = 0, close = 0, far = 0;
+         float close = 0, medium = 0, far = 0;
          for ( int i = Math.Min( ___weaponNames.Count, weapons.Count ) - 1 ; i >= 0 ; i-- ) {
             Weapon w = weapons[ i ];
             if ( ! w.CanFire ) continue;
@@ -220,31 +220,33 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                if ( (int) w.Category < ByType.Length )
                   ___weaponNames[ i ].color = ByType[ (int) w.Category ];
             }
-            if ( w.MaxRange <= 90 )
-               support += damage;
-            else if ( w.MaxRange <= 360 )
-               close += damage;
-            else
-               far += damage;
+            if ( w.MaxRange <= 90 )       close += damage;
+            else if ( w.MaxRange <= 360 ) medium += damage;
+            else                          far += damage;
          }
          if ( Settings.ShowAlphaDamageInLoadout != null ) {
             TMPro.TextMeshProUGUI loadout = GameObject.Find( "tgtWeaponsLabel" )?.GetComponent<TMPro.TextMeshProUGUI>();
             if ( loadout != null ) {
-               Verbo( Logging.Logger.Stacktrace );
-               loadout.fontStyle = TMPro.FontStyles.Normal;
-               loadout.color = colours.white;
-               loadout.text = string.Format( Settings.ShowAlphaDamageInLoadout, support + close + far, support, close, far, close + far );
+               if ( loadout.fontStyle != TMPro.FontStyles.Normal ) InitDamageLabel( loadout, colours.white );
+               loadout.text = string.Format( Settings.ShowAlphaDamageInLoadout, close + medium + far, close, medium, far, medium + far );
             }
          }
          if ( Settings.ShowMeleeDamageInLoadout && actor is Mech mech ) {
             int start = weapons.Count;
-            if ( Settings.ShowAlphaDamageInLoadout != null ) ++start;
             string format = Settings.ShowDamageInLoadout ? "{0} {1}({2})" : "{0} {1}{2}";
             if ( start < ___weaponNames.Count )
                SetWeapon( ___weaponNames[ start ], colours.white, format, Translate( "Melee" ), MetaColour, mech.MeleeWeapon.DamagePerShot * mech.MeleeWeapon.ShotsWhenFired );
             if ( actor.WorkingJumpjets > 0 && start + 1 < ___weaponNames.Count )
                SetWeapon( ___weaponNames[ start + 1 ], colours.white, format, Translate( "DFA" ), MetaColour, mech.DFAWeapon.DamagePerShot * mech.DFAWeapon.ShotsWhenFired );
          }
+      }
+
+      private static void InitDamageLabel ( TMPro.TextMeshProUGUI label, Color white ) {
+         label.rectTransform.sizeDelta = new Vector2( 200, label.rectTransform.sizeDelta.y );
+         label.transform.Translate( 10, 0, 0 );
+         label.alignment = TMPro.TextAlignmentOptions.Left;
+         label.fontStyle = TMPro.FontStyles.Normal;
+         label.color = white;
       }
 
       private static Color[] LerpWeaponColours ( UIColorRefs ui ) {
