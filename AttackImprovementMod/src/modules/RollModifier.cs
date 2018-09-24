@@ -215,15 +215,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Combat.ToHit.GetIndirectModifier( attacker ) >= CombatConstants.ToHit.ToHitCoverObstructed ) return false; // Abort if it is pointless
          Vector3 targetPos = target.CurrentPosition;
          if ( ! attacker.IsTargetPositionInFiringArc( target, attackPosition, attackRotation, targetPos ) ) return false; // Abort if can't shot
-         if ( checkWeapon ) {
-            float dist = Vector3.Distance( attackPosition, targetPos );
-            if ( ! CanFireIndirectWeapon( attacker, target, dist ) ) return false; // Abort if no indirect weapon can fire at target
-         }
+         if ( checkWeapon && ! CanFireIndirectWeapon( attacker, Vector3.Distance( attackPosition, targetPos ) ) ) return false; // Can't indirect
          LineOfFireLevel lof = Combat.LOFCache.GetLineOfFire( attacker, attackPosition, target, targetPos, target.CurrentRotation, out _ );
          return lof == LineOfFireLevel.LOFObstructed;
       }
 
-      private static bool CanFireIndirectWeapon ( AbstractActor attacker, ICombatant target, float dist ) {
+      private static bool CanFireIndirectWeapon ( AbstractActor attacker, float dist ) {
          foreach ( Weapon w in attacker.Weapons ) // Check that we have any indirect weapon that can shot
             if ( w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire )
                return true;

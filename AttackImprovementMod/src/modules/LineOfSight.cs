@@ -269,7 +269,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisLine?.gameObject?.SetActive( true );
       }
 
-      // ============ UTILS ============
+      // ============ Utils ============
 
       private static Material[] NewMat ( Line line ) {
          string name = line.ToString();
@@ -321,7 +321,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return RestoreMat = true;
       }
 
-      // ============ ARCS ============
+      // ============ Arcs ============
 
       private static float thisArcHeight;
       private static readonly Vector3[] linePoints = new Vector3[18]; // Must be at least 18 for game to copy points, which we will override
