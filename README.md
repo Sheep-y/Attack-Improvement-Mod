@@ -32,12 +32,11 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 
 ## Bug Fixes and HUD Enhancements ##
 
-* Grey head disease fixed.
+* Fix Grey head disease, Multi-Target back out, and 0 hp unit/locations.
 * Line of fire fixed and stylised: Dotted = indirect, Cyan = flank, Green = rear.
 * Coloured nameplate, facing ring, and floating armour bar.
+* Coloured weapon loadout with individual damage, melee damage, and alpha damage.
 * Damaged Structure Display fixed and enhanced. Enemy injuries shown.
-* Multi-Target Back Out fixed.
-* Make sure 0 HP means dead, never zombie.
 * Show heat, instability, distance, movement numbers.
 * Show ammo count in paper doll hover.
 * Show weapon range (in meters) and properties such as +50% crit.
@@ -51,6 +50,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 ## Mechanic Enhancements ##
 
 * Unlock hit chance stepping (make odd Gunnery useful).
+* Smart indirect fire when direct fire is obstructed.
 * Called shots cluster around called mech location.
 * Precise hit distribution that improves SRM and MG called shot.
 * More melee modifiers, and fixes the absent of stood up penalty.
@@ -209,6 +209,30 @@ These settings can be changed in `settings.json`.
 
 
 **Weapon Info**
+
+> Setting: `ColouredLoadout`  (true/false, default true) <br>
+> Setting: `ShowDamageInLoadout`  (true/false, default true) <br>
+>
+> When true, loadout list of the targeting computer will be coloured by weapon type and postfixed with weapon damage.
+<br>
+
+> Setting: `ShowAlphaDamageInLoadout`  (format string, default "Damage {2} + Long {3}")
+>
+> When non-empty, loadout list label of the targeting computer will be changed to show total weapon damage.
+>
+> Parameters: <br>
+> `{0}` - Sum of damage of all ranged weapons.
+> `{1}` - Sum of damage of all support-range weapons. (Range <= 90)
+> `{2}` - Sum of damage of all close-range weapons. (Range 91 to 360)
+> `{3}` - Sum of damage of all long-range weapons. (Range > 360)
+> `{4}` - Sum of damage of close and long range weapons. (Range > 90)
+<br>
+
+> Setting: `ShowMeleeDamageInLoadout`  (true/false, default true)
+>
+> When true, loadout list of the targeting computer will have melee and dfa entry.
+> Their damage will always be displayed regardless of `ShowDamageInLoadout`.
+<br>
 
 > Setting: `ShowAmmoInTooltip`  (true/false, default true)<br>
 > Setting: `ShowEnemyAmmoInTooltip`  (true/false, default false)<br>
@@ -461,6 +485,14 @@ These settings can be changed in `settings.json`.
 > Game default is false.
 
 
+**Indirect Fire**
+
+> Setting: `SmartIndirectFire`  (true/false, default true)
+>
+> When true, indirect fire will be used for indirect-fire-capable weapons,
+> if line of fire is obstructed and indirect penalty is less than obstructed penalty.
+
+
 **Jumped Modifier**
 
 > Settings: `ToHitSelfJumped` (-20 to 20, default 0)
@@ -469,6 +501,18 @@ These settings can be changed in `settings.json`.
 > You may set it with this mod if you want to.  It will be factored in attack preview.
 >
 > Effective only if "Jumped" is in the modifier lists.
+
+      public bool ColouredLoadout = true;
+
+      [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default true." ) ]
+      public bool ShowDamageInLoadout = true;
+
+      [ JsonComment( "Show alpha/melee&dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
+      public string ShowAlphaDamageInLoadout = "Damage {2} + Long {3}";
+
+      [ JsonComment( "Show melee & dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
+      public bool ShowMeleeDamageInLoadout = true;
+
 
 
 ## Net Hit Modifier Settings
@@ -633,10 +677,11 @@ These settings can be changed in `settings.json`.
 > Show the mechwarrior's base hit chance in modifier tooltip.
 
 
-> Setting: `ShowNeutralRangeInBreakdown`  (true/false, default true)
+> Setting: `ShowNeutralRangeInBreakdown`  (true/false, default false)
 >
 > When true, show range category in modifier tooltip even the range has no modifiers.
-> This is usually the "Short Range" unless modded.
+> In unmodded vanilla this will be the "Short Range".
+> Because this differs from "Optimal Range" used in vanilla mech bay, this setting is disabled by default.
 
 
 > Setting: `FixSelfSpeedModifierPreview`  (true/false, default true)

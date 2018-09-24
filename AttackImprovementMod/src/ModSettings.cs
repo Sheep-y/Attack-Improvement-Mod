@@ -37,16 +37,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
       public bool FixLosPreviewHeight = true;
 
-      [ JsonComment( "Colour weapon loadout by weapon type in targetting computer.  Default true." ) ]
+      [ JsonComment( "Colour weapon loadout by weapon type in targeting computer.  Default true." ) ]
       public bool ColouredLoadout = true;
 
-      [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default true." ) ]
+      [ JsonComment( "Show weapon damage in weapon loadout list in targeting computer.  Default true." ) ]
       public bool ShowDamageInLoadout = true;
 
-      [ JsonComment( "Show alpha/melee&dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
+      [ JsonComment( "Show alpha/melee&dfa damage in weapon loadout list in targeting computer.  Default \"Damage {2} + Long {3}\"." ) ]
       public string ShowAlphaDamageInLoadout = "Damage {2} + Long {3}";
 
-      [ JsonComment( "Show melee & dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
+      [ JsonComment( "Show melee & dfa damage in weapon loadout list in targeting computer.  Default ." ) ]
       public bool ShowMeleeDamageInLoadout = true;
 
       [ JsonComment( "Show ammo count in the list of components when you mouseover the paper doll.  Default true for friends." ) ]
@@ -260,8 +260,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Display base hit chance in weapon mouseover hint.  Default true." ) ]
       public bool ShowBaseHitchance = true;
 
-      [ JsonComment( "Show \"Short Range\" in hit modifier breakdown, or whichever range is at +0.  Default true." ) ]
-      public bool ShowNeutralRangeInBreakdown = true;
+      [ JsonComment( "Show \"Short Range\" in hit modifier breakdown, or whichever range is at +0.  Default false." ) ]
+      public bool ShowNeutralRangeInBreakdown = false;
 
       [ JsonComment( "Apply self moved modifier during preview, before the move actually take place.  Default true." ) ]
       public bool FixSelfSpeedModifierPreview = true;
