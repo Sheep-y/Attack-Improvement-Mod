@@ -68,6 +68,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
 
+         Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
+         Patch( typeof( CombatGameState ), "get_AllEnemies", "AddFriendsToEnemies", null );
+         Patch( typeof( CombatGameState ), "GetAllTabTargets", null, "AddFriendsToTargets" );
+         Patch( typeof( SelectionStateFire ), "CalcPossibleTargets", null, "AddFriendsToTargets" );
+         Patch( typeof( SelectionStateFire ), "ProcessClickedCombatant", null, "SuppressHudSafety" );
+         Patch( typeof( SelectionStateFire ), "get_ValidateInfoTargetAsFireTarget", null, "SuppressIFF" );
+         Patch( typeof( CombatSelectionHandler ), "TrySelectTarget", null, "SuppressSafety" );
+         Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleFriendlyFire", null );
+         
          if ( Settings.FunctionKeySelectPC )
             Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
       }
@@ -164,6 +173,64 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Combat.MessageCenter.PublishMessage( new ActorMultiTargetClearedMessage( index.ToString(), clearedForFiring ) );
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      // ============ Friendly Fire ============
+
+      private static bool FriendlyFire = false;
+
+      public static bool MakeFriendsVisible ( AbstractActor __instance, ref VisibilityLevel __result, ICombatant targetUnit ) {
+         if ( ! FriendlyFire || ! __instance.IsFriendly( targetUnit ) ) return true;
+         __result = VisibilityLevel.LOSFull;
+         return false;
+      }
+
+      public static bool AddFriendsToEnemies ( CombatGameState __instance, ref List<AbstractActor> __result ) {
+         if ( ! FriendlyFire ) return true;
+         __result = __instance.AllActors.FindAll( e => ! e.IsDead && e != HUD?.SelectedActor );
+         return false;
+      }
+
+      public static void AddFriendsToTargets ( List<ICombatant> __result, AbstractActor actor ) {
+         if ( ! FriendlyFire || ! actor.team.IsLocalPlayer ) return;
+         int before = __result.Count;
+         foreach ( Team team in Combat.Teams )
+            if ( team.IsLocalPlayer || team.IsFriendly( Combat.LocalPlayerTeam ) )
+               foreach ( ICombatant unit in team.units )
+                  if ( ! unit.IsDead && unit != actor )
+                     __result.Add( unit );
+      }
+
+      public static void SuppressHudSafety ( SelectionStateFire __instance, ICombatant combatant, ref bool __result ) {
+         if ( __result || ! FriendlyFire || __instance.Orders != null ) return;
+         if ( combatant.team.IsFriendly( Combat.LocalPlayerTeam ) && HUD.SelectionHandler.TrySelectTarget( combatant ) ) {
+            __instance.SetTargetedCombatant( combatant );
+            __result = true;
+         }
+      }
+
+      public static void SuppressIFF ( SelectionStateFire __instance, ref bool __result ) {
+         if ( __result || ! FriendlyFire ) return;
+         ICombatant target = HUD.SelectionHandler.InfoTarget;
+         if ( target == null || ! Combat.LocalPlayerTeam.IsFriendly( target.team ) ) return;
+         __result = BattleTech.WeaponFilters.GenericAttack.Filter( __instance.SelectedActor.Weapons, target, false ).Count > 0;
+      }
+
+      public static void SuppressSafety ( ICombatant target, ref bool __result ) {
+         if ( __result || ! FriendlyFire ) return;
+         if ( target == null || target.team != Combat.LocalPlayerTeam ) return;
+         Combat.MessageCenter.PublishMessage( new ActorTargetedMessage( target.GUID ) );
+         __result = true;
+      }
+
+      public static void ToggleFriendlyFire ( CombatSelectionHandler __instance ) {
+         if ( __instance.ActiveState == null ) return;
+         bool AltPressed = Input.GetKey( KeyCode.LeftAlt ) || Input.GetKey( KeyCode.RightAlt );
+         if ( FriendlyFire != AltPressed ) {
+            Verbo( "FriendlyFire {0}", AltPressed );
+            FriendlyFire = AltPressed;
+            //__instance.ActiveState.ProcessMousePos( CameraControl.Instance.ScreenCenterToGroundPosition );
+         }
+      }
 
       // ============ Floating Nameplate ============
 
