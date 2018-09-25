@@ -186,6 +186,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NullIfEmpty( ref Settings.ShowAllyHealth );
          NullIfEmpty( ref Settings.ShowPlayerHealth );
          NullIfEmpty( ref Settings.ShowAlphaDamageInLoadout );
+         NullIfEmpty( ref Settings.ShowReducedWeaponDamage );
 
          NullIfEmpty( ref Settings.NameplateColourPlayer );
          NullIfEmpty( ref Settings.NameplateColourEnemy );

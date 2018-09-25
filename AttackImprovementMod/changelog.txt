@@ -4,6 +4,7 @@ CHANGE LOG
 
 * New: Use indirect fire when better than direct fire.
 * New: Show enemy wounds and ally health in mechwarrior names.
+* New: Apply damage reduction in weapon panel and customise display format.
 * New: Set nameplate text colour.
 * New: Press F1 to F4 to select player mech.
 * New: Hold Alt to enable friendly fire (non-Multi-Target).

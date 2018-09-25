@@ -67,6 +67,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
+         if ( Settings.ShowReducedWeaponDamage != null )
+            Patch( slotType, "RefreshDisplayedWeapon", null, "ShowReducedWeaponDamage" );
 
          if ( Settings.AltKeyFriendlyFire ) {
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
@@ -349,6 +351,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             spec[0] = new Text( string.IsNullOrEmpty( weapon.weaponDef.BonusValueB ) ? "{0}" : "{0}, {1}", weapon.weaponDef.BonusValueA, weapon.weaponDef.BonusValueB );
          if ( Settings.WeaponRangeFormat != null )
             spec[2] = new Text( Settings.WeaponRangeFormat, weapon.MinRange, weapon.ShortRange, weapon.MediumRange, weapon.LongRange, weapon.MaxRange );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ShowReducedWeaponDamage ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
+         if ( target == null ) return;
+         CombatHUDWeaponSlot me = __instance;
+         Weapon weapon = me.DisplayedWeapon;
+         if ( weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
+         AbstractActor owner = weapon.parent;
+         Vector2 position = HUD.SelectionHandler.ActiveState?.PreviewPos ?? owner.CurrentPosition;
+         float raw = weapon.DamagePerShotAdjusted(),
+               dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target );
+         if ( Math.Abs( raw - dmg ) < 0.01 ) return;
+			int damageVariance = weapon.DamageVariance;
+			string text = (damageVariance <= 0) ? string.Format( Settings.ShowReducedWeaponDamage, dmg ) : string.Format( "{0:0}-{1:0}", dmg - damageVariance, dmg + damageVariance );
+			if ( weapon.HeatDamagePerShot > 0 )
+				text = string.Format( HUD.WeaponPanel.HeatFormatString, text, Mathf.RoundToInt( weapon.HeatDamagePerShot ) );
+			if ( weapon.ShotsWhenFired > 1 )
+				text = string.Format( "{0} (x{1})", text, weapon.ShotsWhenFired );
+			me.DamageText.SetText( text, new object[0] );
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
