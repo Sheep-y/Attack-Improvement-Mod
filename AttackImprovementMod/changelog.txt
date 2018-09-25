@@ -1,6 +1,6 @@
 CHANGE LOG
 
-????-??-?? AIM Version 2.6 development for BATTLETECH 1.2.0
+????-??-?? AIM Version 3.0 development for BATTLETECH 1.2.0
 
 * New: Use indirect fire when better than direct fire.
 * New: Show enemy wounds and ally health in mechwarrior names.

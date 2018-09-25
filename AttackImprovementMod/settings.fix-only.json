@@ -9,6 +9,14 @@
 
   "FixMultiTargetBackout": true,
 
+  /* Allow friendly fire while pressing Alt key.  Default true. */
+
+  "AltKeyFriendlyFire": false,
+
+  /* Select player mechs with F1 to F4 key.  Default true. */
+
+  "FunctionKeySelectPC": false,
+
   /* Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game. */
 
   "FixGreyHeadDisease": true,
@@ -37,17 +45,53 @@
 
   "FixLosPreviewHeight": true,
 
+  /* Colour weapon loadout by weapon type in targeting computer.  Default true. */
+
+  "ColouredLoadout": false,
+
+  /* Show weapon damage in weapon loadout list in targeting computer.  Default true. */
+
+  "ShowDamageInLoadout": false,
+
+  /* Show alpha/melee&dfa damage in weapon loadout list in targeting computer.  Default "Damage {2} + Long {3}". */
+
+  "ShowAlphaDamageInLoadout": "",
+
+  /* Show melee & dfa damage in weapon loadout list in targeting computer.  Default . */
+
+  "ShowMeleeDamageInLoadout": false,
+
   /* Show ammo count in the list of components when you mouseover the paper doll.  Default true for friends. */
 
   "ShowAmmoInTooltip": false,
   "ShowEnemyAmmoInTooltip": false,
 
   /* Format of short mechwarrior hint that shows up when you mouseover/right-click the portrait.
-   * Default "HP:{1}/{2} ST:{3},{4},{5},{6}" which summarise both health and stats.  Set to empty to leave at game default. */
+   * Default "G:{3} P:{4} G:{5} T:{6}" which summarise his/her stats.  Set to empty to leave at game default. */
 
   "ShortPilotHint": "",
 
-  /* Set armour colour of floating bar of Player / Enemy / Ally.  Default "cyan" for player, "teal" for ally.  Set to empty to not change. */
+  /* Show weapon properties (bonus) instead of weapon type in weapon mouseover. */
+
+  "ShowWeaponProp": false,
+
+  /* Show weapon range in meters instead of "Short" or "Very Long" in weapon mouseover.  Default "Min {0} : Long {2} : Max {4}". */
+
+  "WeaponRangeFormat": "",
+
+  /* Format pilot name to show wounds (enemies) and health (ally) after their names.
+   * {0} is pilot name, {1} is injury, {2} is health - injury, and {3} is health.  Set to empty to not change game default. */
+
+  "ShowEnemyWounds": "",
+  "ShowNPCHealth": "",
+
+  /* Set name colour of overhead nameplate of Player / Enemy / Ally.  Default "#8FF", "#FBB", "#BFB".  Set to empty to not change (leave at white). */
+
+  "NameplateColourPlayer": "",
+  "NameplateColourEnemy": "",
+  "NameplateColourAlly": "",
+
+  /* Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default "#8FF", "#FBB", "#BFB".  Set to empty to not change (leave at white). */
 
   "FloatingArmorColourPlayer": "",
   "FloatingArmorColourEnemy": "",
@@ -152,6 +196,10 @@
 
   "AllowLowElevationPenalty": false,
 
+  /* Use indirect fire when direct LoF is obstructed and indirect is better.  Default true. */
+
+  "SmartIndirectFire": false,
+
   /* Directional to hit modifiers.  Effective only if "Direction" is in the modifier factor list(s).  Default front 0, side -1, back -2. */
 
   "ToHitMechFromFront": 0,
@@ -241,6 +289,10 @@
   /* Display base hit chance in weapon mouseover hint.  Default true. */
 
   "ShowBaseHitchance": true,
+
+  /* Show "Short Range" in hit modifier breakdown, or whichever range is at +0.  Default false. */
+
+  "ShowNeutralRangeInBreakdown": false,
 
   /* Apply self moved modifier during preview, before the move actually take place.  Default true. */
 
@@ -403,5 +455,5 @@
 
   /* Used to determine which settings should be updated and how.  Please do not change. */
 
-  "SettingVersion": 2005000
+  "SettingVersion": 2006000
 }

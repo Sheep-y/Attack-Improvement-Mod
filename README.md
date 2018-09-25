@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 2.6 Development #
+# AIM - Attack Improvement Mod 3.0 Development #
 For BATTLETECH 1.2.0
 
 - [Features Overview](#features-overview)
@@ -140,12 +140,12 @@ These settings can be changed in `settings.json`.
 
 **Nameplates**
 
-> Setting: `NameplateColourPlayer`  (color string, default "#8FF")<br>
+> Setting: `NameplateColourPlayer`  (color string, default "#BFB")<br>
 > Setting: `NameplateColourEnemy`  (color string, default "#FBB")<br>
-> Setting: `NameplateColourAlly`  (color string, default "#BFB")<br>
-> Setting: `FloatingArmorColourPlayer`  (color string, default "#8FF")<br>
+> Setting: `NameplateColourAlly`  (color string, default "#8FF")<br>
+> Setting: `FloatingArmorColourPlayer`  (color string, default "#BFB")<br>
 > Setting: `FloatingArmorColourEnemy`  (color string, default "#FBB")<br>
-> Setting: `FloatingArmorColourAlly`  (color string, default "#BFB")<br>
+> Setting: `FloatingArmorColourAlly`  (color string, default "#8FF")<br>
 >
 > When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.
 
@@ -192,16 +192,18 @@ These settings can be changed in `settings.json`.
 
 **MechWarrior Info**
 
-> Setting: `ShowEnemyWounds`  (string, default "{0}, Wounds {1}")<br>
-> Setting: `ShowNPCHealth`  (string, default "{0}, HP {2}/{3}")<br>
+> Setting: `ShowEnemyWounds`  (format string, default "{0}, Wounds {1}")<br>
+> Setting: `ShowNPCHealth`  (format string, default "{0}, HP {2}/{3}")<br>
 >
 > When non-empty, NPCs who are wounded will have its injuries or health displayed.
 > {0} is pilot name, {1} is injury, {2} is (health - injury), and {3} is health.
 >
 > Note that enemy's health is unknown to players by design.  {2} and {3} will show "?" when used.
+> If the format does not starts with {0}, it will be always active.
+> Otherwise, the wounds or health only display when the NPC is wounded.
 <br>
 
-> Setting: `ShortPilotHint`  (string, default "G:{3} P:{4} G:{5} T:{6}")
+> Setting: `ShortPilotHint`  (format string, default "G:{3} P:{4} G:{5} T:{6}")
 >
 > When non-empty, replace mechwarrior's summary hint. The parameters are: <br>
 > {0}, {1}, {2} - Wound, Health - Wound, and Health. <br>

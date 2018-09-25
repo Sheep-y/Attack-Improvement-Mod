@@ -30,12 +30,12 @@ document.addEventListener( 'DOMContentLoaded', () => {
 </script>
 <body>
 
-<h1 id="aimattackimprovementmod25">AIM - Attack Improvement Mod 2.5</h1>
+<h1 id="aimattackimprovementmod30development">AIM - Attack Improvement Mod 3.0 Development</h1>
 
 <p>For BATTLETECH 1.2.0</p>
 
 <ul>
-<li><a href="#featuresoverview">Features Overview</a></li>
+<li><a href="#features-overview">Features Overview</a></li>
 
 <li><a href="#installation">Installation</a></li>
 
@@ -88,27 +88,29 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <h2 id="bugfixesandhudenhancements">Bug Fixes and HUD Enhancements</h2>
 
 <ul>
-<li>Grey head disease fixed.</li>
+<li>Fix Grey head disease, Multi-Target back out, and 0 hp unit/locations.</li>
 
 <li>Line of fire fixed and stylised: Dotted = indirect, Cyan = flank, Green = rear.</li>
 
-<li>Coloured facing ring and floating armour bar.</li>
+<li>Coloured nameplate, facing ring, and floating armour bar.</li>
 
-<li>Damaged Structure Display fixed and enhanced.</li>
+<li>Coloured weapon loadout with individual damage, melee damage, and alpha damage.</li>
 
-<li>Multi-Target Back Out fixed.</li>
+<li>Damaged Structure Display fixed and enhanced. Enemy injuries shown.</li>
 
-<li>Make sure 0 HP means dead, never zombie.</li>
-
-<li>Show heat, instability, distance, and movement numbers.</li>
+<li>Show heat, instability, distance, movement numbers.</li>
 
 <li>Show ammo count in paper doll hover.</li>
+
+<li>Show weapon range (in meters) and properties such as +50% crit.</li>
 
 <li>Show base hit chance in accuracy modifier popup.</li>
 
 <li>Show mechwarrior stats in hover/right-click hint.</li>
 
 <li>Post-move to-hit penalties and heat factored in action preview.</li>
+
+<li>Press F1 to F4 to select mech. Hold Alt to enable friendly fire.</li>
 
 <li>(Optional) Show Mech Tonnage.</li>
 
@@ -119,6 +121,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 <ul>
 <li>Unlock hit chance stepping (make odd Gunnery useful).</li>
+
+<li>Smart indirect fire when direct fire is obstructed.</li>
 
 <li>Called shots cluster around called mech location.</li>
 
@@ -227,14 +231,33 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 
 <h2 id="userinterfacesettings">User Interface Settings</h2>
 
-<p><strong>Armour Bars</strong></p>
+<p><strong>Hotkeys</strong></p>
 
 <blockquote>
-  <p>Setting: <code>FloatingArmorColourPlayer</code>  (color string, default "cyan")<br>
-   Setting: <code>FloatingArmorColourEnemy</code>  (color string, default "")<br>
-   Setting: <code>FloatingArmorColourAlly</code>  (color string, default "teal")<br></p>
+  <p>Setting: <code>FunctionKeySelectPC</code>  (true/false, default true)</p>
   
-  <p>When non-empty, change colours of armour bars, making it easier to tell friends from foes.</p>
+  <p>When true, F1 to F4 keys can be used to select player mechs.</p>
+  
+  <p>The keys will stop to work if they are already binded.
+  Also, because the keys are hard-coded and not keybinds, this will not change game settings or game profile.
+  <br></p>
+  
+  <p>Setting: <code>AltKeyFriendlyFire</code>  (true/false, default true)</p>
+  
+  <p>When true, friendly units may be targeted by attack when pressing Alt.</p>
+</blockquote>
+
+<p><strong>Nameplates</strong></p>
+
+<blockquote>
+  <p>Setting: <code>NameplateColourPlayer</code>  (color string, default "#BFB")<br>
+  Setting: <code>NameplateColourEnemy</code>  (color string, default "#FBB")<br>
+  Setting: <code>NameplateColourAlly</code>  (color string, default "#8FF")<br>
+  Setting: <code>FloatingArmorColourPlayer</code>  (color string, default "#BFB")<br>
+  Setting: <code>FloatingArmorColourEnemy</code>  (color string, default "#FBB")<br>
+  Setting: <code>FloatingArmorColourAlly</code>  (color string, default "#8FF")<br></p>
+  
+  <p>When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.</p>
 </blockquote>
 
 <p><strong>Paper Dolls</strong></p>
@@ -253,12 +276,12 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Both settings apply to all paper dolls: selection panel, target panel, called shot popup, mech bay, deploy, post-mission report etc.</p>
 </blockquote>
 
-<p><strong>Combat Data</strong></p>
+<p><strong>Mech Info</strong></p>
 
 <blockquote>
   <p>Setting: <code>FixHeatPreview</code>  (true/false, default true)</p>
   
-  <p>When true, previewed move destination's terrain will be factored in heat preview.
+  <p>When true, previewed move destination's terrain will be factored in heat preview, plus any heat effects en-route.
   For example, moving into water will predict more cooldown and vice versa.
   <br></p>
   
@@ -275,6 +298,60 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Duplicates with Extended Information, but AIM override it and use a shorter form for mechs to fit <code>ShowNumericInfo</code>.
   Default false because the short form may overwhelm inexperienced players.
   <br></p>
+</blockquote>
+
+<p><strong>MechWarrior Info</strong></p>
+
+<blockquote>
+  <p>Setting: <code>ShowEnemyWounds</code>  (format string, default "{0}, Wounds {1}")<br>
+  Setting: <code>ShowNPCHealth</code>  (format string, default "{0}, HP {2}/{3}")<br></p>
+  
+  <p>When non-empty, NPCs who are wounded will have its injuries or health displayed.
+  {0} is pilot name, {1} is injury, {2} is (health - injury), and {3} is health.</p>
+  
+  <p>Note that enemy's health is unknown to players by design.  {2} and {3} will show "?" when used.
+  If the format does not starts with {0}, it will be always active.
+  Otherwise, the wounds or health only display when the NPC is wounded.
+  <br></p>
+  
+  <p>Setting: <code>ShortPilotHint</code>  (format string, default "G:{3} P:{4} G:{5} T:{6}")</p>
+  
+  <p>When non-empty, replace mechwarrior's summary hint. The parameters are: <br>
+  {0}, {1}, {2} - Wound, Health - Wound, and Health. <br>
+  {3}, {4}, {5}, {6} - Gunnery, Piloting, Gut, and Tactic.</p>
+  
+  <p>This only applies to the one-line hint that pops up on mouseover and right-click.
+  The original hint, which shows only wounds and health, will be preserved when the hint is fully expanded (i.e. when no mech is selected).</p>
+  
+  <p>If the line is too long, for example when HP is included, the line will wrap.</p>
+</blockquote>
+
+<p><strong>Weapon Info</strong></p>
+
+<blockquote>
+  <p>Setting: <code>ColouredLoadout</code>  (true/false, default true) <br>
+  Setting: <code>ShowDamageInLoadout</code>  (true/false, default true) <br></p>
+  
+  <p>When true, loadout list of the targeting computer will be coloured by weapon type and postfixed with weapon damage.
+  <br></p>
+  
+  <p>Setting: <code>ShowAlphaDamageInLoadout</code>  (format string, default "Damage {2} + Long {3}")</p>
+  
+  <p>When non-empty, loadout list label of the targeting computer will be changed to show total weapon damage.</p>
+  
+  <p>Parameters: <br>
+  <code>{0}</code> - Sum of damage of all ranged weapons.
+  <code>{1}</code> - Sum of damage of all support-range weapons. (Range &lt;= 90)
+  <code>{2}</code> - Sum of damage of all close-range weapons. (Range 91 to 360)
+  <code>{3}</code> - Sum of damage of all long-range weapons. (Range > 360)
+  <code>{4}</code> - Sum of damage of close and long range weapons. (Range > 90)
+  <br></p>
+  
+  <p>Setting: <code>ShowMeleeDamageInLoadout</code>  (true/false, default true)</p>
+  
+  <p>When true, loadout list of the targeting computer will have melee and dfa entry.
+  Their damage will always be displayed regardless of <code>ShowDamageInLoadout</code>.
+  <br></p>
   
   <p>Setting: <code>ShowAmmoInTooltip</code>  (true/false, default true)<br>
   Setting: <code>ShowEnemyAmmoInTooltip</code>  (true/false, default false)<br></p>
@@ -284,14 +361,18 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
   <br></p>
   
-  <p>Setting: <code>ShortPilotHint</code>  (string, default "HP:{1}/{2} ST:{3},{4},{5},{6}")</p>
+  <p>Setting: <code>ShowWeaponProp</code>  (true/false, default true)<br>
+  Setting: <code>WeaponRangeFormat</code>  (string, default "Min {0} : Long {2} : Max {4}")<br></p>
   
-  <p>When non-empty, replace mechwarrior's summary hint. The parameters are: <br>
-  {0}, {1}, {2} - Wound, Health - Wound, and Health. <br>
-  {3}, {4}, {5}, {6} - Gunnery, Piloting, Gut, and Tactic.</p>
+  <p>These two settings override the weapon information displayed when you mouseover a weapon in combat.</p>
   
-  <p>This only applies to the one-line hint that pops up on mouseover and right-click.
-  The original hint, which shows only wounds and health, will be preserved when the hint is fully expanded (i.e. when no mech is selected).</p>
+  <p><code>ShowWeaponProp</code> overrides the full weapon name with weapon properties, if the weapon is rare (+ to +++).
+  For example, an "M Laser++" may display "+1 ACC, +25% CRIT" instead of "MEDIUM LASER".</p>
+  
+  <p><code>WeaponRangeFormat</code> replaces the weapon range with actual meters when non-empty.
+  The string {0} to {4} will be replaced by a weapon's MinRange, ShortRange, MediumRange, LongRange, and MaxRange.
+  Most of them are unused by vanilla game, so this mod use MinRange, MediumRange, and MaxRange by default.
+  But if a mod is installed that make use of them, the range display can be customised, such as "{0}:{1}:{2}:{3}:{4}".</p>
 </blockquote>
 
 <p><strong>Multi-Target</strong></p>
@@ -533,6 +614,15 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   Game default is false.</p>
 </blockquote>
 
+<p><strong>Indirect Fire</strong></p>
+
+<blockquote>
+  <p>Setting: <code>SmartIndirectFire</code>  (true/false, default true)</p>
+  
+  <p>When true, indirect fire will be used for indirect-fire-capable weapons,
+  if line of fire is obstructed and indirect penalty is less than obstructed penalty.</p>
+</blockquote>
+
 <p><strong>Jumped Modifier</strong></p>
 
 <blockquote>
@@ -543,6 +633,18 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   
   <p>Effective only if "Jumped" is in the modifier lists.</p>
 </blockquote>
+
+<pre><code>  public bool ColouredLoadout = true;
+
+  [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default true." ) ]
+  public bool ShowDamageInLoadout = true;
+
+  [ JsonComment( "Show alpha/melee&amp;dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
+  public string ShowAlphaDamageInLoadout = "Damage {2} + Long {3}";
+
+  [ JsonComment( "Show melee &amp; dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
+  public bool ShowMeleeDamageInLoadout = true;
+</code></pre>
 
 <h2 id="nethitmodifiersettings">Net Hit Modifier Settings</h2>
 
@@ -709,6 +811,12 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Setting: <code>ShowBaseHitchance</code>  (true/false, default true)</p>
   
   <p>Show the mechwarrior's base hit chance in modifier tooltip.</p>
+  
+  <p>Setting: <code>ShowNeutralRangeInBreakdown</code>  (true/false, default false)</p>
+  
+  <p>When true, show range category in modifier tooltip even the range has no modifiers.
+  In unmodded vanilla this will be the "Short Range".
+  Because this differs from "Optimal Range" used in vanilla mech bay, this setting is disabled by default.</p>
   
   <p>Setting: <code>FixSelfSpeedModifierPreview</code>  (true/false, default true)</p>
   
@@ -1135,11 +1243,13 @@ License: <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPL v3</a></p>
 <h1 id="credits">Credits</h1>
 
 <ul>
-<li>Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.</li>
+<li><p>LogGuiTree code taken from CptMoore's <a href="https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99">MechEngineer</a>.</p></li>
 
-<li>Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.</li>
+<li><p>Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.</p></li>
 
-<li>And many more players on the BattleTechGame discord that gave comments and ideas.</li>
+<li><p>Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.</p></li>
+
+<li><p>And many more players on the BattleTechGame discord that gave comments and ideas.</p></li>
 </ul>
 
 <p>Despite feature overlap with some mods, this mod does not reference or use their code due to lack of license, and in most cases the approaches are different.</p>
