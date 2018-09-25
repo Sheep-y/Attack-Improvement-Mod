@@ -157,9 +157,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                settings.ShortPilotHint = "G:{3} P:{4} G:{5} T:{6}";
             // Update floating armour colour to match nameplate text
             if ( settings.FloatingArmorColourPlayer == "cyan" && string.IsNullOrEmpty( settings.FloatingArmorColourEnemy ) && settings.FloatingArmorColourAlly == "teal" ) {
-               settings.FloatingArmorColourPlayer = "#8FF";
+               settings.FloatingArmorColourPlayer = "#BFB";
                settings.FloatingArmorColourEnemy = "#FBB";
-               settings.FloatingArmorColourAlly = "#BFB";
+               settings.FloatingArmorColourAlly = "#8FF";
             }
             settings.SettingVersion = 2_006_000;
          }

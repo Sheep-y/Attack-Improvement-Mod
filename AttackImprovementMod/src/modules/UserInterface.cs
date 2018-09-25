@@ -252,7 +252,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             format = Settings.ShowEnemyWounds;
             args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, "?", "?" };
          }
-         if ( format == null || ( ! format.StartsWith( "{0}" ) && pilot.Injuries <= 0 ) ) return;
+         if ( format == null || ( format.StartsWith( "{0}" ) && pilot.Injuries <= 0 ) ) return;
          __instance.PilotNameText.SetText( Translate( format, args ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
