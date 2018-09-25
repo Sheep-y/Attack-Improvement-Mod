@@ -13,6 +13,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "You can still quickly switch out of Multi-Target by pressing another action." } ) ]
       public bool FixMultiTargetBackout = true;
 
+      [ JsonComment( "Allow friendly fire while pressing Alt key.  Default true." ) ]
+      public bool AltKeyFriendlyFire = true;
+
       [ JsonComment( "Select player mechs with F1 to F4 key.  Default true." ) ]
       public bool FunctionKeySelectPC = true;
 

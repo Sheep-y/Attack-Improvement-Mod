@@ -68,15 +68,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
 
-         Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
-         Patch( typeof( CombatGameState ), "get_AllEnemies", "AddFriendsToEnemies", null );
-         Patch( typeof( CombatGameState ), "GetAllTabTargets", null, "AddFriendsToTargets" );
-         Patch( typeof( SelectionStateFire ), "CalcPossibleTargets", null, "AddFriendsToTargets" );
-         Patch( typeof( SelectionStateFire ), "ProcessClickedCombatant", null, "SuppressHudSafety" );
-         Patch( typeof( SelectionStateFire ), "get_ValidateInfoTargetAsFireTarget", null, "SuppressIFF" );
-         Patch( typeof( CombatSelectionHandler ), "TrySelectTarget", null, "SuppressSafety" );
-         Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleFriendlyFire", null );
-         
+         if ( Settings.AltKeyFriendlyFire ) {
+            Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
+            Patch( typeof( CombatGameState ), "get_AllEnemies", "AddFriendsToEnemies", null );
+            Patch( typeof( CombatGameState ), "GetAllTabTargets", null, "AddFriendsToTargets" );
+            Patch( typeof( SelectionStateFire ), "CalcPossibleTargets", null, "AddFriendsToTargets" );
+            Patch( typeof( SelectionStateFire ), "ProcessClickedCombatant", null, "SuppressHudSafety" );
+            Patch( typeof( SelectionStateFire ), "get_ValidateInfoTargetAsFireTarget", null, "SuppressIFF" );
+            Patch( typeof( CombatSelectionHandler ), "TrySelectTarget", null, "SuppressSafety" );
+            Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleFriendlyFire", null );
+         }
+
          if ( Settings.FunctionKeySelectPC )
             Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
       }
@@ -179,7 +181,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool FriendlyFire = false;
 
       public static bool MakeFriendsVisible ( AbstractActor __instance, ref VisibilityLevel __result, ICombatant targetUnit ) {
-         if ( ! FriendlyFire || ! __instance.IsFriendly( targetUnit ) ) return true;
+         if ( ! __instance.IsFriendly( targetUnit ) ) return true;
          __result = VisibilityLevel.LOSFull;
          return false;
       }
@@ -226,8 +228,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( __instance.ActiveState == null ) return;
          bool AltPressed = Input.GetKey( KeyCode.LeftAlt ) || Input.GetKey( KeyCode.RightAlt );
          if ( FriendlyFire != AltPressed ) {
-            Verbo( "FriendlyFire {0}", AltPressed );
             FriendlyFire = AltPressed;
+            foreach ( AbstractActor actor in Combat.LocalPlayerTeam.units )
+               if ( ! actor.IsDead )
+                  actor.VisibilityCache.RebuildCache( Combat.GetAllCombatants() );
             //__instance.ActiveState.ProcessMousePos( CameraControl.Instance.ScreenCenterToGroundPosition );
          }
       }

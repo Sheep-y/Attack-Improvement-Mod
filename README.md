@@ -43,7 +43,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Show base hit chance in accuracy modifier popup.
 * Show mechwarrior stats in hover/right-click hint.
 * Post-move to-hit penalties and heat factored in action preview.
-* Press F1 to F4 to select mech.
+* Press F1 to F4 to select mech. Hold Alt to enable friendly fire.
 * (Optional) Show Mech Tonnage.
 * (Optional) Show Corrected Hit chance and Called Shot Chance.
 
@@ -131,6 +131,11 @@ These settings can be changed in `settings.json`.
 >
 > The keys will stop to work if they are already binded.
 > Also, because the keys are hard-coded and not keybinds, this will not change game settings or game profile.
+<br>
+
+> Setting: `AltKeyFriendlyFire`  (true/false, default true)
+>
+> When true, friendly units may be targeted by attack when pressing Alt.
 
 
 **Nameplates**
