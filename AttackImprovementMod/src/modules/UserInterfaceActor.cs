@@ -191,9 +191,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             string componentName = mechComponent.UIName.ToString();
             int allAmmo = 1;
             if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
-               componentName += " (x" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
-            else if ( mechComponent is AmmunitionBox ammo )
-               componentName += " (" + ammo.CurrentAmmo + "/" + ammo.AmmoCapacity + ")";
+               componentName += "<size=80%> (x" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
+            else if ( mechComponent is AmmunitionBox ammo ) {
+               int curr = ammo.CurrentAmmo, max = ammo.AmmoCapacity;
+               componentName += "<size=80%> (" + curr + "/" + max + ")";
+               if ( curr < max/2 ) componentName = "<#808080>" + componentName;
+            }
             if ( mechComponent.DamageLevel >= ComponentDamageLevel.NonFunctional || allAmmo <= 0 )
                ToolTip.DebuffStrings.Add( new Text( componentName ) );
             else
