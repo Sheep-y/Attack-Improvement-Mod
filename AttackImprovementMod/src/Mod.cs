@@ -151,7 +151,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( settings.FacingMarkerEnemyColors == "#FFFF,#FCCF,#FCCF,#FAAF,#FF8F" )
                settings.FacingMarkerEnemyColors = "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A";
          }
-         if ( settings.SettingVersion < 2_006_000 ) {
+         if ( settings.SettingVersion < 2_006_000 ) { // Update from 2.5 to 3.0 preview 20180925
             // Old hint was too long for elites and cause line wrapping
             if ( settings.ShortPilotHint == "HP:{1}/{2} ST:{3},{4},{5},{6}" )
                settings.ShortPilotHint = "G:{3} P:{4} G:{5} T:{6}";
@@ -161,7 +161,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                settings.FloatingArmorColourEnemy = "#FBB";
                settings.FloatingArmorColourAlly = "#8FF";
             }
-            settings.SettingVersion = 2_006_000;
+         }
+         if ( settings.SettingVersion < 2_007_000 ) { // Update from 3.0 preview 20180925
+            if ( settings.ShowEnemyWounds == "{0}, Wounds {1}" )
+               settings.ShowEnemyWounds = "{0}</uppercase><size=80%>, Wounds {1}";
+            settings.SettingVersion = 2_007_000;
          }
       }
 
@@ -179,7 +183,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NullIfEmpty( ref Settings.ShortPilotHint );
          NullIfEmpty( ref Settings.WeaponRangeFormat );
          NullIfEmpty( ref Settings.ShowEnemyWounds );
-         NullIfEmpty( ref Settings.ShowNPCHealth );
+         NullIfEmpty( ref Settings.ShowAllyHealth );
+         NullIfEmpty( ref Settings.ShowPlayerHealth );
          NullIfEmpty( ref Settings.ShowAlphaDamageInLoadout );
 
          NullIfEmpty( ref Settings.NameplateColourPlayer );

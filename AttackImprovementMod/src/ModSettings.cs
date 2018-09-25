@@ -68,10 +68,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string WeaponRangeFormat = "Min {0} : Long {2} : Max {4}";
 
       [ JsonComment( new string[]{
-        "Format pilot name to show wounds (enemies) and health (ally) after their names.",
+        "Format pilot name to show wounds (enemies) and health (non-enemy) after their names.",
         "{0} is pilot name, {1} is injury, {2} is health - injury, and {3} is health.  Set to empty to not change game default." } ) ]
-      public string ShowEnemyWounds = "{0}, Wounds {1}";
-      public string ShowNPCHealth = "{0}, HP {2}/{3}";
+      public string ShowPlayerHealth = "{0}</uppercase><size=80%>, HP {2}/{3}";
+      public string ShowEnemyWounds = "{0}</uppercase><size=80%>, Wounds {1}";
+      public string ShowAllyHealth = "{0}</uppercase><size=80%>, HP {2}/{3}";
 
       [ JsonComment( "Set name colour of overhead nameplate of Player / Enemy / Ally.  Default \"#8FF\", \"#FBB\", \"#BFB\".  Set to empty to not change (leave at white)." ) ]
       public string NameplateColourPlayer = "#BFB";

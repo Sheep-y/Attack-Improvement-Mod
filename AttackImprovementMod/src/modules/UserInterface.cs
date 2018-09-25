@@ -18,8 +18,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStartsOnce () {
          NameplateColours = ParseColours( Settings.NameplateColourPlayer, Settings.NameplateColourEnemy, Settings.NameplateColourAlly );
-         if ( Settings.ShowEnemyWounds != null || Settings.ShowNPCHealth != null ) {
-            Patch( typeof( CombatHUDActorNameDisplay ), "RefreshInfo", typeof( VisibilityLevel ), null, "ShowNPCWounds" );
+         if ( Settings.ShowEnemyWounds != null || Settings.ShowAllyHealth != null || Settings.ShowPlayerHealth != null ) {
+            Patch( typeof( CombatHUDActorNameDisplay ), "RefreshInfo", typeof( VisibilityLevel ), null, "ShowPilotWounds" );
             Patch( typeof( Pilot ), "InjurePilot", null, "RefreshPilotNames" );
          }
          if ( NameplateColours != null )
@@ -238,16 +238,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Floating Nameplate ============
 
-      public static void ShowNPCWounds ( CombatHUDActorNameDisplay __instance, VisibilityLevel visLevel ) { try {
+      public static void ShowPilotWounds ( CombatHUDActorNameDisplay __instance, VisibilityLevel visLevel ) { try {
          AbstractActor actor = __instance.DisplayedCombatant as AbstractActor;
          Pilot pilot = actor?.GetPilot();
          Team team = actor?.team;
-         if ( pilot == null || ( team != null && team.IsLocalPlayer ) ) return;
+         if ( pilot == null || team == null ) return;
          string format = null;
-         object[] args = null;
-         if ( team.IsFriendly( BattleTechGame?.Combat?.LocalPlayerTeam ) ) {
-            format = Settings.ShowNPCHealth;
-            args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, pilot.Health - pilot.Injuries, pilot.Health };
+         object[] args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, pilot.Health - pilot.Injuries, pilot.Health };
+         if ( team == Combat.LocalPlayerTeam ) {
+            format = Settings.ShowPlayerHealth;
+         } else if ( team.IsFriendly( Combat.LocalPlayerTeam ) ) {
+            format = Settings.ShowAllyHealth;
          } else if ( visLevel == VisibilityLevel.LOSFull ) {
             format = Settings.ShowEnemyWounds;
             args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, "?", "?" };
