@@ -201,11 +201,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result = __instance.GetIndirectModifier( attacker );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void SmartIndirectFireArc ( MissileLauncherEffect __instance, ref bool ___isIndirect ) {
+      public static void SmartIndirectFireArc ( MissileLauncherEffect __instance, ref bool ___isIndirect ) { try {
          if ( ___isIndirect || ! __instance.weapon.IndirectFireCapable ) return;
          if ( ! ShouldSmartIndirect( __instance.weapon.parent, Combat.FindCombatantByGUID( __instance.hitInfo.targetId ) ) ) return;
          ___isIndirect = true;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static bool ShouldSmartIndirect ( AbstractActor attacker, ICombatant target ) {
          return CanSmartIndirect( attacker, attacker.CurrentPosition, attacker.CurrentRotation, target, false );

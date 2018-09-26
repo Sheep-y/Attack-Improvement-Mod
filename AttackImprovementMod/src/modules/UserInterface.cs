@@ -204,29 +204,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                      __result.Add( unit );
       }
 
-      public static void SuppressHudSafety ( SelectionStateFire __instance, ICombatant combatant, ref bool __result ) {
+      public static void SuppressHudSafety ( SelectionStateFire __instance, ICombatant combatant, ref bool __result ) { try {
          if ( __result || ! FriendlyFire || __instance.Orders != null ) return;
          if ( combatant.team.IsFriendly( Combat.LocalPlayerTeam ) && HUD.SelectionHandler.TrySelectTarget( combatant ) ) {
             __instance.SetTargetedCombatant( combatant );
             __result = true;
          }
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void SuppressIFF ( SelectionStateFire __instance, ref bool __result ) {
+      public static void SuppressIFF ( SelectionStateFire __instance, ref bool __result ) { try {
          if ( __result || ! FriendlyFire ) return;
          ICombatant target = HUD.SelectionHandler.InfoTarget;
          if ( target == null || ! Combat.LocalPlayerTeam.IsFriendly( target.team ) ) return;
          __result = BattleTech.WeaponFilters.GenericAttack.Filter( __instance.SelectedActor.Weapons, target, false ).Count > 0;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void SuppressSafety ( ICombatant target, ref bool __result ) {
+      public static void SuppressSafety ( ICombatant target, ref bool __result ) { try {
          if ( __result || ! FriendlyFire ) return;
          if ( target == null || target.team != Combat.LocalPlayerTeam ) return;
          Combat.MessageCenter.PublishMessage( new ActorTargetedMessage( target.GUID ) );
          __result = true;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void ToggleFriendlyFire ( CombatSelectionHandler __instance ) {
+      public static void ToggleFriendlyFire ( CombatSelectionHandler __instance ) { try {
          if ( __instance.ActiveState == null ) return;
          bool AltPressed = Input.GetKey( KeyCode.LeftAlt ) || Input.GetKey( KeyCode.RightAlt );
          if ( FriendlyFire != AltPressed ) {
@@ -236,7 +236,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   actor.VisibilityCache.RebuildCache( Combat.GetAllCombatants() );
             //__instance.ActiveState.ProcessMousePos( CameraControl.Instance.ScreenCenterToGroundPosition );
          }
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Floating Nameplate ============
 
@@ -273,7 +273,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // Colours are Player, Enemy, and Ally
       private static Color? GetTeamColour ( ICombatant owner, Color?[] Colours ) {
          Team team = owner?.team;
-         if ( team == null || owner.IsDead ) return null;
+         if ( team == null || owner.IsDead || Colours == null || Colours.Length < 3 ) return null;
 
          if ( team.IsLocalPlayer ) return Colours[0];
          if ( team.IsEnemy( BattleTechGame?.Combat?.LocalPlayerTeam ) ) return Colours[1];
@@ -306,12 +306,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             BarOwners.Remove( bar );
       }
 
-      public static void CombatHUDLifeBarPips ( CombatHUDPipBar __instance, ref Color shownColor ) { try {
+      public static void CombatHUDLifeBarPips ( CombatHUDPipBar __instance, ref Color shownColor ) {
          if ( ! ( __instance is CombatHUDLifeBarPips me ) || ! BarOwners.TryGetValue( __instance, out ICombatant owner ) ) return;
          Color? colour = GetTeamColour( owner, FloatingArmorColours );
          if ( colour != null )
             shownColor = colour.GetValueOrDefault();
-      }                 catch ( Exception ex ) { Error( ex ); } }
+      }
 
       // ============ Others ============
 
@@ -360,16 +360,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          AbstractActor owner = weapon.parent;
          Vector2 position = HUD.SelectionHandler.ActiveState?.PreviewPos ?? owner.CurrentPosition;
-         float raw = weapon.DamagePerShotAdjusted(),
+         float raw = weapon.DamagePerShotAdjusted(), damageVariance = weapon.DamageVariance,
                dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target );
          if ( Math.Abs( raw - dmg ) < 0.01 ) return;
-			int damageVariance = weapon.DamageVariance;
-			string text = (damageVariance <= 0) ? string.Format( Settings.ShowReducedWeaponDamage, dmg ) : string.Format( "{0:0}-{1:0}", dmg - damageVariance, dmg + damageVariance );
-			if ( weapon.HeatDamagePerShot > 0 )
-				text = string.Format( HUD.WeaponPanel.HeatFormatString, text, Mathf.RoundToInt( weapon.HeatDamagePerShot ) );
-			if ( weapon.ShotsWhenFired > 1 )
-				text = string.Format( "{0} (x{1})", text, weapon.ShotsWhenFired );
-			me.DamageText.SetText( text, new object[0] );
+         string text = damageVariance <= 0 ? string.Format( Settings.ShowReducedWeaponDamage, dmg ) : string.Format( "{0:0}-{1:0}", dmg - damageVariance, dmg + damageVariance );
+         if ( weapon.HeatDamagePerShot > 0 )
+            text = string.Format( HUD.WeaponPanel.HeatFormatString, text, Mathf.RoundToInt( weapon.HeatDamagePerShot ) );
+         if ( weapon.ShotsWhenFired > 1 )
+            text = string.Format( "{0} (x{1})", text, weapon.ShotsWhenFired );
+         me.DamageText.SetText( text, new object[0] );
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }

@@ -319,7 +319,7 @@ namespace Sheepy.BattleTechMod {
          get { return _Logger ?? BattleMod.BTML_LOG; }
          set { _Logger = value; }
       }
-      
+
       public void LogGuiTree ( UnityEngine.Transform root ) { LogGuiTree( Log, root ); }
       public static void LogGuiTree ( Logger Log, UnityEngine.Transform root ) {
          StringBuilder buf = new StringBuilder( "GUI Tree:\n" );
@@ -531,7 +531,7 @@ namespace Sheepy.BattleTechMod {
       public static bool IsNullOrEmpty ( this Array array ) {
           return array == null || array.Length <= 0;
       }
-      
+
       public static bool IsNullOrEmpty ( this System.Collections.ICollection collection ) {
           return collection == null || collection.Count <= 0;
       }
