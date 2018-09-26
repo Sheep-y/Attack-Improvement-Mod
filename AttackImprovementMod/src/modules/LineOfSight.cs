@@ -8,6 +8,7 @@ using UnityEngine;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using Harmony;
    using static Mod;
 
    public class LineOfSight : BattleModModule {
@@ -50,9 +51,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( Indicator, "getLine" , null, "FixLOSWidth" );
 
          if ( Settings.ArcLinePoints != 18 ) {
-            Patch( Indicator, "GetPointsForArc", "OverrideGetPointsForArc", null );
-            Patch( Indicator, "DrawLine", null, "SetIndirectSegments" );
-            Patch( typeof( CombatPathLine ), "DrawJumpPath", null, "SetJumpPathSegments" );
+            Patch( Indicator, "DrawLine", null, null, "ModifyArcPoints" );
+            Patch( typeof( CombatPathLine ), "DrawJumpPath", null, null, "ModifyArcPoints" );
          }
       }
 
@@ -323,33 +323,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Arcs ============
 
-      private static float thisArcHeight;
-      private static readonly Vector3[] linePoints = new Vector3[18]; // Must be at least 18 for game to copy points, which we will override
-
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideGetPointsForArc ( ref Vector3[] __result, int numPoints, float minArcHeight, Vector3 begin, Vector3 end ) {
-         if ( numPoints == 2 || numPoints == 18 ) {
-            thisArcHeight = minArcHeight;
-            linePoints[0] = begin;
-            linePoints[1] = end;
-            __result = linePoints; // Skip all calculations
-            return false;
-         }
-         return true;
-      }
-
-      public static void SetIndirectSegments () {
-         if ( thisLine.positionCount == 18 ) SetArc( thisLine );
-      }
-
-      public static void SetJumpPathSegments ( CombatPathLine __instance ) {
-         SetArc( __instance.line );
-      }
-
-      private static void SetArc ( LineRenderer line ) {
-         // Unfortunately re-calculate the points is the simplest course of mod
-         line.positionCount = Settings.ArcLinePoints;
-         line.SetPositions( WeaponRangeIndicators.GetPointsForArc( Settings.ArcLinePoints, thisArcHeight, linePoints[ 0 ], linePoints[ 1 ] ) );
+      public static IEnumerable<CodeInstruction> ModifyArcPoints ( IEnumerable<CodeInstruction> input ) {
+         return ReplaceIL( input,
+            ( code ) => code.opcode.Name == "ldc.i4.s" && code.operand != null && code.operand.Equals( (sbyte) 18 ),
+            ( code ) => { code.operand = (sbyte) Settings.ArcLinePoints; return code; },
+            2, "SetIndirectSegments", ModLog );
       }
 
       /*

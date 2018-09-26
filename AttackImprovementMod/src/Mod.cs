@@ -84,7 +84,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
          RangeCheck( "LOSWidthBlocked", ref settings.LOSWidthBlocked, 0, 10 );
          RangeCheck( "LOSMarkerBlockedMultiplier", ref settings.LOSMarkerBlockedMultiplier, 0, 10 );
-         RangeCheck( "ArcLineSegments", ref settings.ArcLinePoints, 1, 1000 );
+         RangeCheck( "ArcLinePoints", ref settings.ArcLinePoints, 2, 127 );
 
          RangeCheck( "MechCalledShotMultiplier", ref settings.MechCalledShotMultiplier, 0, 1024 );
          RangeCheck( "VehicleCalledShotMultiplier", ref settings.VehicleCalledShotMultiplier, 0, 1024 );

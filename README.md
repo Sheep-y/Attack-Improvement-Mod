@@ -341,7 +341,7 @@ These settings can be changed in `settings.json`.
 
 **Refine or Roughen Fire Arc and Jump Arc**
 
-> Setting: `ArcLinePoints`  (2 to 1000, default 48, game default 18)
+> Setting: `ArcLinePoints`  (2 to 127, default 48, game default 18)
 >
 > To some sharp eyes, it is easy to see the hard corners of the arc of indirect targeting lines.
 > Lines are quick to draw, so this mod will happily improves their qualities for you.
