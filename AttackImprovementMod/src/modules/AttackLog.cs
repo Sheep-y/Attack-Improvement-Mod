@@ -197,8 +197,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static string GetHitKey ( string weapon, object hitLocation, string targetId ) {
-         if ( weapon.Length > 8 ) weapon = weapon.Substring( weapon.Length - 5 ); // "Melee" or "0_DFA"
-         return weapon + "/" + hitLocation.ToString() + "/" + targetId;
+         if ( weapon != null && weapon.Length > 8 ) weapon = weapon.Substring( weapon.Length - 5 ); // "Melee" or "0_DFA"
+         return weapon + "/" + hitLocation?.ToString() + "/" + targetId;
       }
 
       private static List<string> blankCache = new List<string>(12);
