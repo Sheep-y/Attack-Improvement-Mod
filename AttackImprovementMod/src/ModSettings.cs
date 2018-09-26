@@ -40,6 +40,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
       public bool FixLosPreviewHeight = true;
 
+      [ JsonComment( "Show both original terrain description and danger description, instead of danger overriding terrain." ) ]
+      public bool ShowDangerousTerrain = true;
+
       [ JsonComment( "Colour weapon loadout by weapon type in targeting computer.  Default true." ) ]
       public bool ColouredLoadout = true;
 

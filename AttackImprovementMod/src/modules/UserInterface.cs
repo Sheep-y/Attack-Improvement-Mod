@@ -55,6 +55,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.FixLosPreviewHeight )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
+         if ( Settings.ShowDangerousTerrain ) {
+            SidePanelProp = typeof( MoveStatusPreview ).GetProperty( "sidePanel", NonPublic | Instance );
+            if ( SidePanelProp == null )
+               Warn( "MoveStatusPreview.sidePanel not found, ShowDangerousTerrain not patched." );
+            else
+               Patch( typeof( MoveStatusPreview ), "DisplayPreviewStatus", null, "AppendDangerousTerrainText" );
+         }
 
          Type slotType = typeof( CombatHUDWeaponSlot );
          if ( Settings.ShowBaseHitchance ) {
@@ -318,6 +325,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void FixMoveDestinationHeight ( Pathing __instance ) {
          __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
       }
+
+      private static PropertyInfo SidePanelProp;
+
+      public static void AppendDangerousTerrainText ( MoveStatusPreview __instance, AbstractActor actor, Vector3 worldPos ) { try {
+         MapTerrainDataCell cell = Combat.EncounterLayerData.GetCellAt( worldPos ).relatedTerrainCell;
+         bool isLandingZone = SplatMapInfo.IsDropshipLandingZone( cell.terrainMask ), 
+              isDangerous = SplatMapInfo.IsDangerousLocation( cell.terrainMask );
+         if ( ! isLandingZone && ! isDangerous ) return;
+         DesignMaskDef mask = Combat.MapMetaData.GetPriorityDesignMask( cell );
+         if ( mask == null ) return;
+         string title = mask.Description.Name, text = mask.Description.Details;
+         CombatUIConstantsDef desc = Combat.Constants.CombatUIConstants;
+         if ( isDangerous ) {
+            title += " <#FF0000>(" + desc.DangerousLocationDesc.Name + ")";
+            text += " <#FF0000>" + desc.DangerousLocationDesc.Details;
+            if ( isLandingZone ) text += " " + desc.DrophipLocationDesc.Details;
+         } else {
+            title += " <#FF0000>(" + desc.DrophipLocationDesc.Name + ")";
+            text += " <#FF0000>" + desc.DrophipLocationDesc.Details;
+         }
+         CombatHUDInfoSidePanel sidePanel = (CombatHUDInfoSidePanel) SidePanelProp.GetValue( __instance, null );
+         sidePanel?.ForceShowSingleFrame( new Text( title ), new Text( text ), null, false );
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Weapon Hint ============
 
