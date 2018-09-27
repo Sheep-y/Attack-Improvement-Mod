@@ -390,8 +390,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          AbstractActor owner = weapon.parent;
          Vector2 position = HUD.SelectionHandler.ActiveState?.PreviewPos ?? owner.CurrentPosition;
-         float raw = weapon.DamagePerShotAdjusted(), damageVariance = weapon.DamageVariance,
-               dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target );
+         float raw = weapon.DamagePerShotAdjusted(), damageVariance = weapon.DamageVariance, // raw is the damage displayed by vanilla
+               dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
          if ( Math.Abs( raw - dmg ) < 0.01 ) return;
          string text = damageVariance <= 0 ? string.Format( Settings.ShowReducedWeaponDamage, dmg ) : string.Format( "{0:0}-{1:0}", dmg - damageVariance, dmg + damageVariance );
          if ( weapon.HeatDamagePerShot > 0 )
