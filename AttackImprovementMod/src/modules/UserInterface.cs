@@ -76,6 +76,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
          if ( Settings.ShowReducedWeaponDamage != null )
             Patch( slotType, "RefreshDisplayedWeapon", null, "ShowReducedWeaponDamage" );
+         if ( Settings.ShowTotalWeaponDamage ) {
+            WeaponSlotShowEmptyHex = typeof( CombatHUDWeaponSlot ).GetMethod( "ShowOutOfAmmoHex", NonPublic | Instance );
+            Patch( typeof( CombatHUDWeaponPanel ), "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
+            Patch( typeof( CombatHUDWeaponPanel ), "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
+         }
 
          if ( Settings.AltKeyFriendlyFire ) {
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
@@ -383,6 +388,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             spec[2] = new Text( Settings.WeaponRangeFormat, weapon.MinRange, weapon.ShortRange, weapon.MediumRange, weapon.LongRange, weapon.MaxRange );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
+      // ============ Weapon Slots ============
+
+      private static float TotalDamage, AverageDamage;
+      private static CombatHUDWeaponSlot TotalSlot;
+
       public static void ShowReducedWeaponDamage ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( target == null ) return;
          CombatHUDWeaponSlot me = __instance;
@@ -392,6 +402,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Vector2 position = HUD.SelectionHandler.ActiveState?.PreviewPos ?? owner.CurrentPosition;
          float raw = weapon.DamagePerShotAdjusted(), damageVariance = weapon.DamageVariance, // raw is the damage displayed by vanilla
                dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
+         if ( weapon.IsEnabled ) {
+            TotalDamage += dmg;
+            AverageDamage += dmg * __instance.HitChance;
+         }
          if ( Math.Abs( raw - dmg ) < 0.01 ) return;
          string text = damageVariance <= 0 ? string.Format( Settings.ShowReducedWeaponDamage, dmg ) : string.Format( "{0:0}-{1:0}", dmg - damageVariance, dmg + damageVariance );
          if ( weapon.HeatDamagePerShot > 0 )
@@ -399,6 +413,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( weapon.ShotsWhenFired > 1 )
             text = string.Format( "{0} (x{1})", text, weapon.ShotsWhenFired );
          me.DamageText.SetText( text, new object[0] );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static MethodInfo WeaponSlotShowEmptyHex;
+
+      public static void ShowTotalDamageSlot ( CombatHUDWeaponPanel __instance, int topIndex, List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
+         TotalSlot = null;
+         if ( topIndex <= 0 || topIndex >= ___WeaponSlots.Count || __instance.DisplayedActor == null || ! ( __instance.DisplayedActor is Mech mech ) ) return;
+         TotalSlot = ___WeaponSlots[ topIndex ];
+         TotalSlot.transform.parent.gameObject.SetActive( true );
+         TotalSlot.DisplayedWeapon = null;
+         TotalSlot.WeaponText.text = Translate( "Total" );
+         TotalSlot.AmmoText.text = "--";
+         WeaponSlotShowEmptyHex?.Invoke( __instance, null );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ResetTotalWeaponDamage () {
+         TotalDamage = AverageDamage = 0;
+      }
+
+      public static void ShowTotalWeaponDamage () { try {
+         if ( TotalSlot == null ) return;
+         TotalSlot.DamageText.text = ( (int) TotalDamage ).ToString();
+         TotalSlot.HitChanceText.text = ( (int) AverageDamage ).ToString();
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
