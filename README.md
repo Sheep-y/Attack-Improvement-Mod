@@ -121,9 +121,9 @@ Please report them on [GitHub](https://github.com/Sheep-y/Attack-Improvement-Mod
 These settings can be changed in `settings.json`.
 
 
-## User Interface Settings
+## HUD Settings
 
-**Hotkeys**
+**Unit Selection**
 
 > Setting: `FunctionKeySelectPC`  (true/false, default true)
 >
@@ -131,24 +131,32 @@ These settings can be changed in `settings.json`.
 >
 > The keys will stop to work if they are already binded.
 > Also, because the keys are hard-coded and not keybinds, this will not change game settings or game profile.
-<br>
+
+
+**Friendly Fire**
 
 > Setting: `AltKeyFriendlyFire`  (true/false, default true)
 >
 > When true, friendly units may be targeted by attack when pressing Alt.
 
 
-**Nameplates**
+**Actions**
 
-> Setting: `NameplateColourPlayer`  (color string, default "#BFB")<br>
-> Setting: `NameplateColourEnemy`  (color string, default "#FBB")<br>
-> Setting: `NameplateColourAlly`  (color string, default "#8FF")<br>
-> Setting: `FloatingArmorColourPlayer`  (color string, default "#BFB")<br>
-> Setting: `FloatingArmorColourEnemy`  (color string, default "#FBB")<br>
-> Setting: `FloatingArmorColourAlly`  (color string, default "#8FF")<br>
+> Setting: `FixMultiTargetBackout`  (true/false, default true)
 >
-> When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.
+> The game's Muti-Target back out (escape/right click) is bugged
+> Backing out from first target will cancel the action, and second back out will always cancel the whole thing (regardless of target).
+>
+> When true, this mod will make Multi-Target back out from selected targets one by one as expected.
+<br>
 
+> Setting: `ShowDangerousTerrain`  (true/false, default true)
+>
+> When true, dangerous terrain will show both terrain description and danger description,
+> instead of danger description overriding terrain description.
+
+
+## Mech and Pilot UI Settings
 
 
 **Paper Dolls**
@@ -162,9 +170,18 @@ These settings can be changed in `settings.json`.
 > Setting: `ShowUnderArmourDamage `  (true/false, default true)
 >
 > When true, armour of damaged location will have a striped pattern instead of solid.
+<br>
 
 > Both settings apply to all paper dolls: selection panel, target panel, called shot popup, mech bay, deploy, post-mission report etc.
+<br>
 
+> Setting: `ShowAmmoInTooltip`  (true/false, default true)<br>
+> Setting: `ShowEnemyAmmoInTooltip`  (true/false, default false)<br>
+>
+> When true, show ammo count in the component lists when you mouseover a location on the paper doll in combat.
+>
+> The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
+> When ShowAmmoInTooltip is true, non-exploding (half-empty) ammo bin will be displayed as grey.
 
 
 **Mech Info**
@@ -187,20 +204,20 @@ These settings can be changed in `settings.json`.
 >
 > Duplicates with Extended Information, but AIM override it and use a shorter form for mechs to fit `ShowNumericInfo`.
 > Default false because the short form may overwhelm inexperienced players.
-<br>
+
 
 
 **MechWarrior Info**
 
-> Setting: `ShowEnemyWounds`  (format string, default "{0}, Wounds {1}")<br>
-> Setting: `ShowNPCHealth`  (format string, default "{0}, HP {2}/{3}")<br>
+> Setting: `ShowPlayerHealth`  (format string, default ", HP {2}/{3}")<br>
+> Setting: `ShowEnemyWounds`  (format string, default ", Wounds {1}")<br>
+> Setting: `ShowAllyHealth`  (format string, default ", HP {2}/{3}")<br>
 >
-> When non-empty, NPCs who are wounded will have its injuries or health displayed.
+> When non-empty, units that are wounded will have its injuries or health displayed after pilot name.
 > {0} is pilot name, {1} is injury, {2} is (health - injury), and {3} is health.
 >
+> The wounds or health only display when the unit is wounded.
 > Note that enemy's health is unknown to players by design.  {2} and {3} will show "?" when used.
-> If the format does not starts with {0}, it will be always active.
-> Otherwise, the wounds or health only display when the NPC is wounded.
 <br>
 
 > Setting: `ShortPilotHint`  (format string, default "G:{3} P:{4} G:{5} T:{6}")
@@ -215,7 +232,10 @@ These settings can be changed in `settings.json`.
 > If the line is too long, for example when HP is included, the line will wrap.
 
 
-**Weapon Info**
+
+## Weapons and Ammo UI Settings
+
+**Weapons Loadout**
 
 > Setting: `ColouredLoadout`  (true/false, default true) <br>
 > Setting: `ShowDamageInLoadout`  (true/false, default true) <br>
@@ -239,15 +259,17 @@ These settings can be changed in `settings.json`.
 >
 > When true, loadout list of the targeting computer will have melee and dfa entry.
 > Their damage will always be displayed regardless of `ShowDamageInLoadout`.
-<br>
 
-> Setting: `ShowAmmoInTooltip`  (true/false, default true)<br>
-> Setting: `ShowEnemyAmmoInTooltip`  (true/false, default false)<br>
+
+**Weapon Panel**
+
+> Setting: `ShowReducedWeaponDamage`  (format string, default "{0:0}")
 >
-> When true, show ammo count in the component lists when you mouseover a location on the paper doll.
->
-> The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
-<br>
+> When non-empty, the damage displayed in weapon panel will take terrain factor and enemy damage reduction into account.
+> The default setting will round it down to integer; use "{0:0.#}" to dynamically display up to 1 decimal.
+
+
+**Weapon Mouseover Hint**
 
 > Setting: `ShowWeaponProp`  (true/false, default true)<br>
 > Setting: `WeaponRangeFormat`  (string, default "Min {0} : Long {2} : Max {4}")<br>
@@ -263,35 +285,23 @@ These settings can be changed in `settings.json`.
 > But if a mod is installed that make use of them, the range display can be customised, such as "{0}:{1}:{2}:{3}:{4}".
 
 
-**Multi-Target**
 
-> Setting: `FixMultiTargetBackout`  (true/false, default true)
+## HUD Colour Settings
+
+
+**Nameplates**
+
+> Setting: `NameplateColourPlayer`  (color string, default "#BFB")<br>
+> Setting: `NameplateColourEnemy`  (color string, default "#FBB")<br>
+> Setting: `NameplateColourAlly`  (color string, default "#8FF")<br>
+> Setting: `FloatingArmorColourPlayer`  (color string, default "#BFB")<br>
+> Setting: `FloatingArmorColourEnemy`  (color string, default "#FBB")<br>
+> Setting: `FloatingArmorColourAlly`  (color string, default "#8FF")<br>
 >
-> The game's Muti-Target back out (escape/right click) is bugged
-> Backing out from first target will cancel the action, and second back out will always cancel the whole thing (regardless of target).
->
-> When true, this mod will make Multi-Target back out from selected targets one by one as expected.
+> When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.
 
 
-
-## Targeting Line and Facing Ring Settings
-
-**LoS Widths**
-
-> Setting: `LOSWidth`  (0 to 10, default 2, game default 1)
->
-> Set width of all targeting lines (direct, indirect, blocked, can't attack etc.).  Game default is 1  Mod default is 2.
-<br>
-
-> Setting: `LOSWidthBlocked`  (0 to 10, default 1.5, game default 0.75)
->
-> Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
-<br>
-
-> When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
-
-
-**LoS Styles and Colours**
+**Line of Sight/Fire Style**
 
 > Setting: `LOSIndirectDotted`  (default true, game default false)<br>
 > Setting: `LOSNoAttackDotted`  (default true)<br>
@@ -318,6 +328,21 @@ These settings can be changed in `settings.json`.
 >
 > When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
 > Note that Firing Line Improvement does not have directional styling.
+
+
+**Line of Sight/Fire Width**
+
+> Setting: `LOSWidth`  (0 to 10, default 2, game default 1)
+>
+> Set width of all targeting lines (direct, indirect, blocked, can't attack etc.).  Game default is 1  Mod default is 2.
+<br>
+
+> Setting: `LOSWidthBlocked`  (0 to 10, default 1.5, game default 0.75)
+>
+> Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
+<br>
+
+> When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
 
 
 **Facing Rings Colours**
