@@ -262,8 +262,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             format = Settings.ShowEnemyWounds;
             args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, "?", "?" };
          }
-         if ( format == null || ( format.StartsWith( "{0}" ) && pilot.Injuries <= 0 ) ) return;
-         __instance.PilotNameText.SetText( Translate( format, args ) );
+         if ( format == null || pilot.Injuries <= 0 ) return;
+         __instance.PilotNameText.SetText( args[0] + "</uppercase><size=80%>" + Translate( format, args ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void RefreshPilotNames ( Pilot __instance ) { try {
