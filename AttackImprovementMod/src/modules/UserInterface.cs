@@ -77,7 +77,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowReducedWeaponDamage != null )
             Patch( slotType, "RefreshDisplayedWeapon", null, "ShowReducedWeaponDamage" );
          if ( Settings.ShowTotalWeaponDamage ) {
-            WeaponSlotShowEmptyHex = typeof( CombatHUDWeaponSlot ).GetMethod( "ShowOutOfAmmoHex", NonPublic | Instance );
             Patch( typeof( CombatHUDWeaponPanel ), "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
             Patch( typeof( CombatHUDWeaponPanel ), "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
          }
@@ -393,19 +392,23 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float TotalDamage, AverageDamage;
       private static CombatHUDWeaponSlot TotalSlot;
 
+      private static void AddToTotalDamage ( float dmg, CombatHUDWeaponSlot slot ) {
+         float chance = slot.HitChance, multiplied = dmg * slot.DisplayedWeapon.ShotsWhenFired;
+         if ( chance <= 0 ) return; // Hit Chance is -999.9 if it can't fire at target (Method ClearHitChance)
+         TotalDamage += multiplied;
+         AverageDamage += multiplied * chance;
+      }
+
       public static void ShowReducedWeaponDamage ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( target == null ) return;
          CombatHUDWeaponSlot me = __instance;
          Weapon weapon = me.DisplayedWeapon;
-         if ( weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
+         if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          AbstractActor owner = weapon.parent;
          Vector2 position = HUD.SelectionHandler.ActiveState?.PreviewPos ?? owner.CurrentPosition;
          float raw = weapon.DamagePerShotAdjusted(), damageVariance = weapon.DamageVariance, // raw is the damage displayed by vanilla
                dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
-         if ( weapon.IsEnabled ) {
-            TotalDamage += dmg;
-            AverageDamage += dmg * __instance.HitChance;
-         }
+         if ( weapon.IsEnabled ) AddToTotalDamage( dmg, __instance );
          if ( Math.Abs( raw - dmg ) < 0.01 ) return;
          string text = damageVariance <= 0 ? string.Format( Settings.ShowReducedWeaponDamage, dmg ) : string.Format( "{0:0}-{1:0}", dmg - damageVariance, dmg + damageVariance );
          if ( weapon.HeatDamagePerShot > 0 )
@@ -415,8 +418,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          me.DamageText.SetText( text, new object[0] );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static MethodInfo WeaponSlotShowEmptyHex;
-
       public static void ShowTotalDamageSlot ( CombatHUDWeaponPanel __instance, int topIndex, List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
          TotalSlot = null;
          if ( topIndex <= 0 || topIndex >= ___WeaponSlots.Count || __instance.DisplayedActor == null || ! ( __instance.DisplayedActor is Mech mech ) ) return;
@@ -425,15 +426,23 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          TotalSlot.DisplayedWeapon = null;
          TotalSlot.WeaponText.text = Translate( "Total" );
          TotalSlot.AmmoText.text = "--";
-         WeaponSlotShowEmptyHex?.Invoke( __instance, null );
+         TotalSlot.MainImage.color = Color.clear;
+         TotalSlot.ToggleButton.childImage.color = Color.clear;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ResetTotalWeaponDamage () {
          TotalDamage = AverageDamage = 0;
       }
 
-      public static void ShowTotalWeaponDamage () { try {
+      public static void ShowTotalWeaponDamage ( List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
          if ( TotalSlot == null ) return;
+         if ( Settings.ShowReducedWeaponDamage == null ) {
+            foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
+               Weapon w = slot.DisplayedWeapon;
+               if ( w != null && w.IsEnabled && w.CanFire )
+                  AddToTotalDamage( w.DamagePerShotAdjusted(), slot );
+            }
+         }
          TotalSlot.DamageText.text = ( (int) TotalDamage ).ToString();
          TotalSlot.HitChanceText.text = ( (int) AverageDamage ).ToString();
       }                 catch ( Exception ex ) { Error( ex ); } }
