@@ -76,9 +76,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
          if ( Settings.ShowReducedWeaponDamage != null )
             Patch( slotType, "RefreshDisplayedWeapon", null, "ShowReducedWeaponDamage" );
+         if ( Settings.FixMultiTargetWeaponState )
+            Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
          if ( Settings.ShowTotalWeaponDamage ) {
             Patch( typeof( CombatHUDWeaponPanel ), "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
             Patch( typeof( CombatHUDWeaponPanel ), "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
+            if ( ! Settings.FixMultiTargetWeaponState )
+               Warn( "ShowTotalWeaponDamage may display mismatched numbers during multi-target, because FixMultiTargetWeaponState is disabled." );
          }
 
          if ( Settings.AltKeyFriendlyFire ) {
@@ -396,7 +400,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float chance = slot.HitChance, multiplied = dmg * slot.DisplayedWeapon.ShotsWhenFired;
          if ( chance <= 0 ) return; // Hit Chance is -999.9 if it can't fire at target (Method ClearHitChance)
          SelectionState state = HUD.SelectionHandler.ActiveState;
-         if ( state is SelectionStateFireMulti multi 
+         if ( state is SelectionStateFireMulti multi
            && state.AllTargetedCombatants.Contains( HUD.SelectedTarget )
            && HUD.SelectedTarget != multi.GetSelectedTarget( slot.DisplayedWeapon ) ) return;
          TotalDamage += multiplied;
@@ -429,7 +433,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          TotalSlot.transform.parent.gameObject.SetActive( true );
          TotalSlot.DisplayedWeapon = null;
          TotalSlot.WeaponText.text = Translate( "Total" );
-         TotalSlot.AmmoText.text = "--";
+         TotalSlot.AmmoText.text = "";
          TotalSlot.MainImage.color = Color.clear;
          TotalSlot.ToggleButton.childImage.color = Color.clear;
       }                 catch ( Exception ex ) { Error( ex ); } }
@@ -450,5 +454,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          TotalSlot.DamageText.text = ( (int) TotalDamage ).ToString();
          TotalSlot.HitChanceText.text = ( (int) AverageDamage ).ToString();
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void RefreshTotalDamage () {
+         HUD.WeaponPanel.RefreshDisplayedWeapons(); // Refresh weapon highlight AFTER HUD.SelectedTarget is updated.
+      }
    }
 }

@@ -13,6 +13,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "You can still quickly switch out of Multi-Target by pressing another action." } ) ]
       public bool FixMultiTargetBackout = true;
 
+      [ JsonComment( new string[]{
+        "Fix multi-Target weapon highlight so that they always match selected target." } ) ]
+      public bool FixMultiTargetWeaponState = true;
+
       [ JsonComment( "Allow friendly fire while pressing Alt key.  Default true." ) ]
       public bool AltKeyFriendlyFire = true;
 
