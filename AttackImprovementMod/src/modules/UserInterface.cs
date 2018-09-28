@@ -395,6 +395,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static void AddToTotalDamage ( float dmg, CombatHUDWeaponSlot slot ) {
          float chance = slot.HitChance, multiplied = dmg * slot.DisplayedWeapon.ShotsWhenFired;
          if ( chance <= 0 ) return; // Hit Chance is -999.9 if it can't fire at target (Method ClearHitChance)
+         SelectionState state = HUD.SelectionHandler.ActiveState;
+         if ( state is SelectionStateFireMulti multi 
+           && state.AllTargetedCombatants.Contains( HUD.SelectedTarget )
+           && HUD.SelectedTarget != multi.GetSelectedTarget( slot.DisplayedWeapon ) ) return;
          TotalDamage += multiplied;
          AverageDamage += multiplied * chance;
       }
