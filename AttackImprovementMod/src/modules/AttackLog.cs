@@ -485,7 +485,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( DebugLog ) Verbo( "SELF HIT {0} {1} >>> {2}", thisSequence, hitLocation, log.Count );
          string line = thisSequence;
          if ( LogLocation ) {
-            line += FillBlanks( 12 ) + Separator + hitLocation;
+            line += FillBlanks( 11 ) + Separator + hitLocation;
             if ( LogDamage ) {
                line += DamageDummy;
                if ( LogCritical )
