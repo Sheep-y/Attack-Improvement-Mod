@@ -60,7 +60,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
 
-         if ( Settings.ColouredLoadout || Settings.ShowDamageInLoadout || Settings.ShowMeleeDamageInLoadout || Settings.ShowAlphaDamageInLoadout != null )
+         if ( Settings.SaturationOfLoadout != 0 || Settings.ShowDamageInLoadout || Settings.ShowMeleeDamageInLoadout || Settings.ShowAlphaDamageInLoadout != null )
             Patch( typeof( CombatHUDTargetingComputer ), "RefreshWeaponList", null, "EnhanceWeaponLoadout" );
 
          if ( Settings.ShowAmmoInTooltip || Settings.ShowEnemyAmmoInTooltip ) {
@@ -207,12 +207,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Weapon Loadout ============
 
+      private static Color[] ByType;
+
       public static void EnhanceWeaponLoadout ( CombatHUDTargetingComputer __instance, List<TMPro.TextMeshProUGUI> ___weaponNames, UIManager ___uiManager ) { try {
          UIColorRefs colours = ___uiManager.UIColorRefs;
          AbstractActor actor = __instance.ActivelyShownCombatant as AbstractActor;
          List<Weapon> weapons = actor?.Weapons;
          if ( actor == null || weapons == null ) return;
-         Color[] ByType = LerpWeaponColours( colours );
+         if ( ByType == null && Settings.SaturationOfLoadout != 0 )
+            ByType = LerpWeaponColours( colours );
          float close = 0, medium = 0, far = 0;
          for ( int i = Math.Min( ___weaponNames.Count, weapons.Count ) - 1 ; i >= 0 ; i-- ) {
             Weapon w = weapons[ i ];
@@ -220,7 +223,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             float damage = w.DamagePerShot * w.ShotsWhenFired;
             if ( Settings.ShowDamageInLoadout )
                ___weaponNames[ i ].text = ___weaponNames[ i ].text.Replace( " +", "+" ) + MetaColour + " (" + damage + ")";
-            if ( Settings.ColouredLoadout && ByType != null && ___weaponNames[ i ].color == colours.qualityA ) {
+            if ( ByType != null && ___weaponNames[ i ].color == colours.qualityA ) {
                if ( (int) w.Category < ByType.Length )
                   ___weaponNames[ i ].color = ByType[ (int) w.Category ];
             }
@@ -255,11 +258,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static Color[] LerpWeaponColours ( UIColorRefs ui ) {
-         if ( ! Settings.ColouredLoadout || ui == null ) return null;
+         if ( Settings.SaturationOfLoadout <= 0 || ui == null ) return null;
          Color[] colours = new Color[]{ Color.clear, ui.ballisticColor, ui.energyColor, ui.missileColor, ui.smallColor };
+         float saturation = (float) Settings.SaturationOfLoadout, lower = saturation * 0.8f;
          for ( int i = colours.Length - 1 ; i > 0 ; i-- ) {
             Color.RGBToHSV( colours[ i ], out float h, out float s, out float v );
-            colours[ i ] = Color.HSVToRGB( h, i == 3 ? 0.4f : 0.6f, 1 );
+            colours[ i ] = Color.HSVToRGB( h, i == 3 ? lower : saturation, 1 );
          }
          return colours;
       }

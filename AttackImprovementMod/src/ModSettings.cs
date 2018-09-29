@@ -47,8 +47,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show both original terrain description and danger description, instead of danger overriding terrain." ) ]
       public bool ShowDangerousTerrain = true;
 
-      [ JsonComment( "Colour weapon loadout by weapon type in targeting computer.  Default true." ) ]
-      public bool ColouredLoadout = true;
+      [ JsonComment( "Colour saturation of weapon loadout by weapon type in targeting computer.  Default 0.5.  0 to disable." ) ]
+      public decimal SaturationOfLoadout = 0.5m;
 
       [ JsonComment( "Show weapon damage in weapon loadout list in targeting computer.  Default true." ) ]
       public bool ShowDamageInLoadout = true;

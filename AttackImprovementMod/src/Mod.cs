@@ -81,6 +81,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             settings.ShowNumericInfo = false;
 #pragma warning restore CS0618
 
+         RangeCheck( "LoadoutColourSaturation", ref settings.SaturationOfLoadout, 0, 1 );
          RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
          RangeCheck( "LOSWidthBlocked", ref settings.LOSWidthBlocked, 0, 10 );
          RangeCheck( "LOSMarkerBlockedMultiplier", ref settings.LOSMarkerBlockedMultiplier, 0, 10 );
