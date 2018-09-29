@@ -539,9 +539,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          damageResolved = false;
       }
 
+      private static bool IsLoggedDamage ( DamageType type ) {
+         switch ( type ) {
+            case DamageType.Weapon:
+            case DamageType.Overheat:
+            case DamageType.OverheatSelf:
+            case DamageType.DFA:
+            case DamageType.DFASelf:
+               return true;
+         }
+         return false;
+      }
+
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc, Weapon weapon ) {
-         if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
+      public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc, Weapon weapon, DamageType damageType ) {
+         if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid || ! IsLoggedDamage( damageType ) ) return;
          int line = LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
          if ( line >= 0 && Settings.CritFollowDamageTransfer && hitMap != null ) {
             string newKey = GetHitKey( weapon.uid, aLoc, __instance.GUID );
