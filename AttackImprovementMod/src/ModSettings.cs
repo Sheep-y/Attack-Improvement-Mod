@@ -295,6 +295,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Melee and DFA" ) ]
       //
 
+      [ JsonComment( "Show terrain description and danger description of melee destination, instead of hiding them." ) ]
+      public bool ShowMeleeTerrain = true;
+
       [ JsonComment( "Allow all possible melee / DFA attack positions." ) ]
       public bool IncreaseMeleePositionChoice = true;
       public bool IncreaseDFAPositionChoice = true;

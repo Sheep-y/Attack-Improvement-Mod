@@ -62,6 +62,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Patch( typeof( MoveStatusPreview ), "DisplayPreviewStatus", null, "AppendDangerousTerrainText" );
          }
+         if ( Settings.ShowMeleeTerrain ) { // Rewrite with transpiler
+            UpdateStatusMethod= typeof( CombatMovementReticle ).GetMethod( "UpdateStatusPreview", NonPublic | Instance );
+            if ( SidePanelProp == null )
+               Warn( "MoveStatusPreview.sidePanel not found, ShowDangerousTerrain not patched." );
+            else
+               Patch( typeof( CombatMovementReticle ), "DrawPath", null, "ShowMeleeTerrainText" );
+         }
 
          if ( Settings.AltKeyFriendlyFire ) {
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
@@ -331,8 +338,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             title += " <#FF0000>(" + desc.DrophipLocationDesc.Name + ")";
             text += " <#FF0000>" + desc.DrophipLocationDesc.Details;
          }
-         CombatHUDInfoSidePanel sidePanel = (CombatHUDInfoSidePanel) SidePanelProp.GetValue( __instance, null );
+         CombatHUDInfoSidePanel sidePanel = (CombatHUDInfoSidePanel) SidePanelProp?.GetValue( __instance, null );
          sidePanel?.ForceShowSingleFrame( new Text( title ), new Text( text ), null, false );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static MethodInfo UpdateStatusMethod;
+
+      public static void ShowMeleeTerrainText ( CombatMovementReticle __instance, AbstractActor actor, bool isMelee, bool isTargetLocked, Vector3 mousePos, bool isBadTutorialPath ) { try {
+         if ( ! isMelee ) return;
+         Pathing pathing = actor.Pathing;
+         if ( pathing == null || pathing.CurrentPath.IsNullOrEmpty() ) return;
+         UpdateStatusMethod.Invoke( __instance, new object[]{ actor, pathing.ResultDestination + actor.HighestLOSPosition, pathing.MoveType } );
+         // TODO: Update status preview text to melee
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
