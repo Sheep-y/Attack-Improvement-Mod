@@ -326,8 +326,7 @@ These settings can be changed in `settings.json`.
 > If less colours are specified than direction, the missing directions will use the last colour.
 > For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
 >
-> When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
-> Note that Firing Line Improvement does not have directional styling.
+> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, it will override this mod's colours.
 
 
 **Line of Sight/Fire Width**
@@ -342,7 +341,7 @@ These settings can be changed in `settings.json`.
 > Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
 <br>
 
-> When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
+> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, it will override this mod's widths.
 
 
 **Facing Rings Colours**
@@ -372,7 +371,7 @@ These settings can be changed in `settings.json`.
 > Lines are quick to draw, so this mod will happily improves their qualities for you.
 > Set to 2 to make them flat like other lines.  Set to 18 to leave at game default.
 >
-> When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
+> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, the indirect fire arc cannot be modified.
 
 
 **Fix LoS Inconsistency**
@@ -462,13 +461,13 @@ These settings can be changed in `settings.json`.
 > Setting: `IncreaseDFAPositionChoice`  (true/false, default true)
 >
 > When true, melee and DFA can use all available positions, instead of nearest three.
-> Compatible with [MeleeMover](https://www.nexusmods.com/battletech/mods/226).
+> Compatible with the mod "[MeleeMover](https://www.nexusmods.com/battletech/mods/226)".
 <br>
 
 > Setting: `UnlockMeleePositioning`  (true/false, default true)
 >
 > When true, player units may move to another melee position when target is already in melee range.
-> A warning will be logged when overridden by [MeleeMover](https://www.nexusmods.com/battletech/mods/226), but otherwise compatible.
+> When the mod "[MeleeMover](https://www.nexusmods.com/battletech/mods/226)" is used, a warning will be logged but otherwise fully compatible.
 
 
 **Adjust Max Height Offset**
@@ -1017,9 +1016,6 @@ but because the code that determine hit distribution is not designed for fractio
 AIM is aware of some other mods and will behave differently in their present to meet player expectations.
 
 Mod settings changed by these behaviours are not saved.  If you want to replace them with AIM, you may need to change AIM settings.
-
-**[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)**
-AIM will skip line styling and arc point adjustment to not crash line drawings.
 
 **[Real Hit Chance](https://www.nexusmods.com/battletech/mods/90)**
 AIM will enable corrected hit chance display and override this mod, since it does not support AIM features such as adjustable correction strength.

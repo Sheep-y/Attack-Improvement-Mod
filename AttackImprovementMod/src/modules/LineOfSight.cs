@@ -24,19 +24,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
 
-         if ( HasMod( "com.joelmeador.BTMLColorLOSMod", "BTMLColorLOSMod.BTMLColorLOSMod" ) ) {
-            BattleMod.BTML_LOG.Warn( Mod.Name + " detected joelmeador's BTMLColorLOSMod, LOS and arc styling disabled and left in the hands of BTMLColorLOSMod." );
-            return;
-         }
          TryRun( ModLog, InitSettings );
-
          bool LinesChanged = Settings.LOSIndirectDotted || parsedColor.ContainsKey( Line.Indirect ) ||
                                 Settings.LOSMeleeDotted || parsedColor.ContainsKey( Line.Melee ) ||
                                 Settings.LOSClearDotted || parsedColor.ContainsKey( Line.Clear ) ||
                            Settings.LOSBlockedPreDotted || parsedColor.ContainsKey( Line.BlockedPre ) ||
                           Settings.LOSBlockedPostDotted || parsedColor.ContainsKey( Line.BlockedPost ) ||
                            ! Settings.LOSNoAttackDotted || parsedColor.ContainsKey( Line.NoAttack );
-
          Type Indicator = typeof( WeaponRangeIndicators );
 
          if ( Settings.LOSWidth != 1 || Settings.LOSWidthBlocked != 0.75m || Settings.LOSMarkerBlockedMultiplier != 1 )
