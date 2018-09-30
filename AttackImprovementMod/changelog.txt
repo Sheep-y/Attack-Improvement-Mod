@@ -19,6 +19,7 @@ CHANGE LOG
 * Fix: Geothermal and Radiation Field are now factored in heat preview fix.
 * Fix: Range meters in hit modifier list no longer show decimal.
 * Fix: FixPaperDollRearStructure now works in campaign, without going through combat first.
+* Fix: DFA self-damage log location misalignment.
 
 2018-09-15 AIM Version 2.5 for BATTLETECH 1.2.0
 

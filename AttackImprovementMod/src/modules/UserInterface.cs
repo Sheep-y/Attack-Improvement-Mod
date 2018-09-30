@@ -76,13 +76,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
          if ( Settings.ShowReducedWeaponDamage != null )
             Patch( slotType, "RefreshDisplayedWeapon", null, "ShowReducedWeaponDamage" );
-         if ( Settings.FixMultiTargetWeaponState )
-            Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
          if ( Settings.ShowTotalWeaponDamage ) {
             Patch( typeof( CombatHUDWeaponPanel ), "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
             Patch( typeof( CombatHUDWeaponPanel ), "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
-            if ( ! Settings.FixMultiTargetWeaponState )
-               Warn( "ShowTotalWeaponDamage may display mismatched numbers during multi-target, because FixMultiTargetWeaponState is disabled." );
+         }
+         if ( Settings.ShowReducedWeaponDamage != null || Settings.ShowTotalWeaponDamage ) {
+            Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
+            Patch( typeof( CombatHUDWeaponSlot ), "OnPointerUp", null, "RefreshTotalDamage" );
          }
 
          if ( Settings.AltKeyFriendlyFire ) {
@@ -409,8 +409,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ShowReducedWeaponDamage ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( target == null ) return;
-         CombatHUDWeaponSlot me = __instance;
-         Weapon weapon = me.DisplayedWeapon;
+         if ( HUD.SelectionHandler.ActiveState is SelectionStateFireMulti multi && __instance.TargetIndex < 0 ) return;
+         Weapon weapon = __instance.DisplayedWeapon;
          if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          AbstractActor owner = weapon.parent;
          Vector2 position = HUD.SelectionHandler.ActiveState?.PreviewPos ?? owner.CurrentPosition;
@@ -423,7 +423,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             text = string.Format( HUD.WeaponPanel.HeatFormatString, text, Mathf.RoundToInt( weapon.HeatDamagePerShot ) );
          if ( weapon.ShotsWhenFired > 1 )
             text = string.Format( "{0} (x{1})", text, weapon.ShotsWhenFired );
-         me.DamageText.SetText( text, new object[0] );
+         __instance.DamageText.SetText( text, new object[0] );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowTotalDamageSlot ( CombatHUDWeaponPanel __instance, int topIndex, List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
@@ -456,7 +456,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void RefreshTotalDamage () {
-         HUD.WeaponPanel.RefreshDisplayedWeapons(); // Refresh weapon highlight AFTER HUD.SelectedTarget is updated.
+         if ( HUD.SelectionHandler.ActiveState is SelectionStateFireMulti )
+            HUD.WeaponPanel.RefreshDisplayedWeapons(); // Refresh weapon highlight AFTER HUD.SelectedTarget is updated.
       }
    }
 }
