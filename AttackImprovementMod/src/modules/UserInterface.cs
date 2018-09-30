@@ -81,6 +81,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDWeaponPanel ), "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
          }
          if ( Settings.ShowReducedWeaponDamage != null || Settings.ShowTotalWeaponDamage ) {
+            // Update damage numbers (and multi-target highlights) after all slots are in a correct state.
             Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
             Patch( typeof( CombatHUDWeaponSlot ), "OnPointerUp", null, "RefreshTotalDamage" );
          }
@@ -414,11 +415,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          AbstractActor owner = weapon.parent;
          Vector2 position = HUD.SelectionHandler.ActiveState?.PreviewPos ?? owner.CurrentPosition;
-         float raw = weapon.DamagePerShotAdjusted(), damageVariance = weapon.DamageVariance, // raw is the damage displayed by vanilla
+         float raw = weapon.DamagePerShotAdjusted(), // damage displayed by vanilla
                dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
          if ( weapon.IsEnabled ) AddToTotalDamage( dmg, __instance );
          if ( Math.Abs( raw - dmg ) < 0.01 ) return;
-         string text = damageVariance <= 0 ? string.Format( Settings.ShowReducedWeaponDamage, dmg ) : string.Format( "{0:0}-{1:0}", dmg - damageVariance, dmg + damageVariance );
+         string text = ( (int) dmg ).ToString();
          if ( weapon.HeatDamagePerShot > 0 )
             text = string.Format( HUD.WeaponPanel.HeatFormatString, text, Mathf.RoundToInt( weapon.HeatDamagePerShot ) );
          if ( weapon.ShotsWhenFired > 1 )
