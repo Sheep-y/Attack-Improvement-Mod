@@ -70,8 +70,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Apply damage reduction to damage numbers in weapon panel.  Default true." ) ]
       public bool ShowReducedWeaponDamage = true;
 
-      [ JsonComment( "Show max weapon damage and average weapon damage at the bottom of weapon panel.  Default true." ) ]
+      [ JsonComment( "Show max attack damage and averaged attack damage at the bottom of weapon panel.  Default true." ) ]
       public bool ShowTotalWeaponDamage = true;
+
+      [ JsonComment( "Show stability damage while pressing Alt key.  Default true." ) ]
+      public bool AltKeyWeaponStability = true;
 
       [ JsonComment( "Show weapon range in meters instead of \"Short\" or \"Very Long\" in weapon mouseover.  Default \"Min {0} : Long {2} : Max {4}\"." ) ]
       public string WeaponRangeFormat = "Min {0} : Long {2} : Max {4}";
