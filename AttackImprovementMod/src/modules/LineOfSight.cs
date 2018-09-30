@@ -103,8 +103,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                //Log( $"Direction {direction}, Index {dirIndex}, Color {colors[ dirIndex ]}" );
             }
          } else {
-            if ( HUD.SelectionHandler.ActiveState == null ) return;
-            FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( me.Owner );
+            if ( ActiveState == null ) return;
+            FiringPreviewManager.PreviewInfo info = ActiveState.FiringPreview.GetPreviewInfo( me.Owner );
             orig = info.HasLOF ? ( FacingMarkerTargetColors[4] ?? me.ColorActive ) : ( activeColors[4] ?? me.ColorInactive );
             colors = new object[]{ orig, orig, orig, orig };
          }
@@ -230,7 +230,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( isMelee )
             SwapMat( me, Melee, dirIndex, ref me.LOSLockedTarget, false );
          else {
-            FiringPreviewManager.PreviewInfo info = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( target );
+            FiringPreviewManager.PreviewInfo info = ActiveState.FiringPreview.GetPreviewInfo( target );
             if ( info.HasLOF )
                if ( info.LOFLevel == LineOfFireLevel.LOFClear )
                   SwapMat( me, Clear, dirIndex, ref me.LOSInRange, usingMultifire );

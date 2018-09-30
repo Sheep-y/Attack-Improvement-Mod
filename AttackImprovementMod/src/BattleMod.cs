@@ -283,6 +283,7 @@ namespace Sheepy.BattleTechMod {
       public static CombatGameState Combat { get; internal set; }
       public static CombatGameConstants CombatConstants { get; internal set; }
       public static CombatHUD HUD { get; internal set; }
+      public static SelectionState ActiveState { get => HUD?.SelectionHandler?.ActiveState; }
 
       public virtual void ModStarts () {}
       public virtual void GameStartsOnce () { }

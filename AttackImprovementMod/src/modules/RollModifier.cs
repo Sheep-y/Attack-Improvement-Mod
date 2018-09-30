@@ -179,12 +179,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void SmartIndirectFireLoF ( FiringPreviewManager __instance, ref FiringPreviewManager.PreviewInfo __result, ICombatant target ) { try {
          if ( __result.availability != PossibleDirect ) return;
          AbstractActor actor = HUD?.SelectedActor;
-         SelectionState selection = HUD.SelectionHandler.ActiveState;
-         float dist = Vector3.Distance( selection.PreviewPos, target.CurrentPosition );
+         float dist = Vector3.Distance( ActiveState.PreviewPos, target.CurrentPosition );
          foreach ( Weapon w in actor.Weapons ) // Don't change LoF if any direct weapon is enabled and can shot
             if ( ! w.IndirectFireCapable && w.IsEnabled && w.MaxRange > dist && w.CanFire ) return;
                //Verbo( "Smart indirect blocked by {0}: {1}, {2}, {3}, {4}, {5}", w, dist, w.MaxRange, w.IsDisabled, w.IsEnabled, w.IndirectFireCapable );
-         if ( ! CanSmartIndirect( actor, selection.PreviewPos, selection.PreviewRot, target ) ) return;
+         if ( ! CanSmartIndirect( actor, ActiveState.PreviewPos, ActiveState.PreviewRot, target ) ) return;
          __result.availability = PossibleIndirect;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
@@ -231,10 +230,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // Set self walked modifier when previewing movement
       public static void Preview_SelfSpeedModifier ( ref float __result, AbstractActor attacker ) {
-         if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasMovedThisRound ) return;
-         SelectionState state = HUD?.SelectionHandler?.ActiveState;
-         if ( state == null || ! ( state is SelectionStateMoveBase ) ) return;
-         float movement = Vector3.Distance( mech.CurrentPosition, state.PreviewPos );
+         if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasMovedThisRound || ! ( ActiveState is SelectionStateMoveBase ) ) return;
+         float movement = Vector3.Distance( mech.CurrentPosition, ActiveState.PreviewPos );
          if ( movement <= 10 ) return;
          switch ( mech.weightClass ) {
             case WeightClass.LIGHT   : __result = CombatConstants.ToHit.ToHitSelfWalkLight  ; break;
@@ -246,9 +243,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // Set self sprint modifier when previewing movement
       public static void Preview_SelfSprintedModifier ( ref float __result, AbstractActor attacker ) {
-         if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasSprintedThisRound ) return;
-         SelectionState state = HUD?.SelectionHandler?.ActiveState;
-         if ( state == null || ! ( state is SelectionStateSprint sprint ) ) return;
+         if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasSprintedThisRound || ! ( ActiveState is SelectionStateSprint ) ) return;
          __result = CombatConstants.ToHit.ToHitSelfSprinted;
       }
 
@@ -257,8 +252,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( attacker.HasMovedThisRound && attacker.JumpedLastRound ) {
             movement = attacker.DistMovedThisRound;
          } else if ( Settings.FixSelfSpeedModifierPreview ) {
-            SelectionState state = HUD?.SelectionHandler?.ActiveState;
-            if ( state != null && state is SelectionStateJump jump )
+            if ( ActiveState is SelectionStateJump jump )
                movement = 100; // Vector3.Distance( attacker.CurrentPosition, jump.PreviewPos );
          }
          if ( movement <= 0 ) return 0;

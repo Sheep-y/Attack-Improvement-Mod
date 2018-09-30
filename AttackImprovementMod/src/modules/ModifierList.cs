@@ -175,7 +175,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void SetToolTips ( CombatHUDWeaponSlot slot, Dictionary<string, Func<AttackModifier>> factors ) { try {
-         AttackPos = HUD.SelectionHandler.ActiveState.PreviewPos;
+         AttackPos = ActiveState.PreviewPos;
          tip = slot.ToolTipHoverElement;
          thisModifier = "(Init)";
          int TotalModifiers = 0;
@@ -300,8 +300,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ Harmony.HarmonyPriority( Harmony.Priority.VeryHigh ) ]
       public static void SaveRangedToolTipState ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          CombatHUDWeaponSlot slot = __instance;
-         LineOfFire = HUD.SelectionHandler.ActiveState.FiringPreview.GetPreviewInfo( target as AbstractActor ).LOFLevel;
-         IsMoraleAttack = HUD.SelectionHandler.ActiveState.SelectionType == SelectionType.FireMorale;
+         LineOfFire = ActiveState.FiringPreview.GetPreviewInfo( target as AbstractActor ).LOFLevel;
+         IsMoraleAttack = ActiveState.SelectionType == SelectionType.FireMorale;
          SaveStates( HUD.SelectedActor, target, slot.DisplayedWeapon );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
