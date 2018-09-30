@@ -390,7 +390,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       public void Patch ( MethodBase patched, HarmonyMethod prefix, HarmonyMethod postfix, HarmonyMethod transpiler = null ) {
-         string pre = prefix?.method?.Name, post = postfix?.method?.Name;
+         string pre = prefix?.method?.Name, post = postfix?.method?.Name, trans = transpiler?.method?.Name;
          if ( patched == null ) {
             Log.Error( "Method not found. Cannot patch [ {0} : {1} ]", pre, post );
             return;
@@ -400,7 +400,7 @@ namespace Sheepy.BattleTechMod {
             Log.Info( "Harmony instance \"{0}\"", Id );
          }
          Mod.ModHarmony.Patch( patched, prefix, postfix, transpiler );
-         Log.Verbo( "Patched: {0} {1} [ {2} : {3} : {4} ]", patched.DeclaringType, patched, pre, post, transpiler );
+         Log.Verbo( "Patched: {0} {1} [ {2} : {3} : {4} ]", patched.DeclaringType, patched, pre, post, trans );
       }
 
       public static IEnumerable<CodeInstruction> LogIL ( IEnumerable<CodeInstruction> input, Logger logger ) {

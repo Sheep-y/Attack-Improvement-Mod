@@ -461,13 +461,14 @@ These settings can be changed in `settings.json`.
 > Setting: `IncreaseMeleePositionChoice`  (true/false, default true)<br>
 > Setting: `IncreaseDFAPositionChoice`  (true/false, default true)
 >
-> When true, melee and DFA can use all available positions, instead of nearest three.  Compatible with MeleeMover.
+> When true, melee and DFA can use all available positions, instead of nearest three.
+> Compatible with [MeleeMover](https://www.nexusmods.com/battletech/mods/226).
 <br>
 
 > Setting: `UnlockMeleePositioning`  (true/false, default true)
 >
 > When true, player units may move to another melee position when target is already in melee range.
-> When the mod "MeleeMover" is detected, this setting will be disabled to avoid conflicts.
+> A warning will be logged when overridden by [MeleeMover](https://www.nexusmods.com/battletech/mods/226), but otherwise compatible.
 
 
 **Adjust Max Height Offset**
@@ -1019,9 +1020,6 @@ Mod settings changed by these behaviours are not saved.  If you want to replace 
 
 **[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)**
 AIM will skip line styling and arc point adjustment to not crash line drawings.
-
-**[MeleeMover](https://www.nexusmods.com/battletech/mods/226)**
-AIM will skip its own melee unlock to preserve sprint range melee.
 
 **[Real Hit Chance](https://www.nexusmods.com/battletech/mods/90)**
 AIM will enable corrected hit chance display and override this mod, since it does not support AIM features such as adjustable correction strength.

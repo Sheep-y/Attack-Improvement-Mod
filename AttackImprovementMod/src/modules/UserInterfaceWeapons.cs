@@ -111,7 +111,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             text = string.Format( HUD.WeaponPanel.HeatFormatString, text, Mathf.RoundToInt( weapon.HeatDamagePerShot ) );
          if ( weapon.ShotsWhenFired > 1 )
             text = string.Format( "{0} <#FFFFFF>(x{1})", text, weapon.ShotsWhenFired );
-         Verbo( text );
          __instance.DamageText.SetText( text, new object[0] );
       }                 catch ( Exception ex ) { Error( ex ); } }
 

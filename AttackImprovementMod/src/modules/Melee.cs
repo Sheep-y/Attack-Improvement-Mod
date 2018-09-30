@@ -12,10 +12,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStartsOnce () {
          Type PathingType = typeof( Pathing );
-         if ( Settings.UnlockMeleePositioning && HasMod( "de.morphyum.MeleeMover", "MeleeMover.MeleeMover" ) ) {
-            BattleMod.BTML_LOG.Warn( Mod.Name + " detected morphyum's MeleeMover, melee positioning unlock left in MeleeMover's hands." );
-            Settings.UnlockMeleePositioning = false;
-         }
          if ( Settings.UnlockMeleePositioning )
             Patch( PathingType, "GetMeleeDestsForTarget", typeof( AbstractActor ), null, null, "UnlockMeleeDests" );
 
@@ -41,6 +37,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
+      [ HarmonyPriority( Priority.Low ) ]
       public static IEnumerable<CodeInstruction> UnlockMeleeDests ( IEnumerable<CodeInstruction> input ) {
          return ReplaceIL( input,
             ( code ) => code.opcode.Name == "ldc.r4" && code.operand != null && code.operand.Equals( 10f ),
