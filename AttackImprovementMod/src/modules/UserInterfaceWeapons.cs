@@ -3,10 +3,13 @@ using BattleTech;
 using Localize;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
+   using static System.Reflection.BindingFlags;
 
    public class UserInterfaceWeapons : BattleModModule {
 
@@ -35,8 +38,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.AltKeyWeaponStability )
             Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleStabilityDamage", null );
+
+         if ( HasMod( "com.joelmeador.WeaponRealizer", "WeaponRealizer.Core" ) ) TryRun( ModLog, InitWeaponRealizerBridge );
       }
 
+      private void InitWeaponRealizerBridge () {
+         Assembly WeaponRealizer = AppDomain.CurrentDomain.GetAssemblies().First( e => e.GetName().Name == "WeaponRealizer" );
+         Type WeaponRealizerCalculator = WeaponRealizer?.GetType( "WeaponRealizer.Calculator" );
+         WeaponRealizerDamageModifiers = WeaponRealizerCalculator?.GetMethod( "ApplyAllDamageModifiers", Static | NonPublic );
+         if ( WeaponRealizerDamageModifiers == null )
+            BattleMod.BTML_LOG.Warn( "Attack Improvement Mod cannot bridge with WeaponRealizer. Damage prediction may be inaccurate." );
+         else
+            Info( "Attack Improvement Mod has bridged with WeaponRealizer.Calculator on damage prediction." );
+      }
+      
       // ============ Mouseover Hint ============
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
@@ -73,6 +88,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Weapon Panel ============
 
+      private static MethodInfo WeaponRealizerDamageModifiers;
+
       private static float TotalDamage, AverageDamage;
       private static CombatHUDWeaponSlot TotalSlot;
 
@@ -97,12 +114,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( Settings.ShowReducedWeaponDamage && target is AbstractActor actor )
 			      dmg *= actor.StatCollection.GetValue<float>("ReceivedInstabilityMultiplier") * actor.EntrenchedMultiplier;
             if ( weapon.IsEnabled ) AddToTotalDamage( dmg, __instance );
-            text = "<#FFFF00>" + (int) dmg;
+            text = "<#FFFF00>" + (int) dmg + "s";
          } else {
             if ( ActiveState is SelectionStateFireMulti multi && __instance.TargetIndex < 0 ) return;
             Vector2 position = ActiveState?.PreviewPos ?? weapon.parent.CurrentPosition;
             float raw = weapon.DamagePerShotAdjusted(); // damage displayed by vanilla
             float dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
+            if ( WeaponRealizerDamageModifiers != null )
+               dmg = (float) WeaponRealizerDamageModifiers.Invoke( null, new object[]{ weapon.parent, target, weapon, dmg, false } );
             if ( weapon.IsEnabled ) AddToTotalDamage( dmg, __instance );
             if ( Math.Abs( raw - dmg ) < 0.01 ) return;
             text = ( (int) dmg ).ToString();
@@ -110,7 +129,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( weapon.HeatDamagePerShot > 0 )
             text = string.Format( HUD.WeaponPanel.HeatFormatString, text, Mathf.RoundToInt( weapon.HeatDamagePerShot ) );
          if ( weapon.ShotsWhenFired > 1 )
-            text = string.Format( "{0} <#FFFFFF>(x{1})", text, weapon.ShotsWhenFired );
+            text = string.Format( "{0}</color> (x{1})", text, weapon.ShotsWhenFired );
          __instance.DamageText.SetText( text, new object[0] );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
@@ -139,8 +158,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   AddToTotalDamage( w.DamagePerShotAdjusted(), slot );
             }
          }
-         TotalSlot.DamageText.text = ( (int) TotalDamage ).ToString();
-         TotalSlot.HitChanceText.text = ( (int) AverageDamage ).ToString();
+         string prefix = ShowingStabilityDamage ? "<#FFFF00>" : "", postfix = ShowingStabilityDamage ? "s" : "";
+         TotalSlot.DamageText.text = prefix + (int) TotalDamage + postfix;
+         TotalSlot.HitChanceText.text = prefix + (int) AverageDamage + postfix;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void RefreshTotalDamage () {
