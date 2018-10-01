@@ -153,7 +153,7 @@ namespace Sheepy.BattleTechMod {
          if ( arg == null || arg is string || arg is ValueType || level > 10 ) return arg;
          if ( arg is Text text ) 
             return text.ToString( true );
-         else if ( arg is AbstractActor unit )
+         else if ( arg is ICombatant unit )
             return unit.DisplayName.ToString() + " (" + unit.GetPilot()?.Callsign + ( unit.team.IsLocalPlayer ? ",PC" : ",NPC" ) + ")";
          else if ( arg is MechComponent comp )
             if ( string.IsNullOrEmpty( comp.uid ) )
