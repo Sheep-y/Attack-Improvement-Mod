@@ -1,5 +1,6 @@
 ﻿using BattleTech.UI;
 using BattleTech;
+using Harmony;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +9,6 @@ using UnityEngine;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using Harmony;
    using static Mod;
 
    public class LineOfSight : BattleModModule {
@@ -154,7 +154,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // Modded materials
       private static Dictionary<Line,Color?[]> parsedColor; // Exists until Mats are created. Each row and colour may be null.
-      private static Material[][] Mats; // Replaces parsedColor. Either whole row is null or whole row is filled.
+      private static LosMaterial[][] Mats; // Replaces parsedColor. Either whole row is null or whole row is filled.
       internal const int LOSDirectionCount = 5;
 
       private static void InitSettings () {
@@ -180,20 +180,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Dotted = OrigOutOfRangeMat = me.MaterialOutOfRange;
             OrigColours = new Color[]{ me.LOSInRange, me.LOSOutOfRange, me.LOSUnlockedTarget, me.LOSLockedTarget, me.LOSMultiTargetKBSelection, me.LOSBlocked };
 
-            Mats = new Material[ NoAttack + 1 ][];
+            Mats = new LosMaterial[ NoAttack + 1 ][];
             foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) )
                Mats[ (int) line ] = NewMat( line );
 
             // Make sure post mat is applied even if pre mat was not modified
             if ( Mats[ BlockedPost ] != null && Mats[ BlockedPre ] == null ) {
-               Mats[ BlockedPre ] = new Material[ LOSDirectionCount ];
+               Mats[ BlockedPre ] = new LosMaterial[ LOSDirectionCount ];
                for ( int i = 0 ; i < LOSDirectionCount ; i++ )
-                  Mats[ BlockedPre ][i] = new Material( OrigInRangeMat ) { name = "BlockedPreLOS"+i };
+                  Mats[ BlockedPre ][i] = new LosMaterial( OrigColours[5], false, (float) Settings.LOSWidthBlocked, "BlockedPreLOS"+i );
             }
             parsedColor = null;
          }
       } catch ( Exception ex ) {
-         Mats = new Material[ NoAttack + 1 ][]; // Reset all materials
+         Mats = new LosMaterial[ NoAttack + 1 ][]; // Reset all materials
          Error( ex );
       } }
 
@@ -217,8 +217,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             dirIndex = canSee ? Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) ) : 0;
          }
          if ( dirIndex != lastDirIndex && Mats[ NoAttack ] != null ) {
-            me.MaterialOutOfRange = Mats[ NoAttack ][ dirIndex ];
-            me.LOSOutOfRange = Mats[ NoAttack ][ dirIndex ].color;
+            me.MaterialOutOfRange = Mats[ NoAttack ][ dirIndex ].GetMaterial();
+            me.LOSOutOfRange = Mats[ NoAttack ][ dirIndex ].GetColor();
          }
          lastDirIndex = dirIndex;
          if ( isMelee )
@@ -230,7 +230,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   SwapMat( me, Clear, dirIndex, ref me.LOSInRange, usingMultifire );
                else {
                   if ( SwapMat( me, BlockedPre, dirIndex, ref me.LOSInRange, usingMultifire ) )
-                     me.LOSBlocked = Mats[ BlockedPre ][ dirIndex ].color;
+                     me.LOSBlocked = Mats[ BlockedPre ][ dirIndex ].GetColor();
                }
             else
                SwapMat( me, Indirect, dirIndex, ref me.LOSInRange, usingMultifire );
@@ -240,8 +240,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void CleanupLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
          //Log( "Mat = {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
          if ( thisLine.material.name.StartsWith( "BlockedPreLOS" ) ) {
-            thisLine.material = Mats[ BlockedPost ][ lastDirIndex ];
-            thisLine.startColor = thisLine.endColor = Mats[ BlockedPost ][ lastDirIndex ].color;
+            thisLine.material = Mats[ BlockedPost ][ lastDirIndex ].GetMaterial();
+            thisLine.startColor = thisLine.endColor = Mats[ BlockedPost ][ lastDirIndex ].GetColor();
             //Log( "Swap to blocked post {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
          }
          if ( RestoreMat ) {
@@ -265,7 +265,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Utils ============
 
-      private static Material[] NewMat ( Line line ) {
+      private static LosMaterial[] NewMat ( Line line ) {
          string name = line.ToString();
          parsedColor.TryGetValue( line, out Color?[] colors );
          bool dotted  = (bool) typeof( ModSettings ).GetField( "LOS" + name + "Dotted" ).GetValue( Settings );
@@ -274,35 +274,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             colors = new Color?[ LOSDirectionCount ];
          }
          //Log( "NewMat " + line + " = " + Join( ",", colors ) );
-         Material[] lineMats = new Material[ LOSDirectionCount ];
+         LosMaterial[] lineMats = new LosMaterial[ LOSDirectionCount ];
          for ( int i = 0 ; i < LOSDirectionCount ; i++ )
             lineMats[ i ] = NewMat( name + "LOS" + i, name.StartsWith( "NoAttack" ), colors[i], i > 0 ? colors[i-1] : null, dotted );
          return lineMats;
       }
 
-      private static Material NewMat ( string name, bool origInRange, Color? color, Color? fallback, bool dotted ) { try {
-         Color newColour;
-         if ( color != null )
-            newColour = color.GetValueOrDefault();
-         else if ( fallback != null )
-            newColour = fallback.GetValueOrDefault(); // Use last colour if null
-         else
-            newColour = origInRange ? OrigInRangeMat.color : OrigOutOfRangeMat.color; // Restore original colour if dotted/solid is reversed
-         Material newMat = new Material( dotted ? Dotted : Solid ) { name = name, color = newColour };
-
-         // Blocked Post scale need to be override if normal width is not same as blocked width
-         float width = (float) Settings.LOSWidthBlocked, origWidth = Settings.LOSWidth <= 0 ? 1 : (float) Settings.LOSWidth;
-         if ( name.StartsWith( "BlockedPost" ) && dotted && origWidth != width ) {
-            Vector2 s = newMat.mainTextureScale;
-            s.x *= origWidth / width;
-            newMat.mainTextureScale = s;
-         }
-         //Verbo( "Created {0} {1}, Color {2} = {3}", newMat.name, dotted ? "Dotted":"Solid", color, newColour );
-         return newMat;
+      private static LosMaterial NewMat ( string name, bool origInRange, Color? color, Color? fallback, bool dotted ) { try {
+         return new LosMaterial( color ?? fallback ?? OrigColours[ origInRange ? 0 : 1 ], dotted, (float) Settings.LOSWidth, name );
       }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
       private static bool SwapMat ( WeaponRangeIndicators __instance, int matIndex, int dirIndex, ref Color lineColor, bool IsMultifire ) {
-         Material newMat = Mats[ matIndex ]?[ dirIndex ];
+         Material newMat = Mats[ matIndex ]?[ dirIndex ].GetMaterial();
          if ( newMat == null ) return false;
          WeaponRangeIndicators me = __instance;
          me.MaterialInRange = newMat;
@@ -336,5 +319,27 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       LOSWidthBlocked = 0.4
       LOSWidthFacingTargetMultiplier = 2.5f
       */
+
+      public class LosMaterial {
+         private readonly Material Material;
+         private readonly Color Color;
+         public readonly float Width;
+         public LosMaterial ( Color color, bool dotted, float width, string name ) {
+            Color = color;
+            Width = width;
+            Material = new Material( dotted ? Dotted : Solid ) { name = name, color = Color };
+            if ( dotted && width != 1 ) {
+               Vector2 s = Material.mainTextureScale;
+               s.x *= 1 / width;
+               Material.mainTextureScale = s;
+            }
+         }
+         public Material GetMaterial () {
+            return Material;
+         }
+         public Color GetColor () {
+            return Color;
+         }
+      }
    }
 }
