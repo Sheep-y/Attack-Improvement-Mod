@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Reflection;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using BattleTech.UI;
+   using UnityEngine;
    using static Mod;
    using static System.Reflection.BindingFlags;
 
@@ -22,6 +24,40 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( JumpPathing ), "GetDFADestsForTarget", new Type[]{ typeof( AbstractActor ), typeof( List<AbstractActor> ) }, "SetDFATarget", "ClearMeleeTarget" );
                Patch( typeof( JumpPathing ), "GetPathNodesForPoints", null, "CheckMeleeVerticalOffset" );
             }
+
+         Patch( typeof( SelectionStateMove ), "GetAllMeleeTargets", null, "AddBuildingsToMeleeTargets" );
+      }
+
+      public static void AddBuildingsToMeleeTargets ( SelectionStateMove __instance, List<ICombatant> __result ) { try {
+         foreach ( ICombatant target in GetAllTabCombatants( __instance.SelectedActor ) )
+            if ( target is BattleTech.Building && CanMeleeMoveTo( __instance.SelectedActor as Mech, target ) )
+               __result.Add( target );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static List<ICombatant> GetAllTabCombatants ( AbstractActor actor ) {
+         List<ICombatant> list = new List<ICombatant>();
+         if ( actor == null ) return list;
+         foreach ( ICombatant combatant in Combat.GetAllMiscCombatants() ) {
+            if ( ! combatant.IsDead && combatant.IsTabTarget && Combat.HostilityMatrix.CanShoot( actor.team.GUID, combatant.team.GUID ) )
+               list.Add( combatant );
+         }
+         return list;
+      }
+
+      private static PropertyInfo PathingMeleeGridProp = typeof( Pathing ).GetProperty( "MeleeGrid", NonPublic | Instance );
+
+      public static bool CanMeleeMoveTo ( Mech attacker, ICombatant target ) {
+         if ( attacker == null ) return false;
+         PathNodeGrid MeleeGrid = (PathNodeGrid) PathingMeleeGridProp.GetValue( attacker.Pathing, null );
+			if ( MeleeGrid == null || attacker.VisibilityToTargetUnit( target ) < VisibilityLevel.LOSFull ) return false;
+			List<Vector3> adjacentPointsOnGrid = Combat.HexGrid.GetAdjacentPointsOnGrid( target.CurrentPosition );
+			List<PathNode> pathNodesForPoints = Pathing.GetPathNodesForPoints( adjacentPointsOnGrid, MeleeGrid );
+			for ( int i = pathNodesForPoints.Count - 1; i >= 0; i--) {
+            //Verbo( "Check {0} Pos {1}: {2} || {3}", attacker, target, pathNodesForPoints[ i ].Position.y - target.CurrentPosition.y, MeleeGrid.FindBlockerReciprocal( pathNodesForPoints[ i ].Position, target.CurrentPosition ) );
+            if ( Mathf.Abs( pathNodesForPoints[ i ].Position.y - target.CurrentPosition.y ) > CombatConstants.MoveConstants.MaxMeleeVerticalOffset )
+               pathNodesForPoints.RemoveAt(i);
+			}
+         return pathNodesForPoints.Count > 0;
       }
 
       public override void CombatStarts () {
