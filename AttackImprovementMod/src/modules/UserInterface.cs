@@ -63,7 +63,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( MoveStatusPreview ), "DisplayPreviewStatus", null, "AppendDangerousTerrainText" );
          }
          if ( Settings.ShowMeleeTerrain ) { // Rewrite with transpiler
-            UpdateStatusMethod= typeof( CombatMovementReticle ).GetMethod( "UpdateStatusPreview", NonPublic | Instance );
+            UpdateStatusMethod = typeof( CombatMovementReticle ).GetMethod( "UpdateStatusPreview", NonPublic | Instance );
+            StatusPreviewProp = typeof( CombatMovementReticle ).GetProperty( "StatusPreview", NonPublic | Instance );
             if ( SidePanelProp == null )
                Warn( "MoveStatusPreview.sidePanel not found, ShowDangerousTerrain not patched." );
             else
@@ -313,13 +314,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             shownColor = colour.GetValueOrDefault();
       }
 
-      // ============ Others ============
+      // ============ Terrain ============
+
+      private static PropertyInfo SidePanelProp, StatusPreviewProp;
+      private static MethodInfo UpdateStatusMethod;
 
       public static void FixMoveDestinationHeight ( Pathing __instance ) {
          __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
       }
-
-      private static PropertyInfo SidePanelProp;
 
       public static void AppendDangerousTerrainText ( MoveStatusPreview __instance, AbstractActor actor, Vector3 worldPos ) { try {
          MapTerrainDataCell cell = Combat.EncounterLayerData.GetCellAt( worldPos ).relatedTerrainCell;
@@ -342,14 +344,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          sidePanel?.ForceShowSingleFrame( new Text( title ), new Text( text ), null, false );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static MethodInfo UpdateStatusMethod;
-
       public static void ShowMeleeTerrainText ( CombatMovementReticle __instance, AbstractActor actor, bool isMelee, bool isTargetLocked, Vector3 mousePos, bool isBadTutorialPath ) { try {
          if ( ! isMelee ) return;
          Pathing pathing = actor.Pathing;
          if ( pathing == null || pathing.CurrentPath.IsNullOrEmpty() ) return;
-         UpdateStatusMethod.Invoke( __instance, new object[]{ actor, pathing.ResultDestination + actor.HighestLOSPosition, pathing.MoveType } );
-         // TODO: Update status preview text to melee
+         UpdateStatusMethod?.Invoke( __instance, new object[]{ actor, pathing.ResultDestination + actor.HighestLOSPosition, pathing.MoveType } );
+         ( (MoveStatusPreview) StatusPreviewProp?.GetValue( __instance, null ) ).MoveTypeText.text = Translate( "Melee" );
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
