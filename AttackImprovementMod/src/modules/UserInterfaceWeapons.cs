@@ -14,7 +14,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class UserInterfaceWeapons : BattleModModule {
 
       public override void CombatStartsOnce () {
-         Type slotType = typeof( CombatHUDWeaponSlot );
+         Type slotType = typeof( CombatHUDWeaponSlot ), panelType = typeof( CombatHUDWeaponPanel );
+
+         SlotSetTargetIndexMethod = slotType.GetMethod( "SetTargetIndex", NonPublic | Instance );
+         Patch( panelType, "OnActorMultiTargeted", "OverrideMultiTargetAssignment", null );
+
          if ( Settings.ShowBaseHitchance ) {
             Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
             Patch( slotType, "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
@@ -25,16 +29,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
+
          if ( Settings.ShowReducedWeaponDamage || Settings.AltKeyWeaponStability )
             Patch( slotType, "RefreshDisplayedWeapon", null, "UpdateWeaponDamage" );
          if ( Settings.ShowTotalWeaponDamage ) {
-            Patch( typeof( CombatHUDWeaponPanel ), "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
-            Patch( typeof( CombatHUDWeaponPanel ), "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
+            Patch( panelType, "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
+            Patch( panelType, "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
          }
          if ( Settings.ShowReducedWeaponDamage || Settings.ShowTotalWeaponDamage ) {
-            // Update damage numbers (and multi-target highlights) after all slots are in a correct state.
+            // Update damage numbers (and multi-target highlights) _after_ all slots are in a correct state.
             Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
-            Patch( typeof( CombatHUDWeaponSlot ), "OnPointerUp", null, "RefreshTotalDamage" );
+            Patch( slotType, "OnPointerUp", null, "RefreshTotalDamage" );
          }
          if ( Settings.AltKeyWeaponStability )
             Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleStabilityDamage", null );
@@ -51,6 +56,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else
             Info( "Attack Improvement Mod has bridged with WeaponRealizer.Calculator on damage prediction." );
       }
+
+      // ============ Multi-Target target selection ============
+
+      private static MethodInfo SlotSetTargetIndexMethod;
+
+      public static bool OverrideMultiTargetAssignment ( CombatHUDWeaponPanel __instance, List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
+         SelectionStateFireMulti multi = ActiveState as SelectionStateFireMulti;
+         List<ICombatant> targets = multi?.AllTargetedCombatants;
+         if ( targets.IsNullOrEmpty() ) return true;
+			foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
+            Weapon w = slot.DisplayedWeapon;
+            if ( w == null || w.Category == WeaponCategory.Melee ) continue;
+            float hitChance = 0;
+            foreach ( ICombatant target in targets ) {
+               if ( ! w.IsEnabled || ! w.WillFireAtTarget( target ) ) continue;
+               float newChance = Combat.ToHit.GetToHitChance( w.parent, w, target, w.parent.CurrentPosition, target.CurrentPosition, 1, MeleeAttackType.NotSet, false );
+               if ( newChance >= hitChance ) continue;
+               SlotSetTargetIndexMethod.Invoke( slot, new object[]{ multi.AssignWeaponToTarget( w, target ), false } );
+            }
+         }
+			__instance.RefreshDisplayedWeapons();
+         return false;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
       
       // ============ Mouseover Hint ============
 
