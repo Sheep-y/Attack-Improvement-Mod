@@ -13,6 +13,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "You can still quickly switch out of Multi-Target by pressing another action." } ) ]
       public bool FixMultiTargetBackout = true;
 
+      [ JsonComment( "When a target is selected/deselected during Multi-Target, aggressively reassign enabled weapons by hit chance.  Default true." ) ]
+      public bool AggressiveMultiTargetAssignment = true;
+
       [ JsonComment( "Allow friendly fire while pressing Alt key.  Default true." ) ]
       public bool AltKeyFriendlyFire = true;
 

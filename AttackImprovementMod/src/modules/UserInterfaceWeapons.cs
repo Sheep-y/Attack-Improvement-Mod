@@ -16,8 +16,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStartsOnce () {
          Type slotType = typeof( CombatHUDWeaponSlot ), panelType = typeof( CombatHUDWeaponPanel );
 
-         SlotSetTargetIndexMethod = slotType.GetMethod( "SetTargetIndex", NonPublic | Instance );
-         Patch( panelType, "OnActorMultiTargeted", "OverrideMultiTargetAssignment", null );
+         if ( Settings.AggressiveMultiTargetAssignment ) {
+            SlotSetTargetIndexMethod = slotType.GetMethod( "SetTargetIndex", NonPublic | Instance );
+            if ( SlotSetTargetIndexMethod != null ) {
+               Patch( panelType, "OnActorMultiTargeted", "OverrideMultiTargetAssignment", null );
+               Patch( panelType, "OnActorMultiTargetCleared", "OverrideMultiTargetAssignment", null );
+            } else
+               Warn( "CombatHUDWeaponSlot.SetTargetIndex not found. AggressiveMultiTargetAssignment not patched." );
+         }
 
          if ( Settings.ShowBaseHitchance ) {
             Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
@@ -65,15 +71,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          SelectionStateFireMulti multi = ActiveState as SelectionStateFireMulti;
          List<ICombatant> targets = multi?.AllTargetedCombatants;
          if ( targets.IsNullOrEmpty() ) return true;
-			foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
-            Weapon w = slot.DisplayedWeapon;
+            foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
+            Weapon w = slot?.DisplayedWeapon;
             if ( w == null || w.Category == WeaponCategory.Melee ) continue;
             float hitChance = 0;
             foreach ( ICombatant target in targets ) {
                if ( ! w.IsEnabled || ! w.WillFireAtTarget( target ) ) continue;
                float newChance = Combat.ToHit.GetToHitChance( w.parent, w, target, w.parent.CurrentPosition, target.CurrentPosition, 1, MeleeAttackType.NotSet, false );
-               if ( newChance >= hitChance ) continue;
+               if ( newChance <= hitChance ) continue;
                SlotSetTargetIndexMethod.Invoke( slot, new object[]{ multi.AssignWeaponToTarget( w, target ), false } );
+               hitChance = newChance;
             }
          }
 			__instance.RefreshDisplayedWeapons();
