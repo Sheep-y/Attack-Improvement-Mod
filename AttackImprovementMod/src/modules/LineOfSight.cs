@@ -335,10 +335,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          public Material GetMaterial () {
+            Material.color = GetColor();
             return Material;
          }
          public Color GetColor () {
-            return Color;
+            Color.RGBToHSV( Color, out float H, out float S, out float V );
+            int tick = Environment.TickCount & Int32.MaxValue, cycleH = 3000;
+            float H2 = ShiftHue( H, 0.05f * Math.Abs( tick % ( cycleH * 2 ) - cycleH ) / cycleH );
+            return Color.HSVToRGB( H2, S, V );
+         }
+         private static float ShiftHue ( float v, float d ) {
+            v += d;
+            while ( v > 1 ) v -= 1;
+            while ( v < 0 ) v += 1;
+            return v;
          }
       }
    }
