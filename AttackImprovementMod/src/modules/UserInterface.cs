@@ -67,8 +67,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             StatusPreviewProp = typeof( CombatMovementReticle ).GetProperty( "StatusPreview", NonPublic | Instance );
             if ( SidePanelProp == null )
                Warn( "MoveStatusPreview.sidePanel not found, ShowDangerousTerrain not patched." );
-            else
+            else {
                Patch( typeof( CombatMovementReticle ), "DrawPath", null, "ShowMeleeTerrainText" );
+               Patch( typeof( CombatMovementReticle ), "drawJumpPath", null, "ShowDFATerrainText" );
+            }
          }
 
          if ( Settings.AltKeyFriendlyFire ) {
@@ -344,12 +346,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          sidePanel?.ForceShowSingleFrame( new Text( title ), new Text( text ), null, false );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void ShowMeleeTerrainText ( CombatMovementReticle __instance, AbstractActor actor, bool isMelee, bool isTargetLocked, Vector3 mousePos, bool isBadTutorialPath ) { try {
-         if ( ! isMelee ) return;
+      public static void ShowMeleeTerrainText ( CombatMovementReticle __instance, AbstractActor actor, bool isMelee ) {
+         if ( isMelee ) ShowTerrainText( __instance, actor, "Melee" );
+      }
+
+      public static void ShowDFATerrainText ( CombatMovementReticle __instance, AbstractActor actor, bool isMelee ) {
+         if ( isMelee ) ShowTerrainText( __instance, actor, "DFA" );
+      }
+
+      public static void ShowTerrainText ( CombatMovementReticle __instance, AbstractActor actor, string action ) { try {
          Pathing pathing = actor.Pathing;
          if ( pathing == null || pathing.CurrentPath.IsNullOrEmpty() ) return;
          UpdateStatusMethod?.Invoke( __instance, new object[]{ actor, pathing.ResultDestination + actor.HighestLOSPosition, pathing.MoveType } );
-         ( (MoveStatusPreview) StatusPreviewProp?.GetValue( __instance, null ) ).MoveTypeText.text = Translate( "Melee" );
+         ( (MoveStatusPreview) StatusPreviewProp?.GetValue( __instance, null ) ).MoveTypeText.text = Translate( action );
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
