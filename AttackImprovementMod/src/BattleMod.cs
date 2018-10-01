@@ -144,25 +144,27 @@ namespace Sheepy.BattleTechMod {
          } else if ( args == null ) 
             return true;
          // Format parameters
-         for ( int i = 0, len = args.Length ; i < len ; i++ ) {
-            object arg = args[ i ];
-            if ( arg is string )
-               continue;
-            if ( arg is Text text )
-               args[i] = text.ToString( true );
-            else if ( arg is AbstractActor unit )
-               args[i] = unit.DisplayName.ToString() + " (" + unit.GetPilot()?.Callsign + ( unit.team.IsLocalPlayer ? ",PC" : ",NPC" ) + ")";
-            else if ( arg is MechComponent comp )
-               if ( string.IsNullOrEmpty( comp.uid ) )
-                  args[i] = comp.UIName.ToString();
-               else
-                  args[i] = comp.UIName.ToString() + " (#" + comp.uid + ")";
-            else if ( arg is MechComponentDef def )
-               args[i] = def.Description.Id;
-            else if ( arg is System.Collections.IEnumerable list )
-               args[i] = "[" + list.Concat() + "]";
-         }
+         for ( int i = 0, len = args.Length ; i < len ; i++ )
+            args[ i ] = FormatParameter( args[i] );
          return true;
+      }
+
+      private static object FormatParameter ( object arg, int level = 0 ) {
+         if ( arg == null || arg is string || arg is ValueType || level > 10 ) return arg;
+         if ( arg is Text text ) 
+            return text.ToString( true );
+         else if ( arg is AbstractActor unit )
+            return unit.DisplayName.ToString() + " (" + unit.GetPilot()?.Callsign + ( unit.team.IsLocalPlayer ? ",PC" : ",NPC" ) + ")";
+         else if ( arg is MechComponent comp )
+            if ( string.IsNullOrEmpty( comp.uid ) )
+               return comp.UIName.ToString();
+            else
+               return comp.UIName.ToString() + " (#" + comp.uid + ")";
+         else if ( arg is MechComponentDef def )
+            return def.Description.Id;
+         else if ( arg is System.Collections.IEnumerable list )
+            return "[" + list.Concat( ", ", e => FormatParameter( e, level + 1 )?.ToString() ) + "]";
+         return arg.ToString();
       }
 
       // ============ Execution ============
