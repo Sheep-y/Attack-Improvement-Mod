@@ -45,7 +45,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( IndicatorType, "ShowLinesToAllEnemies", "SetupLOSAnimation", null );
                Patch( IndicatorType, "ShowLineToTarget", "SetupLOSAnimation", null );
             }
-            Patch( IndicatorType, "ShowLinesToAllEnemies", null, "ShowBlockedLOS" );
             Patch( IndicatorType, "ShowLineToTarget", null, "ShowBlockedLOS" );
             Patch( IndicatorType, "DrawLine", "SetupLOS", "SetBlockedLOS" );
             Patch( IndicatorType, "getLine" , null, "FixLOSWidth" );
@@ -220,16 +219,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Los Material Swap ============
 
       private static float HueLerp, ValueLerp;
-      private static LineRenderer thisLine;
-
-      public static void FixLOSWidth ( LineRenderer __result, WeaponRangeIndicators __instance ) {
-         thisLine = __result;
-         // Reset line width to default to prevent blocked width from leaking to no attack width.
-         thisLine.startWidth = __instance.LOSWidthBegin;
-         thisLine.endWidth = __instance.LOSWidthEnd;
-      }
-
       private static int lastDirIndex;
+      private static LineRenderer lineA, lineB;
+
+      public static void FixLOSWidth ( LineRenderer __result ) {
+         if ( lineA == null ) lineA = __result; else lineB = __result;
+      }
 
       public static void SetupLOSAnimation () {
          int tick = Environment.TickCount & int.MaxValue;
@@ -240,8 +235,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void SetupLOS ( WeaponRangeIndicators __instance, Vector3 position, AbstractActor selectedActor, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          if ( Mats == null ) return;
          WeaponRangeIndicators me = __instance;
-         ValueLerp += 0.4f;
-         if ( ValueLerp > 1 ) ValueLerp -= 2;
+         lineA = lineB = null;
+         if ( LinesAnimated ) {
+            ValueLerp += 0.4f;
+            if ( ValueLerp > 1 ) ValueLerp -= 2;
+         }
 
          int typeIndex = 0, dirIndex = 0;
          if ( target is Mech || target is Vehicle ) {
@@ -256,10 +254,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else {
             FiringPreviewManager.PreviewInfo info = ActiveState.FiringPreview.GetPreviewInfo( target );
             if ( info.HasLOF )
-               if ( info.LOFLevel != LineOfFireLevel.LOFClear ) {
+               if ( info.LOFLevel != LineOfFireLevel.LOFClear )
                   typeIndex = BlockedPre;
-                  Mats[ BlockedPost ][ dirIndex ].ApplyBlocked( me );
-               } else
+               else
                   typeIndex = Clear;
             else
                typeIndex = Indirect;
@@ -274,17 +271,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void SetBlockedLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
-         //Verbo( "Mat = {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
-         if ( thisLine.material.name.StartsWith( "BlockedPreLOS" ) ) {
-            thisLine.material = Mats[ BlockedPost ][ lastDirIndex ].GetMaterial();
-            thisLine.startColor = thisLine.endColor = thisLine.material.color;
-            //Verbo( "Swap to blocked post {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
-         }
-      }
-
-      // Make sure Blocked LOS is displayed in single target mode.
-      public static void ShowBlockedLOS () {
-         thisLine?.gameObject?.SetActive( true );
+         if ( lineB == null ) return;
+         LosMaterial mat = Mats[ BlockedPost ][ lastDirIndex ];
+         lineB.material = mat.GetMaterial();
+         lineB.startColor = lineB.endColor = lineB.material.color;
+         lineB.startWidth = lineB.endWidth = mat.Width;
+         lineB.gameObject.SetActive( true );
       }
 
       // ============ Arcs ============
@@ -337,10 +329,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                me.LOSUnlockedTarget.a *= 0.8f;
             }
             return this;
-         }
-
-         public void ApplyBlocked ( WeaponRangeIndicators me ) {
-            me.LOSWidthBlocked = Width;  // Colour assigned in SetBlockedLOS
          }
 
          public void ApplyOutOfRange ( WeaponRangeIndicators me ) {
