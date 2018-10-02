@@ -6,8 +6,8 @@ using System.Reflection;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using static HitLocation;
    using static Mod;
+   using static HitLocation;
 
    public class CalledShotPopUp : BattleModModule {
 

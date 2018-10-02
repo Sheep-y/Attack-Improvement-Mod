@@ -327,7 +327,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void AppendDangerousTerrainText ( MoveStatusPreview __instance, AbstractActor actor, Vector3 worldPos ) { try {
          MapTerrainDataCell cell = Combat.EncounterLayerData.GetCellAt( worldPos ).relatedTerrainCell;
-         bool isLandingZone = SplatMapInfo.IsDropshipLandingZone( cell.terrainMask ), 
+         bool isLandingZone = SplatMapInfo.IsDropshipLandingZone( cell.terrainMask ),
               isDangerous = SplatMapInfo.IsDangerousLocation( cell.terrainMask );
          if ( ! isLandingZone && ! isDangerous ) return;
          DesignMaskDef mask = Combat.MapMetaData.GetPriorityDesignMask( cell );

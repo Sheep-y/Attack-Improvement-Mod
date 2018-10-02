@@ -33,7 +33,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          TryRun( ModLog, InitColours );
          LinesChanged = Settings.LOSIndirectDotted      || Settings.LOSMeleeDotted  || Settings.LOSBlockedPostDotted
-                     || Settings.LOSBlockedPreDotted     || Settings.LOSClearDotted || ! Settings.LOSNoAttackDotted 
+                     || Settings.LOSBlockedPreDotted     || Settings.LOSClearDotted || ! Settings.LOSNoAttackDotted
                      || Settings.LOSWidthBlocked != 0.75m || Settings.LOSWidth != 1 || parsedColours.Count > 0;
          LinesAnimated = ( Settings.LOSHueDeviation != 0 && Settings.LOSHueHalfCycleMS > 0 )
                       || ( Settings.LOSBrightnessDeviation != 0 && Settings.LOSBrightnessHalfCycleMS > 0 );
@@ -215,7 +215,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          return lineMats;
       }
-      
+
       // ============ Los Material Swap ============
 
       private static float HueLerp, BrightnessLerp;

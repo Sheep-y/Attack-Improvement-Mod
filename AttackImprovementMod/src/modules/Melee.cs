@@ -99,7 +99,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          //Verbo( "Checking {0} offsets", __result.Count );
          float targetY = thisMeleeTarget.CurrentPosition.y, maxY = 0;
          WeightClass lowerClass = 0;
-			for (int i = __result.Count - 1 ; i >= 0 ; i-- ) {
+         for (int i = __result.Count - 1 ; i >= 0 ; i-- ) {
             float attackerY = __result[ i ].Position.y;
             if ( attackerY > targetY )
                lowerClass = thisMeleeTarget is Mech mech ? mech.weightClass : WeightClass.LIGHT;

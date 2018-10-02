@@ -86,7 +86,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __instance.RefreshDisplayedWeapons();
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
-      
+
       // ============ Mouseover Hint ============
 
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {

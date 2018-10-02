@@ -141,7 +141,7 @@ namespace Sheepy.BattleTechMod {
          if ( ! ( line.message is string ) && args.IsNullOrEmpty() && ! ( line.message is Exception ) ) {
             line.args = args = new object[]{ line.message };
             line.message = "{0}";
-         } else if ( args == null ) 
+         } else if ( args == null )
             return true;
          // Format parameters
          for ( int i = 0, len = args.Length ; i < len ; i++ )
@@ -151,7 +151,7 @@ namespace Sheepy.BattleTechMod {
 
       private static object FormatParameter ( object arg, int level = 0 ) {
          if ( arg == null || arg is string || arg is ValueType || level > 10 ) return arg;
-         if ( arg is Text text ) 
+         if ( arg is Text text )
             return text.ToString( true );
          else if ( arg is ICombatant unit )
             return unit.DisplayName.ToString() + " (" + unit.GetPilot()?.Callsign + ( unit.team.IsLocalPlayer ? ",PC" : ",NPC" ) + ")";
