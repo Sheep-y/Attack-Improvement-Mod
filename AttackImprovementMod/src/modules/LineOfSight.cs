@@ -204,27 +204,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static int lastDirIndex;
 
       public static void SetupLOS ( WeaponRangeIndicators __instance, Vector3 position, AbstractActor selectedActor, ICombatant target, bool usingMultifire, bool isMelee ) { try {
+         if ( Mats == null ) return;
          WeaponRangeIndicators me = __instance;
-         int dirIndex = 0;
+         int typeIndex = 0, dirIndex = 0;
          if ( target is Mech || target is Vehicle ) {
             bool canSee = selectedActor.HasLOSToTargetUnit( target );
             dirIndex = canSee ? Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) ) : 0;
          }
          lastDirIndex = dirIndex;
          if ( isMelee )
-            SwapMat( me, Melee, dirIndex, ref me.LOSLockedTarget, false );
+            typeIndex = Melee;
          else {
             FiringPreviewManager.PreviewInfo info = ActiveState.FiringPreview.GetPreviewInfo( target );
             if ( info.HasLOF )
-               if ( info.LOFLevel == LineOfFireLevel.LOFClear )
-                  SwapMat( me, Clear, dirIndex, ref me.LOSInRange, usingMultifire );
-               else {
-                  SwapMat( me, BlockedPre, dirIndex, ref me.LOSInRange, usingMultifire );
-                  me.LOSBlocked = Mats[ BlockedPre ][ dirIndex ].GetColor();
-               }
+               if ( info.LOFLevel != LineOfFireLevel.LOFClear ) {
+                  typeIndex = BlockedPre;
+                  Mats[ BlockedPost ][ dirIndex ].ApplyBlocked( me, usingMultifire );
+               } else
+                  typeIndex = Clear;
             else
-               SwapMat( me, Indirect, dirIndex, ref me.LOSInRange, usingMultifire );
+               typeIndex = Indirect;
          }
+         Mats[ typeIndex ][ dirIndex ].Apply( me, usingMultifire );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void CleanupLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
@@ -239,12 +240,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // Make sure Blocked LOS is displayed in single target mode.
       public static void ShowBlockedLOS () {
          thisLine?.gameObject?.SetActive( true );
-      }
-
-      private static void SwapMat ( WeaponRangeIndicators __instance, int matIndex, int dirIndex, ref Color lineColor, bool IsMultifire ) {
-         if ( Mats == null ) return;
-         LosMaterial newMat = Mats[ matIndex ][ dirIndex ].Apply( __instance, IsMultifire );
-         //Verbo( "Swapped to {0} {1} {2}", matIndex, dirIndex, newMat.GetMaterial().name );
       }
 
       // ============ Arcs ============
@@ -270,14 +265,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       */
 
       public class LosMaterial {
-         private readonly bool IsInRange, IsBlockedPost;
+         private readonly bool IsInRange;
          private readonly Material Material;
          private readonly Color Color;
          public readonly float Width;
 
          public LosMaterial ( Color color, bool dotted, float width, string name ) {
             IsInRange = ! name.StartsWith( "NoAttack" );
-            IsBlockedPost = name.StartsWith( "BlockedPost" );
             Color = color;
             Width = width;
             Material = new Material( dotted ? Dotted : Solid ) { name = name, color = Color };
@@ -289,16 +283,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public LosMaterial Apply ( WeaponRangeIndicators me, bool IsMultifire ) {
-            if ( IsBlockedPost ) {
-               me.LOSWidthBegin = Width;
-               me.LOSWidthEnd = Width;
-               me.LineTemplate.startWidth = Width;
-               me.LineTemplate.endWidth = Width;
-            } else {
-               me.LOSWidthBlocked = Width;
-            }
+            me.LOSWidthBegin = Width;
+            me.LOSWidthEnd = Width;
+            me.LineTemplate.startWidth = Width;
+            me.LineTemplate.endWidth = Width;
             if ( IsInRange ) {
                me.MaterialInRange = GetMaterial();
+               me.LOSLockedTarget = me.LOSInRange = me.MaterialInRange.color;
                if ( IsMultifire ) {
                   me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = me.MaterialInRange.color;
                   me.LOSUnlockedTarget.a *= 0.8f;
@@ -309,6 +300,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return this;
          }
 
+         public void ApplyBlocked ( WeaponRangeIndicators me, bool IsMultifire ) {
+            me.LOSWidthBlocked = Width;
+            me.LOSBlocked = GetColor();
+         }
+
          public Material GetMaterial () {
             Material.color = GetColor();
             return Material;
@@ -317,7 +313,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          public Color GetColor () {
             Color.RGBToHSV( Color, out float H, out float S, out float V );
             int tick = Environment.TickCount & Int32.MaxValue, cycleH = 3000;
-            float H2 = ShiftHue( H, 0.05f * Math.Abs( tick % ( cycleH * 2 ) - cycleH ) / cycleH );
+            float H2 = ShiftHue( H, 0.03125f * Math.Abs( tick % ( cycleH * 2 ) - cycleH ) / cycleH );
             return Color.HSVToRGB( H2, S, V );
          }
          private static float ShiftHue ( float v, float d ) {
