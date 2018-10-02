@@ -13,6 +13,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class LineOfSight : BattleModModule {
 
+      private static float HueDeviation, ValueDeviation;
+      private static bool LinesChanged, LinesAnimated;
+
       public override void CombatStartsOnce () {
          if ( Settings.FacingMarkerPlayerColors != null || Settings.FacingMarkerEnemyColors != null || Settings.FacingMarkerTargetColors != null ) {
             SetColors = typeof( AttackDirectionIndicator ).GetMethod( "SetColors", NonPublic | Instance );
@@ -29,11 +32,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( IndicatorType, "Init", null, "ResizeLOS" );
 
          TryRun( ModLog, InitColours );
-         bool LinesChanged = Settings.LOSIndirectDotted      || Settings.LOSMeleeDotted  || Settings.LOSBlockedPostDotted
-                          || Settings.LOSBlockedPreDotted     || Settings.LOSClearDotted || ! Settings.LOSNoAttackDotted 
-                          || Settings.LOSWidthBlocked != 0.75m || Settings.LOSWidth != 1 || parsedColours.Count > 0;
+         LinesChanged = Settings.LOSIndirectDotted      || Settings.LOSMeleeDotted  || Settings.LOSBlockedPostDotted
+                     || Settings.LOSBlockedPreDotted     || Settings.LOSClearDotted || ! Settings.LOSNoAttackDotted 
+                     || Settings.LOSWidthBlocked != 0.75m || Settings.LOSWidth != 1 || parsedColours.Count > 0;
+         LinesAnimated = ( Settings.LOSHueDeviation != 0 && Settings.LOSHueHalfCycleMS > 0 )
+                      || ( Settings.LOSBrightnessDeviation != 0 && Settings.LOSBrightnessHalfCycleMS > 0 );
 
-         if ( LinesChanged ) {
+         if ( LinesChanged || LinesAnimated ) {
             Patch( IndicatorType, "Init", null, "CreateLOSTexture" );
             Patch( IndicatorType, "DrawLine", "SetupLOS", "SetBlockedLOS" );
             Patch( IndicatorType, "ShowLineToTarget", null, "ShowBlockedLOS" );
@@ -52,7 +57,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Color[] OrigDirectionMarkerColors; // [ Active #FFFFFF4B, Inactive #F8441464 ]
       private static Color?[] FacingMarkerPlayerColors, FacingMarkerEnemyColors, FacingMarkerTargetColors;
 
-      private static void InitDirectionColors () {
+      private static void InitDirectionColors () { // TODO: Refactor
          FacingMarkerPlayerColors = new Color?[ LOSDirectionCount ];
          FacingMarkerEnemyColors  = new Color?[ LOSDirectionCount ];
          FacingMarkerTargetColors = new Color?[ LOSDirectionCount ];
@@ -69,9 +74,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( active != null && active.Length > i )
                FacingMarkerTargetColors[ i ] = ParseColour( active[ i ] );
          }
-         Info( "Player direction marker = {0}", FacingMarkerPlayerColors.Select( e => ColorUtility.ToHtmlStringRGBA( e.GetValueOrDefault() ) ) );
-         Info( "Enemy  direction marker = {0}", FacingMarkerEnemyColors .Select( e => ColorUtility.ToHtmlStringRGBA( e.GetValueOrDefault() ) ) );
-         Info( "Target direction marker = {0}", FacingMarkerTargetColors.Select( e => ColorUtility.ToHtmlStringRGBA( e.GetValueOrDefault() ) ) );
+         Info( "Player direction marker = {0}", FacingMarkerPlayerColors.Select( e => e.GetValueOrDefault() ) );
+         Info( "Enemy  direction marker = {0}", FacingMarkerEnemyColors .Select( e => e.GetValueOrDefault() ) );
+         Info( "Target direction marker = {0}", FacingMarkerTargetColors.Select( e => e.GetValueOrDefault() ) );
       }
 
       public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) {
@@ -131,6 +136,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // Parse existing colours and leave the rest as null, called at CombatStartOnce
       private static void InitColours () {
+         HueDeviation = (float) Settings.LOSHueDeviation;
+         ValueDeviation = (float) Settings.LOSBrightnessDeviation;
          parsedColours = new Dictionary<Line, Color?[]>( LOSDirectionCount );
          foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) ) {
             FieldInfo colorsField = typeof( ModSettings ).GetField( "LOS" + line + "Colors"  );
@@ -155,7 +162,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             for ( int i = 1 ; i < LOSDirectionCount ; i++ )
                if ( colours[ i ] == null )
                   colours[ i ] = colours[ i - 1 ];
+            Info( "LOS {0} = {1}", line, colours );
          }
+         if ( LinesAnimated )
+            Info( "LOS animation, Hue = {0} @ {1}ms, Brightness = {2} @ {3}ms", HueDeviation, Settings.LOSHueHalfCycleMS, ValueDeviation, Settings.LOSBrightnessHalfCycleMS  );
+         else
+            Info( "LOS is not animated." );
       }
 
       public static void CreateLOSTexture ( WeaponRangeIndicators __instance ) { try {
@@ -183,15 +195,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          LosMaterial[] lineMats = new LosMaterial[ LOSDirectionCount ];
          for ( int i = 0 ; i < LOSDirectionCount ; i++ ) {
             string matName = name + "LOS" + i;
-            decimal width = i != BlockedPost ? Settings.LOSWidth : Settings.LOSWidthBlocked;
+            float width = (float) ( i != BlockedPost ? Settings.LOSWidth : Settings.LOSWidthBlocked );
             Color colour = colors[i] ?? OrigColours[ i != NoAttack ? 0 : 1 ];
-            lineMats[ i ] = new LosMaterial( colour, dotted, (float) width, matName );
+            lineMats[ i ] = LinesAnimated
+               ? new LosAnimated( colour, dotted, width, matName )
+               : new LosMaterial( colour, dotted, width, matName );
          }
          return lineMats;
       }
       
       // ============ Los Material Swap ============
 
+      private static float HueLerp, ValueLerp;
       private static LineRenderer thisLine;
 
       public static void FixLOSWidth ( LineRenderer __result, WeaponRangeIndicators __instance ) {
@@ -206,13 +221,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void SetupLOS ( WeaponRangeIndicators __instance, Vector3 position, AbstractActor selectedActor, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          if ( Mats == null ) return;
          WeaponRangeIndicators me = __instance;
+
+         int tick = Environment.TickCount & int.MaxValue;
+         HueLerp = HueDeviation * TickToCycle( tick, Settings.LOSHueHalfCycleMS );
+         ValueLerp = TickToCycle( tick, Settings.LOSBrightnessHalfCycleMS );
+
          int typeIndex = 0, dirIndex = 0;
          if ( target is Mech || target is Vehicle ) {
             bool canSee = selectedActor.HasLOSToTargetUnit( target );
             dirIndex = canSee ? Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) ) : 0;
          }
-         Mats[ NoAttack ][ dirIndex ].ApplyOutOfRange( me );
          lastDirIndex = dirIndex;
+
+         Mats[ NoAttack ][ dirIndex ].ApplyOutOfRange( me );
          if ( isMelee )
             typeIndex = Melee;
          else {
@@ -228,6 +249,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          Mats[ typeIndex ][ dirIndex ].Apply( me, usingMultifire );
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static float TickToCycle ( int tick, int cycle ) {
+         if ( cycle == 0 ) return 0;
+         return Math.Abs( tick % ( cycle * 2 ) - cycle ) / (float) cycle;
+      }
 
       public static void SetBlockedLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
          //Verbo( "Mat = {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
@@ -266,8 +292,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       */
 
       public class LosMaterial {
-         private readonly Material Material;
-         private readonly Color Color;
+         protected readonly Material Material;
+         protected readonly Color Color;
          public readonly float Width;
 
          public LosMaterial ( Color color, bool dotted, float width, string name ) {
@@ -304,19 +330,40 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             me.LOSOutOfRange = me.MaterialOutOfRange.color;
          }
 
-         public Material GetMaterial () {
+         public virtual Material GetMaterial () {
+            return Material;
+         }
+      }
+
+      public class LosAnimated : LosMaterial {
+         public LosAnimated ( Color color, bool dotted, float width, string name )
+                : base( color, dotted, width, name ) { }
+
+         public override Material GetMaterial () {
             Color.RGBToHSV( Color, out float H, out float S, out float V );
-            int tick = Environment.TickCount & Int32.MaxValue, cycleH = 3000;
-            float H2 = S > 0 ? ShiftHue( H, 0.03125f * Math.Abs( tick % ( cycleH * 2 ) - cycleH ) / cycleH ) : H;
-            Material.color = Color.HSVToRGB( H2, S, V );
+            float H2 = S > 0 ? ShiftHue( H, HueLerp ) : H, V2 = ShiftValue( V, ValueLerp, ValueDeviation );
+            //Verbo( "Hue {0} => {1} ({5}), Sat {4}, Val {2} => {3} ({6})", H, H2, V, V2, S, HueLerp, ValueLerp );
+            Material.color = Color.HSVToRGB( H2, S, V2 );
             return Material;
          }
 
-         private static float ShiftHue ( float v, float d ) {
-            v += d;
-            while ( v > 1 ) v -= 1;
-            while ( v < 0 ) v += 1;
-            return v;
+         private static float ShiftHue ( float val, float time ) {
+            val += time;
+            while ( val > 1 ) val -= 1;
+            while ( val < 0 ) val += 1;
+            return val;
+         }
+
+         private static float ShiftValue ( float val, float time, float devi ) {
+            float max = val + devi, min = val - devi;
+            if ( max > 1 ) {
+               max = 1;
+               min = 1 - devi - devi;
+            } else if ( min < 0 ) {
+               min = 0;
+               max = min + devi + devi;
+            }
+            return Mathf.Lerp( min, max, time );
          }
       }
    }

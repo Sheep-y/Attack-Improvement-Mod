@@ -162,6 +162,8 @@ namespace Sheepy.BattleTechMod {
                return comp.UIName.ToString() + " (#" + comp.uid + ")";
          else if ( arg is MechComponentDef def )
             return def.Description.Id;
+         else if ( arg is UnityEngine.Color color )
+            return UnityEngine.ColorUtility.ToHtmlStringRGBA( color );
          else if ( arg is System.Collections.IEnumerable list )
             return "[" + list.Concat( ", ", e => FormatParameter( e, level + 1 )?.ToString() ) + "]";
          return arg.ToString();

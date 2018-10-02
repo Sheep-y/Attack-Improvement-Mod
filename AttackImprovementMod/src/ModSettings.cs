@@ -112,18 +112,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Set to 1 to use game default, or 0 to hide the marker." } ) ]
       public decimal LOSMarkerBlockedMultiplier = 1.5m;
 
-      [ JsonComment( "Controls whether indirect attack lines / can't attack lines are dotted.  Default both true." ) ]
+      [ JsonComment( "Controls whether indirect firing lines / can't fire lines are dotted.  Default both true." ) ]
       public bool LOSIndirectDotted = true;
       public bool LOSNoAttackDotted = true;
 
-      [ JsonComment( "Controls whether other attack lines are dotted.  Default all false." ) ]
+      [ JsonComment( "Controls whether other firing lines are dotted.  Default all false." ) ]
       public bool LOSMeleeDotted = false;
       public bool LOSClearDotted = false;
       public bool LOSBlockedPreDotted  = false;
       public bool LOSBlockedPostDotted = false;
 
       [ JsonComment( new string[]{
-      "Change fire line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to empty to leave alone.",
+      "Change firing line colour (html syntax). \"#FF0000\" is red, \"#00FF00\" is green etc.  Set to empty to leave alone.",
       "The colour orders are Front, Left, Right, Back, Prone.  Set to empty string to use game default." }  ) ]
       public string LOSMeleeColors = "#F00,#0FF,#0FF,#0F8,#F00";
       public string LOSClearColors = "#F00,#0FF,#0FF,#0F8,#F00";
@@ -131,6 +131,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string LOSBlockedPostColors = "#C8E,#C8E,#C8E,#C8E,#C8E";
       public string LOSIndirectColors = "#F00,#0FF,#0FF,#0F8,#F00";
       public string LOSNoAttackColors = "";
+
+      [ JsonComment( "Range and speed (in half-cycle ms) of firing line animation." ) ]
+      public decimal LOSHueDeviation = 0.03125m;
+      public int     LOSHueHalfCycleMS = 2400;
+      public decimal LOSBrightnessDeviation = 0.125m;
+      public int     LOSBrightnessHalfCycleMS = 600;
 
       [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
