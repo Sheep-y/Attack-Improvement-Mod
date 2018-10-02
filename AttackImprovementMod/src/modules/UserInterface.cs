@@ -72,8 +72,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( CombatMovementReticle ), "drawJumpPath", null, "ShowDFATerrainText" );
             }
          }
-         if ( Settings.SpecialTerrainDotSize != 1 )
-            Patch( typeof( MovementDotMgr.MovementDot ).GetConstructors()[0], null, "EnlargeMovementDot" );
+         if ( Settings.SpecialTerrainDotSize != 1 || Settings.NormalTerrainDotSize != 1 )
+            Patch( typeof( MovementDotMgr.MovementDot ).GetConstructors()[0], null, "ScaleMovementDot" );
+         if ( Settings.BoostTerrainDotColor )
+            Patch( typeof( CombatMovementReticle ), "Awake", null, "ColourMovementDot" );
 
          if ( Settings.CalloutFriendlyFire ) {
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
@@ -88,6 +90,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.FunctionKeySelectPC )
             Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
+      }
+
+      public override void CombatStarts () {
+         if ( Settings.MovementPreviewRadius > 0 ) {
+            MovementConstants con = CombatConstants.MoveConstants;
+            con.ExperimentalHexRadius = Settings.MovementPreviewRadius;
+            typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( CombatConstants, con, null );
+         }
       }
 
       public override void CombatEnds () {
@@ -363,12 +373,29 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          ( (MoveStatusPreview) StatusPreviewProp?.GetValue( __instance, null ) ).MoveTypeText.text = Translate( action );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void EnlargeMovementDot ( MovementDotMgr.DotType type, GameObject ___dotObject ) {
-         if ( type == MovementDotMgr.DotType.Normal ) return;
+      public static void ScaleMovementDot ( MovementDotMgr.DotType type, GameObject ___dotObject ) { try {
+         float size = (float) ( type == MovementDotMgr.DotType.Normal ? Settings.NormalTerrainDotSize : Settings.SpecialTerrainDotSize );
+         if ( size == 1 ) return;
          Vector3 scale = ___dotObject.transform.localScale;
-         scale.x *= (float) Settings.SpecialTerrainDotSize;
-         scale.y *= (float) Settings.SpecialTerrainDotSize;
+         scale.x *= size;
+         scale.y *= size;
          ___dotObject.transform.localScale = scale;
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ColourMovementDot ( GameObject ___forestDotTemplate, GameObject ___waterDotTemplate, GameObject ___roughDotTemplate, GameObject ___roadDotTemplate, GameObject ___specialDotTemplate, GameObject ___dangerousDotTemplate ) { try {
+         BrightenGameObject( ___forestDotTemplate );
+         BrightenGameObject( ___waterDotTemplate );
+         BrightenGameObject( ___roughDotTemplate );
+         BrightenGameObject( ___roadDotTemplate );
+         BrightenGameObject( ___specialDotTemplate );
+         BrightenGameObject( ___dangerousDotTemplate );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static void BrightenGameObject ( GameObject obj ) {
+         MeshRenderer mesh = TryGet( obj?.GetComponents<MeshRenderer>(), 0, null, "MovementDot MeshRenderer" );
+         if ( mesh == null ) return;
+         Color.RGBToHSV( mesh.sharedMaterial.color, out float H, out float S, out float V );
+         mesh.sharedMaterial.color = Color.HSVToRGB( H, 1, 1 );
       }
    }
 }

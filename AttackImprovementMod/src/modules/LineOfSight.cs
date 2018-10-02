@@ -45,7 +45,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( IndicatorType, "ShowLinesToAllEnemies", "SetupLOSAnimation", null );
                Patch( IndicatorType, "ShowLineToTarget", "SetupLOSAnimation", null );
             }
-            Patch( IndicatorType, "ShowLineToTarget", null, "ShowBlockedLOS" );
             Patch( IndicatorType, "DrawLine", "SetupLOS", "SetBlockedLOS" );
             Patch( IndicatorType, "getLine" , null, "FixLOSWidth" );
          } else

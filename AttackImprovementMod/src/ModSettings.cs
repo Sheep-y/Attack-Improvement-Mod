@@ -46,8 +46,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show both original terrain description and danger description, instead of danger overriding terrain.  Default true." ) ]
       public bool ShowDangerousTerrain = true;
 
-      [ JsonComment( "Make movement dots of special terrains bigger or smaller.  Default 1.5.  1 to leave alone." ) ]
+      [ JsonComment( "Make movement dots bigger or smaller.  Default 2 and 1.5.  1 to leave alone." ) ]
       public decimal SpecialTerrainDotSize = 2;
+      public decimal NormalTerrainDotSize = 1.5m;
+
+      [ JsonComment( "Give movement dots stronger colour.  Default true." ) ]
+      public bool BoostTerrainDotColor = true;
+
+      [ JsonComment( "How many grids to show around mouse cursor.  Same as CombatConstants.MoveConstants.ExperimentalHexRadius.  Default 6.  Game default 4." ) ]
+      public int MovementPreviewRadius = 6;
 
       [ JsonComment( "Colour saturation of weapon loadout by weapon type in targeting computer.  Default 0.5.  0 to disable." ) ]
       public decimal SaturationOfLoadout = 0.5m;

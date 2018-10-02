@@ -83,7 +83,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 #pragma warning restore CS0618
 
          RangeCheck( "LoadoutColourSaturation", ref settings.SaturationOfLoadout, 0, 1 );
-         RangeCheck( "ScaleSpecialTerrainDot", ref settings.SpecialTerrainDotSize, 0, 10 );
+         RangeCheck( "SpecialTerrainDotSize", ref settings.SpecialTerrainDotSize, 0, 10 );
+         RangeCheck( "NormalTerrainDotSize", ref settings.NormalTerrainDotSize, 0, 10 );
+         RangeCheck( "MovementPreviewRadius", ref settings.MovementPreviewRadius, 0, 32 );
 
          RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
          RangeCheck( "LOSWidthBlocked", ref settings.LOSWidthBlocked, 0, 10 );
@@ -115,10 +117,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "MissStreakBreakerThreshold", ref settings.MissStreakBreakerThreshold, 0, 1 );
          RangeCheck( "MissStreakBreakerDivider"  , ref settings.MissStreakBreakerDivider, -100, 100 );
 
-         RangeCheck( "CritChanceMultiplierEnemy", ref settings.CritChanceEnemy, 0, 1000 );
-         RangeCheck( "CritChanceMultiplierAlly", ref settings.CritChanceAlly, 0, 1000 );
-         RangeCheck( "VehicleCritMultiplier", ref settings.CriChanceVsVehicle, 0, 1000 );
-         RangeCheck( "TurretCritMultiplier" , ref settings.CritChanceVsTurret, 0, 1000 );
+         RangeCheck( "CritChanceEnemy", ref settings.CritChanceEnemy, 0, 1000 );
+         RangeCheck( "CritChanceAlly", ref settings.CritChanceAlly, 0, 1000 );
+         RangeCheck( "CriChanceVsVehicle", ref settings.CriChanceVsVehicle, 0, 1000 );
+         RangeCheck( "CritChanceVsTurret" , ref settings.CritChanceVsTurret, 0, 1000 );
          RangeCheck( "ThroughArmorCritThreshold", ref settings.ThroughArmorCritThreshold, -1, 10000 );
          RangeCheck( "CritChanceZeroArmor", ref settings.CritChanceZeroArmor, 0, 2 );
          RangeCheck( "CritChanceFullArmor", ref settings.CritChanceFullArmor, -1, settings.CritChanceZeroArmor );
