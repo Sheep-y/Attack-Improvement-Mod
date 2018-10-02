@@ -73,7 +73,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
 
-         if ( Settings.AltKeyFriendlyFire ) {
+         if ( Settings.CalloutFriendlyFire ) {
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
             Patch( typeof( CombatGameState ), "get_AllEnemies", "AddFriendsToEnemies", null );
             Patch( typeof( CombatGameState ), "GetAllTabTargets", null, "AddFriendsToTargets" );
@@ -231,9 +231,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ToggleFriendlyFire () { try {
          if ( ActiveState == null ) return;
-         bool AltPressed = Input.GetKey( KeyCode.LeftAlt ) || Input.GetKey( KeyCode.RightAlt );
-         if ( FriendlyFire != AltPressed ) {
-            FriendlyFire = AltPressed;
+         bool CalloutPressed = BTInput.Instance.Combat_ToggleCallouts().IsPressed;
+         if ( FriendlyFire != CalloutPressed ) {
+            FriendlyFire = CalloutPressed;
             foreach ( AbstractActor actor in Combat.LocalPlayerTeam.units )
                if ( ! actor.IsDead )
                   actor.VisibilityCache.RebuildCache( Combat.GetAllCombatants() );

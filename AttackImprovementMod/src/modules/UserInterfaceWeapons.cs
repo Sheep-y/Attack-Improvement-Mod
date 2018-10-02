@@ -36,7 +36,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
 
-         if ( Settings.ShowReducedWeaponDamage || Settings.AltKeyWeaponStability )
+         if ( Settings.ShowReducedWeaponDamage || Settings.CalloutWeaponStability )
             Patch( slotType, "RefreshDisplayedWeapon", null, "UpdateWeaponDamage" );
          if ( Settings.ShowTotalWeaponDamage ) {
             Patch( panelType, "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
@@ -47,7 +47,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
             Patch( slotType, "OnPointerUp", null, "RefreshTotalDamage" );
          }
-         if ( Settings.AltKeyWeaponStability )
+         if ( Settings.CalloutWeaponStability )
             Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleStabilityDamage", null );
 
          if ( HasMod( "com.joelmeador.WeaponRealizer", "WeaponRealizer.Core" ) ) TryRun( ModLog, InitWeaponRealizerBridge );
@@ -83,7 +83,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                hitChance = newChance;
             }
          }
-			__instance.RefreshDisplayedWeapons();
+         __instance.RefreshDisplayedWeapons();
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
       
@@ -144,10 +144,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Weapon weapon = __instance.DisplayedWeapon;
          if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          string text = null;
-         if ( Settings.AltKeyFriendlyFire && ( Input.GetKey( KeyCode.LeftAlt ) || Input.GetKey( KeyCode.RightAlt ) ) ) {
+         if ( Settings.CalloutFriendlyFire && BTInput.Instance.Combat_ToggleCallouts().IsPressed ) {
             float dmg = weapon.Instability();
             if ( Settings.ShowReducedWeaponDamage && target is AbstractActor actor )
-			      dmg *= actor.StatCollection.GetValue<float>("ReceivedInstabilityMultiplier") * actor.EntrenchedMultiplier;
+               dmg *= actor.StatCollection.GetValue<float>("ReceivedInstabilityMultiplier") * actor.EntrenchedMultiplier;
             if ( weapon.IsEnabled ) AddToTotalDamage( dmg, __instance );
             text = "<#FFFF00>" + (int) dmg + "s";
          } else {

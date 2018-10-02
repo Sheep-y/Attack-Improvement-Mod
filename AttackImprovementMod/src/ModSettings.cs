@@ -16,8 +16,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "When a target is selected/deselected during Multi-Target, aggressively reassign enabled weapons by hit chance.  Default true." ) ]
       public bool AggressiveMultiTargetAssignment = true;
 
-      [ JsonComment( "Allow friendly fire while pressing Alt key.  Default true." ) ]
-      public bool AltKeyFriendlyFire = true;
+      [ JsonComment( "Allow friendly fire while pressing Callout key (default left alt).  Default true." ) ]
+      public bool CalloutFriendlyFire = true;
 
       [ JsonComment( "Select player mechs with F1 to F4 key.  Default true." ) ]
       public bool FunctionKeySelectPC = true;
@@ -76,8 +76,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show max attack damage and averaged attack damage at the bottom of weapon panel.  Default true." ) ]
       public bool ShowTotalWeaponDamage = true;
 
-      [ JsonComment( "Show stability damage while pressing Alt key.  Default true." ) ]
-      public bool AltKeyWeaponStability = true;
+      [ JsonComment( "Show stability damage while pressing Callout key (default left alt).  Default true." ) ]
+      public bool CalloutWeaponStability = true;
 
       [ JsonComment( "Show weapon range in meters instead of \"Short\" or \"Very Long\" in weapon mouseover.  Default \"Min {0} : Long {2} : Max {4}\"." ) ]
       public string WeaponRangeFormat = "Min {0} : Long {2} : Max {4}";
