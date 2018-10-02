@@ -83,6 +83,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 #pragma warning restore CS0618
 
          RangeCheck( "LoadoutColourSaturation", ref settings.SaturationOfLoadout, 0, 1 );
+         RangeCheck( "ScaleSpecialTerrainDot", ref settings.SpecialTerrainDotSize, 0, 10 );
+
          RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
          RangeCheck( "LOSWidthBlocked", ref settings.LOSWidthBlocked, 0, 10 );
          RangeCheck( "LOSMarkerBlockedMultiplier", ref settings.LOSMarkerBlockedMultiplier, 0, 10 );
@@ -90,7 +92,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "LOSHueHalfCycleMS", ref settings.LOSHueHalfCycleMS, 0, 3600_000 );
          RangeCheck( "LOSBrightnessDeviation", ref settings.LOSBrightnessDeviation, 0, 0.5m );
          RangeCheck( "LOSBrightnessHalfCycleMS", ref settings.LOSBrightnessHalfCycleMS, 0, 3600_000 );
-
          RangeCheck( "ArcLinePoints", ref settings.ArcLinePoints, 2, 127 );
 
          RangeCheck( "MechCalledShotMultiplier", ref settings.MechCalledShotMultiplier, 0, 1024 );

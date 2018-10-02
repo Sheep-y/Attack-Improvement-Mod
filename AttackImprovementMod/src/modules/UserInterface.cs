@@ -72,6 +72,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( CombatMovementReticle ), "drawJumpPath", null, "ShowDFATerrainText" );
             }
          }
+         if ( Settings.SpecialTerrainDotSize != 1 )
+            Patch( typeof( MovementDotMgr.MovementDot ).GetConstructors()[0], null, "EnlargeMovementDot" );
 
          if ( Settings.CalloutFriendlyFire ) {
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
@@ -360,5 +362,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          UpdateStatusMethod?.Invoke( __instance, new object[]{ actor, pathing.ResultDestination + actor.HighestLOSPosition, pathing.MoveType } );
          ( (MoveStatusPreview) StatusPreviewProp?.GetValue( __instance, null ) ).MoveTypeText.text = Translate( action );
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void EnlargeMovementDot ( MovementDotMgr.DotType type, GameObject ___dotObject ) {
+         if ( type == MovementDotMgr.DotType.Normal ) return;
+         Vector3 scale = ___dotObject.transform.localScale;
+         scale.x *= (float) Settings.SpecialTerrainDotSize;
+         scale.y *= (float) Settings.SpecialTerrainDotSize;
+         ___dotObject.transform.localScale = scale;
+      }
    }
 }

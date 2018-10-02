@@ -40,11 +40,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Factor in heat multiplier at target location when previewing movement.  Default true." ) ]
       public bool FixHeatPreview = true;
 
-      [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results." ) ]
+      [ JsonComment( "Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results.  Default true." ) ]
       public bool FixLosPreviewHeight = true;
 
-      [ JsonComment( "Show both original terrain description and danger description, instead of danger overriding terrain." ) ]
+      [ JsonComment( "Show both original terrain description and danger description, instead of danger overriding terrain.  Default true." ) ]
       public bool ShowDangerousTerrain = true;
+
+      [ JsonComment( "Make movement dots of special terrains bigger or smaller.  Default 1.5.  1 to leave alone." ) ]
+      public decimal SpecialTerrainDotSize = 2;
 
       [ JsonComment( "Colour saturation of weapon loadout by weapon type in targeting computer.  Default 0.5.  0 to disable." ) ]
       public decimal SaturationOfLoadout = 0.5m;
