@@ -40,10 +40,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( LinesChanged || LinesAnimated ) {
             Patch( IndicatorType, "Init", null, "CreateLOSTexture" );
-            Patch( IndicatorType, "DrawLine", "SetupLOS", "SetBlockedLOS" );
+            if ( LinesAnimated ) {
+               RGBtoHSV = new Dictionary<Color, Vector3>();
+               Patch( IndicatorType, "ShowLinesToAllEnemies", "SetupLOSAnimation", null );
+               Patch( IndicatorType, "ShowLineToTarget", "SetupLOSAnimation", null );
+            }
+            Patch( IndicatorType, "ShowLinesToAllEnemies", null, "ShowBlockedLOS" );
             Patch( IndicatorType, "ShowLineToTarget", null, "ShowBlockedLOS" );
+            Patch( IndicatorType, "DrawLine", "SetupLOS", "SetBlockedLOS" );
             Patch( IndicatorType, "getLine" , null, "FixLOSWidth" );
-         }
+         } else
+            parsedColours = null;
 
          if ( Settings.ArcLinePoints != 18 ) {
             Patch( IndicatorType, "DrawLine", null, null, "ModifyArcPoints" );
@@ -113,7 +120,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ResizeLOS ( WeaponRangeIndicators __instance ) { try {
          float size = (float) Settings.LOSMarkerBlockedMultiplier;
          if ( size != 1 && ! losTextureScaled ) {
-            //Log( "Scaling LOS block marker by {0}", width );
+            //Info( "Scaling LOS block marker by {0}", width );
             Vector3 zoom = __instance.CoverTemplate.transform.localScale;
             zoom.x *= size;
             zoom.y *= size;
@@ -131,6 +138,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // Modded materials
       private static Dictionary<Line,Color?[]> parsedColours; // Exists until Mats are created. Each row and colour may be null.
+      private static Dictionary<Color, Vector3> RGBtoHSV; // For animation
       private static LosMaterial[][] Mats; // Replaces parsedColor. Either whole row is null or whole row is filled.
       internal const int LOSDirectionCount = 5;
 
@@ -159,9 +167,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             parsedColours.TryGetValue( line, out Color?[] colours );
             if ( colours == null ) parsedColours[ line ] = colours = new Color?[ LOSDirectionCount ];
             if ( colours[ 0 ] == null ) colours[ 0 ] = OrigColours[ line != Line.NoAttack ? 0 : 1 ];
-            for ( int i = 1 ; i < LOSDirectionCount ; i++ )
+            for ( int i = 1 ; i < LOSDirectionCount ; i++ ) {
                if ( colours[ i ] == null )
                   colours[ i ] = colours[ i - 1 ];
+               if ( RGBtoHSV != null && colours[i].GetValueOrDefault() is Color c && ! RGBtoHSV.ContainsKey( c ) ) { // Cache HSV for animation
+                  Color.RGBToHSV( c, out float H, out float S, out float V );
+                  RGBtoHSV[ c ] = new Vector3( H, S, V );
+               }
+            }
             Info( "LOS {0} = {1}", line, colours );
          }
          if ( LinesAnimated )
@@ -218,13 +231,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static int lastDirIndex;
 
+      public static void SetupLOSAnimation () {
+         int tick = Environment.TickCount & int.MaxValue;
+         HueLerp = HueDeviation * Math.Abs( TickToCycle( tick, Settings.LOSHueHalfCycleMS ) );
+         ValueLerp = TickToCycle( tick, Settings.LOSBrightnessHalfCycleMS );
+      }
+
       public static void SetupLOS ( WeaponRangeIndicators __instance, Vector3 position, AbstractActor selectedActor, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          if ( Mats == null ) return;
          WeaponRangeIndicators me = __instance;
-
-         int tick = Environment.TickCount & int.MaxValue;
-         HueLerp = HueDeviation * TickToCycle( tick, Settings.LOSHueHalfCycleMS );
-         ValueLerp = TickToCycle( tick, Settings.LOSBrightnessHalfCycleMS );
+         ValueLerp += 0.4f;
+         if ( ValueLerp > 1 ) ValueLerp -= 2;
 
          int typeIndex = 0, dirIndex = 0;
          if ( target is Mech || target is Vehicle ) {
@@ -250,9 +267,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Mats[ typeIndex ][ dirIndex ].Apply( me, usingMultifire );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
+      // Return -1 to 1. Negative means heading towards zero, zero and positive means heading towards 1.
       private static float TickToCycle ( int tick, int cycle ) {
          if ( cycle == 0 ) return 0;
-         return Math.Abs( tick % ( cycle * 2 ) - cycle ) / (float) cycle;
+         return ( tick % ( cycle * 2 ) - cycle ) / (float) cycle;
       }
 
       public static void SetBlockedLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
@@ -340,10 +358,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                 : base( color, dotted, width, name ) { }
 
          public override Material GetMaterial () {
-            Color.RGBToHSV( Color, out float H, out float S, out float V );
-            float H2 = S > 0 ? ShiftHue( H, HueLerp ) : H, V2 = ShiftValue( V, ValueLerp, ValueDeviation );
-            //Verbo( "Hue {0} => {1} ({5}), Sat {4}, Val {2} => {3} ({6})", H, H2, V, V2, S, HueLerp, ValueLerp );
-            Material.color = Color.HSVToRGB( H2, S, V2 );
+            Vector3 HSV = RGBtoHSV[ Color ]; // x = H, y = S, z = V
+            float S = HSV.y, H = S > 0 ? ShiftHue( HSV.x, HueLerp ) : HSV.x, V = ShiftValue( HSV.z, ValueLerp, ValueDeviation );
+            //Verbo( "Hue {0} => {1} ({5}), Sat {4}, Val {2} => {3} ({6})", HSV.x, H, HSV.z, V, S, HueLerp, ValueLerp );
+            Material.color = Color.HSVToRGB( H, S, V );
             return Material;
          }
 
@@ -363,7 +381,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                min = 0;
                max = min + devi + devi;
             }
-            return Mathf.Lerp( min, max, time );
+            return Mathf.Lerp( min, max, Math.Abs( time ) );
          }
       }
    }

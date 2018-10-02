@@ -134,9 +134,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( "Range and speed (in half-cycle ms) of firing line animation." ) ]
       public decimal LOSHueDeviation = 0.03125m;
-      public int     LOSHueHalfCycleMS = 2400;
+      public int     LOSHueHalfCycleMS = 2048;
       public decimal LOSBrightnessDeviation = 0.125m;
-      public int     LOSBrightnessHalfCycleMS = 600;
+      public int     LOSBrightnessHalfCycleMS = 1024;
 
       [ JsonComment( "Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve." ) ]
       public int ArcLinePoints = 48;
