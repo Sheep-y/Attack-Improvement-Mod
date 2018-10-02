@@ -24,28 +24,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
 
-         TryRun( ModLog, InitSettings );
-         bool LinesChanged = Settings.LOSIndirectDotted || parsedColor.ContainsKey( Line.Indirect ) ||
-                                Settings.LOSMeleeDotted || parsedColor.ContainsKey( Line.Melee ) ||
-                                Settings.LOSClearDotted || parsedColor.ContainsKey( Line.Clear ) ||
-                           Settings.LOSBlockedPreDotted || parsedColor.ContainsKey( Line.BlockedPre ) ||
-                          Settings.LOSBlockedPostDotted || parsedColor.ContainsKey( Line.BlockedPost ) ||
-                           ! Settings.LOSNoAttackDotted || parsedColor.ContainsKey( Line.NoAttack );
-         Type Indicator = typeof( WeaponRangeIndicators );
+         Type IndicatorType = typeof( WeaponRangeIndicators );
+         if ( Settings.LOSMarkerBlockedMultiplier != 1 )
+            Patch( IndicatorType, "Init", null, "ResizeLOS" );
 
-         if ( Settings.LOSWidth != 1 || Settings.LOSWidthBlocked != 0.75m || Settings.LOSMarkerBlockedMultiplier != 1 )
-            Patch( Indicator, "Init", null, "ResizeLOS" );
+         TryRun( ModLog, InitColours );
+         bool LinesChanged = Settings.LOSIndirectDotted      || Settings.LOSMeleeDotted  || Settings.LOSBlockedPostDotted
+                          || Settings.LOSBlockedPreDotted     || Settings.LOSClearDotted || ! Settings.LOSNoAttackDotted 
+                          || Settings.LOSWidthBlocked != 0.75m || Settings.LOSWidth != 1 || parsedColours.Count > 0;
 
          if ( LinesChanged ) {
-            Patch( Indicator, "Init", null, "CreateLOSTexture" );
-            Patch( Indicator, "DrawLine", "SetupLOS", "CleanupLOS" );
-            Patch( Indicator, "ShowLineToTarget", null, "ShowBlockedLOS" );
+            Patch( IndicatorType, "Init", null, "CreateLOSTexture" );
+            Patch( IndicatorType, "DrawLine", "SetupLOS", "CleanupLOS" );
+            Patch( IndicatorType, "ShowLineToTarget", null, "ShowBlockedLOS" );
+            Patch( IndicatorType, "getLine" , null, "FixLOSWidth" );
          }
-         if ( LinesChanged || Settings.ArcLinePoints != 18 )
-            Patch( Indicator, "getLine" , null, "FixLOSWidth" );
 
          if ( Settings.ArcLinePoints != 18 ) {
-            Patch( Indicator, "DrawLine", null, null, "ModifyArcPoints" );
+            Patch( IndicatorType, "DrawLine", null, null, "ModifyArcPoints" );
             Patch( typeof( CombatPathLine ), "DrawJumpPath", null, null, "ModifyArcPoints" );
          }
       }
@@ -85,7 +81,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void SetDirectionMarker ( AttackDirectionIndicator __instance, AttackDirection direction ) { try {
          AttackDirectionIndicator me =  __instance;
-			if ( me.Owner.IsDead ) return;
+         if ( me.Owner.IsDead ) return;
          Color orig = me.ColorInactive;
          Color?[] activeColors = __instance.Owner?.team?.IsFriendly( Combat.LocalPlayerTeam ) ?? false ? FacingMarkerPlayerColors : FacingMarkerEnemyColors;
          object[] colors;
@@ -105,42 +101,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          SetColors.Invoke( __instance, colors );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      // ============ Line change ============
+      // ============ Los Setup ============
 
       private static bool losTextureScaled = false;
 
       public static void ResizeLOS ( WeaponRangeIndicators __instance ) { try {
-         WeaponRangeIndicators me = __instance;
-
-         float width = (float) Settings.LOSWidth;
-         if ( width > 0 && me.LOSWidthBegin != width ) {
-            //Log( "Setting default LOS width to {0}", width );
-            // Scale solid line width
-            me.LOSWidthBegin = width;
-            me.LOSWidthEnd = width;
-            // Scale Out of Range line width, when line is solid
-            me.LineTemplate.startWidth = width;
-            me.LineTemplate.endWidth = width;
-            // Scale all dotted lines
-            if ( ! losTextureScaled ) {
-               Vector2 s = me.MaterialOutOfRange.mainTextureScale;
-               s.x /= width;
-               me.MaterialOutOfRange.mainTextureScale = s;
-            }
-         }
-
-         width = (float) Settings.LOSWidthBlocked;
-         if ( width > 0 && me.LOSWidthBlocked != width )
-            me.LOSWidthBlocked = width;
-         //Log( "LOS widths, normal = {0}, post-blocked = {1}", me.LOSWidthBegin, me.LOSWidthBlocked );
-
-         width = (float) Settings.LOSMarkerBlockedMultiplier;
-         if ( width != 1 && ! losTextureScaled ) {
+         float size = (float) Settings.LOSMarkerBlockedMultiplier;
+         if ( size != 1 && ! losTextureScaled ) {
             //Log( "Scaling LOS block marker by {0}", width );
-            Vector3 zoom = me.CoverTemplate.transform.localScale;
-            zoom.x *= width;
-            zoom.y *= width;
-            me.CoverTemplate.transform.localScale = zoom;
+            Vector3 zoom = __instance.CoverTemplate.transform.localScale;
+            zoom.x *= size;
+            zoom.y *= size;
+            __instance.CoverTemplate.transform.localScale = zoom;
          }
          losTextureScaled = true;
       }                 catch ( Exception ex ) { Error( ex ); } }
@@ -153,12 +125,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Color[] OrigColours;
 
       // Modded materials
-      private static Dictionary<Line,Color?[]> parsedColor; // Exists until Mats are created. Each row and colour may be null.
+      private static Dictionary<Line,Color?[]> parsedColours; // Exists until Mats are created. Each row and colour may be null.
       private static LosMaterial[][] Mats; // Replaces parsedColor. Either whole row is null or whole row is filled.
       internal const int LOSDirectionCount = 5;
 
-      private static void InitSettings () {
-         parsedColor = new Dictionary<Line, Color?[]>( LOSDirectionCount );
+      // Parse existing colours and leave the rest as null, called at CombatStartOnce
+      private static void InitColours () {
+         parsedColours = new Dictionary<Line, Color?[]>( LOSDirectionCount );
          foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) ) {
             FieldInfo colorsField = typeof( ModSettings ).GetField( "LOS" + line + "Colors"  );
             string colorTxt = colorsField.GetValue( Settings )?.ToString();
@@ -169,35 +142,56 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                if ( colorList.Count > i )
                   colors[ i ] = ParseColour( colorList[ i ] );
             if ( colors.Any( e => e != null ) )
-               parsedColor.Add( line, colors );
+               parsedColours.Add( line, colors );
+         }
+      }
+
+      // Fill in all parsedColours leaving no null, called after OrigColours is populated
+      private static void FillColours () {
+         foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) ) {
+            parsedColours.TryGetValue( line, out Color?[] colours );
+            if ( colours == null ) parsedColours[ line ] = colours = new Color?[ LOSDirectionCount ];
+            if ( colours[ 0 ] == null ) colours[ 0 ] = OrigColours[ line != Line.NoAttack ? 0 : 1 ];
+            for ( int i = 1 ; i < LOSDirectionCount ; i++ )
+               if ( colours[ i ] == null )
+                  colours[ i ] = colours[ i - 1 ];
          }
       }
 
       public static void CreateLOSTexture ( WeaponRangeIndicators __instance ) { try {
+         if ( parsedColours == null ) return;
          WeaponRangeIndicators me = __instance;
-         if ( parsedColor != null ) {
-            Solid = OrigInRangeMat = me.MaterialInRange;
-            Dotted = OrigOutOfRangeMat = me.MaterialOutOfRange;
-            OrigColours = new Color[]{ me.LOSInRange, me.LOSOutOfRange, me.LOSUnlockedTarget, me.LOSLockedTarget, me.LOSMultiTargetKBSelection, me.LOSBlocked };
+         Solid = OrigInRangeMat = me.MaterialInRange;
+         Dotted = OrigOutOfRangeMat = me.MaterialOutOfRange;
+         OrigColours = new Color[]{ me.LOSInRange, me.LOSOutOfRange, me.LOSUnlockedTarget, me.LOSLockedTarget, me.LOSMultiTargetKBSelection, me.LOSBlocked };
 
-            Mats = new LosMaterial[ NoAttack + 1 ][];
-            foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) )
-               Mats[ (int) line ] = NewMat( line );
-
-            // Make sure post mat is applied even if pre mat was not modified
-            if ( Mats[ BlockedPost ] != null && Mats[ BlockedPre ] == null ) {
-               Mats[ BlockedPre ] = new LosMaterial[ LOSDirectionCount ];
-               for ( int i = 0 ; i < LOSDirectionCount ; i++ )
-                  Mats[ BlockedPre ][i] = new LosMaterial( OrigColours[5], false, (float) Settings.LOSWidthBlocked, "BlockedPreLOS"+i );
-            }
-            parsedColor = null;
-         }
+         FillColours();
+         Mats = new LosMaterial[ NoAttack + 1 ][];
+         foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) )
+            Mats[ (int) line ] = NewMat( line );
+         parsedColours = null;
       } catch ( Exception ex ) {
-         Mats = new LosMaterial[ NoAttack + 1 ][]; // Reset all materials
+         Mats = null;
          Error( ex );
       } }
 
-      private static bool RestoreMat = false;
+      private static LosMaterial[] NewMat ( Line line ) {
+         string name = line.ToString();
+         Color?[] colors = parsedColours[ line ];
+         bool dotted  = (bool) typeof( ModSettings ).GetField( "LOS" + name + "Dotted" ).GetValue( Settings );
+         //Log( "LOS " + line + " = " + Join( ",", colors ) );
+         LosMaterial[] lineMats = new LosMaterial[ LOSDirectionCount ];
+         for ( int i = 0 ; i < LOSDirectionCount ; i++ ) {
+            string matName = name + "LOS" + i;
+            decimal width = i != BlockedPost ? Settings.LOSWidth : Settings.LOSWidthBlocked;
+            Color colour = colors[i] ?? OrigColours[ i != NoAttack ? 0 : 1 ];
+            lineMats[ i ] = new LosMaterial( colour, dotted, (float) width, matName );
+         }
+         return lineMats;
+      }
+      
+      // ============ Los Material Swap ============
+
       private static LineRenderer thisLine;
 
       public static void FixLOSWidth ( LineRenderer __result, WeaponRangeIndicators __instance ) {
@@ -216,10 +210,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             bool canSee = selectedActor.HasLOSToTargetUnit( target );
             dirIndex = canSee ? Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) ) : 0;
          }
-         if ( dirIndex != lastDirIndex && Mats[ NoAttack ] != null ) {
-            me.MaterialOutOfRange = Mats[ NoAttack ][ dirIndex ].GetMaterial();
-            me.LOSOutOfRange = Mats[ NoAttack ][ dirIndex ].GetColor();
-         }
          lastDirIndex = dirIndex;
          if ( isMelee )
             SwapMat( me, Melee, dirIndex, ref me.LOSLockedTarget, false );
@@ -229,8 +219,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                if ( info.LOFLevel == LineOfFireLevel.LOFClear )
                   SwapMat( me, Clear, dirIndex, ref me.LOSInRange, usingMultifire );
                else {
-                  if ( SwapMat( me, BlockedPre, dirIndex, ref me.LOSInRange, usingMultifire ) )
-                     me.LOSBlocked = Mats[ BlockedPre ][ dirIndex ].GetColor();
+                  SwapMat( me, BlockedPre, dirIndex, ref me.LOSInRange, usingMultifire );
+                  me.LOSBlocked = Mats[ BlockedPre ][ dirIndex ].GetColor();
                }
             else
                SwapMat( me, Indirect, dirIndex, ref me.LOSInRange, usingMultifire );
@@ -238,23 +228,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void CleanupLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
-         //Log( "Mat = {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
+         //Verbo( "Mat = {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
          if ( thisLine.material.name.StartsWith( "BlockedPreLOS" ) ) {
             thisLine.material = Mats[ BlockedPost ][ lastDirIndex ].GetMaterial();
             thisLine.startColor = thisLine.endColor = Mats[ BlockedPost ][ lastDirIndex ].GetColor();
-            //Log( "Swap to blocked post {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
-         }
-         if ( RestoreMat ) {
-            WeaponRangeIndicators me = __instance;
-            me.MaterialInRange = OrigInRangeMat;
-            me.LOSInRange = OrigColours[0];
-            if ( usingMultifire ) {
-               me.LOSUnlockedTarget = OrigColours[2];
-               me.LOSLockedTarget = OrigColours[3];
-               me.LOSMultiTargetKBSelection = OrigColours[4];
-            }
-            me.LOSBlocked = OrigColours[5];
-            RestoreMat = false;
+            //Verbo( "Swap to blocked post {0}, Width = {1}, Color = {2}", thisLine.material.name, thisLine.startWidth, thisLine.startColor );
          }
       }
 
@@ -263,39 +241,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          thisLine?.gameObject?.SetActive( true );
       }
 
-      // ============ Utils ============
-
-      private static LosMaterial[] NewMat ( Line line ) {
-         string name = line.ToString();
-         parsedColor.TryGetValue( line, out Color?[] colors );
-         bool dotted  = (bool) typeof( ModSettings ).GetField( "LOS" + name + "Dotted" ).GetValue( Settings );
-         if ( colors == null ) {
-            if ( dotted == ( name.StartsWith( "NoAttack" ) ) ) return null;
-            colors = new Color?[ LOSDirectionCount ];
-         }
-         //Log( "NewMat " + line + " = " + Join( ",", colors ) );
-         LosMaterial[] lineMats = new LosMaterial[ LOSDirectionCount ];
-         for ( int i = 0 ; i < LOSDirectionCount ; i++ )
-            lineMats[ i ] = NewMat( name + "LOS" + i, name.StartsWith( "NoAttack" ), colors[i], i > 0 ? colors[i-1] : null, dotted );
-         return lineMats;
-      }
-
-      private static LosMaterial NewMat ( string name, bool origInRange, Color? color, Color? fallback, bool dotted ) { try {
-         return new LosMaterial( color ?? fallback ?? OrigColours[ origInRange ? 0 : 1 ], dotted, (float) Settings.LOSWidth, name );
-      }                 catch ( Exception ex ) { Error( ex ); return null; } }
-
-      private static bool SwapMat ( WeaponRangeIndicators __instance, int matIndex, int dirIndex, ref Color lineColor, bool IsMultifire ) {
-         Material newMat = Mats[ matIndex ]?[ dirIndex ].GetMaterial();
-         if ( newMat == null ) return false;
-         WeaponRangeIndicators me = __instance;
-         me.MaterialInRange = newMat;
-         lineColor = newMat.color;
-         if ( IsMultifire ) {
-            me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = lineColor;
-            me.LOSUnlockedTarget.a *= 0.8f;
-         }
-         //Verbo( $"Swapped to {matIndex} {dirIndex} {newMat.name}" );
-         return RestoreMat = true;
+      private static void SwapMat ( WeaponRangeIndicators __instance, int matIndex, int dirIndex, ref Color lineColor, bool IsMultifire ) {
+         if ( Mats == null ) return;
+         LosMaterial newMat = Mats[ matIndex ][ dirIndex ].Apply( __instance, IsMultifire );
+         //Verbo( "Swapped to {0} {1} {2}", matIndex, dirIndex, newMat.GetMaterial().name );
       }
 
       // ============ Arcs ============
@@ -321,10 +270,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       */
 
       public class LosMaterial {
+         private readonly bool IsInRange, IsBlockedPost;
          private readonly Material Material;
          private readonly Color Color;
          public readonly float Width;
+
          public LosMaterial ( Color color, bool dotted, float width, string name ) {
+            IsInRange = ! name.StartsWith( "NoAttack" );
+            IsBlockedPost = name.StartsWith( "BlockedPost" );
             Color = color;
             Width = width;
             Material = new Material( dotted ? Dotted : Solid ) { name = name, color = Color };
@@ -334,10 +287,33 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Material.mainTextureScale = s;
             }
          }
+
+         public LosMaterial Apply ( WeaponRangeIndicators me, bool IsMultifire ) {
+            if ( IsBlockedPost ) {
+               me.LOSWidthBegin = Width;
+               me.LOSWidthEnd = Width;
+               me.LineTemplate.startWidth = Width;
+               me.LineTemplate.endWidth = Width;
+            } else {
+               me.LOSWidthBlocked = Width;
+            }
+            if ( IsInRange ) {
+               me.MaterialInRange = GetMaterial();
+               if ( IsMultifire ) {
+                  me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = me.MaterialInRange.color;
+                  me.LOSUnlockedTarget.a *= 0.8f;
+               }
+            } else {
+               me.MaterialOutOfRange = GetMaterial();
+            }
+            return this;
+         }
+
          public Material GetMaterial () {
             Material.color = GetColor();
             return Material;
          }
+
          public Color GetColor () {
             Color.RGBToHSV( Color, out float H, out float S, out float V );
             int tick = Environment.TickCount & Int32.MaxValue, cycleH = 3000;
