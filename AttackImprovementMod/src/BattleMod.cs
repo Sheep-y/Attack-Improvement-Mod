@@ -149,22 +149,28 @@ namespace Sheepy.BattleTechMod {
          return true;
       }
 
-      private static object FormatParameter ( object arg, int level = 0 ) {
-         if ( arg == null || arg is string || arg is ValueType || level > 10 ) return arg;
+      public static object FormatParameter ( object arg ) { return FormatParameter( arg, 0 ); }
+      public static object FormatParameter ( object arg, int level ) {
+         if ( arg == null || arg is string || level > 10 ) return arg;
+         if ( arg is UnityEngine.Color color )
+            return "#" + UnityEngine.ColorUtility.ToHtmlStringRGBA( color );
+         if ( arg is UnityEngine.Vector2 vet2 )
+            return "[" + vet2.x + "," + vet2.y + "]";
+         if ( arg is UnityEngine.Vector3 vet3 )
+            return "[" + vet3.x + "," + vet3.y + "," + vet3.z + "]";
+         if ( arg is ValueType ) return arg;
          if ( arg is Text text )
             return text.ToString( true );
-         else if ( arg is ICombatant unit )
+         if ( arg is ICombatant unit )
             return unit.DisplayName.ToString() + " (" + unit.GetPilot()?.Callsign + ( unit.team.IsLocalPlayer ? ",PC" : ",NPC" ) + ")";
-         else if ( arg is MechComponent comp )
+         if ( arg is MechComponent comp )
             if ( string.IsNullOrEmpty( comp.uid ) )
                return comp.UIName.ToString();
             else
                return comp.UIName.ToString() + " (#" + comp.uid + ")";
-         else if ( arg is MechComponentDef def )
+         if ( arg is MechComponentDef def )
             return def.Description.Id;
-         else if ( arg is UnityEngine.Color color )
-            return UnityEngine.ColorUtility.ToHtmlStringRGBA( color );
-         else if ( arg is System.Collections.IEnumerable list )
+         if ( arg is System.Collections.IEnumerable list )
             return "[" + list.Concat( ", ", e => FormatParameter( e, level + 1 )?.ToString() ) + "]";
          return arg.ToString();
       }
@@ -333,14 +339,17 @@ namespace Sheepy.BattleTechMod {
          Log.Info( buf.ToString() );
       }
 
-      // From CptMoore's MechEngineer: https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99
+      // Based on CptMoore's MechEngineer: https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99
       public static void LogGuiTree ( UnityEngine.Transform transform, StringBuilder buf, string indent = "" ) {
-         buf.Append( indent ).AppendFormat( "{0} world={1} local={2}", transform.gameObject.name, transform.position, transform.localPosition );
+         Func<object,object> format = BattleMod.FormatParameter;
+         buf.Append( indent ).AppendFormat( "{0} world={1} local={2}", transform.gameObject.name, format( transform.position ), format( transform.localPosition ) );
          if ( transform.GetComponent<UnityEngine.RectTransform>() is UnityEngine.RectTransform rect )
-            buf.AppendFormat( " rect={0} anchor={1}", rect.rect, rect.anchoredPosition );
+            buf.AppendFormat( " rect={0} anchor={1}", rect.rect, format( rect.anchoredPosition ) );
+         if ( transform.GetComponent<UnityEngine.MeshRenderer>() is UnityEngine.MeshRenderer mesh )
+            buf.AppendFormat( " mesh={0} material={1} color={2}", mesh.name, mesh.material?.name, format( mesh.material?.color ) );
          if ( transform.GetComponent<TMPro.TextMeshProUGUI>() is TMPro.TextMeshProUGUI textComponent )
-            buf.AppendFormat( " color={0} font={1} text={2}", UnityEngine.ColorUtility.ToHtmlStringRGBA( textComponent.color ), textComponent.font.name, textComponent.text );
-         if ( indent.Length > 60 ) return;
+            buf.AppendFormat( " font={0} color={1} text={2}", textComponent.font?.name, format( textComponent.color ), textComponent.text );
+         if ( indent.Length > 20 ) return;
          foreach ( UnityEngine.Transform current in transform )
             LogGuiTree( current, buf.Append( '\n' ), indent + "   " );
       }

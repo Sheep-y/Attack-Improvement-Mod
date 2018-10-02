@@ -46,9 +46,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show both original terrain description and danger description, instead of danger overriding terrain.  Default true." ) ]
       public bool ShowDangerousTerrain = true;
 
-      [ JsonComment( "Make movement dots bigger or smaller.  Default 2 and 1.5.  1 to leave alone." ) ]
+      [ JsonComment( "Make movement dots bigger or smaller.  Default 2 and 1.25.  1 to leave alone." ) ]
       public decimal SpecialTerrainDotSize = 2;
-      public decimal NormalTerrainDotSize = 1.5m;
+      public decimal NormalTerrainDotSize = 1.25m;
 
       [ JsonComment( "Give movement dots stronger colour.  Default true." ) ]
       public bool BoostTerrainDotColor = true;
