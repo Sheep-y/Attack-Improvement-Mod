@@ -13,7 +13,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class LineOfSight : BattleModModule {
 
-      private static float HueDeviation, ValueDeviation;
+      private static float HueDeviation, BrightnessDeviation;
       private static bool LinesChanged, LinesAnimated;
 
       public override void CombatStartsOnce () {
@@ -144,7 +144,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // Parse existing colours and leave the rest as null, called at CombatStartOnce
       private static void InitColours () {
          HueDeviation = (float) Settings.LOSHueDeviation;
-         ValueDeviation = (float) Settings.LOSBrightnessDeviation;
+         BrightnessDeviation = (float) Settings.LOSBrightnessDeviation;
          parsedColours = new Dictionary<Line, Color?[]>( LOSDirectionCount );
          foreach ( Line line in (Line[]) Enum.GetValues( typeof( Line ) ) ) {
             FieldInfo colorsField = typeof( ModSettings ).GetField( "LOS" + line + "Colors"  );
@@ -177,7 +177,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Info( "LOS {0} = {1}", line, colours );
          }
          if ( LinesAnimated )
-            Info( "LOS animation, Hue = {0} @ {1}ms, Brightness = {2} @ {3}ms", HueDeviation, Settings.LOSHueHalfCycleMS, ValueDeviation, Settings.LOSBrightnessHalfCycleMS  );
+            Info( "LOS animation, Hue = {0} @ {1}ms, Brightness = {2} @ {3}ms", HueDeviation, Settings.LOSHueHalfCycleMS, BrightnessDeviation, Settings.LOSBrightnessHalfCycleMS  );
          else
             Info( "LOS is not animated." );
       }
@@ -218,8 +218,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       
       // ============ Los Material Swap ============
 
-      private static float HueLerp, ValueLerp;
-      private static int lastDirIndex;
+      private static float HueLerp, BrightnessLerp;
+      private static int typeIndex, dirIndex;
       private static LineRenderer lineA, lineB;
 
       public static void FixLOSWidth ( LineRenderer __result ) {
@@ -229,24 +229,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void SetupLOSAnimation () {
          int tick = Environment.TickCount & int.MaxValue;
          HueLerp = HueDeviation * Math.Abs( TickToCycle( tick, Settings.LOSHueHalfCycleMS ) );
-         ValueLerp = TickToCycle( tick, Settings.LOSBrightnessHalfCycleMS );
+         BrightnessLerp = TickToCycle( tick, Settings.LOSBrightnessHalfCycleMS );
       }
 
       public static void SetupLOS ( WeaponRangeIndicators __instance, Vector3 position, AbstractActor selectedActor, ICombatant target, bool usingMultifire, bool isMelee ) { try {
          if ( Mats == null ) return;
          WeaponRangeIndicators me = __instance;
          lineA = lineB = null;
-         if ( LinesAnimated ) {
-            ValueLerp += 0.4f;
-            if ( ValueLerp > 1 ) ValueLerp -= 2;
-         }
+         if ( LinesAnimated ) BrightnessLerp = AdvanceBrightness( 0.7f );
 
-         int typeIndex = 0, dirIndex = 0;
+         typeIndex = dirIndex = 0;
          if ( target is Mech || target is Vehicle ) {
             bool canSee = selectedActor.HasLOSToTargetUnit( target );
             dirIndex = canSee ? Math.Max( 0, Math.Min( (int) Combat.HitLocation.GetAttackDirection( position, target ) - 1, LOSDirectionCount-1 ) ) : 0;
          }
-         lastDirIndex = dirIndex;
 
          Mats[ NoAttack ][ dirIndex ].ApplyOutOfRange( me );
          if ( isMelee )
@@ -254,10 +250,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else {
             FiringPreviewManager.PreviewInfo info = ActiveState.FiringPreview.GetPreviewInfo( target );
             if ( info.HasLOF )
-               if ( info.LOFLevel != LineOfFireLevel.LOFClear )
-                  typeIndex = BlockedPre;
-               else
-                  typeIndex = Clear;
+               typeIndex = info.LOFLevel == LineOfFireLevel.LOFClear ? Clear : BlockedPre;
             else
                typeIndex = Indirect;
          }
@@ -270,9 +263,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return ( tick % ( cycle * 2 ) - cycle ) / (float) cycle;
       }
 
+      private static float AdvanceBrightness ( float deviate ) {
+         float value = BrightnessLerp + deviate;
+         if ( value > 1 ) value -= 2;
+         return value;
+      }
+
       public static void SetBlockedLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
          if ( lineB == null ) return;
-         LosMaterial mat = Mats[ BlockedPost ][ lastDirIndex ];
+         LosMaterial mat = Mats[ BlockedPost ][ dirIndex ];
          lineB.material = mat.GetMaterial();
          lineB.startColor = lineB.endColor = lineB.material.color;
          lineB.startWidth = lineB.endWidth = mat.Width;
@@ -347,7 +346,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          public override Material GetMaterial () {
             Vector3 HSV = RGBtoHSV[ Color ]; // x = H, y = S, z = V
-            float S = HSV.y, H = S > 0 ? ShiftHue( HSV.x, HueLerp ) : HSV.x, V = ShiftValue( HSV.z, ValueLerp, ValueDeviation );
+            float S = HSV.y, H = S > 0 ? ShiftHue( HSV.x, HueLerp ) : HSV.x, V = ShiftBrightness( HSV.z, BrightnessLerp, BrightnessDeviation );
             //Verbo( "Hue {0} => {1} ({5}), Sat {4}, Val {2} => {3} ({6})", HSV.x, H, HSV.z, V, S, HueLerp, ValueLerp );
             Material.color = Color.HSVToRGB( H, S, V );
             return Material;
@@ -360,7 +359,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return val;
          }
 
-         private static float ShiftValue ( float val, float time, float devi ) {
+         private static float ShiftBrightness ( float val, float time, float devi ) {
             float max = val + devi, min = val - devi;
             if ( max > 1 ) {
                max = 1;
