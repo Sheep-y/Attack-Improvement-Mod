@@ -149,7 +149,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( Settings.ShowReducedWeaponDamage && target is AbstractActor actor )
                dmg *= actor.StatCollection.GetValue<float>("ReceivedInstabilityMultiplier") * actor.EntrenchedMultiplier;
             if ( weapon.IsEnabled ) AddToTotalDamage( dmg, __instance );
-            text = "<#FFFF00>" + (int) dmg + "s";
+            text = FormatStabilityDamage( dmg );
          } else {
             if ( ActiveState is SelectionStateFireMulti multi && __instance.TargetIndex < 0 ) return;
             Vector2 position = ActiveState?.PreviewPos ?? weapon.parent.CurrentPosition;
@@ -193,9 +193,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   AddToTotalDamage( w.DamagePerShotAdjusted(), slot );
             }
          }
-         string prefix = ShowingStabilityDamage ? "<#FFFF00>" : "", postfix = ShowingStabilityDamage ? "s" : "";
-         TotalSlot.DamageText.text = prefix + (int) TotalDamage + postfix;
-         TotalSlot.HitChanceText.text = prefix + (int) AverageDamage + postfix;
+         TotalSlot.DamageText.text = FormatTotalDamage( TotalDamage );
+         TotalSlot.HitChanceText.text = FormatTotalDamage( AverageDamage );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void RefreshTotalDamage () {
@@ -212,5 +211,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             HUD.WeaponPanel.RefreshDisplayedWeapons();
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
-   }
+
+      // ============ Helpers ============
+
+      private const string StabilityPrefix = "<#FFFF00>", StabilityPostfix = "s";
+
+      private static string FormatStabilityDamage ( float dmg ) {
+         if ( dmg == 0 ) return StabilityPrefix + "--";
+         return StabilityPrefix + (int) dmg + StabilityPostfix;
+      }
+
+      private static string FormatTotalDamage ( float dmg ) {
+         if ( ShowingStabilityDamage ) return FormatStabilityDamage( dmg );
+         return ( (int) dmg ).ToString();
+      }
+  }
 }
