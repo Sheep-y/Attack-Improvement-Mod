@@ -149,7 +149,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Weapon weapon = __instance.DisplayedWeapon;
          if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          string text = null;
-         if ( Settings.CalloutFriendlyFire && BTInput.Instance.Combat_ToggleCallouts().IsPressed ) {
+         if ( Settings.CalloutFriendlyFire && ShowingStabilityDamage) {
             float dmg = weapon.Instability();
             if ( Settings.ShowReducedWeaponDamage && target is AbstractActor actor )
                dmg *= actor.StatCollection.GetValue<float>("ReceivedInstabilityMultiplier") * actor.EntrenchedMultiplier;
@@ -194,7 +194,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ShowTotalWeaponDamage ( List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
          if ( TotalSlot == null ) return;
          if ( ! Settings.ShowReducedWeaponDamage ) { // Sum damage when reduced damage patch is not applied.
-            bool ShowStability = Settings.CalloutFriendlyFire && BTInput.Instance.Combat_ToggleCallouts().IsPressed;
+            bool ShowStability = Settings.CalloutFriendlyFire && ShowingStabilityDamage;
             foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
                Weapon w = slot.DisplayedWeapon;
                if ( w != null && w.IsEnabled && w.CanFire )
@@ -213,9 +213,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool ShowingStabilityDamage = false;
 
       public static void ToggleStabilityDamage () { try {
-         bool CalloutPressed = BTInput.Instance.Combat_ToggleCallouts().IsPressed;
-         if ( ShowingStabilityDamage != CalloutPressed ) {
-            ShowingStabilityDamage = CalloutPressed;
+         if ( ShowingStabilityDamage != IsCalloutPressed ) {
+            ShowingStabilityDamage = IsCalloutPressed;
             HUD.WeaponPanel.RefreshDisplayedWeapons();
          }
       }                 catch ( Exception ex ) { Error( ex ); } }

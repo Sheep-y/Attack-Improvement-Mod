@@ -250,6 +250,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return AllNull( result ) ? null : result;
       }
 
+      public static bool IsCalloutPressed  { get => BattleTech.BTInput.Instance.Combat_ToggleCallouts().IsPressed; }
+
       public static bool HasMod ( params string[] mods ) { try {
          return BattleMod.FoundMod( mods );
       } catch ( Exception ex ) {

@@ -243,9 +243,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ToggleFriendlyFire () { try {
          if ( ActiveState == null ) return;
-         bool CalloutPressed = BTInput.Instance.Combat_ToggleCallouts().IsPressed;
-         if ( FriendlyFire != CalloutPressed ) {
-            FriendlyFire = CalloutPressed;
+         if ( FriendlyFire != IsCalloutPressed ) {
+            FriendlyFire = IsCalloutPressed;
             foreach ( AbstractActor actor in Combat.LocalPlayerTeam.units )
                if ( ! actor.IsDead )
                   actor.VisibilityCache.RebuildCache( Combat.GetAllCombatants() );
