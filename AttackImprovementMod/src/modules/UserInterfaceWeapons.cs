@@ -129,18 +129,23 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static CombatHUDWeaponSlot TotalSlot;
 
       private static void AddToTotalDamage ( float dmg, CombatHUDWeaponSlot slot ) {
-         float chance = slot.HitChance, multiplied = dmg * slot.DisplayedWeapon.ShotsWhenFired;
-         if ( chance <= 0 ) return; // Hit Chance is -999.9 if it can't fire at target (Method ClearHitChance)
+         Weapon w = slot.DisplayedWeapon;
+         if ( ! w.IsEnabled ) return;
+         float chance = slot.HitChance, multiplied = dmg * w.ShotsWhenFired;
+         ICombatant target = HUD.SelectedTarget;
+         if ( chance <= 0 ) {
+            if ( target != null ) return; // Hit Chance is -999.9 if it can't fire at target (Method ClearHitChance)
+            chance = 1; // Otherwise, preview full damage when no target is selected.
+         }
          SelectionState state = HUD.SelectionHandler.ActiveState;
          if ( state is SelectionStateFireMulti multi
            && state.AllTargetedCombatants.Contains( HUD.SelectedTarget )
-           && HUD.SelectedTarget != multi.GetSelectedTarget( slot.DisplayedWeapon ) ) return;
+           && HUD.SelectedTarget != multi.GetSelectedTarget( w ) ) return;
          TotalDamage += multiplied;
          AverageDamage += multiplied * chance;
       }
 
       public static void UpdateWeaponDamage ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
-         if ( target == null ) return;
          Weapon weapon = __instance.DisplayedWeapon;
          if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          string text = null;
@@ -148,17 +153,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             float dmg = weapon.Instability();
             if ( Settings.ShowReducedWeaponDamage && target is AbstractActor actor )
                dmg *= actor.StatCollection.GetValue<float>("ReceivedInstabilityMultiplier") * actor.EntrenchedMultiplier;
-            if ( weapon.IsEnabled ) AddToTotalDamage( dmg, __instance );
+            AddToTotalDamage( dmg, __instance );
             text = FormatStabilityDamage( dmg );
          } else {
             if ( ActiveState is SelectionStateFireMulti multi && __instance.TargetIndex < 0 ) return;
             Vector2 position = ActiveState?.PreviewPos ?? weapon.parent.CurrentPosition;
-            float raw = weapon.DamagePerShotAdjusted(); // damage displayed by vanilla
-            float dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
-            if ( WeaponRealizerDamageModifiers != null )
-               dmg = (float) WeaponRealizerDamageModifiers.Invoke( null, new object[]{ weapon.parent, target, weapon, dmg, false } );
-            if ( weapon.IsEnabled ) AddToTotalDamage( dmg, __instance );
-            if ( Math.Abs( raw - dmg ) < 0.01 ) return;
+            float raw = weapon.DamagePerShotAdjusted(), dmg = raw; // damage displayed by vanilla
+            if ( target != null ) {
+               dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
+               if ( WeaponRealizerDamageModifiers != null )
+                  dmg = (float) WeaponRealizerDamageModifiers.Invoke( null, new object[]{ weapon.parent, target, weapon, dmg, false } );
+            }
+            AddToTotalDamage( dmg, __instance );
+            if ( target == null || Math.Abs( raw - dmg ) < 0.01 ) return;
             text = ( (int) dmg ).ToString();
          }
          if ( weapon.HeatDamagePerShot > 0 )
@@ -186,15 +193,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ShowTotalWeaponDamage ( List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
          if ( TotalSlot == null ) return;
-         if ( ! Settings.ShowReducedWeaponDamage ) {
+         if ( ! Settings.ShowReducedWeaponDamage ) { // Sum damage when reduced damage patch is not applied.
+            bool ShowStability = Settings.CalloutFriendlyFire && BTInput.Instance.Combat_ToggleCallouts().IsPressed;
             foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
                Weapon w = slot.DisplayedWeapon;
                if ( w != null && w.IsEnabled && w.CanFire )
-                  AddToTotalDamage( w.DamagePerShotAdjusted(), slot );
+                  AddToTotalDamage( ShowStability ? w.Instability() : w.DamagePerShotAdjusted(), slot );
             }
          }
-         TotalSlot.DamageText.text = FormatTotalDamage( TotalDamage );
-         TotalSlot.HitChanceText.text = FormatTotalDamage( AverageDamage );
+         TotalSlot.DamageText.text = FormatTotalDamage( TotalDamage, true );
+         TotalSlot.HitChanceText.text = FormatTotalDamage( AverageDamage, true );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void RefreshTotalDamage () {
@@ -205,9 +213,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool ShowingStabilityDamage = false;
 
       public static void ToggleStabilityDamage () { try {
-         bool AltPressed = Input.GetKey( KeyCode.LeftAlt ) || Input.GetKey( KeyCode.RightAlt );
-         if ( ShowingStabilityDamage != AltPressed ) {
-            ShowingStabilityDamage = AltPressed;
+         bool CalloutPressed = BTInput.Instance.Combat_ToggleCallouts().IsPressed;
+         if ( ShowingStabilityDamage != CalloutPressed ) {
+            ShowingStabilityDamage = CalloutPressed;
             HUD.WeaponPanel.RefreshDisplayedWeapons();
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
@@ -216,13 +224,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private const string StabilityPrefix = "<#FFFF00>", StabilityPostfix = "s";
 
-      private static string FormatStabilityDamage ( float dmg ) {
-         if ( dmg == 0 ) return StabilityPrefix + "--";
+      private static string FormatStabilityDamage ( float dmg, bool alwaysShowNumber = false ) {
+         if ( dmg < 1 && ! alwaysShowNumber ) return StabilityPrefix + "--";
          return StabilityPrefix + (int) dmg + StabilityPostfix;
       }
 
-      private static string FormatTotalDamage ( float dmg ) {
-         if ( ShowingStabilityDamage ) return FormatStabilityDamage( dmg );
+      private static string FormatTotalDamage ( float dmg, bool alwaysShowNumber = false ) {
+         if ( ShowingStabilityDamage ) return FormatStabilityDamage( dmg, alwaysShowNumber );
          return ( (int) dmg ).ToString();
       }
   }
