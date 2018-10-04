@@ -11,7 +11,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
    using static System.Reflection.BindingFlags;
 
-   public class UserInterfaceWeapons : BattleModModule {
+   public class WeaponInfo : BattleModModule {
 
       public override void CombatStartsOnce () {
          Type slotType = typeof( CombatHUDWeaponSlot ), panelType = typeof( CombatHUDWeaponPanel );

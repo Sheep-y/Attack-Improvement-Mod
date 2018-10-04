@@ -87,9 +87,10 @@
     <Compile Include="src\modules\RollCorrection.cs" />
     <Compile Include="src\modules\RollModifier.cs" />
     <Compile Include="src\modules\HitLocation.cs" />
-    <Compile Include="src\modules\UserInterfaceWeapons.cs" />
-    <Compile Include="src\modules\UserInterfaceActor.cs" />
-    <Compile Include="src\modules\UserInterface.cs" />
+    <Compile Include="src\modules\Targetting.cs" />
+    <Compile Include="src\modules\UserInterfacePanels.cs" />
+    <Compile Include="src\modules\HUD.cs" />
+    <Compile Include="src\modules\WeaponInformation.cs" />
     <Compile Include="src\Test.cs" />
   </ItemGroup>
   <ItemGroup>

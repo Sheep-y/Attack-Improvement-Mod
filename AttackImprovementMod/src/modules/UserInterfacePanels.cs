@@ -15,7 +15,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static ChassisLocations;
    using static System.Reflection.BindingFlags;
 
-   public class UserInterfaceActor : BattleModModule {
+   public class UserInterfacePanels : BattleModModule {
 
       private const string MetaColour = "<#888888FF>";
 
