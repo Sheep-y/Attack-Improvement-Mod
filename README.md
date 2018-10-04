@@ -5,9 +5,9 @@ For BATTLETECH 1.2.0
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Settings](#settings)
+  * [HUD Settings](#hud-settings)
   * [User Interface Settings](#user-interface-settings)
   * [Weapons Information Settings](#weapon-information-settings)
-  * [Targeting Line and Facing Ring Settings](#targeting-line-and-facing-ring-settings)
   * [Called Shot Settings](#called-shot-settings)
   * [Melee and DFA Settings](#melee-and-dfa-settings)
   * [Individual Modifier Settings](#individual-modifier-settings)
@@ -124,6 +124,7 @@ These settings can be changed in `settings.json`.
 
 ## HUD Settings
 
+
 **Unit Selection**
 
 > Setting: `FunctionKeySelectPC`  (true/false, default true)
@@ -132,16 +133,23 @@ These settings can be changed in `settings.json`.
 >
 > The keys will stop to work if they are already binded.
 > Also, because the keys are hard-coded and not keybinds, this will not change game settings or game profile.
+<br>
 
-
-**Friendly Fire**
-
-> Setting: `AltKeyFriendlyFire`  (true/false, default true)
+> Setting: `CalloutFriendlyFire`  (true/false, default true)
 >
-> When true, friendly units may be targeted by attack when pressing Alt.
+> When true, friendly units may be targeted and attacked when toggling callout.
+> By game default this happens when you press and hold Left Alt.
 
 
 **Actions**
+
+> Setting: `SmartIndirectFire`  (true/false, default true)
+>
+> When true, indirect fire will be used for indirect-fire-capable weapons,
+> if line of fire is obstructed and indirect penalty is less than obstructed penalty.
+>
+> This setting applies equally to both players and enemies.
+<br>
 
 > Setting: `FixMultiTargetBackout`  (true/false, default true)
 >
@@ -151,10 +159,154 @@ These settings can be changed in `settings.json`.
 > When true, this mod will make Multi-Target back out from selected targets one by one as expected.
 <br>
 
+> Setting: `AggressiveMultiTargetAssignment`  (true/false, default true)
+>
+> When you select a new target with the Multi-Target skill, all enabled weapons will be reassigned.
+> Each weapon will prefer to hit the target with highest hit chance, and 
+
+
+**Terrain Dots**
+
+> Setting: `SpecialTerrainDotSize`  (small positive number, default 2)<br>
+> Setting: `NormalTerrainDotSize`   (small positive number, default 1.25)<br>
+>
+> Change the size of terrain dots.  1 is default size, 2 doubles the diameter, 0.5 halves.
+<br>
+
+> Setting: `BoostTerrainDotColor`  (true/false, default true)
+>
+> When true, strengthen the colour of special terrain dots to make them easier to see.
+<br>
+
+> Setting: `MovementPreviewRadius`  (small positive integer, default 6)
+>
+> When non-zero, this much grid dots will be displayed during movement preview.
+>
+> This setting simply override `MoveConstants.ExperimentalHexRadius` in `CombatConstants.json`.
+
+
+**Terrain Descriptions And Effects**
+
 > Setting: `ShowDangerousTerrain`  (true/false, default true)
 >
 > When true, dangerous terrain will show both terrain description and danger description,
 > instead of danger description overriding terrain description.
+<br>
+
+> Setting: `ShowMeleeTerrain`  (true/false, default true)
+>
+> When true, terrain description will be displayed in melee and DFA preview,
+> and the terrain reticle will be labeled with the action.
+<br>
+
+> Setting: `FixHeatPreview`  (true/false, default true)
+>
+> When true, previewed move destination's terrain will be factored in heat preview, plus any heat effects en-route.
+> For example, moving into water will predict more cooldown and vice versa.
+<br>
+
+> Setting: `FixLosPreviewHeight`  (true/false, default true)
+>
+> Walk and Jump will sometimes predicts different Line of Sight, because their preview height is slightly different from each other.
+> When true, they will be made the same.
+
+
+**Nameplates**
+
+> Setting: `NameplateColourPlayer`  (color string, default "#BFB")<br>
+> Setting: `NameplateColourEnemy`  (color string, default "#FBB")<br>
+> Setting: `NameplateColourAlly`  (color string, default "#8FF")<br>
+> Setting: `FloatingArmorColourPlayer`  (color string, default "#BFB")<br>
+> Setting: `FloatingArmorColourEnemy`  (color string, default "#FBB")<br>
+> Setting: `FloatingArmorColourAlly`  (color string, default "#8FF")<br>
+>
+> When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.
+<br>
+
+> Setting: `ShowPlayerHealth`  (format string, default ", HP {2}/{3}")<br>
+> Setting: `ShowEnemyWounds`  (format string, default ", Wounds {1}")<br>
+> Setting: `ShowAllyHealth`  (format string, default ", HP {2}/{3}")<br>
+>
+> When non-empty, units that are wounded will have its injuries or health displayed after pilot name.
+> {0} is pilot name, {1} is injury, {2} is (health - injury), and {3} is health.
+>
+> The wounds or health only display when the unit is wounded.
+> Note that enemy's health is unknown to players by design.  {2} and {3} will show "?" when used.
+
+
+**Facing Rings Colours**
+
+> Setting: `FacingMarkerPlayerColors`  (default "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A")<br>
+> Setting: `FacingMarkerEnemyColors`  (default "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A")<br>
+> Setting: `FacingMarkerTargetColors`  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br>
+>
+> When non-empty, change the colours of each arc for friends, foes, and targeted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.
+
+
+**Line of Sight/Fire Style**
+
+> Setting: `LOSIndirectDotted`  (default true, game default false)<br>
+> Setting: `LOSNoAttackDotted`  (default true)<br>
+> Setting: `LOSMeleeDotted`  (default false)<br>
+> Setting: `LOSClearDotted`  (default false)<br>
+> Setting: `LOSBlockedPreDotted`   (default false)<br>
+> Setting: `LOSBlockedPostDotted`  (default false)<br>
+> Setting: `LOSMeleeColors`  (default "")<br>
+> Setting: `LOSClearColors`  (default "")<br>
+> Setting: `LOSBlockedPreColors`   (default "#D0F")<br>
+> Setting: `LOSBlockedPostColors`  (default "#C8E")<br>
+> Setting: `LOSIndirectColors`  (default "")<br>
+> Setting: `LOSNoAttackColors`  (default "")<br>
+>
+> When non-empty, set the colour and style of various targeting lines.
+> Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.
+>
+> Colours are either empty or in HTML hash syntax.  For example `"#F00"` = red, `"#0F0"` = green, `"#00F"` = blue, `"#FFF"` = white, `"#888"` = grey, `"#000"` = black.
+> Four parts means RGBA, while three parts mean full opacity RGB.  Supports full and short form. e.g. #28B = #2288BB = #2288BBFF.
+>
+> Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in this order.
+> If less colours are specified than direction, the missing directions will use the last colour.
+> For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
+>
+> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, it will override this mod's colours.
+
+
+**Line of Sight/Fire Width**
+
+> Setting: `LOSWidth`  (0 to 10, default 2, game default 1)
+>
+> Set width of all targeting lines (direct, indirect, blocked, can't attack etc.).  Game default is 1  Mod default is 2.
+<br>
+
+> Setting: `LOSWidthBlocked`  (0 to 10, default 1.5, game default 0.75)
+>
+> Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
+<br>
+
+> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, it will override this mod's widths.
+
+
+**Widths of Obstruction Marker**
+
+> Setting: `LOSMarkerBlockedMultiplier`  (0 to 10, default 1.5)
+>
+> Scale the obstruction marker of targeting lines, the "light dot" that split the obstructed line into two. 2 means double width and height, 0.5 means half-half.
+> Set to 1 to leave at game default.  Set to 0 will not remove them from game but will effectively hide them.
+>
+> When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
+
+
+**Refine or Roughen Fire Arc and Jump Arc**
+
+> Setting: `ArcLinePoints`  (2 to 127, default 48, game default 18)
+>
+> To some sharp eyes, it is easy to see the hard corners of the arc of indirect targeting lines.
+> Lines are quick to draw, so this mod will happily improves their qualities for you.
+> Set to 2 to make them flat like other lines.  Set to 18 to leave at game default.
+>
+> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, the indirect fire arc cannot be modified.
+
+
 
 
 ## Mech and Pilot UI Settings
@@ -185,13 +337,7 @@ These settings can be changed in `settings.json`.
 > The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
 
 
-**Mech Info**
-
-> Setting: `FixHeatPreview`  (true/false, default true)
->
-> When true, previewed move destination's terrain will be factored in heat preview, plus any heat effects en-route.
-> For example, moving into water will predict more cooldown and vice versa.
-<br>
+**Mech and MechWarrior**
 
 > Setting: `ShowNumericInfo`  (true/false, default true)
 >
@@ -205,20 +351,6 @@ These settings can be changed in `settings.json`.
 >
 > Duplicates with Extended Information, but AIM override it and use a shorter form for mechs to fit `ShowNumericInfo`.
 > Default false because the short form may overwhelm inexperienced players.
-
-
-
-**MechWarrior Info**
-
-> Setting: `ShowPlayerHealth`  (format string, default ", HP {2}/{3}")<br>
-> Setting: `ShowEnemyWounds`  (format string, default ", Wounds {1}")<br>
-> Setting: `ShowAllyHealth`  (format string, default ", HP {2}/{3}")<br>
->
-> When non-empty, units that are wounded will have its injuries or health displayed after pilot name.
-> {0} is pilot name, {1} is injury, {2} is (health - injury), and {3} is health.
->
-> The wounds or health only display when the unit is wounded.
-> Note that enemy's health is unknown to players by design.  {2} and {3} will show "?" when used.
 <br>
 
 > Setting: `ShortPilotHint`  (format string, default "G:{3} P:{4} G:{5} T:{6}")
@@ -312,104 +444,6 @@ These settings can be changed in `settings.json`.
 > The string {0} to {4} will be replaced by a weapon's MinRange, ShortRange, MediumRange, LongRange, and MaxRange.
 > Most of them are unused by vanilla game, so this mod use MinRange, MediumRange, and MaxRange by default.
 > But if a mod is installed that make use of them, the range display can be customised, such as "{0}:{1}:{2}:{3}:{4}".
-
-
-
-## HUD Colour Settings
-
-
-**Nameplates**
-
-> Setting: `NameplateColourPlayer`  (color string, default "#BFB")<br>
-> Setting: `NameplateColourEnemy`  (color string, default "#FBB")<br>
-> Setting: `NameplateColourAlly`  (color string, default "#8FF")<br>
-> Setting: `FloatingArmorColourPlayer`  (color string, default "#BFB")<br>
-> Setting: `FloatingArmorColourEnemy`  (color string, default "#FBB")<br>
-> Setting: `FloatingArmorColourAlly`  (color string, default "#8FF")<br>
->
-> When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.
-
-
-**Line of Sight/Fire Style**
-
-> Setting: `LOSIndirectDotted`  (default true, game default false)<br>
-> Setting: `LOSNoAttackDotted`  (default true)<br>
-> Setting: `LOSMeleeDotted`  (default false)<br>
-> Setting: `LOSClearDotted`  (default false)<br>
-> Setting: `LOSBlockedPreDotted`   (default false)<br>
-> Setting: `LOSBlockedPostDotted`  (default false)<br>
-> Setting: `LOSMeleeColors`  (default "")<br>
-> Setting: `LOSClearColors`  (default "")<br>
-> Setting: `LOSBlockedPreColors`   (default "#D0F")<br>
-> Setting: `LOSBlockedPostColors`  (default "#C8E")<br>
-> Setting: `LOSIndirectColors`  (default "")<br>
-> Setting: `LOSNoAttackColors`  (default "")<br>
->
-> When non-empty, set the colour and style of various targeting lines.
-> Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.
->
-> Colours are either empty or in HTML hash syntax.  For example `"#F00"` = red, `"#0F0"` = green, `"#00F"` = blue, `"#FFF"` = white, `"#888"` = grey, `"#000"` = black.
-> Four parts means RGBA, while three parts mean full opacity RGB.  Supports full and short form. e.g. #28B = #2288BB = #2288BBFF.
->
-> Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in this order.
-> If less colours are specified than direction, the missing directions will use the last colour.
-> For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
->
-> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, it will override this mod's colours.
-
-
-**Line of Sight/Fire Width**
-
-> Setting: `LOSWidth`  (0 to 10, default 2, game default 1)
->
-> Set width of all targeting lines (direct, indirect, blocked, can't attack etc.).  Game default is 1  Mod default is 2.
-<br>
-
-> Setting: `LOSWidthBlocked`  (0 to 10, default 1.5, game default 0.75)
->
-> Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
-<br>
-
-> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, it will override this mod's widths.
-
-
-**Facing Rings Colours**
-
-> Setting: `FacingMarkerPlayerColors`  (default "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A")<br>
-> Setting: `FacingMarkerEnemyColors`  (default "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A")<br>
-> Setting: `FacingMarkerTargetColors`  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br>
->
-> When non-empty, change the colours of each arc for friends, foes, and targeted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.
-
-
-**Widths of Obstruction Marker**
-
-> Setting: `LOSMarkerBlockedMultiplier`  (0 to 10, default 1.5)
->
-> Scale the obstruction marker of targeting lines, the "light dot" that split the obstructed line into two. 2 means double width and height, 0.5 means half-half.
-> Set to 1 to leave at game default.  Set to 0 will not remove them from game but will effectively hide them.
->
-> When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.
-
-
-**Refine or Roughen Fire Arc and Jump Arc**
-
-> Setting: `ArcLinePoints`  (2 to 127, default 48, game default 18)
->
-> To some sharp eyes, it is easy to see the hard corners of the arc of indirect targeting lines.
-> Lines are quick to draw, so this mod will happily improves their qualities for you.
-> Set to 2 to make them flat like other lines.  Set to 18 to leave at game default.
->
-> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, the indirect fire arc cannot be modified.
-
-
-**Fix LoS Inconsistency**
-
-> Setting: `FixLosPreviewHeight`  (true/false, default true)
->
-> Walk and Jump will sometimes predicts different Line of Sight, because their preview height is slightly different from each other.
-> When true, they will be made the same.
-
 
 
 ## Called Shot Settings
@@ -546,14 +580,6 @@ These settings can be changed in `settings.json`.
 > Game default is false.
 
 
-**Indirect Fire**
-
-> Setting: `SmartIndirectFire`  (true/false, default true)
->
-> When true, indirect fire will be used for indirect-fire-capable weapons,
-> if line of fire is obstructed and indirect penalty is less than obstructed penalty.
-
-
 **Jumped Modifier**
 
 > Settings: `ToHitSelfJumped` (-20 to 20, default 0)
@@ -562,17 +588,6 @@ These settings can be changed in `settings.json`.
 > You may set it with this mod if you want to.  It will be factored in attack preview.
 >
 > Effective only if "Jumped" is in the modifier lists.
-
-      public bool ColouredLoadout = true;
-
-      [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default true." ) ]
-      public bool ShowDamageInLoadout = true;
-
-      [ JsonComment( "Show alpha/melee&dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
-      public string ShowAlphaDamageInLoadout = "Damage {2} + Long {3}";
-
-      [ JsonComment( "Show melee & dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
-      public bool ShowMeleeDamageInLoadout = true;
 
 
 
