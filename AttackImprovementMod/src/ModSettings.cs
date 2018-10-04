@@ -77,9 +77,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default \"G:{3} P:{4} G:{5} T:{6}\" which summarise his/her stats.  Set to empty to leave at game default." } ) ]
       public string ShortPilotHint = "G:{3} P:{4} G:{5} T:{6}";
 
-      [ JsonComment( "Show weapon properties (bonus) instead of weapon type in weapon mouseover." ) ]
-      public bool ShowWeaponProp = true;
-
       [ JsonComment( "Apply damage reduction to damage numbers in weapon panel.  Default true." ) ]
       public bool ShowReducedWeaponDamage = true;
 
@@ -88,6 +85,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ JsonComment( "Show stability damage while pressing Callout key (default left alt).  Default true." ) ]
       public bool CalloutWeaponStability = true;
+
+      [ JsonComment( "Show weapon properties (bonus) instead of weapon type in weapon mouseover." ) ]
+      public bool ShowWeaponProp = true;
 
       [ JsonComment( "Show weapon range in meters instead of \"Short\" or \"Very Long\" in weapon mouseover.  Default \"Min {0} : Long {2} : Max {4}\"." ) ]
       public string WeaponRangeFormat = "Min {0} : Long {2} : Max {4}";

@@ -6,8 +6,7 @@ For BATTLETECH 1.2.0
 - [Configuration](#configuration)
 - [Settings](#settings)
   * [HUD Settings](#hud-settings)
-  * [User Interface Settings](#user-interface-settings)
-  * [Weapons Information Settings](#weapon-information-settings)
+  * [Combat Information Settings](#combat-information-settings)
   * [Called Shot Settings](#called-shot-settings)
   * [Melee and DFA Settings](#melee-and-dfa-settings)
   * [Individual Modifier Settings](#individual-modifier-settings)
@@ -251,11 +250,15 @@ These settings can be changed in `settings.json`.
 > Setting: `LOSClearDotted`  (default false)<br>
 > Setting: `LOSBlockedPreDotted`   (default false)<br>
 > Setting: `LOSBlockedPostDotted`  (default false)<br>
-> Setting: `LOSMeleeColors`  (default "")<br>
-> Setting: `LOSClearColors`  (default "")<br>
-> Setting: `LOSBlockedPreColors`   (default "#D0F")<br>
-> Setting: `LOSBlockedPostColors`  (default "#C8E")<br>
-> Setting: `LOSIndirectColors`  (default "")<br>
+>
+> When true, the line(s) will be dotted.  When false, the line(s) will be solid.
+<br>
+
+> Setting: `LOSMeleeColors`  (default "#F00,#0FF,#0FF,#0F8,#F00")<br>
+> Setting: `LOSClearColors`  (default "#F00,#0FF,#0FF,#0F8,#F00")<br>
+> Setting: `LOSBlockedPreColors`   (default "#D0F,#D0F,#D0F,#D0F,#D0F")<br>
+> Setting: `LOSBlockedPostColors`  (default "#C8E,#C8E,#C8E,#C8E,#C8E")<br>
+> Setting: `LOSIndirectColors`  (default "#F00,#0FF,#0FF,#0F8,#F00")<br>
 > Setting: `LOSNoAttackColors`  (default "")<br>
 >
 > When non-empty, set the colour and style of various targeting lines.
@@ -267,8 +270,31 @@ These settings can be changed in `settings.json`.
 > Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in this order.
 > If less colours are specified than direction, the missing directions will use the last colour.
 > For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
+<br>
+
+> Setting: `LOSHueDeviation`  (0 to 0.5, default 0.04);
+> Setting: `LOSHueHalfCycleMS`  (0 to 300k, default 2048);
+> Setting: `LOSBrightnessDeviation`  (0 to 0.5, default 0.1);
+> Setting: `LOSBrightnessHalfCycleMS`  (0 to 300k, default 1024);
 >
-> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used, it will override this mod's colours.
+> When non-zero, the targeting lines will have animated colour, such as dimming and brightening.
+>
+> "Deviation" is the range of animation. For example cyan has a hue value of "0.5",
+> and a hue deviation of "0.1" will causes it to animate between "0.4" and "0.6",
+> or a cycle of green <> cyan <> blue.
+> Thus, a high hue deviation can cause line colours to mix up and lost their meanings.
+>
+> Brightness also works on a scale of 0 (black) to 1 (brightest) with the animation range
+> determined by the colour and deviation setting.
+>
+> "HalfCycleMS" is the milliseconds needed for hue or brightness to complete a half cycle.
+> In the above example, that would be the time it takes to go from green to blue.
+>
+> The default cycles are power of two for faster modulo calculation, but you can use any integer.
+<br>
+
+> When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used,
+> it will override the game's code with its own and render these colour and animation settings moot.
 
 
 **Line of Sight/Fire Width**
@@ -308,8 +334,7 @@ These settings can be changed in `settings.json`.
 
 
 
-
-## Mech and Pilot UI Settings
+## Combat Information Settings
 
 
 **Paper Dolls**
@@ -364,9 +389,6 @@ These settings can be changed in `settings.json`.
 >
 > If the line is too long, for example when HP is included, the line will wrap.
 
-
-
-## Weapons Information Settings
 
 **Weapons Loadout**
 
@@ -446,6 +468,7 @@ These settings can be changed in `settings.json`.
 > But if a mod is installed that make use of them, the range display can be customised, such as "{0}:{1}:{2}:{3}:{4}".
 
 
+
 ## Called Shot Settings
 
 
@@ -513,6 +536,7 @@ These settings can be changed in `settings.json`.
 > Leave empty to round them to nearest integer.
 >
 > Replace the old "ShowDecimalCalledChance" setting in mod version 1.0.
+
 
 
 ## Melee and DFA Settings
@@ -592,6 +616,7 @@ These settings can be changed in `settings.json`.
 
 
 ## Net Hit Modifier Settings
+
 
 **Allow Net Bonus Modifier**
 
@@ -700,6 +725,7 @@ These settings can be changed in `settings.json`.
 
 
 ## Hit Roll Settings
+
 
 **Adjust Roll Correction**
 
@@ -1055,7 +1081,7 @@ but because the code that determine hit distribution is not designed for fractio
 
 * BattleTech 1.0 - AIM 1.0.1.
 * BattleTech 1.1 - AIM 1.0.1 to 2.1.2.
-* BattleTech 1.2 - AIM 2.2 to 2.5.
+* BattleTech 1.2 - AIM 2.2 to 3.0.
 
 AIM is aware of some other mods and will behave differently in their present to meet player expectations.
 
