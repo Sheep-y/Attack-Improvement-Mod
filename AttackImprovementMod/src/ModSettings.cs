@@ -22,6 +22,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Select player mechs with F1 to F4 key.  Default true." ) ]
       public bool FunctionKeySelectPC = true;
 
+      [ JsonComment( "Reverse target selection when left shift is pressed.  Default true." ) ]
+      public bool ShiftKeyReverseSelection = true;
+
       [ JsonComment( "Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game." ) ]
       public bool FixGreyHeadDisease = true;
 

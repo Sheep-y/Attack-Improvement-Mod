@@ -1,5 +1,6 @@
 using BattleTech.UI;
 using BattleTech;
+using InControl;
 using Localize;
 using System;
 using System.Linq;
@@ -36,6 +37,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
 
+         if ( Settings.ShiftKeyReverseSelection ) {
+            SelectNext = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectNext", NonPublic | Instance );
+            SelectPrev = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectPrevious", NonPublic | Instance );
+            if ( BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.LeftShift ) ) != null ) {
+               Warn( "Left Shift is binded. ShiftKeyReverseSelection disabled." );
+            } else {
+               if ( AnyNull( SelectNext, SelectPrev ) ) {
+                  Warn( "CombatSelectionHandler.ProcessSelectNext and/or ProcessSelectPrevious not found. ShiftKeyReverseSelection not fully patched." );
+               } else {
+                  Patch( typeof( CombatSelectionHandler ), "ProcessSelectNext", "CheckReverseNextSelection", null );
+                  Patch( typeof( CombatSelectionHandler ), "ProcessSelectPrevious", "CheckReversePrevSelection", null );
+               }
+            }
+         }
+
          if ( Settings.FixLosPreviewHeight )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
 
@@ -51,9 +67,36 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
+      // ============ Line of Fire ============
+
+      public static void FixMoveDestinationHeight ( Pathing __instance ) {
+         __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
+      }
+
+      // ============ Reverse Selection ============
+
+      private static bool IsSelectionReversed;
+      private static MethodInfo SelectNext, SelectPrev;
+
+      public static bool CheckReverseNextSelection ( CombatSelectionHandler __instance, ref bool __result ) {
+         return CheckReverseSelection( __instance, ref __result, SelectPrev );
+      }
+
+      public static bool CheckReversePrevSelection ( CombatSelectionHandler __instance, ref bool __result ) {
+         return CheckReverseSelection( __instance, ref __result, SelectNext );
+      }
+
+      public static bool CheckReverseSelection ( CombatSelectionHandler __instance, ref bool __result, MethodInfo reverse ) { try {
+         if ( ! Input.GetKey( KeyCode.LeftShift ) ) return true; // Shift not pressed. Continue.
+         IsSelectionReversed = ! IsSelectionReversed;
+         if ( ! IsSelectionReversed ) return true; // In reversed selection. Allow to pass.
+         __result = (bool) reverse.Invoke( __instance, null ); // Otherwise call reverse selection.
+         return false;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
+
       // ============ Multi-Target ============
 
-      private static bool ReAddStateData = false;
+      private static bool ReAddStateData;
 
       public static void PreventMultiTargetBackout ( CombatSelectionHandler __instance ) {
          if ( ReAddStateData ) {
