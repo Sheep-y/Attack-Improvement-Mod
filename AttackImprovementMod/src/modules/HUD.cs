@@ -31,11 +31,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetPipBarOwner", null );
          }
 
+         if ( Settings.ShowDangerousTerrain ) {
+            SidePanelProp = typeof( MoveStatusPreview ).GetProperty( "sidePanel", NonPublic | Instance );
+            if ( SidePanelProp == null )
+               Warn( "MoveStatusPreview.sidePanel not found, ShowDangerousTerrain not patched." );
+            else
+               Patch( typeof( MoveStatusPreview ), "DisplayPreviewStatus", null, "AppendDangerousTerrainText" );
+         }
          if ( Settings.ShowMeleeTerrain ) { // Rewrite with transpiler
             UpdateStatusMethod = typeof( CombatMovementReticle ).GetMethod( "UpdateStatusPreview", NonPublic | Instance );
             StatusPreviewProp = typeof( CombatMovementReticle ).GetProperty( "StatusPreview", NonPublic | Instance );
-            if ( SidePanelProp == null )
-               Warn( "MoveStatusPreview.sidePanel not found, ShowDangerousTerrain not patched." );
+            if ( AnyNull( UpdateStatusMethod, StatusPreviewProp ) )
+               Warn( "CombatMovementReticle.UpdateStatusPreview or StatusPreview not found, ShowMeleeTerrain not patched." );
             else {
                Patch( typeof( CombatMovementReticle ), "DrawPath", null, "ShowMeleeTerrainText" );
                Patch( typeof( CombatMovementReticle ), "drawJumpPath", null, "ShowDFATerrainText" );
@@ -163,10 +170,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static PropertyInfo SidePanelProp, StatusPreviewProp;
       private static MethodInfo UpdateStatusMethod;
-
-      public static void FixMoveDestinationHeight ( Pathing __instance ) {
-         __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
-      }
 
       public static void AppendDangerousTerrainText ( MoveStatusPreview __instance, AbstractActor actor, Vector3 worldPos ) { try {
          MapTerrainDataCell cell = Combat.EncounterLayerData.GetCellAt( worldPos ).relatedTerrainCell;
