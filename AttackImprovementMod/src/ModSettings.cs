@@ -343,8 +343,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Critical Hits" ) ]
       //
 
-      [ JsonComment( "Skip critical checks if target is dead.  Default true.  Applies to vehicle and turret too." ) ]
-      public bool SkipCritingDeadMech = true;
+      [ JsonComment( "When target is dead, skip \"critical\" or \"damage\" processing.  Default \"critical\"." ) ]
+      public string SkipBeatingDeadMech = "critical";
 
       [ JsonComment( new string[] {
         "Overrides AICritChanceBaseMultiplier in CombatGameConstants.json.  Default 0.2, same as game.",
@@ -453,8 +453,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int? SettingVersion = null;
 
 
+      [ Obsolete( "[v3.0] Default true. Replaced by SkipBeatingDeadMech." ) ]
+      public bool? SkipCritingDeadMech = null;
       [ Obsolete( "[v2.5] Default true. Replaced by ShowNumericInfo." ) ]
-      public bool? ShowHeatAndStab = true;
+      public bool? ShowHeatAndStab = null;
       [ Obsolete( "[v2.3 pre 20180827] Default 0. Replaced by CritChanceZeroArmor." ) ]
       public decimal? ThroughArmorCritChanceZeroArmor = null;
       [ Obsolete( "[v2.3 pre 20180827] Default 0. Replaced by CritChanceFullArmor." ) ]

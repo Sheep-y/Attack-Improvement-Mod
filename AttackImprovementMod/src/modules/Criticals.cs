@@ -19,7 +19,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static Type MechType = typeof( Mech );
 
-      private static bool ThroughArmorCritEnabled;
+      private static bool ThroughArmorCritEnabled, SkipCritingDeadMech;
       private static float MultiplierEnemy, MultiplierAlly,
          TAC_Threshold, TAC_ThresholdPerc, TAC_BaseChance, TAC_VarChance, CritChanceMin, CritChanceMax, CritChanceBase, CritChanceVar;
 
@@ -29,8 +29,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          MethodInfo ResolveWeaponDamage = MechType.GetMethod( "ResolveWeaponDamage", ResolveParams );
          TryRun( ModLog, InitCritChance );
 
-         if ( Settings.SkipCritingDeadMech )
-            Patch( ResolveWeaponDamage, "Skip_BeatingDeadMech", null );
+         switch ( Settings.SkipBeatingDeadMech?.Trim().ToLower() ) {
+            case "damage" :
+               Patch( MechType, "TakeWeaponDamage", "SkipBeatingDeadMech", null ); 
+               goto case "critical";
+            case "critical" :
+               SkipCritingDeadMech = true;
+               Patch( ResolveWeaponDamage, "SkipBeatingDeadMech", null );
+               break;
+            case "": case null: 
+               break;
+            default :
+               Warn( "Unknown SkipBeatingDeadMech: {0}", Settings.SkipBeatingDeadMech );
+               break;
+         }
 
          if ( MultiplierEnemy != 0.2f || MultiplierAlly != 0.2f )
             Patch( typeof( CritChanceRules ), "GetCritMultiplier", "SetNPCCritMultiplier", null );
@@ -133,9 +145,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       } }
 
       [ HarmonyPriority( Priority.High ) ]
-      public static bool Skip_BeatingDeadMech ( Mech __instance ) {
-         if ( __instance.IsFlaggedForDeath || __instance.IsDead ) return false;
-         return true;
+      public static bool SkipBeatingDeadMech ( Mech __instance ) {
+         return ! IsBeatingDeadMech( __instance );
+      }
+
+      public static bool IsBeatingDeadMech ( AbstractActor __instance ) {
+         return __instance.IsFlaggedForDeath || __instance.IsDead;
       }
 
       // ============ Generic Critical System Support ============
@@ -207,7 +222,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( info?.weapon == null ) return;
          info.SetHitLocation( hitLocation );
          AbstractActor target = info.target;
-         if ( Settings.SkipCritingDeadMech && ( target.IsDead || target.IsFlaggedForDeath ) ) return;
+         if ( SkipCritingDeadMech && IsBeatingDeadMech( target ) ) return;
          float chance = info.GetCritChance();
          for ( int i = 1 ; chance > 0 ; i++ ) {
             float critRoll = Combat.NetworkRandom.Float(); // If use original code AttackDirector.GetRandomFromCache( info.hitInfo, 2 ), may run out of rolls

@@ -80,6 +80,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             settings.CritChanceFullArmor = settings.ThroughArmorCritChanceFullArmor.GetValueOrDefault( 0 );
          if ( settings.ShowHeatAndStab == false )
             settings.ShowNumericInfo = false;
+         if ( settings.SkipCritingDeadMech == false )
+            settings.SkipBeatingDeadMech = "";
 #pragma warning restore CS0618
 
          RangeCheck( "LoadoutColourSaturation", ref settings.SaturationOfLoadout, 0, 1 );
@@ -223,6 +225,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          //NullIfEmpty( ref Settings.MixingIndirectFire ); Never null after validation
 
          NullIfEmpty( ref Settings.MaxMeleeVerticalOffsetByClass );
+
+         NullIfEmpty( ref Settings.SkipBeatingDeadMech );
 
          NullIfEmpty( ref Settings.AttackLogLevel );
       }
