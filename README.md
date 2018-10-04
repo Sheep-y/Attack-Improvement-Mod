@@ -6,6 +6,7 @@ For BATTLETECH 1.2.0
 - [Configuration](#configuration)
 - [Settings](#settings)
   * [User Interface Settings](#user-interface-settings)
+  * [Weapons Information Settings](#weapon-information-settings)
   * [Targeting Line and Facing Ring Settings](#targeting-line-and-facing-ring-settings)
   * [Called Shot Settings](#called-shot-settings)
   * [Melee and DFA Settings](#melee-and-dfa-settings)
@@ -179,9 +180,9 @@ These settings can be changed in `settings.json`.
 > Setting: `ShowEnemyAmmoInTooltip`  (true/false, default false)<br>
 >
 > When true, show ammo count in the component lists when you mouseover a location on the paper doll in combat.
+> Also, non-exploding (half-empty) ammo bin will be dimmed on the list.
 >
 > The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
-> When ShowAmmoInTooltip is true, non-exploding (half-empty) ammo bin will be displayed as grey.
 
 
 **Mech Info**
@@ -233,12 +234,17 @@ These settings can be changed in `settings.json`.
 
 
 
-## Weapons and Ammo UI Settings
+## Weapons Information Settings
 
 **Weapons Loadout**
 
-> Setting: `ColouredLoadout`  (true/false, default true) <br>
-> Setting: `ShowDamageInLoadout`  (true/false, default true) <br>
+> Setting: `SaturationOfLoadout`  (0 to 1, default 0.5)
+>
+> When non-zero, weapon loadout list will be coloured, based on the weapon colour configurated by the game.
+> A high number will make the colour stronger, while a low number will make them more washed out.
+<br>
+
+> Setting: `ShowDamageInLoadout`  (true/false, default true)
 >
 > When true, loadout list of the targeting computer will be coloured by weapon type and postfixed with weapon damage.
 <br>
@@ -263,10 +269,33 @@ These settings can be changed in `settings.json`.
 
 **Weapon Panel**
 
-> Setting: `ShowReducedWeaponDamage`  (format string, default "{0:0}")
+> Setting: `ShowReducedWeaponDamage`  (true/false, default true)
 >
-> When non-empty, the damage displayed in weapon panel will take terrain factor and enemy damage reduction into account.
-> The default setting will round it down to integer; use "{0:0.#}" to dynamically display up to 1 decimal.
+> When true, the damage displayed in weapon panel will take terrain cover and Guarded status into account.
+> The number should match the floating damage when the attack hit the enemy, unless damage variant is used.
+>
+> This setting is compatible with Joel Meador's [WeaponRealizer](https://github.com/janxious/BT-WeaponRealizer).
+> Non-random variances from that mod should be factored in displayed damage.
+>
+> Despite the name, if weapon damage is somehow boosted by terrain (such as by a mod), the displayed numbers will go up.
+<br>
+
+> Setting: `ShowTotalWeaponDamage`  (true/false, default true)
+>
+> When true, a new "Total" slot will be displayed at the bottom of the weapon list, above melee and DFA.
+> It will show the total damage of all enabled weapons, or all weapon that will fire at selected target.
+> The damage column shows max damage, while the accuracy column shows average damage given current accuracy.
+>
+> If `ShowReducedWeaponDamage` is true, the total damage will reflect terrain and status effects.
+<br>
+
+> Setting: `CalloutWeaponStability`  (true/false, default true)
+>
+> When true, pressing the game's callout toggle button (default LeftAlt) will cause the weapon list to 
+> display stability damage instead of normal damage.
+>
+> If `ShowReducedWeaponDamage` is true, the numbers will be affected by status such as Entrenched.
+> If `ShowTotalWeaponDamage` is true, total stability damage will be displayed.
 
 
 **Weapon Mouseover Hint**

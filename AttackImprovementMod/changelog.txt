@@ -2,17 +2,26 @@ CHANGE LOG
 
 ????-??-?? AIM Version 3.0 development for BATTLETECH 1.2.0
 
-* New: Use indirect fire when better than direct fire.
+* New: Set nameplate text colours.
 * New: Show enemy wounds and ally health in mechwarrior names.
-* New: Apply damage reduction in weapon panel and customise display format.
-* New: Set nameplate text colour.
+* New: Bigger, more terrain dots in stronger colours.
+* New: Line of sight animation.
 * New: Press F1 to F4 to select player mech.
-* New: Hold Alt to enable friendly fire (non-Multi-Target).
+* New: Use indirect fire when better than direct fire.
+* New: Colour weapon and show damage in weapon loadout list.
+* New: Show melee and dfa damage in weapon loadout list.
+* New: Show short range and long range firepower above weapon loadout list.
+* New: Apply damage reduction in weapon panel, compatible with WeaponRealizer.
+* New: Show total weapon damage (before and after accuracy).
+* New: Show stability damage with callout toggle (Left Alt).
 * New: Show rare weapon properties and weapon range in meters in weapon mouseover.
-* New: Show terrain description on danger terrains.
 * New: (Optional) Show short range in hit modifier breakdown.
+* New: Allow friendly fire with callout toggle (Left Alt; single target only).
+* New: Show terrain description on danger terrains and during melee/DFA.
+* New: Aggressive multi-target assignment.
 * Mod: ShortPilotHint now hides HP by default, to avoid line wrapping on elite mechwarriors.
 * Mod: ShowNumericInfo no longer shows pc movement points during enemy attacks.
+* Mod: ShowAmmoInTooltip now darkens non-exploding ammo bins.
 * Fix: FacingMarkerEnemyColors not applied when FacingMarkerPlayerColors is empty.
 * Fix: NPE when FacingMarkerPlayerColors is non-empty but FacingMarkerEnemyColors is empty.
 * Fix: FloatingArmorColours no longer applies to target panel.
