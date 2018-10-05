@@ -298,6 +298,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Display base hit chance in weapon mouseover hint.  Default true." ) ]
       public bool ShowBaseHitchance = true;
 
+      [ JsonComment( "Reverse in-combat modifier display so that + is bonus and - is penalty.  Default true." ) ]
+      public bool ReverseInCombatModifier = true;
+
       [ JsonComment( "Show \"Short Range\" in hit modifier breakdown, or whichever range is at +0.  Default false." ) ]
       public bool ShowNeutralRangeInBreakdown = false;
 

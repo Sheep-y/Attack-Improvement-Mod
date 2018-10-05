@@ -3,7 +3,6 @@ using BattleTech;
 using Localize;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static System.Reflection.BindingFlags;
@@ -39,6 +38,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( ToHit ), "GetAllMeleeModifiers", new Type[]{ typeof( Mech ), typeof( ICombatant ), typeof( Vector3 ), typeof( MeleeAttackType ) }, "OverrideMeleeModifiers", null );
                Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", typeof( ICombatant ), "OverrideMeleeToolTips", null );
             }
+         }
+         if ( Settings.ReverseInCombatModifier ) {
+            if ( ! HasRangedModifier() ) {
+               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsFiring", null, "ReverseModifiersSign" );
+               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsSelf", null, "ReverseModifiersSign" );
+            }
+            if ( ! HasMeleeModifier() )
+               Patch( typeof( CombatHUDWeaponSlot ), "UpdateToolTipsMelee", null, "ReverseModifiersSign" );
+            Patch( typeof( CombatHUDToolTipGeneric ), "SetNewToolTipHovering", null, "ReverseNetModifierColour" );
          }
       }
 
@@ -186,7 +194,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( TotalModifiers < 0 && ! CombatConstants.ResolutionConstants.AllowTotalNegativeModifier )
             TotalModifiers = 0;
-         tip.BasicModifierInt = TotalModifiers;
+         tip.BasicModifierInt = Settings.ReverseInCombatModifier ? -TotalModifiers : TotalModifiers;
       } catch ( Exception ) {
          // Reset before giving up
          tip?.DebuffStrings.Clear();
@@ -210,11 +218,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static int AddToolTipDetail( AttackModifier tooltip ) {
          int mod = Mathf.RoundToInt( tooltip.Value );
          if ( mod == 0 ) return 0;
-         if ( mod > 0 )
-            tip.DebuffStrings.Add( new Text( tooltip.DisplayName + " +" + mod ) );
-         else // if ( mod < 0 )
-            tip.BuffStrings.Add( new Text( tooltip.DisplayName + " " + mod ) );
-         return mod;
+         List<Text> TipList = mod > 0 ? tip.DebuffStrings : tip.BuffStrings;
+         if ( Settings.ReverseInCombatModifier ) mod = -mod;
+         string numTxt = ( mod > 0 ? " +" : " " ) + mod;
+         TipList.Add( new Text( tooltip.DisplayName + numTxt ) );
+         return Settings.ReverseInCombatModifier ? -mod : mod;
       }
 
       // ============ Ranged ============
@@ -408,5 +416,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       } catch ( Exception ex ) {
          return Error( new ApplicationException( "Error in melee modifier '" + thisModifier + "'", ex ) );
       } }
+
+      // ============ Reverse Modifier Sign ============
+
+      public static void ReverseModifiersSign ( CombatHUDWeaponSlot __instance ) {
+         foreach ( Text txt in __instance.ToolTipHoverElement.BuffStrings ) ReverseModifierSign( txt );
+         foreach ( Text txt in __instance.ToolTipHoverElement.DebuffStrings ) ReverseModifierSign( txt );
+         __instance.ToolTipHoverElement.BasicModifierInt *= -1;
+      }
+
+      private static void ReverseModifierSign ( Text txt ) {
+         List<Text.Part> parts = txt.m_parts;
+         if ( parts != null && parts.Count == 1 && parts[0].args != null && parts[0].args.Length == 2 && parts[0].args[1] is int )
+            parts[0].args[1] = - (int) parts[0].args[1];
+      }
+
+      public static void ReverseNetModifierColour ( CombatHUDToolTipGeneric __instance, bool useModifier, int BasicModifier ) {
+         if ( ! useModifier ) return;
+         UILookAndColorConstants con = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
+         __instance.BasicModifier.color = BasicModifier >= 0 ? con.Buff.color : con.DeBuff.color;
+      }
    }
 }

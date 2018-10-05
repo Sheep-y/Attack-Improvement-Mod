@@ -481,6 +481,14 @@ namespace Sheepy.BattleTechMod {
          return array[ index ];
       }
 
+      public static T TryGet<T> ( List<T> list, int index, T fallback = default, string errorArrayName = null ) {
+         if ( list == null || list.Count <= index ) {
+            if ( errorArrayName != null ) BattleMod.BTML_LOG.Warn( $"{errorArrayName}[{index}] not found, using default {fallback}." );
+            return fallback;
+         }
+         return list[ index ];
+      }
+
       public static V TryGet<T,V> ( Dictionary<T, V> map, T key, V fallback = default, string errorDictName = null ) {
          if ( map == null || ! map.ContainsKey( key ) ) {
             if ( errorDictName != null ) BattleMod.BTML_LOG.Warn( $"{errorDictName}[{key}] not found, using default {fallback}." );
