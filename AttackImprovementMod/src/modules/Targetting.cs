@@ -38,17 +38,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          if ( Settings.ShiftKeyReverseSelection ) {
-            SelectNext = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectNext", NonPublic | Instance );
-            SelectPrev = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectPrevious", NonPublic | Instance );
+            SelectNextMethod = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectNext", NonPublic | Instance );
+            SelectPrevMethod = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectPrevious", NonPublic | Instance );
+            WeaponTargetIndicesProp = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
             if ( BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.LeftShift ) ) != null ) {
                Warn( "Left Shift is binded. ShiftKeyReverseSelection disabled." );
             } else {
-               if ( AnyNull( SelectNext, SelectPrev ) ) {
+               if ( AnyNull( SelectNextMethod, SelectPrevMethod ) ) {
                   Warn( "CombatSelectionHandler.ProcessSelectNext and/or ProcessSelectPrevious not found. ShiftKeyReverseSelection not fully patched." );
                } else {
                   Patch( typeof( CombatSelectionHandler ), "ProcessSelectNext", "CheckReverseNextSelection", null );
                   Patch( typeof( CombatSelectionHandler ), "ProcessSelectPrevious", "CheckReversePrevSelection", null );
                }
+               if ( WeaponTargetIndicesProp == null )
+                  Warn( "SelectionStateFireMulti.weaponTargetIndices not found. ShiftKeyReverseSelection not fully patched." );
+               else
+                  Patch( typeof( SelectionStateFireMulti ), "CycleWeapon", "CheckReverseMultiTargetCycle", null );
             }
          }
 
@@ -76,21 +81,34 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Reverse Selection ============
 
       private static bool IsSelectionReversed;
-      private static MethodInfo SelectNext, SelectPrev;
+      private static MethodInfo SelectNextMethod, SelectPrevMethod;
+      private static PropertyInfo WeaponTargetIndicesProp;
 
       public static bool CheckReverseNextSelection ( CombatSelectionHandler __instance, ref bool __result ) {
-         return CheckReverseSelection( __instance, ref __result, SelectPrev );
+         return CheckReverseSelection( __instance, ref __result, SelectPrevMethod );
       }
 
       public static bool CheckReversePrevSelection ( CombatSelectionHandler __instance, ref bool __result ) {
-         return CheckReverseSelection( __instance, ref __result, SelectNext );
+         return CheckReverseSelection( __instance, ref __result, SelectNextMethod );
       }
 
       public static bool CheckReverseSelection ( CombatSelectionHandler __instance, ref bool __result, MethodInfo reverse ) { try {
-         if ( ! Input.GetKey( KeyCode.LeftShift ) ) return true; // Shift not pressed. Continue.
+         if ( ! Input.GetKey( KeyCode.LeftShift ) ) return true; // Shift not pressed. Abort.
          IsSelectionReversed = ! IsSelectionReversed;
          if ( ! IsSelectionReversed ) return true; // In reversed selection. Allow to pass.
          __result = (bool) reverse.Invoke( __instance, null ); // Otherwise call reverse selection.
+         return false;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      public static bool CheckReverseMultiTargetCycle ( SelectionStateFireMulti __instance, ref int __result, Weapon weapon ) { try {
+         if ( ! Input.GetKey( KeyCode.LeftShift ) ) return true; // Shift not pressed. Abort.
+         ICombatant current = __instance.GetSelectedTarget( weapon );
+         List<ICombatant> targets = __instance.AllTargetedCombatants;
+         int index = targets.IndexOf( current ), newIndex = index < 0 ? targets.Count - 1 : index - 1;
+         while ( newIndex >= 0 && ! weapon.WillFireAtTarget( targets[ newIndex ] ) ) // Find a target we can fire at.
+            --newIndex;
+         ( (Dictionary<Weapon, int>) WeaponTargetIndicesProp.GetValue( __instance, null ) )[ weapon ] = newIndex;
+         __result = newIndex;
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
@@ -150,7 +168,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Dictionary<Weapon, int> indice = (Dictionary<Weapon, int>) weaponTargetIndices.GetValue( __instance, null );
          foreach ( Weapon weapon in indice.Keys.ToArray() ) {
             if ( indice[ weapon ] > index )
-               indice[ weapon ] -= - 1;
+               indice[ weapon ] -= -1;
             else if ( indice[ weapon ] == index )
                indice[ weapon ] = -1;
          }
