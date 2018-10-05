@@ -41,8 +41,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             SelectNextMethod = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectNext", NonPublic | Instance );
             SelectPrevMethod = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectPrevious", NonPublic | Instance );
             WeaponTargetIndicesProp = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
-            if ( BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.LeftShift ) ) != null ) {
-               Warn( "Left Shift is binded. ShiftKeyReverseSelection disabled." );
+            LeftShiftReverse = BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.LeftShift ) ) == null;
+            RightShiftReverse = BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.RightShift ) ) == null;
+            if ( ! LeftShiftReverse && ! RightShiftReverse ) {
+               Warn( "Both shift keys are binded. ShiftKeyReverseSelection disabled." );
             } else {
                if ( AnyNull( SelectNextMethod, SelectPrevMethod ) ) {
                   Warn( "CombatSelectionHandler.ProcessSelectNext and/or ProcessSelectPrevious not found. ShiftKeyReverseSelection not fully patched." );
@@ -80,9 +82,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Reverse Selection ============
 
-      private static bool IsSelectionReversed;
+      private static bool IsSelectionReversed, LeftShiftReverse, RightShiftReverse;
       private static MethodInfo SelectNextMethod, SelectPrevMethod;
       private static PropertyInfo WeaponTargetIndicesProp;
+
+      private static bool IsReverseKeyPressed () {
+         if ( LeftShiftReverse && Input.GetKey( KeyCode.LeftShift ) ) return true;
+         if ( RightShiftReverse && Input.GetKey( KeyCode.RightShift ) ) return true;
+         return false;
+      }
 
       public static bool CheckReverseNextSelection ( CombatSelectionHandler __instance, ref bool __result ) {
          return CheckReverseSelection( __instance, ref __result, SelectPrevMethod );
@@ -93,7 +101,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static bool CheckReverseSelection ( CombatSelectionHandler __instance, ref bool __result, MethodInfo reverse ) { try {
-         if ( ! Input.GetKey( KeyCode.LeftShift ) ) return true; // Shift not pressed. Abort.
+         if ( ! IsReverseKeyPressed() ) return true; // Shift not pressed. Abort.
          IsSelectionReversed = ! IsSelectionReversed;
          if ( ! IsSelectionReversed ) return true; // In reversed selection. Allow to pass.
          __result = (bool) reverse.Invoke( __instance, null ); // Otherwise call reverse selection.
@@ -101,7 +109,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool CheckReverseMultiTargetCycle ( SelectionStateFireMulti __instance, ref int __result, Weapon weapon ) { try {
-         if ( ! Input.GetKey( KeyCode.LeftShift ) ) return true; // Shift not pressed. Abort.
+         if ( ! IsReverseKeyPressed() ) return true; // Shift not pressed. Abort.
          ICombatant current = __instance.GetSelectedTarget( weapon );
          List<ICombatant> targets = __instance.AllTargetedCombatants;
          int index = targets.IndexOf( current ), newIndex = index < 0 ? targets.Count - 1 : index - 1;
