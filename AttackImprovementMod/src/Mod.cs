@@ -177,7 +177,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( settings.SettingVersion < 2_007_000 ) { // Update from 3.0 preview 20180925
             if ( settings.ShowEnemyWounds == "{0}, Wounds {1}" )
-               settings.ShowEnemyWounds = "{0}</uppercase><size=80%>, Wounds {1}";
+               settings.ShowEnemyWounds = ", Wounds {1}";
             settings.SettingVersion = 2_007_000;
          }
       }

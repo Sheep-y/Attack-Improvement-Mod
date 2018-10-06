@@ -419,11 +419,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Reverse Modifier Sign ============
 
-      public static void ReverseModifiersSign ( CombatHUDWeaponSlot __instance ) {
+      public static void ReverseModifiersSign ( CombatHUDWeaponSlot __instance ) { try {
          foreach ( Text txt in __instance.ToolTipHoverElement.BuffStrings ) ReverseModifierSign( txt );
          foreach ( Text txt in __instance.ToolTipHoverElement.DebuffStrings ) ReverseModifierSign( txt );
          __instance.ToolTipHoverElement.BasicModifierInt *= -1;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static void ReverseModifierSign ( Text txt ) {
          List<Text.Part> parts = txt.m_parts;
@@ -431,10 +431,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             parts[0].args[1] = - (int) parts[0].args[1];
       }
 
-      public static void ReverseNetModifierColour ( CombatHUDToolTipGeneric __instance, bool useModifier, int BasicModifier ) {
+      public static void ReverseNetModifierColour ( CombatHUDToolTipGeneric __instance, bool useModifier, int BasicModifier ) { try {
          if ( ! useModifier ) return;
          UILookAndColorConstants con = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
          __instance.BasicModifier.color = BasicModifier >= 0 ? con.Buff.color : con.DeBuff.color;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }
