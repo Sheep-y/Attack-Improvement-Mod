@@ -15,22 +15,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class Targetting : BattleModModule {
 
       public override void CombatStartsOnce () {
+         Type MultiTargetType = typeof( SelectionStateFireMulti ), HandlerType = typeof( CombatSelectionHandler );
+
          if ( Settings.FixMultiTargetBackout ) {
             TryRun( Log, () => {
-               weaponTargetIndices = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
-               RemoveTargetedCombatant = typeof( SelectionStateFireMulti ).GetMethod( "RemoveTargetedCombatant", NonPublic | Instance );
-               ClearTargetedActor = typeof( SelectionStateFireMulti ).GetMethod( "ClearTargetedActor", NonPublic | Instance | FlattenHierarchy );
+               weaponTargetIndices = MultiTargetType.GetProperty( "weaponTargetIndices", NonPublic | Instance );
+               RemoveTargetedCombatant = MultiTargetType.GetMethod( "RemoveTargetedCombatant", NonPublic | Instance );
+               ClearTargetedActor = MultiTargetType.GetMethod( "ClearTargetedActor", NonPublic | Instance | FlattenHierarchy );
             } );
 
             if ( ClearTargetedActor == null )
                Warn( "Cannot find SelectionStateFireMulti.ClearTargetedActor. MultiTarget backout may be slightly inconsistent." );
-            if ( RemoveTargetedCombatant == null )
-               Error( "Cannot find RemoveTargetedCombatant(), SelectionStateFireMulti not patched" );
-            else if ( weaponTargetIndices == null )
-               Error( "Cannot find weaponTargetIndices, SelectionStateFireMulti not patched" );
+            if ( AnyNull( RemoveTargetedCombatant, weaponTargetIndices ) )
+               Error( "Cannot find RemoveTargetedCombatant or weaponTargetIndices, SelectionStateFireMulti not patched" );
             else {
-               Type MultiTargetType = typeof( SelectionStateFireMulti );
-               Patch( typeof( CombatSelectionHandler ), "BackOutOneStep", null, "PreventMultiTargetBackout" );
+               Patch( HandlerType, "BackOutOneStep", null, "PreventMultiTargetBackout" );
                Patch( MultiTargetType, "get_CanBackOut", "OverrideMultiTargetCanBackout", null );
                Patch( MultiTargetType, "BackOut", "OverrideMultiTargetBackout", null );
                Patch( MultiTargetType, "RemoveTargetedCombatant", "OverrideRemoveTargetedCombatant", null );
@@ -38,9 +37,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          if ( Settings.ShiftKeyReverseSelection ) {
-            SelectNextMethod = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectNext", NonPublic | Instance );
-            SelectPrevMethod = typeof( CombatSelectionHandler ).GetMethod( "ProcessSelectPrevious", NonPublic | Instance );
-            WeaponTargetIndicesProp = typeof( SelectionStateFireMulti ).GetProperty( "weaponTargetIndices", NonPublic | Instance );
+            SelectNextMethod = HandlerType.GetMethod( "ProcessSelectNext", NonPublic | Instance );
+            SelectPrevMethod = HandlerType.GetMethod( "ProcessSelectPrevious", NonPublic | Instance );
+            WeaponTargetIndicesProp = MultiTargetType.GetProperty( "weaponTargetIndices", NonPublic | Instance );
             LeftShiftReverse = BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.LeftShift ) ) == null;
             RightShiftReverse = BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.RightShift ) ) == null;
             if ( ! LeftShiftReverse && ! RightShiftReverse ) {
@@ -49,13 +48,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                if ( AnyNull( SelectNextMethod, SelectPrevMethod ) ) {
                   Warn( "CombatSelectionHandler.ProcessSelectNext and/or ProcessSelectPrevious not found. ShiftKeyReverseSelection not fully patched." );
                } else {
-                  Patch( typeof( CombatSelectionHandler ), "ProcessSelectNext", "CheckReverseNextSelection", null );
-                  Patch( typeof( CombatSelectionHandler ), "ProcessSelectPrevious", "CheckReversePrevSelection", null );
+                  Patch( HandlerType, "ProcessSelectNext", "CheckReverseNextSelection", null );
+                  Patch( HandlerType, "ProcessSelectPrevious", "CheckReversePrevSelection", null );
                }
                if ( WeaponTargetIndicesProp == null )
                   Warn( "SelectionStateFireMulti.weaponTargetIndices not found. ShiftKeyReverseSelection not fully patched." );
                else
-                  Patch( typeof( SelectionStateFireMulti ), "CycleWeapon", "CheckReverseMultiTargetCycle", null );
+                  Patch( MultiTargetType, "CycleWeapon", "CheckReverseMultiTargetCycle", null );
             }
          }
 
@@ -63,14 +62,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
 
          if ( Settings.CalloutFriendlyFire ) {
+            Patch( HandlerType, "TrySelectTarget", null, "SuppressSafety" );
+            Patch( HandlerType, "ProcessInput", "ToggleFriendlyFire", null );
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
             Patch( typeof( CombatGameState ), "get_AllEnemies", "AddFriendsToEnemies", null );
             Patch( typeof( CombatGameState ), "GetAllTabTargets", null, "AddFriendsToTargets" );
             Patch( typeof( SelectionStateFire ), "CalcPossibleTargets", null, "AddFriendsToTargets" );
             Patch( typeof( SelectionStateFire ), "ProcessClickedCombatant", null, "SuppressHudSafety" );
             Patch( typeof( SelectionStateFire ), "get_ValidateInfoTargetAsFireTarget", null, "SuppressIFF" );
-            Patch( typeof( CombatSelectionHandler ), "TrySelectTarget", null, "SuppressSafety" );
-            Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleFriendlyFire", null );
          }
       }
 
