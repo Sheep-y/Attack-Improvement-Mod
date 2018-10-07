@@ -25,6 +25,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Reverse target selection when shift key is pressed.  Default true." ) ]
       public bool ShiftKeyReverseSelection = true;
 
+      [ JsonComment( "Ctrl click on a weapon in Multi-Target mode will enable/disable the weapon.  Default true." ) ]
+      public bool CtrlClickDisableWeapon = true;
+
       [ JsonComment( "Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game." ) ]
       public bool FixGreyHeadDisease = true;
 

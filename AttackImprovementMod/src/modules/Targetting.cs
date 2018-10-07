@@ -1,7 +1,5 @@
 using BattleTech.UI;
 using BattleTech;
-using InControl;
-using Localize;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -39,23 +37,23 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShiftKeyReverseSelection ) {
             SelectNextMethod = HandlerType.GetMethod( "ProcessSelectNext", NonPublic | Instance );
             SelectPrevMethod = HandlerType.GetMethod( "ProcessSelectPrevious", NonPublic | Instance );
-            WeaponTargetIndicesProp = MultiTargetType.GetProperty( "weaponTargetIndices", NonPublic | Instance );
-            LeftShiftReverse = BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.LeftShift ) ) == null;
-            RightShiftReverse = BTInput.Instance.FindActionBoundto( new KeyBindingSource( Key.RightShift ) ) == null;
-            if ( ! LeftShiftReverse && ! RightShiftReverse ) {
-               Warn( "Both shift keys are binded. ShiftKeyReverseSelection disabled." );
+            if ( AnyNull( SelectNextMethod, SelectPrevMethod ) ) {
+               Warn( "CombatSelectionHandler.ProcessSelectNext and/or ProcessSelectPrevious not found. ShiftKeyReverseSelection not fully patched." );
             } else {
-               if ( AnyNull( SelectNextMethod, SelectPrevMethod ) ) {
-                  Warn( "CombatSelectionHandler.ProcessSelectNext and/or ProcessSelectPrevious not found. ShiftKeyReverseSelection not fully patched." );
-               } else {
-                  Patch( HandlerType, "ProcessSelectNext", "CheckReverseNextSelection", null );
-                  Patch( HandlerType, "ProcessSelectPrevious", "CheckReversePrevSelection", null );
-               }
-               if ( WeaponTargetIndicesProp == null )
-                  Warn( "SelectionStateFireMulti.weaponTargetIndices not found. ShiftKeyReverseSelection not fully patched." );
-               else
-                  Patch( MultiTargetType, "CycleWeapon", "CheckReverseMultiTargetCycle", null );
+               Patch( HandlerType, "ProcessSelectNext", "CheckReverseNextSelection", null );
+               Patch( HandlerType, "ProcessSelectPrevious", "CheckReversePrevSelection", null );
             }
+         }
+         if ( Settings.CtrlClickDisableWeapon ) {
+            MultiTargetDisabledWeaponTarget = new Dictionary<Weapon, ICombatant>();
+            Patch( typeof( CombatSelectionHandler ), "TrySelectActor", null, "ClearWeaponMultiTargets" );
+         }
+         if ( Settings.ShiftKeyReverseSelection || Settings.CtrlClickDisableWeapon ) {
+            WeaponTargetIndicesProp = MultiTargetType.GetProperty( "weaponTargetIndices", NonPublic | Instance );
+            if ( WeaponTargetIndicesProp == null )
+               Warn( "SelectionStateFireMulti.weaponTargetIndices not found.  Multi-Target weapon shift/ctrl click not patched." );
+            else
+               Patch( MultiTargetType, "CycleWeapon", "OverrideMultiTargetCycle", null );
          }
 
          if ( Settings.FixLosPreviewHeight )
@@ -73,22 +71,27 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
+      public override void CombatEnds () {
+         MultiTargetDisabledWeaponTarget?.Clear();
+      }
+
       // ============ Line of Fire ============
 
       public static void FixMoveDestinationHeight ( Pathing __instance ) {
          __instance.ResultDestination.y = Combat.MapMetaData.GetLerpedHeightAt( __instance.ResultDestination );
       }
 
-      // ============ Reverse Selection ============
+      // ============ Reverse Unit Selection ============
 
-      private static bool IsSelectionReversed, LeftShiftReverse, RightShiftReverse;
+      private static bool IsSelectionReversed;
       private static MethodInfo SelectNextMethod, SelectPrevMethod;
-      private static PropertyInfo WeaponTargetIndicesProp;
 
       private static bool IsReverseKeyPressed () {
-         if ( LeftShiftReverse && Input.GetKey( KeyCode.LeftShift ) ) return true;
-         if ( RightShiftReverse && Input.GetKey( KeyCode.RightShift ) ) return true;
-         return false;
+         return Input.GetKey( KeyCode.LeftShift ) || Input.GetKey( KeyCode.RightShift );
+      }
+
+      private static bool IsToggleKeyPressed () {
+         return Input.GetKey( KeyCode.LeftControl ) || Input.GetKey( KeyCode.RightControl );
       }
 
       public static bool CheckReverseNextSelection ( CombatSelectionHandler __instance, ref bool __result ) {
@@ -107,17 +110,52 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      public static bool CheckReverseMultiTargetCycle ( SelectionStateFireMulti __instance, ref int __result, Weapon weapon ) { try {
-         if ( ! IsReverseKeyPressed() ) return true; // Shift not pressed. Abort.
-         ICombatant current = __instance.GetSelectedTarget( weapon );
-         List<ICombatant> targets = __instance.AllTargetedCombatants;
+      // ============ Reverse / Toggle Multi-Target Selection ============
+
+      private static PropertyInfo WeaponTargetIndicesProp;
+      private static Dictionary<Weapon,ICombatant> MultiTargetDisabledWeaponTarget;
+
+      public static void ClearWeaponMultiTargets ( bool __result ) {
+         if ( ! __result ) return;
+         MultiTargetDisabledWeaponTarget.Clear();
+      }
+
+      public static bool OverrideMultiTargetCycle ( SelectionStateFireMulti __instance, ref int __result, Weapon weapon ) { try {
+         int newIndex = -2;
+         if ( Settings.CtrlClickDisableWeapon && IsToggleKeyPressed() )
+            newIndex = FindToogleTargetIndex( __instance, weapon );
+         else if ( Settings.ShiftKeyReverseSelection &&  IsReverseKeyPressed() )
+            newIndex = FindReverseTargetIndex( __instance, weapon );
+         if ( newIndex > -2 ) {
+            ( (Dictionary<Weapon, int>) WeaponTargetIndicesProp.GetValue( __instance, null ) )[ weapon ] = newIndex;
+            __result = newIndex;
+            return false;
+         }
+         return true;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      private static int FindToogleTargetIndex ( SelectionStateFireMulti state, Weapon weapon ) {
+         ICombatant current = state.GetSelectedTarget( weapon );
+         if ( current != null ) {
+            MultiTargetDisabledWeaponTarget[ weapon ] = current;
+            return -1;
+         }
+         List<ICombatant> targets = state.AllTargetedCombatants;
+         MultiTargetDisabledWeaponTarget.TryGetValue( weapon, out ICombatant lastTarget );
+         int newIndex = lastTarget == null ? 0 : Math.Max( 0, targets.IndexOf( lastTarget ) );
+         while ( newIndex < targets.Count && ! weapon.WillFireAtTarget( targets[ newIndex ] ) ) // Find a target we can fire at.
+            ++newIndex;
+         return newIndex >= targets.Count ? -1 : newIndex;
+      }
+
+      private static int FindReverseTargetIndex ( SelectionStateFireMulti state, Weapon weapon ) {
+         ICombatant current = state.GetSelectedTarget( weapon );
+         List<ICombatant> targets = state.AllTargetedCombatants;
          int index = targets.IndexOf( current ), newIndex = index < 0 ? targets.Count - 1 : index - 1;
          while ( newIndex >= 0 && ! weapon.WillFireAtTarget( targets[ newIndex ] ) ) // Find a target we can fire at.
             --newIndex;
-         ( (Dictionary<Weapon, int>) WeaponTargetIndicesProp.GetValue( __instance, null ) )[ weapon ] = newIndex;
-         __result = newIndex;
-         return false;
-      }                 catch ( Exception ex ) { return Error( ex ); } }
+         return newIndex;
+      }
 
       // ============ Multi-Target ============
 

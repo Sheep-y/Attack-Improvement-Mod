@@ -38,7 +38,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Patch( typeof( MoveStatusPreview ), "DisplayPreviewStatus", null, "AppendDangerousTerrainText" );
          }
-         if ( Settings.ShowMeleeTerrain ) { // Rewrite with transpiler
+         if ( Settings.ShowMeleeTerrain ) { // Considered transpiler but we'll only save one method call. Not worth trouble?
             UpdateStatusMethod = typeof( CombatMovementReticle ).GetMethod( "UpdateStatusPreview", NonPublic | Instance );
             StatusPreviewProp = typeof( CombatMovementReticle ).GetProperty( "StatusPreview", NonPublic | Instance );
             if ( AnyNull( UpdateStatusMethod, StatusPreviewProp ) )
