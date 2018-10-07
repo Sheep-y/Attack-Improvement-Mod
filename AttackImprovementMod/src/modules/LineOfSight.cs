@@ -47,6 +47,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             Patch( IndicatorType, "DrawLine", "SetupLOS", "SetBlockedLOS" );
             Patch( IndicatorType, "getLine" , null, "FixLOSWidth" );
+            Patch( IndicatorType, "ShowLinesToAllEnemies", null, "ShowBlockedLOS" );
+            Patch( IndicatorType, "ShowLineToTarget", null, "ShowBlockedLOS" );
          } else
             parsedColours = null;
 
@@ -275,6 +277,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          lineB.startColor = lineB.endColor = lineB.material.color;
          lineB.startWidth = lineB.endWidth = mat.Width;
          lineB.gameObject.SetActive( true );
+      }
+
+      // Make sure Blocked LOS is displayed in single target mode.
+      public static void ShowBlockedLOS () {
+         lineB?.gameObject.SetActive( true );
       }
 
       // ============ Arcs ============
