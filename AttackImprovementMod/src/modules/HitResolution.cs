@@ -1,4 +1,6 @@
 using BattleTech;
+using BattleTech.UI;
+using Localize;
 using System.Collections.Generic;
 using System;
 using System.Linq;
@@ -9,7 +11,44 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class HitResolution : BattleModModule {
 
+      private static List<TMPro.TextMeshProUGUI> DamageFloaties;
+      private static bool IsStructureDamaged;
+
+      public static void RecordDamageFloatie ( CombatHUDFloatie __result ) {
+         string text = __result?.floatieText?.text?.Substring( 0, 1 );
+         if ( string.IsNullOrEmpty( text ) || text[0] < '1' || text[0] > '9' ) return;
+         Verbo( "Damage #{0} = {1}", DamageFloaties.Count, __result.floatieText.text );
+         DamageFloaties.Add( __result.floatieText );
+      }
+
+      [ Harmony.HarmonyPriority( Harmony.Priority.High ) ]
+      public static void ClearStructureDamage () {
+         IsStructureDamaged = false;
+      }
+
+      public static void RecordStructureDamage () {
+         IsStructureDamaged = true;
+      }
+
+      public static void FixDamageFloatieColour ( Mech __instance, int hitLocation ) { try {
+         if ( DamageFloaties.IsNullOrEmpty() || hitLocation == 0 || hitLocation == 65535 ) return;
+         ArmorLocation Location = (ArmorLocation) hitLocation;
+         TMPro.TextMeshProUGUI DamageFloatie = DamageFloaties[0];
+         DamageFloaties.RemoveAt( 0 );
+         UILookAndColorConstants con = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
+         UnityEngine.Color color = IsStructureDamaged ? UnityEngine.Color.yellow : UnityEngine.Color.cyan;
+         //DamageFloatie.color = IsStructureDamaged ? con.FloatieStructureDamage.color : con.FloatieArmorDamage.color;
+         Verbo( "Damage {0} at {3} {4} color {1} => {2}", DamageFloatie.text, DamageFloatie.color, color, Location, IsStructureDamaged );
+         DamageFloatie.color = color;
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+
       public override void CombatStartsOnce () {
+         DamageFloaties = new List<TMPro.TextMeshProUGUI>();
+         Patch( typeof( CombatHUDFloatieAnchor ), "CreateFloatie", null, "RecordDamageFloatie" );
+         Patch( typeof( Mech ), "ApplyStructureStatDamage", null, "RecordStructureDamage" );
+         Patch( typeof( Mech ), "TakeWeaponDamage", "ClearStructureDamage", "FixDamageFloatieColour" );
+
          if ( Settings.KillZeroHpLocation ) {
             Patch( typeof( Mech )   , "DamageLocation", null, "FixZombieMech" );
             Patch( typeof( Vehicle ), "DamageLocation", null, "FixZombieVehicle" );
@@ -35,6 +74,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStarts () {
          ClusterChanceNeverMultiplyHead = CombatConstants.ToHit.ClusterChanceNeverMultiplyHead;
          ClusterChanceOriginalLocationMultiplier = CombatConstants.ToHit.ClusterChanceOriginalLocationMultiplier;
+         DamageFloaties?.Clear();
          if ( HeadHitWeights == null ) {
             HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
             foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
@@ -44,6 +84,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                HeadHitWeights.Add( hitTable, head );
             }
          }
+      }
+
+      public override void CombatEnds () {
+         DamageFloaties?.Clear();
       }
 
       // ============ Zombie ============
