@@ -34,6 +34,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
 
+         if ( Settings.CtrlClickDisableWeapon )
+            MultiTargetDisabledWeaponTarget = new Dictionary<Weapon, ICombatant>();
          if ( Settings.ShiftKeyReverseSelection ) {
             SelectNextMethod = HandlerType.GetMethod( "ProcessSelectNext", NonPublic | Instance );
             SelectPrevMethod = HandlerType.GetMethod( "ProcessSelectPrevious", NonPublic | Instance );
@@ -44,11 +46,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( HandlerType, "ProcessSelectPrevious", "CheckReversePrevSelection", null );
             }
          }
-         if ( Settings.CtrlClickDisableWeapon ) {
-            MultiTargetDisabledWeaponTarget = new Dictionary<Weapon, ICombatant>();
-            Patch( typeof( CombatSelectionHandler ), "TrySelectActor", null, "ClearWeaponMultiTargets" );
-         }
-         if ( Settings.ShiftKeyReverseSelection || Settings.CtrlClickDisableWeapon ) {
+         if ( Settings.CtrlClickDisableWeapon || Settings.ShiftKeyReverseSelection ) {
             WeaponTargetIndicesProp = MultiTargetType.GetProperty( "weaponTargetIndices", NonPublic | Instance );
             if ( WeaponTargetIndicesProp == null )
                Warn( "SelectionStateFireMulti.weaponTargetIndices not found.  Multi-Target weapon shift/ctrl click not patched." );
@@ -114,11 +112,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static PropertyInfo WeaponTargetIndicesProp;
       private static Dictionary<Weapon,ICombatant> MultiTargetDisabledWeaponTarget;
-
-      public static void ClearWeaponMultiTargets ( bool __result ) {
-         if ( ! __result ) return;
-         MultiTargetDisabledWeaponTarget.Clear();
-      }
 
       public static bool OverrideMultiTargetCycle ( SelectionStateFireMulti __instance, ref int __result, Weapon weapon ) { try {
          int newIndex = -2;
