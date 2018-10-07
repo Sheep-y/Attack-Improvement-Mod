@@ -17,8 +17,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class UserInterfacePanels : BattleModModule {
 
-      private const string MetaColour = "<#888888FF>";
-
       public override void GameStartsOnce () {
          // Done on game load to be effective in campaign mech bay
          if ( Settings.ShowUnderArmourDamage ) {
@@ -59,9 +57,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.ShowUnitTonnage )
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
-
-         if ( Settings.SaturationOfLoadout != 0 || Settings.ShowDamageInLoadout || Settings.ShowMeleeDamageInLoadout || Settings.ShowAlphaDamageInLoadout != null )
-            Patch( typeof( CombatHUDTargetingComputer ), "RefreshWeaponList", null, "EnhanceWeaponLoadout" );
 
          if ( Settings.ShowAmmoInTooltip || Settings.ShowEnemyAmmoInTooltip ) {
             MechTrayArmorHoverToolTipProp = typeof( CombatHUDMechTrayArmorHover ).GetProperty( "ToolTip", NonPublic | Instance );
@@ -204,75 +199,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
-
-      // ============ Weapon Loadout ============
-
-      private static Color[] ByType;
-
-      public static void EnhanceWeaponLoadout ( CombatHUDTargetingComputer __instance, List<TMPro.TextMeshProUGUI> ___weaponNames, UIManager ___uiManager ) { try {
-         UIColorRefs colours = ___uiManager.UIColorRefs;
-         AbstractActor actor = __instance.ActivelyShownCombatant as AbstractActor;
-         List<Weapon> weapons = actor?.Weapons;
-         if ( actor == null || weapons == null ) return;
-         if ( ByType == null && Settings.SaturationOfLoadout != 0 )
-            ByType = LerpWeaponColours( colours );
-         float close = 0, medium = 0, far = 0;
-         for ( int i = Math.Min( ___weaponNames.Count, weapons.Count ) - 1 ; i >= 0 ; i-- ) {
-            Weapon w = weapons[ i ];
-            if ( w == null || ! w.CanFire ) continue;
-            float damage = w.DamagePerShot * w.ShotsWhenFired;
-            if ( Settings.ShowDamageInLoadout )
-               ___weaponNames[ i ].text = ___weaponNames[ i ].text.Replace( " +", "+" ) + MetaColour + " (" + damage + ")";
-            if ( ByType != null && ___weaponNames[ i ].color == colours.qualityA ) {
-               if ( (int) w.Category < ByType.Length )
-                  ___weaponNames[ i ].color = ByType[ (int) w.Category ];
-            }
-            if ( w.MaxRange <= 90 )       close += damage;
-            else if ( w.MaxRange <= 360 ) medium += damage;
-            else                          far += damage;
-         }
-         if ( Settings.ShowAlphaDamageInLoadout != null ) {
-            TMPro.TextMeshProUGUI loadout = GameObject.Find( "tgtWeaponsLabel" )?.GetComponent<TMPro.TextMeshProUGUI>();
-            if ( loadout != null ) {
-               if ( loadout.fontStyle != TMPro.FontStyles.Normal ) InitDamageLabel( loadout, colours.white );
-               loadout.text = string.Format( Settings.ShowAlphaDamageInLoadout, close + medium + far, close, medium, far, medium + far );
-            }
-         }
-         if ( Settings.ShowMeleeDamageInLoadout && actor is Mech mech ) {
-            int start = weapons.Count, dmg = (int) (mech.MeleeWeapon?.DamagePerShot * mech.MeleeWeapon?.ShotsWhenFired);
-            string format = Settings.ShowDamageInLoadout ? "{0} {1}({2})" : "{0} {1}{2}";
-            if ( start < ___weaponNames.Count && dmg > 0 )
-               SetWeapon( ___weaponNames[ start ], colours.white, format, Translate( "Melee" ), MetaColour, dmg );
-            dmg = (int) (mech.DFAWeapon?.DamagePerShot * mech.DFAWeapon?.ShotsWhenFired);
-            if ( actor.WorkingJumpjets > 0 && start + 1 < ___weaponNames.Count && dmg > 0 )
-               SetWeapon( ___weaponNames[ start + 1 ], colours.white, format, Translate( "DFA" ), MetaColour, dmg );
-         }
-      }                 catch ( Exception ex ) { Error( ex ); } }
-
-      private static void InitDamageLabel ( TMPro.TextMeshProUGUI label, Color white ) {
-         label.rectTransform.sizeDelta = new Vector2( 200, label.rectTransform.sizeDelta.y );
-         label.transform.Translate( 10, 0, 0 );
-         label.alignment = TMPro.TextAlignmentOptions.Left;
-         label.fontStyle = TMPro.FontStyles.Normal;
-         label.color = white;
-      }
-
-      private static Color[] LerpWeaponColours ( UIColorRefs ui ) {
-         if ( Settings.SaturationOfLoadout <= 0 || ui == null ) return null;
-         Color[] colours = new Color[]{ Color.clear, ui.ballisticColor, ui.energyColor, ui.missileColor, ui.smallColor };
-         float saturation = (float) Settings.SaturationOfLoadout, lower = saturation * 0.8f;
-         for ( int i = colours.Length - 1 ; i > 0 ; i-- ) {
-            Color.RGBToHSV( colours[ i ], out float h, out float s, out float v );
-            colours[ i ] = Color.HSVToRGB( h, i == 3 ? lower : saturation, 1 );
-         }
-         return colours;
-      }
-
-      private static void SetWeapon ( TMPro.TextMeshProUGUI ui, Color color, string text, params object[] augs ) {
-         ui.text = augs.Length <= 0 ? text : new Text( text, augs ).ToString();
-         ui.color = color;
-         ui.transform.parent.gameObject.SetActive( true );
-      }
 
       // ============ Heat and Stability ============
 
