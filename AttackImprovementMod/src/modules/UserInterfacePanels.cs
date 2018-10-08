@@ -205,63 +205,60 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static CombatHUDActorDetailsDisplay targetDisplay = null;
 
       public static void ShowNumericInfo ( CombatHUDActorDetailsDisplay __instance ) { try {
-         // Only override mechs. Other actors are unimportant to us.
-         if ( !( __instance.DisplayedActor is Mech mech ) ) return;
+         ICombatant target = __instance.DisplayedActor;
+         string prefix = null, numbers = null, postfix = null;
 
-         int jets = mech.WorkingJumpjets;
+         if ( target is Mech mech ) {
+            float heat = mech.CurrentHeat, stab = mech.CurrentStability;
+            if ( __instance != targetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
+               GetPreviewNumbers( mech, ref heat, ref stab, ref postfix );
+               prefix = "";
+            }
+            numbers = FormatPreview( "Heat", mech.CurrentHeat, heat, mech.MaxHeat ) + "\n"
+                    + FormatPreview( "Stab", mech.CurrentStability, stab, mech.MaxStability ) + "\n";
+         }
+         if ( prefix == null )
+            prefix = GetTargetNumbers( target );
+
          StringBuilder text = new StringBuilder( 100 );
-         text.Append( mech.weightClass );
-         if ( jets > 0 ) text.Append( ", " ).Append( jets ).Append( " JETS" );
-         text.Append( '\n' );
-
-         CombatSelectionHandler selection = HUD?.SelectionHandler;
-         SelectionState ActiveState = selection?.ActiveState;
-         int baseHeat = mech.CurrentHeat, newHeat = baseHeat;
-         float baseStab = (int) mech.CurrentStability, newStab = baseStab;
-         string prefix = null, postfix = null;
-         if ( selection?.SelectedActor == mech && __instance != targetDisplay ) {
-            GetPreviewNumbers( mech, ref newHeat, ref newStab, ref postfix ); // Show predictions in selection panel
-         } else if ( selection != null ) {
-            GetTargetNumbers( mech, ref prefix ); // Target panel or non-selection. Show min/max numbers and distance.
-            if ( prefix != null )
-               text.Append( prefix ).Append( "\n" );
-         }
-
-         text.Append( "Heat " ).Append( baseHeat );
-         if ( baseHeat == newHeat )
-            text.Append( '/' ).Append( mech.MaxHeat );
-         else {
-            text.Append( " >> " );
-            if ( newHeat < 0 ) text.Append( '(' ).Append( -newHeat ).Append( ')' );
-            else text.Append( newHeat );
-         }
-         text.Append( '\n' );
-
-         text.Append( "Stab " ).Append( baseStab );
-         if ( baseStab == newStab )
-            text.Append( '/' ).Append( mech.MaxStability );
-         else
-            text.Append( " >> " ).Append( newStab );
-         text.Append( '\n' );
-
-         text.Append( postfix );
+         text.Append( GetBasicInfo( target ) ).Append( "\n" );
+         text.Append( prefix ).Append( numbers ).Append( postfix );
 
          __instance.ActorWeightText.text = text.ToString();
          __instance.JumpJetsHolder.SetActive( false );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static void GetPreviewNumbers ( Mech mech, ref int newHeat, ref float newStab, ref string movement ) {
+      private static string GetBasicInfo ( ICombatant target ) {
+         if ( target is Mech mech ) {
+            int jets = mech.WorkingJumpjets;
+            return jets > 0 ? string.Format( "{0}, {1} JETS", mech.weightClass, jets ) : mech.weightClass.ToString();
+
+         } else if ( target is Vehicle vehicle )
+            return vehicle.weightClass.ToString();
+
+         else if ( target is Turret turret )
+            return turret.TurretDef.Chassis.weightClass.ToString();
+
+         else return "Building";
+      }
+
+      private static string FormatPreview ( string label, float from, float to, float max ) {
+         if ( from != to ) return string.Format( "{0} {1:0} >> {2:0;(0)}", label, from, to );
+         return string.Format( "{0} {1:0}/{2:0}", label, from, max );
+      }
+
+      private static void GetPreviewNumbers ( Mech mech, ref float heat, ref float stab, ref string movement ) {
          CombatSelectionHandler selection = HUD?.SelectionHandler;
 
-         newHeat += mech.TempHeat;
+         heat += mech.TempHeat;
          try {
-            newHeat += selection.ProjectedHeatForState;
+            heat += selection.ProjectedHeatForState;
             if ( ! mech.HasMovedThisRound )
-               newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
+               heat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
             if ( ! mech.HasAppliedHeatSinks )
-               newHeat -= mech.AdjustedHeatsinkCapacity;
-            newHeat = Math.Min( newHeat, mech.MaxHeat );
-            newStab = (int) selection.ProjectedStabilityForState;
+               heat -= mech.AdjustedHeatsinkCapacity;
+            heat = Math.Min( heat, mech.MaxHeat );
+            stab = (int) selection.ProjectedStabilityForState;
          } catch ( Exception ex ) { Error( ex ); }
 
          string moveType = null;
@@ -280,18 +277,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             movement = string.Format( "{0} {1:0}/{2:0}", Translate( moveType ), spareMove, maxMove );
       }
 
-      private static void GetTargetNumbers ( ICombatant target, ref string distance ) { try {
+      private static string GetTargetNumbers ( ICombatant target ) { try {
+         if ( HUD.SelectedActor == null ) return null;
          float oldDist = Vector3.Distance( HUD.SelectedActor.CurrentPosition, target.CurrentPosition );
          Vector3 position = default;
          if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
          else if ( ActiveState is SelectionStateMove move ) position = move.PreviewPos;
          else if ( ActiveState is SelectionStateJump jump ) position = jump.PreviewPos;
-         if ( position != default ) {
-            float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
-            distance = string.Format( "Dist {0:0} >> {1:0}", oldDist, newDist );
-         } else
-            distance = string.Format( "Dist {0:0}", oldDist );
-      }                 catch ( Exception ex ) { Error( ex ); } }
+         else return string.Format( "Dist {0:0}\n", oldDist );
+
+         float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
+         return string.Format( "Dist {0:0} >> {1:0}\n", oldDist, newDist );
+      }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
       public static void ShowUnitTonnage ( CombatHUDActorDetailsDisplay __instance ) { try {
          CombatHUDActorDetailsDisplay me = __instance;
