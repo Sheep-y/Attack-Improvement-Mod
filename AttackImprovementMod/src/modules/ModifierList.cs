@@ -433,7 +433,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ReverseNetModifierColour ( CombatHUDToolTipGeneric __instance, bool useModifier, int BasicModifier ) { try {
          if ( ! useModifier ) return;
-         UILookAndColorConstants con = HBS.LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
+         UILookAndColorConstants con = uiManager.UILookAndColorConstants;
          __instance.BasicModifier.color = BasicModifier >= 0 ? con.Buff.color : con.DeBuff.color;
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
