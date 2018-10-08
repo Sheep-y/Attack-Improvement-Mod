@@ -97,19 +97,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          AbstractActor actor = __instance.DisplayedCombatant as AbstractActor;
          Pilot pilot = actor?.GetPilot();
          Team team = actor?.team;
-         if ( pilot == null || team == null ) return;
+         TMPro.TextMeshProUGUI textbox = __instance.PilotNameText;
+         if ( AnyNull( pilot, team, textbox ) || pilot.Injuries <= 0 ) return;
          string format = null;
-         object[] args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, pilot.Health - pilot.Injuries, pilot.Health };
+         object[] args = new object[]{ null, pilot.Injuries, pilot.Health - pilot.Injuries, pilot.Health };
          if ( team == Combat.LocalPlayerTeam ) {
             format = Settings.ShowPlayerHealth;
          } else if ( team.IsFriendly( Combat.LocalPlayerTeam ) ) {
             format = Settings.ShowAllyHealth;
          } else if ( visLevel == VisibilityLevel.LOSFull ) {
             format = Settings.ShowEnemyWounds;
-            args = new object[]{ __instance.PilotNameText.text, pilot.Injuries, "?", "?" };
+            args[2] = args[3] = "?";
          }
-         if ( format == null || pilot.Injuries <= 0 ) return;
-         __instance.PilotNameText.SetText( args[0] + "</uppercase><size=80%>" + Translate( format, args ) );
+         if ( format != null )
+            textbox.text = textbox.text + "</uppercase><size=80%>" + Translate( format, args );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void RefreshPilotNames ( Pilot __instance ) { try {

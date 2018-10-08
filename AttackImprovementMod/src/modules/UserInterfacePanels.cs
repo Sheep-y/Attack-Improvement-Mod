@@ -206,13 +206,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ShowNumericInfo ( CombatHUDActorDetailsDisplay __instance ) { try {
          ICombatant target = __instance.DisplayedActor;
+         if ( target == null ) return;
          string prefix = null, numbers = null, postfix = null;
 
          if ( target is Mech mech ) {
             float heat = mech.CurrentHeat, stab = mech.CurrentStability;
             if ( __instance != targetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
                GetPreviewNumbers( mech, ref heat, ref stab, ref postfix );
-               prefix = "";
+               prefix = string.Empty;
             }
             numbers = FormatPreview( "Heat", mech.CurrentHeat, heat, mech.MaxHeat ) + "\n"
                     + FormatPreview( "Stab", mech.CurrentStability, stab, mech.MaxStability ) + "\n";
@@ -239,7 +240,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( target is Turret turret )
             return turret.TurretDef.Chassis.weightClass.ToString();
 
-         else return "Building";
+         return string.Empty;
       }
 
       private static string FormatPreview ( string label, float from, float to, float max ) {
@@ -369,6 +370,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void ReplacePilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) { try {
+         if ( pilot == null ) return;
          if ( ! PilotStatus.ContainsKey( __instance ) )
             PilotStatus.Add( __instance, pilot );
          if ( ( HUD.SelectedActor != null || ! __instance.IsExpanded ) && ! pilot.IsIncapacitated )
