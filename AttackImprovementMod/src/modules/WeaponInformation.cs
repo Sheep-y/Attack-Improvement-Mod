@@ -61,6 +61,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private const string MetaColour = "<#888888FF>";
       private static Color[] ByType;
+      private static TMPro.TextMeshProUGUI loadout;
 
       private static void DisableLoadoutLineWrap ( List<TMPro.TextMeshProUGUI> weaponNames ) {
          foreach ( TMPro.TextMeshProUGUI weapon in weaponNames )
@@ -71,8 +72,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          UIColorRefs colours = ___uiManager.UIColorRefs;
          AbstractActor actor = __instance.ActivelyShownCombatant as AbstractActor;
          List<Weapon> weapons = actor?.Weapons;
-         if ( actor == null || weapons == null ) return;
-         if ( ByType == null && Settings.SaturationOfLoadout != 0 ) {
+         if ( actor == null || weapons == null || colours == null ) return;
+         if ( ByType == null ) {
             ByType = LerpWeaponColours( colours );
             DisableLoadoutLineWrap( ___weaponNames );
          }
@@ -83,7 +84,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             float damage = w.DamagePerShot * w.ShotsWhenFired;
             if ( Settings.ShowDamageInLoadout )
                ___weaponNames[ i ].text = ___weaponNames[ i ].text.Replace( " +", "+" ) + MetaColour + " (" + damage + ")";
-            if ( ByType != null && ___weaponNames[ i ].color == colours.qualityA ) {
+            if ( ByType.Length > 0 && ___weaponNames[ i ].color == colours.qualityA ) {
                if ( (int) w.Category < ByType.Length )
                   ___weaponNames[ i ].color = ByType[ (int) w.Category ];
             }
@@ -91,13 +92,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else if ( w.MaxRange <= 360 ) medium += damage;
             else                          far += damage;
          }
-         if ( Settings.ShowAlphaDamageInLoadout != null ) {
-            TMPro.TextMeshProUGUI loadout = GameObject.Find( "tgtWeaponsLabel" )?.GetComponent<TMPro.TextMeshProUGUI>();
-            if ( loadout != null ) {
-               if ( loadout.fontStyle != TMPro.FontStyles.Normal ) InitDamageLabel( loadout, colours.white );
-               loadout.text = string.Format( Settings.ShowAlphaDamageInLoadout, close + medium + far, close, medium, far, medium + far );
-            }
-         }
+
+         if ( Settings.ShowAlphaDamageInLoadout != null && HasDamageLabel( colours.white ) )
+            loadout.text = string.Format( Settings.ShowAlphaDamageInLoadout, close + medium + far, close, medium, far, medium + far );
+
          if ( Settings.ShowMeleeDamageInLoadout && actor is Mech mech ) {
             int start = weapons.Count, dmg = (int) (mech.MeleeWeapon?.DamagePerShot * mech.MeleeWeapon?.ShotsWhenFired);
             string format = Settings.ShowDamageInLoadout ? "{0} {1}({2})" : "{0} {1}{2}";
@@ -109,16 +107,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static void InitDamageLabel ( TMPro.TextMeshProUGUI label, Color white ) {
-         label.rectTransform.sizeDelta = new Vector2( 200, label.rectTransform.sizeDelta.y );
-         label.transform.Translate( 10, 0, 0 );
-         label.alignment = TMPro.TextAlignmentOptions.Left;
-         label.fontStyle = TMPro.FontStyles.Normal;
-         label.color = white;
+      private static bool HasDamageLabel ( Color white ) {
+         if ( loadout != null ) return true;
+         loadout = GameObject.Find( "tgtWeaponsLabel" )?.GetComponent<TMPro.TextMeshProUGUI>();
+         if ( loadout == null ) return false;
+         loadout.rectTransform.sizeDelta = new Vector2( 200, loadout.rectTransform.sizeDelta.y );
+         loadout.transform.Translate( 10, 0, 0 );
+         loadout.alignment = TMPro.TextAlignmentOptions.Left;
+         loadout.fontStyle = TMPro.FontStyles.Normal;
+         loadout.color = white;
+         return true;
       }
 
       private static Color[] LerpWeaponColours ( UIColorRefs ui ) {
-         if ( Settings.SaturationOfLoadout <= 0 || ui == null ) return null;
+         if ( Settings.SaturationOfLoadout <= 0 ) return new Color[0];
          Color[] colours = new Color[]{ Color.clear, ui.ballisticColor, ui.energyColor, ui.missileColor, ui.smallColor };
          float saturation = (float) Settings.SaturationOfLoadout, lower = saturation * 0.8f;
          for ( int i = colours.Length - 1 ; i > 0 ; i-- ) {
