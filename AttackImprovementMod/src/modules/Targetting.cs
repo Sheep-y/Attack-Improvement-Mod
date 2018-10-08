@@ -147,7 +147,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          int newIndex = lastTarget == null ? -1 : targets.IndexOf( lastTarget );
          if ( newIndex < 0 ) {
             if ( Settings.AggressiveMultiTargetAssignment )
-               newIndex = targets.IndexOf( FindBestTargetForWeapon( weapon, targets ) );
+               newIndex = FindBestTargetForWeapon( weapon, targets );
             if ( newIndex < 0 ) newIndex = 0;
          }
          while ( newIndex < targets.Count && ! weapon.WillFireAtTarget( targets[ newIndex ] ) ) // Find a target we can fire at.
@@ -173,23 +173,24 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          List<ICombatant> targets = multi?.AllTargetedCombatants;
          if ( targets.IsNullOrEmpty() ) return true;
          foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
-            ICombatant target = FindBestTargetForWeapon( slot?.DisplayedWeapon, targets );
-            if ( target != null )
-               SlotSetTargetIndexMethod.Invoke( slot, new object[]{ multi.AssignWeaponToTarget( w, target ), false } );
+            int target = FindBestTargetForWeapon( slot?.DisplayedWeapon, targets );
+            if ( target >= 0 )
+               SlotSetTargetIndexMethod.Invoke( slot, new object[]{ multi.AssignWeaponToTarget( w, targets[ i ] ), false } );
          }
          __instance.RefreshDisplayedWeapons();
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      private static ICombatant FindBestTargetForWeapon ( Weapon w, List<ICombatant> targets )  {
-         if ( w == null || ! w.IsEnabled || w.Category == WeaponCategory.Melee || targets.IsNullOrEmpty() ) return null;
-         ICombatant result = null;
+      private static int FindBestTargetForWeapon ( Weapon w, List<ICombatant> targets )  {
+         if ( w == null || ! w.IsEnabled || w.Category == WeaponCategory.Melee || targets.IsNullOrEmpty() ) return -1;
+         int result = -1;
          float hitChance = 0;
-         foreach ( ICombatant target in targets ) {
+         for ( int i = 0 ; i < targets.Count ; i++ ) {
+            ICombatant target = targets[ i ];
             if ( ! w.WillFireAtTarget( target ) ) continue;
             float newChance = Combat.ToHit.GetToHitChance( w.parent, w, target, w.parent.CurrentPosition, target.CurrentPosition, 1, MeleeAttackType.NotSet, false );
             if ( newChance <= hitChance ) continue;
-            result = target;
+            result = i;
             hitChance = newChance;
          }
          return result;
