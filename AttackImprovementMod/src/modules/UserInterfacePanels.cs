@@ -174,7 +174,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static PropertyInfo MechTrayArmorHoverToolTipProp;
 
-      [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
+      [ HarmonyPriority( Priority.Low ) ]
       public static bool OverridePaperDollTooltip ( CombatHUDMechTrayArmorHover __instance, Mech mech, ArmorLocation location ) { try {
          if ( ! FriendOrFoe( mech, Settings.ShowAmmoInTooltip, Settings.ShowEnemyAmmoInTooltip ) ) return true;
          CombatHUDMechTrayArmorHover me = __instance;
@@ -200,7 +200,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      // ============ Heat and Stability ============
+      // ============ Numeric Info ============
 
       private static CombatHUDActorDetailsDisplay targetDisplay = null;
 
@@ -216,47 +216,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          CombatSelectionHandler selection = HUD?.SelectionHandler;
          SelectionState ActiveState = selection?.ActiveState;
-         int baseHeat = mech.CurrentHeat, newHeat = baseHeat,
-             baseStab = (int) mech.CurrentStability, newStab = baseStab;
-         string movement = "";
-         if ( selection != null && selection.SelectedActor == mech && __instance != targetDisplay ) { // Show predictions in selection panel
-            newHeat += mech.TempHeat;
-
-            try {
-               newHeat += selection.ProjectedHeatForState;
-               if ( ! mech.HasMovedThisRound )
-                  newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
-               if ( ! mech.HasAppliedHeatSinks )
-                  newHeat -= mech.AdjustedHeatsinkCapacity;
-               newHeat = Math.Min( newHeat, mech.MaxHeat );
-               newStab = (int) selection.ProjectedStabilityForState;
-            } catch ( Exception ex ) { Error( ex ); }
-
-            try { if ( ActiveState is SelectionStateMove move ) {
-               float maxCost = move is SelectionStateSprint sprint ? mech.MaxSprintDistance : mech.MaxWalkDistance;
-               mech.Pathing.CurrentGrid.GetPathTo( move.PreviewPos, mech.Pathing.CurrentDestination, maxCost, null, out float costLeft, out Vector3 ResultDestination, out float lockedAngle, false, 0f, 0f, 0f, true, false );
-               movement = move is SelectionStateSprint ? "SPRINT " : "MOVE ";
-               movement += (int) costLeft + "/" + (int) maxCost;
-            } else if ( ActiveState is SelectionStateJump jump ) {
-               float maxCost = mech.JumpDistance, cost = Vector3.Distance( jump.PreviewPos, mech.CurrentPosition );
-               movement = "JUMP " + (int) ( maxCost - cost ) + "/" + (int) maxCost;
-            } } catch ( Exception ex ) { Error( ex ); }
-
-         } else if ( selection != null ) try {  // Target panel or non-selection. Show min/max numbers and distance.
-            Vector3? position;
-            if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
-            else if ( ActiveState is SelectionStateMove move ) position = move.PreviewPos;
-            else if ( ActiveState is SelectionStateJump jump ) position = jump.PreviewPos;
-            else position = HUD.SelectedActor?.CurrentPosition;
-            if ( position != null && HUD.SelectedActor != null ) {
-               int baseDist = (int) Vector3.Distance( HUD.SelectedActor.CurrentPosition, mech.CurrentPosition ),
-                   newDist = (int) Vector3.Distance( position.GetValueOrDefault(), mech.CurrentPosition );
-               text.Append( "Dist " ).Append( baseDist );
-               if ( baseDist != newDist )
-                  text.Append( " >> " ).Append( newDist );
-               text.Append( '\n' );
-            }
-         } catch ( Exception ex ) { Error( ex ); }
+         int baseHeat = mech.CurrentHeat, newHeat = baseHeat;
+         float baseStab = (int) mech.CurrentStability, newStab = baseStab;
+         string prefix = null, postfix = null;
+         if ( selection?.SelectedActor == mech && __instance != targetDisplay ) {
+            GetPreviewNumbers( mech, ref newHeat, ref newStab, ref postfix ); // Show predictions in selection panel
+         } else if ( selection != null ) {
+            GetTargetNumbers( mech, ref prefix ); // Target panel or non-selection. Show min/max numbers and distance.
+            if ( prefix != null )
+               text.Append( prefix ).Append( "\n" );
+         }
 
          text.Append( "Heat " ).Append( baseHeat );
          if ( baseHeat == newHeat )
@@ -275,10 +244,53 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             text.Append( " >> " ).Append( newStab );
          text.Append( '\n' );
 
-         text.Append( movement );
+         text.Append( postfix );
 
          __instance.ActorWeightText.text = text.ToString();
          __instance.JumpJetsHolder.SetActive( false );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static void GetPreviewNumbers ( Mech mech, ref int newHeat, ref float newStab, ref string movement ) {
+         CombatSelectionHandler selection = HUD?.SelectionHandler;
+
+         newHeat += mech.TempHeat;
+         try {
+            newHeat += selection.ProjectedHeatForState;
+            if ( ! mech.HasMovedThisRound )
+               newHeat += mech.StatCollection.GetValue<int>( "EndMoveHeat" );
+            if ( ! mech.HasAppliedHeatSinks )
+               newHeat -= mech.AdjustedHeatsinkCapacity;
+            newHeat = Math.Min( newHeat, mech.MaxHeat );
+            newStab = (int) selection.ProjectedStabilityForState;
+         } catch ( Exception ex ) { Error( ex ); }
+
+         string moveType = null;
+         float spareMove = 0, maxMove = 0;
+         try { if ( ActiveState is SelectionStateMove move ) {
+            maxMove = move is SelectionStateSprint sprint ? mech.MaxSprintDistance : mech.MaxWalkDistance;
+            mech.Pathing.CurrentGrid.GetPathTo( move.PreviewPos, mech.Pathing.CurrentDestination, maxMove, null, out spareMove, out Vector3 ResultDestination, out float lockedAngle, false, 0f, 0f, 0f, true, false );
+            moveType = move is SelectionStateSprint ? uiManager.UILookAndColorConstants.Tooltip_Sprint : uiManager.UILookAndColorConstants.Tooltip_Move;
+         } else if ( ActiveState is SelectionStateJump jump ) {
+            maxMove = mech.JumpDistance;
+            spareMove = maxMove - Vector3.Distance( jump.PreviewPos, mech.CurrentPosition );
+            moveType = uiManager.UILookAndColorConstants.Tooltip_Jump;
+         } } catch ( Exception ex ) { Error( ex ); }
+
+         if ( moveType != null )
+            movement = string.Format( "{0} {1:0}/{2:0}", Translate( moveType ), spareMove, maxMove );
+      }
+
+      private static void GetTargetNumbers ( ICombatant target, ref string distance ) { try {
+         float oldDist = Vector3.Distance( HUD.SelectedActor.CurrentPosition, target.CurrentPosition );
+         Vector3 position = default;
+         if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
+         else if ( ActiveState is SelectionStateMove move ) position = move.PreviewPos;
+         else if ( ActiveState is SelectionStateJump jump ) position = jump.PreviewPos;
+         if ( position != default ) {
+            float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
+            distance = string.Format( "Dist {0:0} >> {1:0}", oldDist, newDist );
+         } else
+            distance = string.Format( "Dist {0:0}", oldDist );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowUnitTonnage ( CombatHUDActorDetailsDisplay __instance ) { try {
