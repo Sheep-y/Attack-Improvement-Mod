@@ -144,7 +144,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          List<ICombatant> targets = state.AllTargetedCombatants;
          MultiTargetDisabledWeaponTarget.TryGetValue( weapon, out ICombatant lastTarget );
-         int newIndex = lastTarget == null ? 0 : Math.Max( 0, targets.IndexOf( lastTarget ) );
+         int newIndex = lastTarget == null ? -1 : targets.IndexOf( lastTarget );
+         if ( newIndex < 0 ) {
+            if ( Settings.AggressiveMultiTargetAssignment )
+               newIndex = targets.IndexOf( FindBestTargetForWeapon( weapon, targets ) );
+            if ( newIndex < 0 ) newIndex = 0;
+         }
          while ( newIndex < targets.Count && ! weapon.WillFireAtTarget( targets[ newIndex ] ) ) // Find a target we can fire at.
             ++newIndex;
          return newIndex >= targets.Count ? -1 : newIndex;
@@ -167,21 +172,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          SelectionStateFireMulti multi = ActiveState as SelectionStateFireMulti;
          List<ICombatant> targets = multi?.AllTargetedCombatants;
          if ( targets.IsNullOrEmpty() ) return true;
-            foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
-            Weapon w = slot?.DisplayedWeapon;
-            if ( w == null || w.Category == WeaponCategory.Melee ) continue;
-            float hitChance = 0;
-            foreach ( ICombatant target in targets ) {
-               if ( ! w.IsEnabled || ! w.WillFireAtTarget( target ) ) continue;
-               float newChance = Combat.ToHit.GetToHitChance( w.parent, w, target, w.parent.CurrentPosition, target.CurrentPosition, 1, MeleeAttackType.NotSet, false );
-               if ( newChance <= hitChance ) continue;
+         foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
+            ICombatant target = FindBestTargetForWeapon( slot?.DisplayedWeapon, targets );
+            if ( target != null )
                SlotSetTargetIndexMethod.Invoke( slot, new object[]{ multi.AssignWeaponToTarget( w, target ), false } );
-               hitChance = newChance;
-            }
          }
          __instance.RefreshDisplayedWeapons();
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      private static ICombatant FindBestTargetForWeapon ( Weapon w, List<ICombatant> targets )  {
+         if ( w == null || ! w.IsEnabled || w.Category == WeaponCategory.Melee || targets.IsNullOrEmpty() ) return null;
+         ICombatant result = null;
+         float hitChance = 0;
+         foreach ( ICombatant target in targets ) {
+            if ( ! w.WillFireAtTarget( target ) ) continue;
+            float newChance = Combat.ToHit.GetToHitChance( w.parent, w, target, w.parent.CurrentPosition, target.CurrentPosition, 1, MeleeAttackType.NotSet, false );
+            if ( newChance <= hitChance ) continue;
+            result = target;
+            hitChance = newChance;
+         }
+         return result;
+      }
 
       // ============ Multi-Target Backout ============
 
