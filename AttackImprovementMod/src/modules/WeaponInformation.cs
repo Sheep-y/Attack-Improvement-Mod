@@ -14,32 +14,32 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class WeaponInfo : BattleModModule {
 
       public override void CombatStartsOnce () {
-         Type slotType = typeof( CombatHUDWeaponSlot ), panelType = typeof( CombatHUDWeaponPanel );
+         Type SlotType = typeof( CombatHUDWeaponSlot ), PanelType = typeof( CombatHUDWeaponPanel );
 
          if ( Settings.SaturationOfLoadout != 0 || Settings.ShowDamageInLoadout || Settings.ShowMeleeDamageInLoadout || Settings.ShowAlphaDamageInLoadout != null )
             Patch( typeof( CombatHUDTargetingComputer ), "RefreshWeaponList", null, "EnhanceWeaponLoadout" );
 
          if ( Settings.ShowBaseHitchance ) {
-            Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
-            Patch( slotType, "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
+            Patch( SlotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowBaseHitChance", null );
+            Patch( SlotType, "UpdateToolTipsMelee", typeof( ICombatant ), "ShowBaseMeleeChance", null );
          }
          if ( Settings.ShowNeutralRangeInBreakdown ) {
             rangedPenalty = ModifierList.GetRangedModifierFactor( "range" );
-            Patch( slotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowNeutralRange", null );
+            Patch( SlotType, "UpdateToolTipsFiring", typeof( ICombatant ), "ShowNeutralRange", null );
          }
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
-            Patch( slotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
+            Patch( SlotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
 
          if ( Settings.ShowReducedWeaponDamage || Settings.CalloutWeaponStability )
-            Patch( slotType, "RefreshDisplayedWeapon", null, "UpdateWeaponDamage" );
+            Patch( SlotType, "RefreshDisplayedWeapon", null, "UpdateWeaponDamage" );
          if ( Settings.ShowTotalWeaponDamage ) {
-            Patch( panelType, "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
-            Patch( panelType, "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
+            Patch( PanelType, "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
+            Patch( PanelType, "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
          }
          if ( Settings.ShowReducedWeaponDamage || Settings.ShowTotalWeaponDamage ) {
             // Update damage numbers (and multi-target highlights) _after_ all slots are in a correct state.
             Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
-            Patch( slotType, "OnPointerUp", null, "RefreshTotalDamage" );
+            Patch( SlotType, "OnPointerUp", null, "RefreshTotalDamage" );
          }
          if ( Settings.CalloutWeaponStability )
             Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleStabilityDamage", null );
@@ -62,13 +62,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private const string MetaColour = "<#888888FF>";
       private static Color[] ByType;
 
+      private static void DisableLoadoutLineWrap ( List<TMPro.TextMeshProUGUI> weaponNames ) {
+         foreach ( TMPro.TextMeshProUGUI weapon in weaponNames )
+            weapon.enableWordWrapping = false;
+      }
+
       public static void EnhanceWeaponLoadout ( CombatHUDTargetingComputer __instance, List<TMPro.TextMeshProUGUI> ___weaponNames, UIManager ___uiManager ) { try {
          UIColorRefs colours = ___uiManager.UIColorRefs;
          AbstractActor actor = __instance.ActivelyShownCombatant as AbstractActor;
          List<Weapon> weapons = actor?.Weapons;
          if ( actor == null || weapons == null ) return;
-         if ( ByType == null && Settings.SaturationOfLoadout != 0 )
+         if ( ByType == null && Settings.SaturationOfLoadout != 0 ) {
             ByType = LerpWeaponColours( colours );
+            DisableLoadoutLineWrap( ___weaponNames );
+         }
          float close = 0, medium = 0, far = 0;
          for ( int i = Math.Min( ___weaponNames.Count, weapons.Count ) - 1 ; i >= 0 ; i-- ) {
             Weapon w = weapons[ i ];

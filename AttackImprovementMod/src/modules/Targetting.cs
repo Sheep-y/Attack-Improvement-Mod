@@ -13,13 +13,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class Targetting : BattleModModule {
 
       public override void CombatStartsOnce () {
-         Type MultiTargetType = typeof( SelectionStateFireMulti ), HandlerType = typeof( CombatSelectionHandler );
+         Type MultiTargetType = typeof( SelectionStateFireMulti ), HandlerType = typeof( CombatSelectionHandler ), PanelType = typeof( CombatHUDWeaponPanel );
 
          if ( Settings.AggressiveMultiTargetAssignment ) {
-            SlotSetTargetIndexMethod = slotType.GetMethod( "SetTargetIndex", NonPublic | Instance );
+            SlotSetTargetIndexMethod = typeof( CombatHUDWeaponSlot ).GetMethod( "SetTargetIndex", NonPublic | Instance );
             if ( SlotSetTargetIndexMethod != null ) {
-               Patch( panelType, "OnActorMultiTargeted", "OverrideMultiTargetAssignment", null );
-               Patch( panelType, "OnActorMultiTargetCleared", "OverrideMultiTargetAssignment", null );
+               Patch( PanelType, "OnActorMultiTargeted", "OverrideMultiTargetAssignment", null );
+               Patch( PanelType, "OnActorMultiTargetCleared", "OverrideMultiTargetAssignment", null );
             } else
                Warn( "CombatHUDWeaponSlot.SetTargetIndex not found. AggressiveMultiTargetAssignment not patched." );
          }
@@ -173,9 +173,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          List<ICombatant> targets = multi?.AllTargetedCombatants;
          if ( targets.IsNullOrEmpty() ) return true;
          foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
-            int target = FindBestTargetForWeapon( slot?.DisplayedWeapon, targets );
+            Weapon w = slot?.DisplayedWeapon;
+            int target = FindBestTargetForWeapon( w, targets );
             if ( target >= 0 )
-               SlotSetTargetIndexMethod.Invoke( slot, new object[]{ multi.AssignWeaponToTarget( w, targets[ i ] ), false } );
+               SlotSetTargetIndexMethod.Invoke( slot, new object[]{ multi.AssignWeaponToTarget( w, targets[ target ] ), false } );
          }
          __instance.RefreshDisplayedWeapons();
          return false;
