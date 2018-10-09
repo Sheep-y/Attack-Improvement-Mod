@@ -202,7 +202,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Numeric Info ============
 
-      private static CombatHUDActorDetailsDisplay targetDisplay = null;
+      private static CombatHUDActorDetailsDisplay targetDisplay;
 
       public static void ShowNumericInfo ( CombatHUDActorDetailsDisplay __instance ) { try {
          ICombatant target = __instance.DisplayedActor;
@@ -214,9 +214,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( __instance != targetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
                GetPreviewNumbers( mech, ref heat, ref stab, ref postfix );
                prefix = string.Empty;
-            }
-            numbers = FormatPreview( "Heat", mech.CurrentHeat, heat, mech.MaxHeat ) + "\n"
-                    + FormatPreview( "Stab", mech.CurrentStability, stab, mech.MaxStability ) + "\n";
+               numbers = FormatPrediction( "Heat", mech.CurrentHeat, heat ) + "\n"
+                       + FormatPrediction( "Stab", mech.CurrentStability, stab ) + "\n";
+            } else
+               numbers = FormatMeter( "Heat", heat, mech.MaxHeat ) + "\n"
+                       + FormatMeter( "Stab", stab, mech.MaxStability ) + "\n";
          }
          if ( prefix == null )
             prefix = GetTargetNumbers( target );
@@ -229,22 +231,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __instance.JumpJetsHolder.SetActive( false );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static string GetBasicInfo ( ICombatant target ) {
+      private static object GetBasicInfo ( ICombatant target ) {
          if ( target is Mech mech ) {
             int jets = mech.WorkingJumpjets;
-            return jets > 0 ? string.Format( "{0}, {1} JETS", mech.weightClass, jets ) : mech.weightClass.ToString();
+            return jets > 0 ? (object) string.Format( "{0}, {1} JETS", mech.weightClass, jets ) : mech.weightClass;
 
          } else if ( target is Vehicle vehicle )
-            return vehicle.weightClass.ToString();
+            return vehicle.weightClass;
 
          else if ( target is Turret turret )
-            return turret.TurretDef.Chassis.weightClass.ToString();
+            return turret.TurretDef.Chassis.weightClass;
 
          return string.Empty;
       }
 
-      private static string FormatPreview ( string label, float from, float to, float max ) {
-         if ( from != to ) return string.Format( "{0} {1:0} >> {2:0;(0)}", label, from, to );
+      private static string FormatPrediction ( string label, float from, float to ) {
+         return string.Format( "{0} {1:0} >> {2:0;(0)}", label, from, to );
+      }
+
+      private static string FormatMeter ( string label, float from, float max ) {
          return string.Format( "{0} {1:0}/{2:0}", label, from, max );
       }
 
@@ -275,11 +280,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          } } catch ( Exception ex ) { Error( ex ); }
 
          if ( moveType != null )
-            movement = string.Format( "{0} {1:0}/{2:0}", Translate( moveType ), spareMove, maxMove );
+            movement = FormatMeter( moveType, spareMove, maxMove ) + "\n";
       }
 
       private static string GetTargetNumbers ( ICombatant target ) { try {
-         if ( HUD.SelectedActor == null ) return null;
+         if ( HUD.SelectedActor == null || HUD.SelectedActor == target ) return null;
          float oldDist = Vector3.Distance( HUD.SelectedActor.CurrentPosition, target.CurrentPosition );
          Vector3 position = default;
          if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
@@ -288,7 +293,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else return string.Format( "Dist {0:0}\n", oldDist );
 
          float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
-         return string.Format( "Dist {0:0} >> {1:0}\n", oldDist, newDist );
+         return FormatPrediction( "Dist", oldDist, newDist );
       }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
       public static void ShowUnitTonnage ( CombatHUDActorDetailsDisplay __instance ) { try {
