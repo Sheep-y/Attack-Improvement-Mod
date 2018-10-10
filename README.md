@@ -134,10 +134,18 @@ These settings can be changed in `settings.json`.
 > Also, because the keys are hard-coded and not keybinds, this will not change game settings or game profile.
 <br>
 
-> Setting: `CalloutFriendlyFire`  (true/false, default true)
+> Setting: `ShiftKeyReverseSelection`  (true/false, default true)
 >
-> When true, friendly units may be targeted and attacked when toggling callout.
-> By game default this happens when you press and hold Left Alt.
+> When the Shift key is holded, target selection will be reversed:
+>
+> Shift+Tab will select the previous target, Shift+Brace will select in the reverse direction,
+> while Shift+Click during Multi-Target will goes from C to B, B to A, and A to disable.
+<br>
+
+> Setting: `CtrlClickDisableWeapon`  (true/false, default true)
+>
+> Ctrl+Click a weapon during Multi-Target will disable / enable the weapon.
+> The target will be remembered when the weapon is enabled this way, allowing quick evaluation of heat and damage.
 
 
 **Actions**
@@ -161,7 +169,8 @@ These settings can be changed in `settings.json`.
 > Setting: `AggressiveMultiTargetAssignment`  (true/false, default true)
 >
 > When you select a new target with the Multi-Target skill, all enabled weapons will be reassigned.
-> Each weapon will prefer to hit the target with highest hit chance, and 
+> Each weapon will reset to the target with highest hit chance, or the earlier target when hit chances are the same
+> (A before B, B before C).
 
 
 **Terrain Dots**
@@ -345,7 +354,7 @@ These settings can be changed in `settings.json`.
 > When true, fix the bug.
 <br>
 
-> Setting: `ShowUnderArmourDamage `  (true/false, default true)
+> Setting: `ShowUnderArmourDamage`  (true/false, default true)
 >
 > When true, armour of damaged location will have a striped pattern instead of solid.
 <br>
@@ -819,11 +828,14 @@ These settings can be changed in `settings.json`.
 
 **Skip Criting the Dead Mech**
 
-> Setting: `SkipCritingDeadMech`  (true/false, default true)
+> Setting: `SkipBeatingDeadMech`  ("", "critical", or "damage", default "critical")
 >
-> When true, critical hits are not rolled for dead units.
+> When set to "critical", critical hits are not rolled for dead units.
 > This is mainly designed to prevent crit messages from flooding over cause of death.
 > As a side effect, slightly more components will be salvageable instead of being destroyed.
+>
+> When set to "damage", damage is not applied to dead units.
+> This means as soon as a target is removed from play, it won't take any more damage or crits.
 
 
 **NPC Crit Multipliers**
