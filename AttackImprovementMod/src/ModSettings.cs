@@ -106,12 +106,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string ShowAllyHealth = ", HP {2}/{3}";
 
       [ JsonComment( "Set name colour of overhead nameplate of Player / Enemy / Ally.  Default \"#8FF\", \"#FBB\", \"#BFB\".  Set to empty to not change (leave at white)." ) ]
-      public string NameplateColourPlayer = "#BFB";
+      public string NameplateColourPlayer = "#CFC";
       public string NameplateColourEnemy = "#FBB";
       public string NameplateColourAlly = "#8FF";
 
       [ JsonComment( "Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default \"#8FF\", \"#FBB\", \"#BFB\".  Set to empty to not change (leave at white)." ) ]
-      public string FloatingArmorColourPlayer = "#BFB";
+      public string FloatingArmorColourPlayer = "#CFC";
       public string FloatingArmorColourEnemy = "#FBB";
       public string FloatingArmorColourAlly = "#8FF";
 

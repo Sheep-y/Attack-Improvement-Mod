@@ -178,6 +178,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( settings.SettingVersion < 2_007_000 ) { // Update from 3.0 preview 20180925
             if ( settings.ShowEnemyWounds == "{0}, Wounds {1}" )
                settings.ShowEnemyWounds = ", Wounds {1}";
+            if ( settings.NameplateColourPlayer == "#BFB" )
+               settings.NameplateColourPlayer = "#CFC";
+            if ( settings.FloatingArmorColourPlayer == "#BFB" )
+               settings.FloatingArmorColourPlayer = "#CFC";
             settings.SettingVersion = 2_007_000;
          }
       }

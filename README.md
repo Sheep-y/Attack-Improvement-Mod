@@ -221,10 +221,10 @@ These settings can be changed in `settings.json`.
 
 **Nameplates**
 
-> Setting: `NameplateColourPlayer`  (color string, default "#BFB")<br>
+> Setting: `NameplateColourPlayer`  (color string, default "#CFC")<br>
 > Setting: `NameplateColourEnemy`  (color string, default "#FBB")<br>
 > Setting: `NameplateColourAlly`  (color string, default "#8FF")<br>
-> Setting: `FloatingArmorColourPlayer`  (color string, default "#BFB")<br>
+> Setting: `FloatingArmorColourPlayer`  (color string, default "#CFC")<br>
 > Setting: `FloatingArmorColourEnemy`  (color string, default "#FBB")<br>
 > Setting: `FloatingArmorColourAlly`  (color string, default "#8FF")<br>
 >
