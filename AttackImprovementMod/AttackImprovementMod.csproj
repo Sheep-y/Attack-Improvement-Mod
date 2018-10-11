@@ -89,7 +89,7 @@
     <Compile Include="src\modules\HitLocation.cs" />
     <Compile Include="src\modules\Targetting.cs" />
     <Compile Include="src\modules\UserInterfacePanels.cs" />
-    <Compile Include="src\modules\HUD.cs" />
+    <Compile Include="src\modules\CombatUI.cs" />
     <Compile Include="src\modules\WeaponInformation.cs" />
     <Compile Include="src\Test.cs" />
   </ItemGroup>

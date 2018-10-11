@@ -11,9 +11,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    using static Mod;
    using static System.Reflection.BindingFlags;
 
-   public class HUD : BattleModModule {
+   public class CombatUI : BattleModModule {
 
-      private static HUD instance;
+      private static CombatUI instance;
 
       private static Color?[] NameplateColours = new Color?[ 3 ];
       private static Color?[] FloatingArmorColours = new Color?[ 3 ];

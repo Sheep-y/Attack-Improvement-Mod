@@ -42,7 +42,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( SlotType, "OnPointerUp", null, "RefreshTotalDamage" );
          }
          if ( Settings.CalloutWeaponStability )
-            AttackImprovementMod.HUD.HookCalloutToggle( ToggleStabilityDamage );
+            CombatUI.HookCalloutToggle( ToggleStabilityDamage );
 
          if ( HasMod( "com.joelmeador.WeaponRealizer", "WeaponRealizer.Core" ) ) TryRun( ModLog, InitWeaponRealizerBridge );
       }
@@ -174,6 +174,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static MethodInfo WeaponRealizerDamageModifiers;
 
+      private static bool ShowingStabilityDamage; // Set only by ToggleStabilityDamage, which only triggers when CalloutWeaponStability is on
       private static float TotalDamage, AverageDamage;
       private static CombatHUDWeaponSlot TotalSlot;
 
@@ -198,7 +199,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Weapon weapon = __instance.DisplayedWeapon;
          if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          string text = null;
-         if ( Settings.CalloutFriendlyFire && ShowingStabilityDamage) {
+         if ( ShowingStabilityDamage ) {
             float dmg = weapon.Instability();
             if ( Settings.ShowReducedWeaponDamage && target is AbstractActor actor )
                dmg *= actor.StatCollection.GetValue<float>("ReceivedInstabilityMultiplier") * actor.EntrenchedMultiplier;
@@ -243,11 +244,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void ShowTotalWeaponDamage ( List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
          if ( TotalSlot == null ) return;
          if ( ! Settings.ShowReducedWeaponDamage ) { // Sum damage when reduced damage patch is not applied.
-            bool ShowStability = Settings.CalloutFriendlyFire && ShowingStabilityDamage;
             foreach ( CombatHUDWeaponSlot slot in ___WeaponSlots ) {
                Weapon w = slot.DisplayedWeapon;
                if ( w != null && w.IsEnabled && w.CanFire )
-                  AddToTotalDamage( ShowStability ? w.Instability() : w.DamagePerShotAdjusted(), slot );
+                  AddToTotalDamage( ShowingStabilityDamage ? w.Instability() : w.DamagePerShotAdjusted(), slot );
             }
          }
          TotalSlot.DamageText.text = FormatTotalDamage( TotalDamage, true );
@@ -258,8 +258,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ActiveState is SelectionStateFireMulti )
             HUD.WeaponPanel.RefreshDisplayedWeapons(); // Refresh weapon highlight AFTER HUD.SelectedTarget is updated.
       }
-
-      private static bool ShowingStabilityDamage = false;
 
       public static void ToggleStabilityDamage ( bool IsCallout ) { try {
          ShowingStabilityDamage = IsCallout;

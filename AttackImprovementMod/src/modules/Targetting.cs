@@ -68,7 +68,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.CalloutFriendlyFire ) {
             Patch( HandlerType, "TrySelectTarget", null, "SuppressSafety" );
-            AttackImprovementMod.HUD.HookCalloutToggle( ToggleFriendlyFire );
+            CombatUI.HookCalloutToggle( ToggleFriendlyFire );
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
             Patch( typeof( CombatGameState ), "get_AllEnemies", "AddFriendsToEnemies", null );
             Patch( typeof( CombatGameState ), "GetAllTabTargets", null, "AddFriendsToTargets" );
@@ -266,7 +266,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Friendly Fire ============
 
-      private static bool FriendlyFire = false;
+      private static bool FriendlyFire; // Set only by ToggleFriendlyFire, which only triggers when CalloutFriendlyFire is on
 
       public static bool MakeFriendsVisible ( AbstractActor __instance, ref VisibilityLevel __result, ICombatant targetUnit ) {
          if ( ! __instance.IsFriendly( targetUnit ) ) return true;

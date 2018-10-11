@@ -19,7 +19,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          NormaliseSettings();
          new Logger( LogDir + "Log_AttackImprovementMod.txt" ).Delete(); // Delete log of old version
 
-         Add( new HUD(){ Name = "Head Up Display" } ); // Created first to prepare callout handling
+         Add( new CombatUI(){ Name = "Head Up Display" } ); // Created first to prepare callout handling
          Add( new UserInterfacePanels(){ Name = "User Interface Panels" } );
          Add( new Targetting(){ Name = "Targetting" } );
          Add( new WeaponInfo(){ Name = "Weapons Information" } );
