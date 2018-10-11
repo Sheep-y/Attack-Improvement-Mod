@@ -44,6 +44,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStartsOnce () {
          if ( Settings.ShowNumericInfo ) {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowNumericInfo" );
+            Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo" , "RecordTarget", "ShowBuildingInfo" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
             // Force heat/stab number refresh
@@ -203,9 +204,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Numeric Info ============
 
       private static CombatHUDActorDetailsDisplay targetDisplay;
+      private static ICombatant ActorInfoTarget;
+
+      public static void RecordTarget ( CombatHUDActorInfo __instance, ICombatant ___displayedCombatant ) { ActorInfoTarget = ___displayedCombatant; }
+      public static void ShowBuildingInfo ( CombatHUDActorInfo __instance ) {
+         if ( ActorInfoTarget is BattleTech.Building )
+            __instance.DetailsDisplay.gameObject.SetActive( true );
+      }
 
       public static void ShowNumericInfo ( CombatHUDActorDetailsDisplay __instance ) { try {
-         ICombatant target = __instance.DisplayedActor;
+         ICombatant target = __instance.DisplayedActor ?? ActorInfoTarget;
          if ( target == null ) return;
          string prefix = null, numbers = null, postfix = null;
 
@@ -221,7 +229,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                        + FormatMeter( "Stab", stab, mech.MaxStability ) + "\n";
          }
          if ( prefix == null )
-            prefix = GetTargetNumbers( target );
+            prefix = GetTargetNumbers( target ) + "\n";
 
          StringBuilder text = new StringBuilder( 100 );
          text.Append( GetBasicInfo( target ) ).Append( "\n" );
@@ -290,7 +298,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
          else if ( ActiveState is SelectionStateMove move ) position = move.PreviewPos;
          else if ( ActiveState is SelectionStateJump jump ) position = jump.PreviewPos;
-         else return string.Format( "Dist {0:0}\n", oldDist );
+         else return string.Format( "Dist {0:0}", oldDist );
 
          float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
          return FormatPrediction( "Dist", oldDist, newDist );
