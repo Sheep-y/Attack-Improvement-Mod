@@ -68,7 +68,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( Settings.CalloutFriendlyFire ) {
             Patch( HandlerType, "TrySelectTarget", null, "SuppressSafety" );
-            Patch( HandlerType, "ProcessInput", "ToggleFriendlyFire", null );
+            AttackImprovementMod.HUD.HookCalloutToggle( ToggleFriendlyFire );
             Patch( typeof( AbstractActor ), "VisibilityToTargetUnit", "MakeFriendsVisible", null );
             Patch( typeof( CombatGameState ), "get_AllEnemies", "AddFriendsToEnemies", null );
             Patch( typeof( CombatGameState ), "GetAllTabTargets", null, "AddFriendsToTargets" );
@@ -312,15 +312,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          __result = true;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void ToggleFriendlyFire () { try {
+      public static void ToggleFriendlyFire ( bool IsCallout ) { try {
          if ( ActiveState == null ) return;
-         if ( FriendlyFire != IsCalloutPressed ) {
-            FriendlyFire = IsCalloutPressed;
-            foreach ( AbstractActor actor in Combat.LocalPlayerTeam.units )
-               if ( ! actor.IsDead )
-                  actor.VisibilityCache.RebuildCache( Combat.GetAllCombatants() );
-            //__instance.ActiveState.ProcessMousePos( CameraControl.Instance.ScreenCenterToGroundPosition );
-         }
+         FriendlyFire = IsCallout;
+         foreach ( AbstractActor actor in Combat.LocalPlayerTeam.units )
+            if ( ! actor.IsDead )
+               actor.VisibilityCache.RebuildCache( Combat.GetAllCombatants() );
+         //__instance.ActiveState.ProcessMousePos( CameraControl.Instance.ScreenCenterToGroundPosition );
       }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }

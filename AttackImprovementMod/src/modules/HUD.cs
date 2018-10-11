@@ -13,10 +13,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class HUD : BattleModModule {
 
+      private static HUD instance;
+
       private static Color?[] NameplateColours = new Color?[ 3 ];
       private static Color?[] FloatingArmorColours = new Color?[ 3 ];
 
       public override void CombatStartsOnce () {
+         instance = this;
          NameplateColours = ParseColours( Settings.NameplateColourPlayer, Settings.NameplateColourEnemy, Settings.NameplateColourAlly );
          if ( Settings.ShowEnemyWounds != null || Settings.ShowAllyHealth != null || Settings.ShowPlayerHealth != null ) {
             Patch( typeof( CombatHUDActorNameDisplay ), "RefreshInfo", typeof( VisibilityLevel ), null, "ShowPilotWounds" );
@@ -90,6 +93,28 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( units == null || index >= units.Count || units[ index ] == null ) return;
          HUD.MechWarriorTray.FindPortraitForActor( units[ index ].GUID ).OnClicked();
       }
+
+      // ============ Floating Nameplate ============
+
+      public static bool IsCallout { get; private set; }
+      private static List<Action<bool>> CalloutListener;
+
+      public static void HookCalloutToggle ( Action<bool> listener ) {
+         if ( CalloutListener == null ) {
+            instance.Patch( typeof( CombatSelectionHandler ), "ProcessInput", null, "ToggleCallout" );
+            CalloutListener = new List<Action<bool>>();
+         }
+         if ( ! CalloutListener.Contains( listener ) )
+            CalloutListener.Add( listener );
+      }
+
+      public static void ToggleCallout () { try {
+         if ( IsCallout != IsCalloutPressed ) {
+            IsCallout = IsCalloutPressed;
+            foreach ( Action<bool> listener in CalloutListener )
+               listener( IsCallout );
+         }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Floating Nameplate ============
 

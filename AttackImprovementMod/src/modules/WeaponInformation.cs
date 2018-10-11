@@ -42,7 +42,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( SlotType, "OnPointerUp", null, "RefreshTotalDamage" );
          }
          if ( Settings.CalloutWeaponStability )
-            Patch( typeof( CombatSelectionHandler ), "ProcessInput", "ToggleStabilityDamage", null );
+            AttackImprovementMod.HUD.HookCalloutToggle( ToggleStabilityDamage );
 
          if ( HasMod( "com.joelmeador.WeaponRealizer", "WeaponRealizer.Core" ) ) TryRun( ModLog, InitWeaponRealizerBridge );
       }
@@ -261,11 +261,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static bool ShowingStabilityDamage = false;
 
-      public static void ToggleStabilityDamage () { try {
-         if ( ShowingStabilityDamage != IsCalloutPressed ) {
-            ShowingStabilityDamage = IsCalloutPressed;
-            HUD.WeaponPanel.RefreshDisplayedWeapons();
-         }
+      public static void ToggleStabilityDamage ( bool IsCallout ) { try {
+         ShowingStabilityDamage = IsCallout;
+         HUD.WeaponPanel.RefreshDisplayedWeapons();
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Helpers ============
