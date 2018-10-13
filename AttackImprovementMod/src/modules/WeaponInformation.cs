@@ -30,19 +30,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( SlotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
 
-         if ( Settings.ShowReducedWeaponDamage || Settings.CalloutWeaponStability )
-            Patch( SlotType, "RefreshDisplayedWeapon", null, "UpdateWeaponDamage" );
-         if ( Settings.ShowTotalWeaponDamage ) {
-            Patch( PanelType, "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
-            Patch( PanelType, "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
+         if ( Settings.ShowReducedWeaponDamage || Settings.CalloutWeaponStability || Settings.ShowTotalWeaponDamage ) {
+            Patch( PanelType, "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "UpdateWeaponDamages" );
+            if ( Settings.ShowTotalWeaponDamage )
+               Patch( PanelType, "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
+            if ( Settings.ShowReducedWeaponDamage || Settings.ShowTotalWeaponDamage ) {
+               // Update damage numbers (and multi-target highlights) _after_ all slots are in a correct state.
+               Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
+               Patch( SlotType, "OnPointerUp", null, "RefreshTotalDamage" );
+            }
+            if ( Settings.CalloutWeaponStability )
+               CombatUI.HookCalloutToggle( ToggleStabilityDamage );
          }
-         if ( Settings.ShowReducedWeaponDamage || Settings.ShowTotalWeaponDamage ) {
-            // Update damage numbers (and multi-target highlights) _after_ all slots are in a correct state.
-            Patch( typeof( SelectionStateFireMulti ), "SetTargetedCombatant", null, "RefreshTotalDamage" );
-            Patch( SlotType, "OnPointerUp", null, "RefreshTotalDamage" );
-         }
-         if ( Settings.CalloutWeaponStability )
-            CombatUI.HookCalloutToggle( ToggleStabilityDamage );
 
          if ( HasMod( "com.joelmeador.WeaponRealizer", "WeaponRealizer.Core" ) ) TryRun( ModLog, InitWeaponRealizerBridge );
       }
@@ -177,6 +176,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool ShowingStabilityDamage; // Set only by ToggleStabilityDamage, which only triggers when CalloutWeaponStability is on
       private static float TotalDamage, AverageDamage;
       private static CombatHUDWeaponSlot TotalSlot;
+
+      private ICombatant getDefaultTarget ( CombatHUDWeaponPanel panel ) {
+         if ( ActiveState; is SelectionStateMove )
+            return panel.hoveredTarget : panel.target;
+         return panel.target : panel.hoveredTarget;
+      }
 
       private static void AddToTotalDamage ( float dmg, CombatHUDWeaponSlot slot ) {
          Weapon w = slot.DisplayedWeapon;
