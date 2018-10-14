@@ -20,20 +20,10 @@ namespace Sheepy.Reflector {
             Console.WriteLine( string.Format( msg, args ) );
       };
 
-      // Config
-      public volatile bool UseCache = true;
-
-      // Data
       private readonly List<Assembly> Assemblies = new List<Assembly>();
       private readonly Dictionary<Assembly, HashSet<string>> Namespaces = new Dictionary<Assembly, HashSet<string>>();
 
-      // Cache
-      private static ReaderWriterLockSlim typeCacheLock   = new ReaderWriterLockSlim( LockRecursionPolicy.NoRecursion ),
-                                          parserCacheLock = new ReaderWriterLockSlim( LockRecursionPolicy.NoRecursion );
-      private static Dictionary<string,Type> typeCache = new Dictionary<string, Type>();
-      private static Dictionary<string,WeakReference> parserCache = new Dictionary<string,WeakReference>();
-
-      // ============ Construcor and Static access ============
+      // ============ Constructor and Static access ============
 
       public Mirrorlect () : this( true ) { }
 
@@ -45,8 +35,8 @@ namespace Sheepy.Reflector {
 
       // ============ Instance API ============
 
-      public Mirrorlect AddAssembly ( Type typeInAssembly, string[] namespaces = null ) { return AddAssembly( typeInAssembly.Assembly, namespaces ); }
-      public Mirrorlect AddAssembly ( Assembly assembly, string[] namespaces = null ) {
+      public virtual Mirrorlect AddAssembly ( Type typeInAssembly, string[] namespaces = null ) { return AddAssembly( typeInAssembly.Assembly, namespaces ); }
+      public virtual Mirrorlect AddAssembly ( Assembly assembly, string[] namespaces = null ) {
          if ( assembly == null ) throw new ArgumentNullException();
          lock ( Assemblies ) {
             if ( ! Assemblies.Contains( assembly ) ) {
@@ -63,34 +53,27 @@ namespace Sheepy.Reflector {
             if ( ! Namespaces.ContainsKey( assembly ) ) Namespaces.Add( assembly, new HashSet<string>() );
             Namespaces[ assembly ].UnionWith( namespaces );
          }
-         ClearCache();
          return this;
       }
 
       public static MemberProxy<T> Reflect<T> ( string member ) { return Instance.Get<T>( member ); }
 
-      public MemberProxy<T> Get<T> ( string member ) {
+      public virtual MemberProxy<T> Get<T> ( string member ) {
          string normalised = NormaliseQuery( member );
-         if ( CheckParserCache( normalised, out MemberInfo cached ) )
-            return InfoToProxy<T>( cached );
-
          return ParseAndProcess( normalised, "Find", ( text, state ) => {
             MemberPart parsed = MatchMember( state );
             state.MustBeEmpty();
             MemberProxy<T> result = PartToProxy<T>( parsed );
-            SaveCache( text, result?.Member );
             return result;
          } );
       }
 
-      public Type GetType ( MemberPart member ) {
-         string name = member.ToString();
-         if ( name == null ) return null;
-         if ( CheckTypeCache( name, out Type result ) ) return result;
-         return SaveCache( name, TryMatchType( name ) );
+      public virtual Type GetType ( string name ) {
+         if ( string.IsNullOrEmpty( name ) ) return null;
+            return TryMatchType(name);
       }
 
-      public MemberPart Parse<T> ( string member ) {
+      public virtual MemberPart Parse<T> ( string member ) {
          return ParseAndProcess( NormaliseQuery( member ), "Parse", ( text, state ) => {
             MemberPart parsed = MatchMember( state );
             state.MustBeEmpty();
@@ -99,6 +82,12 @@ namespace Sheepy.Reflector {
       }
 
       // ============ Helpers ============
+
+      protected void Log( SourceLevels level, string message, params object[] args ) {
+         Action<SourceLevels,string,object[]> actor = Logger;
+         if ( actor == null ) return;
+         try { actor( level, message, args ); } catch ( Exception ) { }
+      }
 
       public string NormaliseQuery ( string query ) {
          return Regex.Replace( query, "\\s+", "" );
@@ -115,71 +104,7 @@ namespace Sheepy.Reflector {
          return default(R);
       } }
 
-      private void WriteLock ( ReaderWriterLockSlim rwlock, Action action ) { 
-         try {
-            rwlock.EnterWriteLock();
-            action();
-         } finally {
-            rwlock.ExitWriteLock();
-         }
-      }
-
-      // ============ Caching System ============
-
-      public Mirrorlect ClearCache () {
-         WriteLock( typeCacheLock, typeCache.Clear );
-         WriteLock( parserCacheLock, parserCache.Clear );
-         return this;
-      }
-
-      private MemberInfo SaveCache ( string input, MemberInfo item ) {
-         if ( item == null || ! UseCache ) return item;
-         Log( Verbose, "Caching MemberInfo {0}", input );
-         WriteLock( parserCacheLock, () => parserCache[ input ] = new WeakReference( item ) );
-         return item;
-      }
-
-      private Type SaveCache ( string input, Type item ) {
-         if ( item == null || ! UseCache ) return item;
-         Log( Verbose, "Caching Type {0}", input );
-         WriteLock( typeCacheLock, () => typeCache[ input ] = item );
-         return item;
-      }
-
-      private bool CheckTypeCache ( string input, out Type result ) {
-         result = null;
-         try {
-            typeCacheLock.EnterReadLock();
-            typeCache.TryGetValue( input, out result );
-         } finally {
-            typeCacheLock.ExitReadLock();
-         }
-         if ( result != null ) Log( ActivityTracing, "Cache Hit Type: {0}", input );
-         return result != null;
-      }
-
-      private bool CheckParserCache ( string input, out MemberInfo result ) {
-         WeakReference pointer = null;
-         result = null;
-         try {
-            parserCacheLock.EnterReadLock();
-            if ( ! parserCache.TryGetValue( input, out pointer ) ) return false;
-         } finally {
-            parserCacheLock.ExitReadLock();
-         }
-         if ( pointer.Target == null ) return false;
-         Log( ActivityTracing, "Cache Hit Member: {0}", input );
-         result = (MemberInfo) pointer.Target;
-         return result != null;
-      }
-
-      // ============ Internal Implementation ============
-
-      private void Log( SourceLevels level, string message, params object[] args ) {
-         Action<SourceLevels,string,object[]> actor = Logger;
-         if ( actor == null ) return;
-         try { actor( level, message, args ); } catch ( Exception ) { }
-      }
+      // ============ Parser ============
 
       private MemberPart MatchMember ( TextParser state ) {
          MemberPart lastMember = null;
@@ -217,7 +142,7 @@ namespace Sheepy.Reflector {
       }
 
       private MemberProxy<T> PartToProxy<T> ( MemberPart member ) {
-         Type type = GetType( member.Parent ?? member );
+         Type type = GetType( ( member.Parent ?? member ).ToString() );
          if ( type == null ) return null;
          MemberInfo[] info = type.GetMember( member.MemberName, Public | BindingFlags.Instance | Static );
          if ( info == null || info.Length <= 0 ) info = type.GetMember( member.MemberName, NonPublic | BindingFlags.Instance | Static );
@@ -225,7 +150,7 @@ namespace Sheepy.Reflector {
          return InfoToProxy<T>( info[ 0 ] );
       }
 
-      private MemberProxy<T> InfoToProxy<T> ( MemberInfo member ) {
+      protected MemberProxy<T> InfoToProxy<T> ( MemberInfo member ) {
          switch ( member.MemberType ) {
          case MemberTypes.Field:
             return new FieldProxy<T>( (FieldInfo) member );
@@ -258,6 +183,8 @@ namespace Sheepy.Reflector {
          return null;
       }
 
+      // ============ Parser State ============
+
       private static Dictionary<string, Type> shortTypes = new Dictionary<string, Type>();
 
       private static void BuildTypeMap () { lock( shortTypes ) {
@@ -273,6 +200,102 @@ namespace Sheepy.Reflector {
             }
          }
       } }
+   }
+
+   public class CachedMirrorlect : Mirrorlect {
+
+      private static ReaderWriterLockSlim typeCacheLock   = new ReaderWriterLockSlim( LockRecursionPolicy.NoRecursion ),
+                                          parserCacheLock = new ReaderWriterLockSlim( LockRecursionPolicy.NoRecursion );
+      private static Dictionary<string,Type> typeCache = new Dictionary<string, Type>();
+      private static Dictionary<string,WeakReference> parserCache = new Dictionary<string,WeakReference>();
+
+      // ============ Overrides ============
+
+      public override Mirrorlect AddAssembly ( Assembly assembly, string[] namespaces = null ) {
+         base.AddAssembly( assembly, namespaces );
+         ClearCache();
+         return this;
+      }
+
+      public override MemberProxy<T> Get<T> ( string member ) {
+         string normalised = NormaliseQuery( member );
+         if ( CheckParserCache( normalised, out MemberInfo cached ) )
+            return InfoToProxy<T>( cached );
+         MemberProxy<T> result = base.Get<T>(normalised);
+         SaveCache( normalised, result?.Member );
+         return result;
+      }
+
+      public override Type GetType ( string name ) {
+         if ( CheckTypeCache( name, out Type result ) ) return result;
+         result = base.GetType( name );
+         return SaveCache( name, result );
+      }
+
+      // ============ Helpers ============
+
+      public string NormaliseQuery ( string query ) {
+         if ( string.IsNullOrEmpty( query ) ) return null;
+         return Regex.Replace( query, "\\s+", "" );
+      }
+
+      private void WriteLock ( ReaderWriterLockSlim rwlock, Action action ) {
+         try {
+            rwlock.EnterWriteLock();
+            action();
+         } finally {
+            rwlock.ExitWriteLock();
+         }
+      }
+
+      // ============ Caching System ============
+
+      public Mirrorlect ClearCache () {
+         WriteLock( typeCacheLock, typeCache.Clear );
+         WriteLock( parserCacheLock, parserCache.Clear );
+         return this;
+      }
+
+      private MemberInfo SaveCache ( string input, MemberInfo item ) {
+         if ( item == null ) return item;
+         Log( Verbose, "Caching MemberInfo {0}", input );
+         WriteLock( parserCacheLock, () => parserCache[ input ] = new WeakReference( item ) );
+         return item;
+      }
+
+      private Type SaveCache ( string input, Type item ) {
+         if ( item == null ) return item;
+         Log( Verbose, "Caching Type {0}", input );
+         WriteLock( typeCacheLock, () => typeCache[ input ] = item );
+         return item;
+      }
+
+      private bool CheckTypeCache ( string input, out Type result ) {
+         result = null;
+         try {
+            typeCacheLock.EnterReadLock();
+            typeCache.TryGetValue( input, out result );
+         } finally {
+            typeCacheLock.ExitReadLock();
+         }
+         if ( result != null ) Log( ActivityTracing, "Cache Hit Type: {0}", input );
+         return result != null;
+      }
+
+      private bool CheckParserCache ( string input, out MemberInfo result ) {
+         WeakReference pointer = null;
+         result = null;
+         try {
+            parserCacheLock.EnterReadLock();
+            if ( ! parserCache.TryGetValue( input, out pointer ) ) return false;
+         } finally {
+            parserCacheLock.ExitReadLock();
+         }
+         if ( pointer.Target == null ) return false;
+         Log( ActivityTracing, "Cache Hit Member: {0}", input );
+         result = (MemberInfo) pointer.Target;
+         return result != null;
+      }
    }
 
    public abstract class MemberProxy <T> {
