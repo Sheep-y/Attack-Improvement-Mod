@@ -20,18 +20,20 @@ namespace Sheepy.Reflector {
             Console.WriteLine( string.Format( msg, args ) );
       };
 
+      // Config
       public volatile bool UseCache = true;
-      // All public field/prop locked to (this)
-      public readonly List<Assembly> Assemblies = new List<Assembly>();
-      public readonly Dictionary<Assembly, HashSet<string>> Namespaces = new Dictionary<Assembly, HashSet<string>>();
 
-      // Caches
-      private static ReaderWriterLockSlim typeCacheLock = new ReaderWriterLockSlim(), parserCacheLock = new ReaderWriterLockSlim();
+      // Data
+      private readonly List<Assembly> Assemblies = new List<Assembly>();
+      private readonly Dictionary<Assembly, HashSet<string>> Namespaces = new Dictionary<Assembly, HashSet<string>>();
+
+      // Cache
+      private static ReaderWriterLockSlim typeCacheLock   = new ReaderWriterLockSlim( LockRecursionPolicy.NoRecursion ),
+                                          parserCacheLock = new ReaderWriterLockSlim( LockRecursionPolicy.NoRecursion );
       private static Dictionary<string,Type> typeCache = new Dictionary<string, Type>();
       private static Dictionary<string,WeakReference> parserCache = new Dictionary<string,WeakReference>();
-      private const int CacheTimeoutMS = 50;
 
-      // ============ Public API ============
+      // ============ Construcor and Static access ============
 
       public Mirrorlect () : this( true ) { }
 
@@ -41,10 +43,12 @@ namespace Sheepy.Reflector {
 
       public static Mirrorlect Instance { get; } = new Mirrorlect();
 
+      // ============ Instance API ============
+
       public Mirrorlect AddAssembly ( Type typeInAssembly, string[] namespaces = null ) { return AddAssembly( typeInAssembly.Assembly, namespaces ); }
       public Mirrorlect AddAssembly ( Assembly assembly, string[] namespaces = null ) {
          if ( assembly == null ) throw new ArgumentNullException();
-         lock ( this ) {
+         lock ( Assemblies ) {
             if ( ! Assemblies.Contains( assembly ) ) {
                Assemblies.Add( assembly );
                Log( Information, "Added assembly {0}", assembly );
@@ -186,9 +190,9 @@ namespace Sheepy.Reflector {
       }
 
       private List<MemberPart> MatchMemberList ( char prefix, TextParser state, char postfix ) {
-         state.Take( '(' );
+         state.Take( prefix );
          List<MemberPart> result = MatchMemberList( state );
-         state.Take( ')' );
+         state.Take( postfix );
          return result;
       }
 
