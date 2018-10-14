@@ -83,6 +83,13 @@ namespace Sheepy.Reflector {
          } );
       }
 
+      public Type GetType ( MemberPart member ) {
+         string name = member.ToString();
+         if ( name == null ) return null;
+         if ( CheckTypeCache( name, out Type result ) ) return result;
+         return SaveCache( name, TryMatchType( name ) );
+      }
+
       public MemberPart Parse<T> ( string member ) {
          return ParseAndProcess( NormaliseQuery( member ), "Parse", ( text, state ) => {
             MemberPart parsed = MatchMember( state );
@@ -231,13 +238,7 @@ namespace Sheepy.Reflector {
          }
       }
 
-      private Type GetType ( MemberPart member ) {
-         string name = member.ToString();
-         if ( CheckTypeCache( name, out Type result ) ) return result;
-         return SaveCache( name, GetTypeNoCache( name ) );
-      }
-
-      private Type GetTypeNoCache ( string name ) {
+      private Type TryMatchType ( string name ) {
          if ( name.IndexOf( '.' ) < 0 ) {
             if ( shortTypes.Count == 0 ) BuildTypeMap();
             if ( shortTypes.TryGetValue( name, out Type shortType ) ) return shortType;
