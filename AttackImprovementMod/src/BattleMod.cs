@@ -349,7 +349,7 @@ namespace Sheepy.BattleTechMod {
          if ( transform.GetComponent<UnityEngine.MeshRenderer>() is UnityEngine.MeshRenderer mesh )
             buf.AppendFormat( " mesh={0} material={1} color={2}", mesh.name, mesh.material?.name, format( mesh.material?.color ) );
          if ( transform.GetComponent<TMPro.TextMeshProUGUI>() is TMPro.TextMeshProUGUI textComponent )
-            buf.AppendFormat( " font={0} color={1} text={2}", textComponent.font?.name, format( textComponent.color ), textComponent.text );
+            buf.AppendFormat( " font={0} color={1} text={2}", textComponent.font?.name, format( textComponent.color ), textComponent.text.Replace( "\n", "\\n" ) );
          if ( indent.Length > 20 ) return;
          foreach ( UnityEngine.Transform current in transform )
             LogGuiTree( current, buf.Append( '\n' ), indent + "   " );
