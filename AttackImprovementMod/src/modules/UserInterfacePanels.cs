@@ -228,7 +228,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                numbers = FormatMeter( "Heat", heat, mech.MaxHeat ) + "\n"
                        + FormatMeter( "Stab", stab, mech.MaxStability ) + "\n";
          }
-         if ( prefix == null )
+         if ( prefix == null && HUD.SelectedActor != null && HUD.SelectedActor != target )
             prefix = GetTargetNumbers( target ) + "\n";
 
          StringBuilder text = new StringBuilder( 100 );
@@ -237,6 +237,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          __instance.ActorWeightText.text = text.ToString();
          __instance.JumpJetsHolder.SetActive( false );
+         LogGuiTree( ModLog, __instance.transform );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static object GetBasicInfo ( ICombatant target ) {
@@ -292,7 +293,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static string GetTargetNumbers ( ICombatant target ) { try {
-         if ( HUD.SelectedActor == null || HUD.SelectedActor == target ) return null;
          float oldDist = Vector3.Distance( HUD.SelectedActor.CurrentPosition, target.CurrentPosition );
          Vector3 position = default;
          if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
