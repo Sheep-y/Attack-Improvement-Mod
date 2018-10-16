@@ -110,8 +110,8 @@ namespace Sheepy.BattleTechMod {
          ThreadPool.QueueUserWorkItem( ( obj ) => {
             string sanitised;
             sanitised = JsonConvert.SerializeObject( obj, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
-            sanitised = Regex.Replace( sanitised, @"(?<=\d)\.0+(?=,\r?\n)", "" ); // Convert 1.0000000000 to 1
-            sanitised = Regex.Replace( sanitised, @"(?<=\d\.\d+)0+(?=,\r?\n)", "" ); // Convert 1.20000000 to 1.2
+            sanitised = Regex.Replace( sanitised, @"(?<=\d)\.0+(?=,\r?\n)", string.Empty ); // Convert 1.0000000000 to 1
+            sanitised = Regex.Replace( sanitised, @"(?<=\d\.\d+)0+(?=,\r?\n)", string.Empty ); // Convert 1.20000000 to 1.2
             Log.Info( "WARNING: Do NOT change settings here. This is just a log." );
             Log.Info( "Loaded Settings: " + sanitised );
             Log.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
@@ -155,19 +155,16 @@ namespace Sheepy.BattleTechMod {
          if ( arg is UnityEngine.Color color )
             return "#" + UnityEngine.ColorUtility.ToHtmlStringRGBA( color );
          if ( arg is UnityEngine.Vector2 vet2 )
-            return "[" + vet2.x + "," + vet2.y + "]";
+            return "[x" + vet2.x + ",y" + vet2.y + "]";
          if ( arg is UnityEngine.Vector3 vet3 )
-            return "[" + vet3.x + "," + vet3.y + "," + vet3.z + "]";
+            return "[x" + vet3.x + ",y" + vet3.y + ",z" + vet3.z + "]";
          if ( arg is ValueType ) return arg;
          if ( arg is Text text )
             return text.ToString( true );
          if ( arg is ICombatant unit )
             return unit.DisplayName.ToString() + " (" + unit.GetPilot()?.Callsign + ( unit.team.IsLocalPlayer ? ",PC" : ",NPC" ) + ")";
          if ( arg is MechComponent comp )
-            if ( string.IsNullOrEmpty( comp.uid ) )
-               return comp.UIName.ToString();
-            else
-               return comp.UIName.ToString() + " (#" + comp.uid + ")";
+            return comp.UIName.ToString() + ( string.IsNullOrEmpty( comp.uid ) ? string.Empty : " (#" + comp.uid + ")" );
          if ( arg is MechComponentDef def )
             return def.Description.Id;
          if ( arg is System.Collections.IEnumerable list )
@@ -336,14 +333,16 @@ namespace Sheepy.BattleTechMod {
       public static void LogGuiTree ( Logger Log, UnityEngine.Transform root ) {
          StringBuilder buf = new StringBuilder( "GUI Tree:\n" );
          buf.EnsureCapacity( 1024 * 16 );
-         LogGuiTree( root, buf, "" );
+         LogGuiTree( root, buf, string.Empty );
          Log.Info( buf.ToString() );
       }
 
       // Based on CptMoore's MechEngineer: https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99
       public static void LogGuiTree ( UnityEngine.Transform transform, StringBuilder buf, string indent = "" ) {
          Func<object,object> format = BattleMod.FormatParameter;
-         buf.Append( indent ).AppendFormat( "{0} world={1} local={2}", transform.gameObject.name, format( transform.position ), format( transform.localPosition ) );
+         buf.Append( indent ).AppendFormat( transform.name );
+         if ( transform.tag != "Untagged" ) buf.AppendFormat( " #{0}", transform.tag );
+         buf.AppendFormat( " world={1} local={2}", format( transform.position ), format( transform.localPosition ) );
          if ( transform.GetComponent<UnityEngine.RectTransform>() is UnityEngine.RectTransform rect )
             buf.AppendFormat( " rect={0} anchor={1}", rect.rect, format( rect.anchoredPosition ) );
          if ( transform.GetComponent<UnityEngine.MeshRenderer>() is UnityEngine.MeshRenderer mesh )
@@ -351,8 +350,8 @@ namespace Sheepy.BattleTechMod {
          if ( transform.GetComponent<TMPro.TextMeshProUGUI>() is TMPro.TextMeshProUGUI textComponent )
             buf.AppendFormat( " font={0} color={1} text={2}", textComponent.font?.name, format( textComponent.color ), textComponent.text.Replace( "\n", "\\n" ) );
          if ( indent.Length > 20 ) return;
-         foreach ( UnityEngine.Transform current in transform )
-            LogGuiTree( current, buf.Append( '\n' ), indent + "   " );
+         foreach ( UnityEngine.Transform child in transform )
+            LogGuiTree( child, buf.Append( '\n' ), indent + "   " );
       }
 
       // ============ Harmony ============
