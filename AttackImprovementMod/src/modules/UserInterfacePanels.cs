@@ -77,8 +77,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStarts () {
          if ( Settings.ShowNumericInfo ) {
-            targetDisplay = HUD?.TargetingComputer?.ActorInfo?.DetailsDisplay;
-            HUD?.MechTray?.ActorInfo?.DetailsDisplay?.transform?.transform?.Translate( 0, -15, 0 );
+            targetDisplay = HUD?.TargetingComputer.ActorInfo.DetailsDisplay;
+            targetDisplay?.transform.Find( "bgFill" )?.gameObject.SetActive( false );
+            HUD?.MechTray.ActorInfo.DetailsDisplay.transform.transform.Translate( 0, -15, 0 );
          }
       }
 
@@ -221,7 +222,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             float heat = mech.CurrentHeat, stab = mech.CurrentStability;
             if ( __instance != targetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
                GetPreviewNumbers( mech, ref heat, ref stab, ref postfix );
-               prefix = string.Empty;
+               prefix = "";
                numbers = FormatPrediction( "Heat", mech.CurrentHeat, heat ) + "\n"
                        + FormatPrediction( "Stab", mech.CurrentStability, stab ) + "\n";
             } else
@@ -237,7 +238,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          __instance.ActorWeightText.text = text.ToString();
          __instance.JumpJetsHolder.SetActive( false );
-         LogGuiTree( ModLog, __instance.transform );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static object GetBasicInfo ( ICombatant target ) {
@@ -251,7 +251,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( target is Turret turret )
             return turret.TurretDef.Chassis.weightClass;
 
-         return string.Empty;
+         return "";
       }
 
       private static string FormatPrediction ( string label, float from, float to ) {

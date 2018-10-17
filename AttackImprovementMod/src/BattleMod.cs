@@ -85,7 +85,7 @@ namespace Sheepy.BattleTechMod {
          Log.Info( "Game Version {0}, Harmony Version {1}" + Environment.NewLine, VersionInfo.ProductVersion, typeof(HarmonyInstance).Assembly.GetName().Version );
       }
 
-      public static string Idify ( string text ) { return new Regex( "\\W+" ).Split( text ).Concat( string.Empty, UppercaseFirst ); }
+      public static string Idify ( string text ) { return new Regex( "\\W+" ).Split( text ).Concat( "", UppercaseFirst ); }
 
       protected virtual string GetLogFile () {
          return LogDir + "Log_" + Idify( Name ) + ".txt";
@@ -93,7 +93,7 @@ namespace Sheepy.BattleTechMod {
 
       // Load settings from settings.json, call SanitizeSettings, and create/overwrite it if the content is different.
       protected virtual void LoadSettings <Settings> ( ref Settings settings, Action<Settings> sanitise = null ) {
-         string file = BaseDir + "settings.json", fileText = string.Empty;
+         string file = BaseDir + "settings.json", fileText = "";
          Settings config = settings;
          if ( File.Exists( file ) ) TryRun( () => {
             fileText = File.ReadAllText( file );
@@ -110,8 +110,8 @@ namespace Sheepy.BattleTechMod {
          ThreadPool.QueueUserWorkItem( ( obj ) => {
             string sanitised;
             sanitised = JsonConvert.SerializeObject( obj, Formatting.Indented, new JsonSerializerSettings { ContractResolver = new BattleJsonContract() } );
-            sanitised = Regex.Replace( sanitised, @"(?<=\d)\.0+(?=,\r?\n)", string.Empty ); // Convert 1.0000000000 to 1
-            sanitised = Regex.Replace( sanitised, @"(?<=\d\.\d+)0+(?=,\r?\n)", string.Empty ); // Convert 1.20000000 to 1.2
+            sanitised = Regex.Replace( sanitised, @"(?<=\d)\.0+(?=,\r?\n)", "" ); // Convert 1.0000000000 to 1
+            sanitised = Regex.Replace( sanitised, @"(?<=\d\.\d+)0+(?=,\r?\n)", "" ); // Convert 1.20000000 to 1.2
             Log.Info( "WARNING: Do NOT change settings here. This is just a log." );
             Log.Info( "Loaded Settings: " + sanitised );
             Log.Info( "WARNING: Do NOT change settings here. This is just a log." ); // Yes. It is intentionally repeated.
@@ -164,7 +164,7 @@ namespace Sheepy.BattleTechMod {
          if ( arg is ICombatant unit )
             return unit.DisplayName.ToString() + " (" + unit.GetPilot()?.Callsign + ( unit.team.IsLocalPlayer ? ",PC" : ",NPC" ) + ")";
          if ( arg is MechComponent comp )
-            return comp.UIName.ToString() + ( string.IsNullOrEmpty( comp.uid ) ? string.Empty : " (#" + comp.uid + ")" );
+            return comp.UIName.ToString() + ( string.IsNullOrEmpty( comp.uid ) ? "" : " (#" + comp.uid + ")" );
          if ( arg is MechComponentDef def )
             return def.Description.Id;
          if ( arg is System.Collections.IEnumerable list )
@@ -333,16 +333,17 @@ namespace Sheepy.BattleTechMod {
       public static void LogGuiTree ( Logger Log, UnityEngine.Transform root ) {
          StringBuilder buf = new StringBuilder( "GUI Tree:\n" );
          buf.EnsureCapacity( 1024 * 16 );
-         LogGuiTree( root, buf, string.Empty );
+         LogGuiTree( root, buf, "" );
          Log.Info( buf.ToString() );
       }
 
       // Based on CptMoore's MechEngineer: https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99
       public static void LogGuiTree ( UnityEngine.Transform transform, StringBuilder buf, string indent = "" ) {
+         if ( transform == null ) return;
          Func<object,object> format = BattleMod.FormatParameter;
          buf.Append( indent ).AppendFormat( transform.name );
          if ( transform.tag != "Untagged" ) buf.AppendFormat( " #{0}", transform.tag );
-         buf.AppendFormat( " world={1} local={2}", format( transform.position ), format( transform.localPosition ) );
+         buf.AppendFormat( " world={0} local={1}", format( transform.position ), format( transform.localPosition ) );
          if ( transform.GetComponent<UnityEngine.RectTransform>() is UnityEngine.RectTransform rect )
             buf.AppendFormat( " rect={0} anchor={1}", rect.rect, format( rect.anchoredPosition ) );
          if ( transform.GetComponent<UnityEngine.MeshRenderer>() is UnityEngine.MeshRenderer mesh )
@@ -449,7 +450,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       public static string UppercaseFirst ( string s ) {
-         if ( string.IsNullOrEmpty( s ) ) return string.Empty;
+         if ( string.IsNullOrEmpty( s ) ) return "";
          return char.ToUpper( s[ 0 ] ) + s.Substring( 1 );
       }
 
@@ -559,7 +560,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       public static string Concat ( this System.Collections.IEnumerable list, string separator = ", ", Func<object,string> formatter = null ) {
-         if ( list == null ) return string.Empty;
+         if ( list == null ) return "";
          StringBuilder result = new StringBuilder();
          foreach ( object e in list ) {
             if ( result.Length > 0 ) result.Append( separator );
@@ -569,7 +570,7 @@ namespace Sheepy.BattleTechMod {
       }
 
       public static string Concat<TSource> ( this IEnumerable<TSource> list, string separator = ", ", Func<TSource,string> formatter = null ) {
-         if ( list == null ) return string.Empty;
+         if ( list == null ) return "";
          StringBuilder result = new StringBuilder();
          foreach ( TSource e in list ) {
             if ( result.Length > 0 ) result.Append( separator );
@@ -587,13 +588,13 @@ namespace Sheepy.BattleTechMod {
    [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonSection : Attribute {
       public string Section;
-      public JsonSection ( string section ) { Section = section ?? string.Empty; }
+      public JsonSection ( string section ) { Section = section ?? ""; }
    }
 
    [ AttributeUsage( AttributeTargets.Field | AttributeTargets.Property, Inherited = true, AllowMultiple = false ) ]
    public class JsonComment : Attribute {
       public string[] Comments;
-      public JsonComment ( string comment ) { Comments = comment?.Split( '\n' ) ?? new string[]{ string.Empty }; }
+      public JsonComment ( string comment ) { Comments = comment?.Split( '\n' ) ?? new string[]{ "" }; }
       public JsonComment ( string[] comments ) { Comments = comments ?? new string[]{}; }
    }
 

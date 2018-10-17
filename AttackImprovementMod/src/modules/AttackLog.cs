@@ -25,7 +25,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static readonly Type AttackType = typeof( AttackDirector.AttackSequence );
       private static readonly Type ArtilleyAttackType = typeof( ArtillerySequence );
 
-      private static string thisCombatId = string.Empty;
+      private static string thisCombatId = "";
 
 #pragma warning disable CS0162 // Disable "unreachable code" warnings due to DebugLog flag
       public override void CombatStartsOnce () {

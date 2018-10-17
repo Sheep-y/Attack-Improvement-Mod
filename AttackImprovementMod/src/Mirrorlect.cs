@@ -394,7 +394,7 @@ namespace Sheepy.Reflector {
 
       public string TakeTill ( params char[] chr ) {
          int pos = text.IndexOfAny( chr );
-         if ( pos == 0 ) return string.Empty;
+         if ( pos == 0 ) return "";
          return Consume( pos < 0 ? Length : pos );
       }
       public TextParser Take ( char chr ) {
