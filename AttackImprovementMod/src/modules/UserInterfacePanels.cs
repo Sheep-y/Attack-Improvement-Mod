@@ -77,8 +77,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void CombatStarts () {
          if ( Settings.ShowNumericInfo ) {
-            targetDisplay = HUD?.TargetingComputer.ActorInfo.DetailsDisplay;
-            targetDisplay?.transform.Find( "bgFill" )?.gameObject.SetActive( false );
+            TargetDisplay = HUD?.TargetingComputer.ActorInfo.DetailsDisplay;
+            // Enlarge target text background
+            TargetDisplay.transform.transform.Translate( 34, -12, 0 );
+            RectTransform TargetRect = TargetDisplay.transform.GetComponent<RectTransform>() as RectTransform;
+            TargetRect.SetSizeWithCurrentAnchors( RectTransform.Axis.Horizontal, 250 );
+            TargetRect.SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, 90 );
+            // Shift selected actor info
             HUD?.MechTray.ActorInfo.DetailsDisplay.transform.transform.Translate( 0, -15, 0 );
          }
       }
@@ -204,7 +209,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Numeric Info ============
 
-      private static CombatHUDActorDetailsDisplay targetDisplay;
+      private static CombatHUDActorDetailsDisplay TargetDisplay;
       private static ICombatant ActorInfoTarget;
 
       public static void RecordTarget ( CombatHUDActorInfo __instance, ICombatant ___displayedCombatant ) { ActorInfoTarget = ___displayedCombatant; }
@@ -220,7 +225,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( target is Mech mech ) {
             float heat = mech.CurrentHeat, stab = mech.CurrentStability;
-            if ( __instance != targetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
+            if ( __instance != TargetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
                GetPreviewNumbers( mech, ref heat, ref stab, ref postfix );
                prefix = "";
                numbers = FormatPrediction( "Heat", mech.CurrentHeat, heat ) + "\n"
