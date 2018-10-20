@@ -223,25 +223,36 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( target == null ) return;
          string prefix = null, numbers = null, postfix = null;
 
-         if ( target is Mech mech ) {
-            float heat = mech.CurrentHeat, stab = mech.CurrentStability;
-            if ( __instance != TargetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
-               GetPreviewNumbers( mech, ref heat, ref stab, ref postfix );
-               prefix = "";
-               numbers = FormatPrediction( "Heat", mech.CurrentHeat, heat ) + "\n"
-                       + FormatPrediction( "Stab", mech.CurrentStability, stab ) + "\n";
-            } else
-               numbers = FormatMeter( "Heat", heat, mech.MaxHeat ) + "\n"
-                       + FormatMeter( "Stab", stab, mech.MaxStability ) + "\n";
-         }
-         if ( prefix == null && HUD.SelectedActor != null && HUD.SelectedActor != target )
-            prefix = GetTargetNumbers( target ) + "\n";
-
          StringBuilder text = new StringBuilder( 100 );
-         text.Append( GetBasicInfo( target ) ).Append( "\n" );
-         text.Append( prefix ).Append( numbers ).Append( postfix );
+         if ( __instance == TargetDisplay && IsCalloutPressed && target.GetPilot() != null ) {
+            Pilot pilot = target.GetPilot();
+            prefix = "";
+            foreach ( Ability ability in pilot.Abilities ) {
+               if ( ! ability.Def.IsPrimaryAbility ) continue;
+               if ( prefix.Length > 0 ) prefix += "\n";
+               prefix += ability.Def.Description.Name;
+            }
+            if ( prefix == "" ) prefix = "(No skills)";
 
+         } else {
+            if ( target is Mech mech ) {
+               float heat = mech.CurrentHeat, stab = mech.CurrentStability;
+               if ( __instance != TargetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
+                  GetPreviewNumbers( mech, ref heat, ref stab, ref postfix );
+                  prefix = "";
+                  numbers = FormatPrediction( "Heat", mech.CurrentHeat, heat ) + "\n"
+                          + FormatPrediction( "Stab", mech.CurrentStability, stab ) + "\n";
+               } else
+                  numbers = FormatMeter( "Heat", heat, mech.MaxHeat ) + "\n"
+                          + FormatMeter( "Stab", stab, mech.MaxStability ) + "\n";
+            }
+            if ( prefix == null && HUD.SelectedActor != null && HUD.SelectedActor != target )
+               prefix = GetTargetNumbers( target ) + "\n";
+         }
+         text.Append( GetBasicInfo( target ) ).Append( '\n' );
+         text.Append( prefix ).Append( numbers ).Append( postfix );
          __instance.ActorWeightText.text = text.ToString();
+
          __instance.JumpJetsHolder.SetActive( false );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
