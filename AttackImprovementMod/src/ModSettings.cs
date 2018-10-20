@@ -34,6 +34,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix the bug that rear paper doll is incorrectly showing front structure.  Default true." ) ]
       public bool FixPaperDollRearStructure = true;
 
+      [ JsonComment( "Add L and R label to paper doll.  Default true." ) ]
+      public bool LabelPaperDollSide = true;
+
       [ JsonComment( "Show structural damage through armour.  i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true." ) ]
       public bool ShowUnderArmourDamage = true;
 

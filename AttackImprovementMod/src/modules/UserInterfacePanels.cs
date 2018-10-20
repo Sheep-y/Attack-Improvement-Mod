@@ -80,11 +80,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             TargetDisplay = HUD?.TargetingComputer.ActorInfo.DetailsDisplay;
             // Enlarge target text background
             TargetDisplay.transform.transform.Translate( 34, -12, 0 );
-            RectTransform TargetRect = TargetDisplay.transform.GetComponent<RectTransform>() as RectTransform;
-            TargetRect.SetSizeWithCurrentAnchors( RectTransform.Axis.Horizontal, 250 );
-            TargetRect.SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, 90 );
+            RectTransform TargetRect = TargetDisplay.transform.GetComponent<RectTransform>();
+            TargetRect?.SetSizeWithCurrentAnchors( RectTransform.Axis.Horizontal, 250 );
+            TargetRect?.SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, 90 );
+            //LogGuiTree( HUD?.TargetingComputer.ActorInfo );
             // Shift selected actor info
             HUD?.MechTray.ActorInfo.DetailsDisplay.transform.transform.Translate( 0, -15, 0 );
+         }
+         if ( Settings.LabelPaperDollSide ) {
+            TMPro.TextMeshProUGUI[] labels = HUD.TargetingComputer.MechArmorDisplay.GetComponentsInChildren<TMPro.TextMeshProUGUI>();
+            labels.First( e => e.name == "MechTray_FrontText" )?.SetText( "L Front R" );
+            labels.First( e => e.name == "MechTray_RearText" )?.SetText( "R Rear L" );
          }
       }
 
