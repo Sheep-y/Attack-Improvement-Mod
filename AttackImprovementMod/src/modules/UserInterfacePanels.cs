@@ -19,8 +19,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public override void GameStartsOnce () {
          // Done on game load to be effective in campaign mech bay
+         Type ReadoutType = typeof( HUDMechArmorReadout );
          if ( Settings.ShowUnderArmourDamage ) {
-            Type ReadoutType = typeof( HUDMechArmorReadout );
             TryRun( Log, () => {
                outlineProp = ReadoutType.GetProperty( "armorOutlineCached", NonPublic | Instance );
                armorProp = ReadoutType.GetProperty( "armorCached", NonPublic | Instance );
@@ -38,7 +38,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          if ( Settings.FixPaperDollRearStructure )
-            Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
+            Patch( ReadoutType, "UpdateMechStructureAndArmor", null, null, "FixRearStructureDisplay" );
+         if ( Settings.LabelPaperDollSide )
+            Patch( ReadoutType, "Init", null, "AddPaperDollSideLabel" );
       }
 
       public override void CombatStartsOnce () {
@@ -86,11 +88,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             //LogGuiTree( HUD?.TargetingComputer.ActorInfo );
             // Shift selected actor info
             HUD?.MechTray.ActorInfo.DetailsDisplay.transform.transform.Translate( 0, -15, 0 );
-         }
-         if ( Settings.LabelPaperDollSide ) {
-            TMPro.TextMeshProUGUI[] labels = HUD.TargetingComputer.MechArmorDisplay.GetComponentsInChildren<TMPro.TextMeshProUGUI>();
-            labels.First( e => e.name == "MechTray_FrontText" )?.SetText( "L Front R" );
-            labels.First( e => e.name == "MechTray_RearText" )?.SetText( "R Rear L" );
          }
       }
 
@@ -212,6 +209,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
+
+      public static void AddPaperDollSideLabel ( HUDMechArmorReadout __instance ) { try {
+         TMPro.TextMeshProUGUI[] labels = __instance.GetComponentsInChildren<TMPro.TextMeshProUGUI>();
+         TMPro.TextMeshProUGUI front = labels.First( e => e.name == "MechTray_FrontText" ), rear = labels.First( e => e.name == "MechTray_RearText" );
+         front?.SetText( PaperDollSideLabel( front.text, __instance.flipFrontDisplay ) );
+         rear?.SetText( PaperDollSideLabel( rear.text, __instance.flipRearDisplay ) );
+      }                 catch ( Exception ex ) { Error( ex ); } }
+
+      private static string PaperDollSideLabel ( string text, bool reversed ) {
+         if ( reversed ) return "R   " + text + "   L";
+         return "L   " + text + "   R";
+      }
 
       // ============ Numeric Info ============
 
