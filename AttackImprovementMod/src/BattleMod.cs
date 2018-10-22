@@ -329,11 +329,11 @@ namespace Sheepy.BattleTechMod {
          set { _Logger = value; }
       }
 
-      public void LogGuiTree ( UnityEngine.Transform root ) { LogGuiTree( Log, root ); }
-      public static void LogGuiTree ( Logger Log, UnityEngine.Transform root ) {
+      public void LogGuiTree ( UnityEngine.Component root ) { LogGuiTree( Log, root ); }
+      public static void LogGuiTree ( Logger Log, UnityEngine.Component root ) {
          StringBuilder buf = new StringBuilder( "GUI Tree:\n" );
          buf.EnsureCapacity( 1024 * 16 );
-         LogGuiTree( root, buf, "" );
+         LogGuiTree( root as UnityEngine.Transform ?? root?.transform, buf, "" );
          Log.Info( buf.ToString() );
       }
 
