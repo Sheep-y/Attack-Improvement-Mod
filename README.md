@@ -348,6 +348,12 @@ These settings can be changed in `settings.json`.
 
 **Paper Dolls**
 
+> Setting: `LabelPaperDollSide`  (true/false, default true)
+>
+> When true, add L and R around the Front/Rear labels.
+> The exact position slightly differs depending on where the paper doll occurs.
+<br>
+
 > Setting: `FixPaperDollRearStructure`  (true/false, default true)
 >
 > The rear structures of the paper dolls are displayed incorrectly because of a typo in game code.
@@ -377,6 +383,8 @@ These settings can be changed in `settings.json`.
 >
 > When true, display heat, stability, movement, and distance numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.
 > Prediction numbers are supplied by the game and is subject to all its quirks and bugs and mods, such as `FixHeatPreview`.
+>
+> When callout mode is enabled (default Left Alt key), pilot skills will be displayed instead.
 <br>
 
 > Setting: `ShowUnitTonnage`  (true/false, default false)
