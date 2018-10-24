@@ -212,7 +212,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void AddPaperDollSideLabel ( HUDMechArmorReadout __instance ) { try {
          TMPro.TextMeshProUGUI[] labels = __instance.GetComponentsInChildren<TMPro.TextMeshProUGUI>();
-         TMPro.TextMeshProUGUI front = labels.First( e => e.name == "MechTray_FrontText" ), rear = labels.First( e => e.name == "MechTray_RearText" );
+         TMPro.TextMeshProUGUI front = labels.FirstOrDefault( e => e.name == "MechTray_FrontText" ), rear = labels?.FirstOrDefault( e => e.name == "MechTray_RearText" );
          front?.SetText( PaperDollSideLabel( front.text, __instance.flipFrontDisplay ) );
          rear?.SetText( PaperDollSideLabel( rear.text, __instance.flipRearDisplay ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
