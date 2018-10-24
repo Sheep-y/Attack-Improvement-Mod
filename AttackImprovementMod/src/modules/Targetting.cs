@@ -66,6 +66,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.FixLosPreviewHeight )
             Patch( typeof( Pathing ), "UpdateFreePath", null, "FixMoveDestinationHeight" );
 
+         /*
          if ( Settings.CalloutFriendlyFire ) {
             Patch( HandlerType, "TrySelectTarget", null, "SuppressSafety" );
             CombatUI.HookCalloutToggle( ToggleFriendlyFire );
@@ -76,6 +77,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( SelectionStateFire ), "ProcessClickedCombatant", null, "SuppressHudSafety" );
             Patch( typeof( SelectionStateFire ), "get_ValidateInfoTargetAsFireTarget", null, "SuppressIFF" );
          }
+         */
       }
 
       public override void CombatEnds () {
@@ -266,6 +268,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Friendly Fire ============
 
+         /*
       private static bool FriendlyFire; // Set only by ToggleFriendlyFire, which only triggers when CalloutFriendlyFire is on
 
       public static bool MakeFriendsVisible ( AbstractActor __instance, ref VisibilityLevel __result, ICombatant targetUnit ) {
@@ -320,5 +323,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                actor.VisibilityCache.RebuildCache( Combat.GetAllCombatants() );
          //__instance.ActiveState.ProcessMousePos( CameraControl.Instance.ScreenCenterToGroundPosition );
       }                 catch ( Exception ex ) { Error( ex ); } }
+      */
    }
 }

@@ -16,8 +16,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "When a target is selected/deselected during Multi-Target, aggressively reassign enabled weapons by hit chance.  Default true." ) ]
       public bool AggressiveMultiTargetAssignment = true;
 
-      [ JsonComment( "Allow friendly fire while pressing Callout key (default left alt).  Default true." ) ]
-      public bool CalloutFriendlyFire = true;
+      //[ JsonComment( "Allow friendly fire while pressing Callout key (default left alt).  Default true." ) ]
+      //public bool CalloutFriendlyFire = true;
 
       [ JsonComment( "Select player mechs with F1 to F4 key.  Default true." ) ]
       public bool FunctionKeySelectPC = true;
