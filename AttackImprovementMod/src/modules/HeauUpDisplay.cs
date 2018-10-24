@@ -25,13 +25,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDActorNameDisplay ), "RefreshInfo", typeof( VisibilityLevel ), null, "ShowPilotWounds" );
             Patch( typeof( Pilot ), "InjurePilot", null, "RefreshPilotNames" );
          }
-         if ( NameplateColours != null )
+         if ( NameplateColours != null ) {
+            Info( "Nameplate colours: {0}", NameplateColours );
             Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", null, "SetNameplateColor" );
+         }
          FloatingArmorColours = ParseColours( Settings.FloatingArmorColourPlayer, Settings.FloatingArmorColourEnemy, Settings.FloatingArmorColourAlly );
          if ( FloatingArmorColours != null ) {
+            Info( "Armor colours: {0}", FloatingArmorColours );
             BarOwners = new Dictionary<CombatHUDPipBar, ICombatant>();
-            Patch( typeof( CombatHUDPipBar ), "ShowValue", new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "CombatHUDLifeBarPips", null );
-            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetPipBarOwner", null );
+            Patch( typeof( CombatHUDPipBar ), "ShowValue", new Type[]{ typeof( float ), typeof( Color ), typeof( Color ), typeof( Color ), typeof( bool ) }, "SetArmorBarColour", null );
+            Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetArmorBarOwner", null );
          }
 
          if ( Settings.ShowDangerousTerrain ) {
@@ -175,18 +178,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
 
-      public static void SetPipBarOwner ( CombatHUDNumFlagHex __instance ) {
+      public static void SetArmorBarOwner ( CombatHUDNumFlagHex __instance ) {
          ICombatant owner = __instance.DisplayedCombatant;
-         CombatHUDLifeBarPips bar = __instance.ActorInfo?.ArmorBar;
+         CombatHUDArmorBarPips bar = __instance.ActorInfo?.ArmorBar;
          if ( bar == null ) return;
-         if ( owner != null )
+         if ( owner != null ) {
             BarOwners[ bar ] = owner;
-         else if ( BarOwners.ContainsKey( bar ) )
+            bar.RefreshUIColors();
+         } else if ( BarOwners.ContainsKey( bar ) )
             BarOwners.Remove( bar );
       }
 
-      public static void CombatHUDLifeBarPips ( CombatHUDPipBar __instance, ref Color shownColor ) {
-         if ( ! ( __instance is CombatHUDLifeBarPips me ) || ! BarOwners.TryGetValue( __instance, out ICombatant owner ) ) return;
+      public static void SetArmorBarColour ( CombatHUDPipBar __instance, ref Color shownColor ) {
+         if ( ! ( __instance is CombatHUDArmorBarPips me ) || ! BarOwners.TryGetValue( __instance, out ICombatant owner ) ) return;
          Color? colour = GetTeamColour( owner, FloatingArmorColours );
          if ( colour != null )
             shownColor = colour.GetValueOrDefault();
