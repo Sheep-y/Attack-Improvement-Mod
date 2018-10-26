@@ -2,11 +2,14 @@ CHANGE LOG
 
 ????-??-?? AIM Version 3.0 development for BATTLETECH 1.2.0
 
-* New: Set nameplate text colours.
-* New: Show enemy wounds and ally health in mechwarrior names.
-* New: Bigger, more terrain dots in stronger colours.
-* New: Line of sight animation.
 * New: Press F1 to F4 to select player mech.
+* New: Shift+Tab or Shift+Click (multi-target) to select in reverse direction.
+* New: Ctrl+Click a weapon in multi-target to quickly enable/disable it.
+* New: Bigger and more terrain dots in stronger colours.
+* New: Set nameplate text colours.
+* New: Show wounds or health in mechwarrior names.
+* New: See target skills with callout toggle.
+* New: Line of sight colour (hue and brightness) animation.
 * New: Use indirect fire when better than direct fire.
 * New: Colour weapon and show damage in weapon loadout list.
 * New: Show melee and dfa damage in weapon loadout list.
@@ -15,10 +18,12 @@ CHANGE LOG
 * New: Show total weapon damage (before and after accuracy).
 * New: Show stability damage with callout toggle (Left Alt).
 * New: Show rare weapon properties and weapon range in meters in weapon mouseover.
+* New: Reverse To-Hit modifier sign, positive bonus / negative penalty like mech bay.
 * New: (Optional) Show short range in hit modifier breakdown.
-* New: Allow friendly fire with callout toggle (Left Alt; single target only).
 * New: Show terrain description on danger terrains and during melee/DFA.
 * New: Aggressive multi-target assignment.
+* New: Excessive damage may be skipped on dead units.
+* New: Add L and R label to paper dolls.
 * Mod: ShortPilotHint now hides HP by default, to avoid line wrapping on elite mechwarriors.
 * Mod: ShowNumericInfo no longer shows pc movement points during enemy attacks.
 * Mod: ShowAmmoInTooltip now darkens non-exploding ammo bins.
@@ -27,6 +32,7 @@ CHANGE LOG
 * Fix: FloatingArmorColours no longer applies to target panel.
 * Fix: Geothermal and Radiation Field are now factored in heat preview fix.
 * Fix: Range meters in hit modifier list no longer show decimal.
+* Fix: Distance info is now displayed for non-mech units.
 * Fix: FixPaperDollRearStructure now works in campaign, without going through combat first.
 * Fix: DFA self-damage log location misalignment.
 
