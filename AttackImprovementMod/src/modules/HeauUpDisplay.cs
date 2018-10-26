@@ -165,15 +165,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void SetNameplateColor ( CombatHUDNumFlagHex __instance ) { try {
          Color? colour = GetTeamColour( __instance.DisplayedCombatant, NameplateColours );
-         if ( colour == null ) return;
+         if ( ! colour.HasValue ) return;
          CombatHUDActorNameDisplay names = __instance.ActorInfo?.NameDisplay;
          if ( names == null ) return;
-         names.PilotNameText.faceColor = colour.GetValueOrDefault();
+         names.PilotNameText.faceColor = colour.Value;
          if ( colour != Color.black ) {
             names.MechNameText.outlineWidth = 0.2f;
             names.MechNameText.outlineColor = Color.black;
          }
-         names.MechNameText.faceColor = colour.GetValueOrDefault();
+         names.MechNameText.faceColor = colour.Value;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
@@ -192,8 +192,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void SetArmorBarColour ( CombatHUDPipBar __instance, ref Color shownColor ) {
          if ( ! ( __instance is CombatHUDArmorBarPips me ) || ! BarOwners.TryGetValue( __instance, out ICombatant owner ) ) return;
          Color? colour = GetTeamColour( owner, FloatingArmorColours );
-         if ( colour != null )
-            shownColor = colour.GetValueOrDefault();
+         if ( colour.HasValue )
+            shownColor = colour.Value;
       }
 
       // ============ Terrain ============

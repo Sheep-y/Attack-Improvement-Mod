@@ -81,9 +81,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( active != null && active.Length > i )
                FacingMarkerTargetColors[ i ] = ParseColour( active[ i ] );
          }
-         Info( "Player direction marker = {0}", FacingMarkerPlayerColors.Select( e => e.GetValueOrDefault() ) );
-         Info( "Enemy  direction marker = {0}", FacingMarkerEnemyColors .Select( e => e.GetValueOrDefault() ) );
-         Info( "Target direction marker = {0}", FacingMarkerTargetColors.Select( e => e.GetValueOrDefault() ) );
+         Info( "Player direction marker = {0}", FacingMarkerPlayerColors );
+         Info( "Enemy  direction marker = {0}", FacingMarkerEnemyColors  );
+         Info( "Target direction marker = {0}", FacingMarkerTargetColors );
       }
 
       public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) {
@@ -170,7 +170,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             for ( int i = 1 ; i < LOSDirectionCount ; i++ ) {
                if ( colours[ i ] == null )
                   colours[ i ] = colours[ i - 1 ];
-               if ( RGBtoHSV != null && colours[i].GetValueOrDefault() is Color c && ! RGBtoHSV.ContainsKey( c ) ) { // Cache HSV for animation
+               if ( RGBtoHSV != null && colours[i].Value is Color c && ! RGBtoHSV.ContainsKey( c ) ) { // Cache HSV for animation
                   Color.RGBToHSV( c, out float H, out float S, out float V );
                   RGBtoHSV[ c ] = new Vector3( H, S, V );
                }
