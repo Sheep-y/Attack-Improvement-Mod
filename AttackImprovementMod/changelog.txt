@@ -27,6 +27,7 @@ CHANGE LOG
 * Mod: ShortPilotHint now hides HP by default, to avoid line wrapping on elite mechwarriors.
 * Mod: ShowNumericInfo no longer shows pc movement points during enemy attacks.
 * Mod: ShowAmmoInTooltip now darkens non-exploding ammo bins.
+* Mod: Turning cost is now deduced from movement points.
 * Fix: FacingMarkerEnemyColors not applied when FacingMarkerPlayerColors is empty.
 * Fix: NPE when FacingMarkerPlayerColors is non-empty but FacingMarkerEnemyColors is empty.
 * Fix: FloatingArmorColours no longer applies to target panel.

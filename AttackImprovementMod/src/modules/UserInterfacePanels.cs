@@ -328,6 +328,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          try { if ( ActiveState is SelectionStateMove move ) {
             maxMove = move is SelectionStateSprint sprint ? mech.MaxSprintDistance : mech.MaxWalkDistance;
             mech.Pathing.CurrentGrid.GetPathTo( move.PreviewPos, mech.Pathing.CurrentDestination, maxMove, null, out spareMove, out Vector3 ResultDestination, out float lockedAngle, false, 0f, 0f, 0f, true, false );
+            spareMove = DeduceLockedAngle( spareMove, mech.Pathing, ref maxMove );
             moveType = move is SelectionStateSprint ? uiManager.UILookAndColorConstants.Tooltip_Sprint : uiManager.UILookAndColorConstants.Tooltip_Move;
          } else if ( ActiveState is SelectionStateJump jump ) {
             maxMove = mech.JumpDistance;
@@ -337,6 +338,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          if ( moveType != null )
             movement = FormatMeter( moveType, spareMove, maxMove ) + "\n";
+      }
+
+      private static float DeduceLockedAngle ( float spareMove, Pathing pathing, ref float maxMove ) {
+         float start = pathing.lockedAngle, end = pathing.ResultAngle;
+         if ( start == end ) return spareMove; // Not yet turned
+         float left = start - end, right = end - start;
+         if ( left < 0 ) left += 360;
+         if ( right < 0 ) right += 360;
+         float angle = Math.Min( left, right );
+         float free = pathing.MoveType == MoveType.Walking ? 45f : 22.5f; // Free turning
+         angle -= free;
+         if ( angle <= 0 ) return spareMove; // Within free turning
+         return spareMove - angle * pathing.MaxCost / ( 180 - free ) / 2; // Reversed from Pathint.GetAngleAvailable
       }
 
       private static string GetTargetNumbers ( ICombatant target ) { try {
