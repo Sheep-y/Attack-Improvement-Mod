@@ -49,6 +49,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( IndicatorType, "getLine" , null, "FixLOSWidth" );
             Patch( IndicatorType, "ShowLinesToAllEnemies", null, "ShowBlockedLOS" );
             Patch( IndicatorType, "ShowLineToTarget", null, "ShowBlockedLOS" );
+            Patch( typeof( FiringPreviewManager ), "Recalc", new Type[]{ typeof( AbstractActor ), typeof( Vector3 ), typeof( Quaternion ), typeof( bool ), typeof( bool ) }, "LogCalc", "Recalc" );
+            Patch( typeof( LOFCache ), "GetLineOfFire", null, "LogLOF" );
          } else
             parsedColours = null;
 
@@ -56,6 +58,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( IndicatorType, "DrawLine", null, null, "ModifyArcPoints" );
             Patch( typeof( CombatPathLine ), "DrawJumpPath", null, null, "ModifyArcPoints" );
          }
+      }
+
+      private static bool lof;
+
+      private static void LogCalc ( AbstractActor attacker, Vector3 position, Quaternion rotation, bool canRotate, bool isJump ) {
+         Verbo( "Recalc {0} {1} {2} {3} {4}", attacker, position, rotation, canRotate, isJump );
+         lof = true;
+      }
+      private static void Recalc ( AbstractActor attacker, Vector3 position, Quaternion rotation, bool canRotate, bool isJump ) {
+         lof = false;
+      }
+      private static void LogLOF ( LineOfFireLevel __result, AbstractActor source, Vector3 sourcePosition, ICombatant target, Vector3 targetPosition, Quaternion targetRotation ) {
+         if ( ! lof ) return;
+         Verbo( "{0} {1} = {2}", target, sourcePosition, __result );
       }
 
       // ============ Marker Colour ============
@@ -254,6 +270,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                typeIndex = info.LOFLevel == LineOfFireLevel.LOFClear ? Clear : BlockedPre;
             else
                typeIndex = Indirect;
+            if ( typeIndex == BlockedPre || typeIndex == Indirect )
+               Verbo( "{0} = {1} ({2})", typeIndex, position, info.availability );
          }
          Mats[ typeIndex ][ dirIndex ].Apply( me, usingMultifire );
       }                 catch ( Exception ex ) { Error( ex ); } }
