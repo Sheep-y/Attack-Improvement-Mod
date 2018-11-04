@@ -55,7 +55,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public override void CombatStarts () {
          Hit = Combat.ToHit;
          MovementConstants con = CombatConstants.MoveConstants;
-         HalfMaxMeleeVerticalOffset = con.MaxMeleeVerticalOffset / 2;
+         HalfMaxMeleeVerticalOffset = Settings.MaxMeleeVerticalOffsetByClass != null
+            ? Melee.MaxMeleeVerticalOffsetByClass[ 1 ] / 2
+            : CombatConstants.MoveConstants.MaxMeleeVerticalOffset / 2;
       }
 
       // ============ Common ============

@@ -708,7 +708,7 @@ These settings can be changed in `settings.json`.
 > **ArmMounted** - (Ranged) Apply arm mounted modifier if weapon is mounted on an arm. (Melee) Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle. <br>
 > **Direction** - Apply bonus if attack is made from the target's side or rear. <br>
 > **DFA** - (Melee) Apply DFA penalty if attack is DFA. <br>
-> **Height** - (Ranged) Apply height modifier.  (Melee) Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position. <br>
+> **Height** - (Ranged) Apply height modifier.  (DFA) Height is measured from pre-flight attacker position to target position.  (Melee) Apply one level of height modifier if height different is at least half of melee reach (medium if MaxMeleeVerticalOffsetByClass is used).<br>
 > **Indirect** - (Ranged) Apply indirect fire penalty. <br>
 > **Inspired** - Apply inspired bonus. <br>
 > **Jumped** - Apply jumped penalty after jump, if any. <br>

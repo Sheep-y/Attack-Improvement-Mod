@@ -48,7 +48,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Vertical Offset ============
 
-      private static float[] MaxMeleeVerticalOffsetByClass;
+      internal static float[] MaxMeleeVerticalOffsetByClass;
       private static AbstractActor thisMeleeAttacker, thisMeleeTarget;
       private static PropertyInfo JumpMechProp;
 
