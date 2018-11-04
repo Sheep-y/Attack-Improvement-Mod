@@ -467,7 +467,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void ReplacePilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) { try {
-         if ( pilot == null ) return;
+         if ( HUD == null || pilot == null ) return;
          if ( ! PilotStatus.ContainsKey( __instance ) )
             PilotStatus.Add( __instance, pilot );
          if ( ( HUD.SelectedActor != null || ! __instance.IsExpanded ) && ! pilot.IsIncapacitated )

@@ -270,7 +270,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ToggleStabilityDamage ( bool IsCallout ) { try {
          ShowingStabilityDamage = IsCallout;
-         HUD.WeaponPanel.RefreshDisplayedWeapons();
+         HUD?.WeaponPanel.RefreshDisplayedWeapons();
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Helpers ============
