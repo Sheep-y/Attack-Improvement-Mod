@@ -408,7 +408,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          HUD?.MechTray?.ActorInfo?.DetailsDisplay?.RefreshInfo();
       }
 
-      public static void CorrectProjectedHeat ( Mech __instance, ref float __result ) { try {
+      public static void CorrectProjectedHeat ( Mech __instance, ref int __result ) { try {
          if ( __instance.HasMovedThisRound ) return;
          SelectionState state = HUD?.SelectionHandler?.ActiveState;
          Vector3 position;
@@ -425,12 +425,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             masks.UnionWith( CombatHUDStatusPanel.GetStickyMasksForWaypoints( Combat,
                ActorMovementSequence.ExtractWaypointsFromPath( __instance, path.CurrentPath, path.ResultDestination, path.CurrentMeleeTarget, path.MoveType ) ) );
          }
-         foreach ( DesignMaskDef mask in masks ) {
+         foreach ( DesignMaskDef mask in masks )
             there *= mask.heatSinkMultiplier;
+         foreach ( DesignMaskDef mask in masks ) {
+            if ( mask == local ) continue; // Skip if sticky effect is already sticking  
             extra += mask.heatPerTurn;
+            if ( mask.stickyEffect != null && mask.stickyEffect.effectType == EffectType.StatisticEffect ) {
+               StatisticEffectData effect = mask.stickyEffect.statisticData;
+               if ( effect.statName != "EndMoveHeat" ) continue;
+               switch ( effect.operation ) {
+                  case StatCollection.StatOperation.Int_Add:
+                     extra += (int) float.Parse( effect.modValue );
+                     break;
+                  default:
+                     Warn( "Unexpected EndMoveHeat operation {0} on stick design mask {1}", effect.operation, mask.Description.Name );
+                     break;
+               }
+            }
          }
          if ( here == there && extra == 0 ) return;
-         __result = ( ( __result / here ) + extra ) * there;
+         __result = (int) ( ( ( (float) __result / here ) - extra ) * there );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Mech Tray ============
