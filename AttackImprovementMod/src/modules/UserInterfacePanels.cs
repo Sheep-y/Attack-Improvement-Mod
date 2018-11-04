@@ -409,14 +409,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void CorrectProjectedHeat ( Mech __instance, ref int __result ) { try {
-         if ( __instance.HasMovedThisRound ) return;
+         if ( __instance.HasMovedThisRound || __instance != HUD?.SelectedActor ) return;
          SelectionState state = HUD?.SelectionHandler?.ActiveState;
          Vector3 position;
          if      ( state is SelectionStateSprint sprint ) position = sprint.PreviewPos;
          else if ( state is SelectionStateMove move ) position = move.PreviewPos;
          else if ( state is SelectionStateJump jump ) position = jump.PreviewPos;
          else return;
+
+         // Get effect list from previewed movement path
          HashSet<DesignMaskDef> masks = new HashSet<DesignMaskDef>();
+         List<Effect> ownEffects = null;
          DesignMaskDef local = __instance.occupiedDesignMask, preview = Combat.MapMetaData.GetPriorityDesignMaskAtPos( position );
          if ( preview != null ) masks.Add( preview );
          float here = local?.heatSinkMultiplier ?? 1, there = 1, extra = 0;
@@ -425,14 +428,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             masks.UnionWith( CombatHUDStatusPanel.GetStickyMasksForWaypoints( Combat,
                ActorMovementSequence.ExtractWaypointsFromPath( __instance, path.CurrentPath, path.ResultDestination, path.CurrentMeleeTarget, path.MoveType ) ) );
          }
+
+         // Apply heat effect to prediction
          foreach ( DesignMaskDef mask in masks )
             there *= mask.heatSinkMultiplier;
          foreach ( DesignMaskDef mask in masks ) {
-            if ( mask == local ) continue; // Skip if sticky effect is already sticking  
             extra += mask.heatPerTurn;
             if ( mask.stickyEffect != null && mask.stickyEffect.effectType == EffectType.StatisticEffect ) {
                StatisticEffectData effect = mask.stickyEffect.statisticData;
                if ( effect.statName != "EndMoveHeat" ) continue;
+               if ( ownEffects == null ) {
+                  ownEffects = Combat.EffectManager.GetAllEffectsTargeting( __instance );
+                  ownEffects.Reverse(); // Put temp effects before permanent effects for quicker positive match
+               }
+               if ( ownEffects.Any( e => e.EffectData?.Description.Name == mask.stickyEffect.Description.Name ) ) continue; // Skip if sticky effect is already sticking  
                switch ( effect.operation ) {
                   case StatCollection.StatOperation.Int_Add:
                      extra += (int) float.Parse( effect.modValue );
