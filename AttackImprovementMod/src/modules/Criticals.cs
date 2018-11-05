@@ -226,11 +226,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float chance = info.GetCritChance();
          for ( int i = 1 ; chance > 0 ; i++ ) {
             float critRoll = Combat.NetworkRandom.Float(); // If use original code AttackDirector.GetRandomFromCache( info.hitInfo, 2 ), may run out of rolls
-            AttackLog.LogAIMCritRoll( critRoll );
-            if ( DebugLog ) Verbo( "Crit {3} roll {0} < chance {1}? {2}", critRoll, chance, critRoll <= chance, i );
+            if ( DebugLog ) Verbo( "Crit {3} roll {0} <= chance {1}? {2}", critRoll, chance, critRoll <= chance, i );
+            if ( i == 1 ) AttackLog.LogAIMCritRoll( critRoll );
             if ( critRoll > chance ) break;
             float slotRoll = Combat.NetworkRandom.Float();
-            AttackLog.LogAIMSlotRoll( slotRoll );
+            if ( AttackLog.thisCritComp == null ) AttackLog.LogAIMSlotRoll( slotRoll );
             MechComponent component = FindAndCritComponent( info, slotRoll );
             if ( i > 1 ) Verbo( "Crit x{0} on location {1} of {2} by {3}. Roll {4} <= Chance {5}. Crit'ed {6}",
                          i, component?.Location ?? hitLocation, info.target, info.weapon, critRoll, chance, component?.UIName.ToString() ?? "(None)" );
@@ -365,7 +365,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          List<MechComponent> list = ListComponentsAtLocation( me, location, MinSlots );
          int slot = (int)( list.Count * random );
          MechComponent result = slot < list.Count ? list[ slot ] : null;
-         if ( list.Count <= 0 && Settings.CritLocationTransfer && me is Mech mech ) {
+         if ( list.Count <= 0 && Settings.CritLocationTransfer && me is Mech mech ) { // TODO: Handle crit transfer at ListComponentsAtLocation so that empty slots won't block transfer
             ArmorLocation newLocation = MechStructureRules.GetPassthroughLocation( MechStructureRules.GetArmorFromChassisLocation( (ChassisLocations) location ) & FrontArmours, AttackDirection.FromFront );
             if ( newLocation != ArmorLocation.None ) {
                Verbo( "Crit list empty at {0} of {1}, transferring crit to {2}", (ChassisLocations) location, me, newLocation );
@@ -384,7 +384,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                                   ? (int) MechEngineerGetCompLocation.Invoke( null, new object[]{ component } )
                                   : component.Location;
             int flag = componentLocation & location;
-            if ( DebugLog && flag > 0 ) Verbo( "List components at {0}, {1} location {2} state {3}, Flag = {4}", location, component, componentLocation, component.DamageLevel, flag );
+            if ( DebugLog && flag > 0 ) Verbo( "List components at {0}, {1} size {2} ({3})", location, component, component.inventorySize, component.DamageLevel );
             if ( flag <= 0 ) continue;
             if ( Settings.CritIgnoreDestroyedComponent && component.DamageLevel >= ComponentDamageLevel.Destroyed ) continue;
             for ( int i = component.inventorySize ; i > 0 ; i-- )

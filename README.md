@@ -985,13 +985,18 @@ These settings can be changed in `settings.json`.
 
 **Multiple Critical Hits from Single Shot**
 
-> Setting: `MultupleCrits` (true or false, default false)
+> Setting: `MultipleCrits` (true or false, default false)
 >
 > In Classic BattleTech, critical hits may damage multiple components.
 > This setting recreate that feel in the context of BattleTech's crit system.
 >
 > When true, a successful crit roll is deduced from the crit chance.
 > This leftover crit chance is then rolled again, and repeated until a crit roll fails.
+> Note that successful crit rolls do not guarantee crits, since they often land on empty slots.
+>
+> The attack log of this mod only logs one line per attack.
+> Only the first crit roll and the first crit'ed component (and its slot roll) will be logged.
+> (They will be different when the first roll get an empty slot and a subsequence roll crits.)
 
 
 

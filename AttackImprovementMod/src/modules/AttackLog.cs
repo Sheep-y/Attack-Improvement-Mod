@@ -625,7 +625,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float thisCritRoll, thisCritSlotRoll, thisBaseCritChance, thisCritMultiplier, thisCritChance, thisLocationMaxHP;
       private static bool ammoExploded, checkCritComp;
       private static int thisCritSlot = -1;
-      private static MechComponent thisCritComp;
+      internal static MechComponent thisCritComp;
       private static ComponentDamageLevel thisCompBefore;
 
       [ HarmonyPriority( Priority.VeryLow ) ]
