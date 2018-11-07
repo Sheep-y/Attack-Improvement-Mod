@@ -374,7 +374,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                ChassisLocations chassis = MechStructureRules.GetChassisLocationFromArmorLocation( newLocation );
                result = GetComponentFromRoll( me, (int) chassis, random, mech.MechDef.GetChassisLocationDef( chassis ).InventorySlots );
             }
-         } else if ( DebugLog ) Verbo( "Slot roll {0}, slot count {1}, slot {2}, component {3} status {4}", random, list.Count, slot, result, result.DamageLevel );
+         } else if ( DebugLog ) Verbo( "Slot roll {0}, slot count {1}, slot {2}, component {3} status {4}", random, list.Count, slot, result, result?.DamageLevel );
          AttackLog.LogCritComp( result, slot );
          return result;
       }
