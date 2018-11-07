@@ -99,6 +99,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          CritChanceMax = (float) Settings.CritChanceMax;
          CritChanceBase = (float) Settings.CritChanceFullStructure;
          CritChanceVar = (float) Settings.CritChanceZeroStructure - CritChanceBase;
+         Info( "Crit chance (structural): Base {0} Var {1}, Min {2} Max {3}", CritChanceBase, CritChanceVar, CritChanceMin, CritChanceMax );
          if ( Settings.CritLocationTransfer ) {
             if ( ! Settings.CritIgnoreDestroyedComponent || ! Settings.CritIgnoreEmptySlots )
                Warn( "Not enabling CritIgnoreDestroyedComponent and CritIgnoreEmptySlots will make CritLocationTransfer hard to happens." );
@@ -123,6 +124,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             TAC_Threshold = (float) Settings.ThroughArmorCritThreshold;
          else
             TAC_ThresholdPerc = (float)Settings.ThroughArmorCritThreshold;
+         Info( "Crit chance (armour): Base {0} Var {1}, Threshold {2} or {3}%", TAC_BaseChance, TAC_VarChance, TAC_Threshold, TAC_ThresholdPerc );
          if ( Settings.ThroughArmorCritThreshold != 0 && ! Settings.CritFollowDamageTransfer )
             Warn( "Disabling CritFollowDamageTransfer may affect ThroughArmorCritThreshold calculation." );
       }

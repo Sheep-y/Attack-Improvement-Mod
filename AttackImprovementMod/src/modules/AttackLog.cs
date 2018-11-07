@@ -739,11 +739,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             line = line.Substring( 0, line.Length - CritDummy.Length ) + critLine;
             log[ lineIndex ] = line;
          }
-         thisCritRoll = thisCritSlotRoll = 0;
+         thisLocationMaxHP = thisCritRoll = thisCritSlotRoll = thisBaseCritChance = thisCritMultiplier = thisCritChance = 0;
          thisCritLocation = "None";
          thisCritSlot = -1;
          thisCritComp = null;
-         checkCritComp = false;
+         checkCritComp = ammoExploded = false;
       }                 catch ( Exception ex ) { Error( ex ); } }
 #pragma warning restore CS0162 // Restore "unreachable code" warnings
    }
