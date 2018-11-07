@@ -143,7 +143,7 @@ namespace Sheepy.Logging {
          } while ( true );
       }
 
-      public void Flush () {
+      public bool? Flush () {
          Func<LogEntry,bool>[] filters;
          LogEntry[] entries;
          lock ( queue ) {
@@ -151,12 +151,11 @@ namespace Sheepy.Logging {
             entries = queue.ToArray();
             queue.Clear();
          }
-         if ( entries.Length > 0 )
-            OutputLog( filters, entries );
+         return OutputLog( filters, entries );
       }
 
-      private void OutputLog ( IEnumerable<Func<LogEntry,bool>> filters, params LogEntry[] entries ) {
-         if ( entries.Length <= 0 ) return;
+      private bool? OutputLog ( IEnumerable<Func<LogEntry,bool>> filters, params LogEntry[] entries ) {
+         if ( entries.Length <= 0 ) return null;
          StringBuilder buf = new StringBuilder();
          lock ( exceptions ) { // Not expecting settings to change frequently. Lock outside format loop for higher throughput.
             foreach ( LogEntry line in entries ) try {
@@ -174,7 +173,7 @@ namespace Sheepy.Logging {
                HandleError( ex );
             }
          }
-         OutputLog( buf );
+         return OutputLog( buf );
       }
 
       // Override to control which message get logged.
@@ -205,9 +204,11 @@ namespace Sheepy.Logging {
       }
 
       // Override to change log output, e.g. to console, system event log, or development environment.
-      protected virtual void OutputLog ( StringBuilder buf ) { try {
+      protected virtual bool? OutputLog ( StringBuilder buf ) { try {
+         if ( buf.Length <= 0 ) return null;
          File.AppendAllText( LogFile, buf.ToString() );
-      } catch ( Exception ex ) { HandleError( ex ); } }
+         return true;
+      } catch ( Exception ex ) { HandleError( ex ); return false; } }
 
       public void Dispose () {
          if ( queue != null ) lock ( queue ) {
