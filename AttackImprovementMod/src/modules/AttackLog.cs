@@ -115,10 +115,23 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          TryRun( ModLog, ForceWriteLog );
       }
 
-      public static void InitLog () {
-         Info( "Init logger" );
-         ROLL_LOG = new Logger( ModLogDir + "Log_Attack." + Settings.AttackLogFormat ){ LevelText = null, TimeFormat = null };
+      public static void CreateLogger ( string filename, bool time = false ) {
+         if ( time ) filename += TimeToFilename( DateTime.UtcNow );
+         string file = filename + "." + Settings.AttackLogFormat;
+         if ( ! time && File.Exists( file ) ) try {
+            using ( File.Open( file, FileMode.Open ) ){}
+         } catch ( IOException ) {
+            Warn( "Cannot open " + file );
+            CreateLogger( filename, true );
+            return;
+         }
+         Info( "Init attack logging to " + file );
+         ROLL_LOG = new Logger( file ){ LevelText = null, TimeFormat = null };
          ROLL_LOG.OnError = ( ex ) => Error( ex ); // Write attack log errors to mod log.
+      }
+
+      public static void InitLog () {
+         CreateLogger( ModLogDir + "Log_Attack" );
          idGenerator = new Random();
          thisSequenceId = GetNewId();
          ArchiveOldAttackLog();
@@ -238,13 +251,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return teamName + who.DisplayName + Separator;
       }
 
+      private static string TimeToFilename ( DateTime time ) {
+         return time.ToString("s").Replace(':','-');
+      }
+
       public static void ArchiveOldAttackLog () {
          // First, rename existing log to clear the way for this launch
          if ( ROLL_LOG.Exists() ) try {
             string from = ROLL_LOG.LogFile;
             FileInfo info = new FileInfo( from );
             if ( info.Length > 500 ) {
-               string to = ModLogDir + "Log_Attack." + info.LastWriteTimeUtc.ToString("s").Replace(':','-') + Path.GetExtension( from );
+               string to = ModLogDir + "Log_Attack." + TimeToFilename( info.LastWriteTimeUtc ) + Path.GetExtension( from );
                Info( "Archiving attack log to {1}", from, to );
                File.Move( from, to );
             } else {
