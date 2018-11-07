@@ -55,10 +55,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedHeatInfo", null, "RecordRefresh" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshPredictedStabilityInfo", null, "RecordRefresh" );
             // Force heat/stab number refresh
-            Patch( typeof( CombatHUDMechTray ), "Update", null, "RefreshHeatAndStab" );
+            Patch( typeof( CombatHUDMechTray ), "Update", null, "RefreshActorInfo" );
             // Force move/distance number refresh
             Patch( typeof( SelectionStateMove ), "ProcessMousePos", null, "RefreshMoveAndDist" );
             Patch( typeof( SelectionStateJump ), "ProcessMousePos", null, "RefreshMoveAndDist" );
+            HeauUpDisplay.HookCalloutToggle( RefreshTargetInfo );
          }
          if ( Settings.FixHeatPreview )
             Patch( typeof( Mech ), "get_AdjustedHeatsinkCapacity", null, "CorrectProjectedHeat" );
@@ -90,6 +91,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             RectTransform TargetRect = TargetDisplay.transform.GetComponent<RectTransform>();
             TargetRect?.SetSizeWithCurrentAnchors( RectTransform.Axis.Horizontal, 250 );
             TargetRect?.SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, 90 );
+            TargetDisplay.ActorWeightText.enableWordWrapping = false; // Prevent skill names from wrapping
             //LogGuiTree( HUD?.TargetingComputer.ActorInfo );
             // Shift selected actor info
             HUD?.MechTray.ActorInfo.DetailsDisplay.transform.transform.Translate( 0, -15, 0 );
@@ -397,7 +399,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          needRefresh = true;
       }
 
-      public static void RefreshHeatAndStab ( CombatHUDMechTray __instance ) {
+      public static void RefreshTargetInfo ( bool isCallout ) {
+         TargetDisplay?.RefreshInfo();
+      }
+
+      public static void RefreshActorInfo ( CombatHUDMechTray __instance ) {
          if ( ! needRefresh ) return;
          __instance?.ActorInfo?.DetailsDisplay?.RefreshInfo();
          needRefresh = false;
