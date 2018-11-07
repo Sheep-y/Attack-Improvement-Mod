@@ -83,6 +83,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             settings.ShowNumericInfo = false;
          if ( settings.SkipCritingDeadMech == false )
             settings.SkipBeatingDeadMech = "";
+         if ( settings.MultupleCrits == false )
+            settings.MultipleCrits = false;
 #pragma warning restore CS0618
 
          RangeCheck( "LoadoutColourSaturation", ref settings.SaturationOfLoadout, 0, 1 );

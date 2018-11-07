@@ -65,7 +65,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( typeof( WeaponHitInfo ), "ConsolidateCriticalHitInfo", null, "RemoveFullStructureLocationsFromCritList" );
             }
             // The settings below are built-in to generic crit system and only need to be patched when the system is not used for mech.
-            if ( Settings.CritIgnoreDestroyedComponent || Settings.CritIgnoreEmptySlots || Settings.CritLocationTransfer || Settings.MultupleCrits )
+            if ( Settings.CritIgnoreDestroyedComponent || Settings.CritIgnoreEmptySlots || Settings.CritLocationTransfer || Settings.MultipleCrits )
                Patch( MechType, "CheckForCrit", "Override_CheckForCrit", null );
             if ( CritChanceBase != 0 || CritChanceVar != 1 )
                Patch( typeof( CritChanceRules ), "GetBaseCritChance", new Type[]{ MechType, typeof( ChassisLocations ), typeof( bool ) }, "Override_BaseCritChance", null );
@@ -240,7 +240,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                AttackLog.LogCritResult( target, info.weapon );
                logCrit = false;
             }
-            if ( ! Settings.MultupleCrits ) break;
+            if ( ! Settings.MultipleCrits ) break;
             chance -= critRoll;
          }
          PostCheckForCrit( info, logCrit );

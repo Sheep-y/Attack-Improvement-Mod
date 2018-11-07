@@ -420,7 +420,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool CritLocationTransfer = false;
 
       [ JsonComment( "Deduce rolled crit from crit% and keep rolling crit until crit% is zero.  Default true." ) ]
-      public bool MultupleCrits = true;
+      public bool MultipleCrits = true;
 
       //
       [ JsonSection( "Hit Resolution" ) ]
@@ -465,6 +465,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public int? SettingVersion = null;
 
 
+      [ Obsolete( "[v3.0] Default true. Replaced by MultipleCrits." ) ]
+      public bool? MultupleCrits = null;
       [ Obsolete( "[v3.0] Default true. Replaced by SkipBeatingDeadMech." ) ]
       public bool? SkipCritingDeadMech = null;
       [ Obsolete( "[v2.5] Default true. Replaced by ShowNumericInfo." ) ]
