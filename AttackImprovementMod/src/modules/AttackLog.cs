@@ -116,7 +116,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void CreateLogger ( string filename, bool time = false ) {
-         if ( time ) filename += TimeToFilename( DateTime.UtcNow );
+         if ( time ) filename += "." + TimeToFilename( DateTime.UtcNow );
          string file = filename + "." + Settings.AttackLogFormat;
          if ( ! time && File.Exists( file ) ) try {
             using ( File.Open( file, FileMode.Open ) ){}
