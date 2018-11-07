@@ -91,7 +91,6 @@
     <Compile Include="src\modules\UserInterfacePanels.cs" />
     <Compile Include="src\modules\HeauUpDisplay.cs" />
     <Compile Include="src\modules\WeaponInformation.cs" />
-    <Compile Include="src\Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mod.json" />
