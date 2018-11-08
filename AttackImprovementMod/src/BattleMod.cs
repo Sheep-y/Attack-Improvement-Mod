@@ -498,14 +498,14 @@ namespace Sheepy.BattleTechMod {
          return map[ key ];
       }
 
-      public static bool AllNull ( params object[] objects ) {
-         for ( int i = 0, len = objects.Length ; i < len ; i++ )
+      public static bool AllNull<T> ( params T[] objects ) {
+         for ( int i = objects.Length - 1 ; i >= 0 ; i-- )
             if ( objects[ i ] != null ) return false;
          return true;
       }
 
-      public static bool AnyNull ( params object[] objects ) {
-         for ( int i = 0, len = objects.Length ; i < len ; i++ )
+      public static bool AnyNull<T> ( params T[] objects ) {
+         for ( int i = objects.Length - 1 ; i >= 0 ; i-- )
             if ( objects[ i ] == null ) return true;
          return false;
       }

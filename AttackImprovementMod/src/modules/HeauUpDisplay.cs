@@ -15,8 +15,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static HeauUpDisplay instance;
 
-      private static Color?[] NameplateColours = new Color?[ 3 ];
-      private static Color?[] FloatingArmorColours = new Color?[ 3 ];
+      private static Color?[] NameplateColours;
+      private static Color?[] FloatingArmorColours;
 
       public override void CombatStartsOnce () {
          instance = this;
@@ -47,7 +47,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowMeleeTerrain ) { // Considered transpiler but we'll only save one method call. Not worth trouble?
             UpdateStatusMethod = typeof( CombatMovementReticle ).GetMethod( "UpdateStatusPreview", NonPublic | Instance );
             StatusPreviewProp = typeof( CombatMovementReticle ).GetProperty( "StatusPreview", NonPublic | Instance );
-            if ( AnyNull( UpdateStatusMethod, StatusPreviewProp ) )
+            if ( AnyNull<object>( UpdateStatusMethod, StatusPreviewProp ) )
                Warn( "CombatMovementReticle.UpdateStatusPreview or StatusPreview not found, ShowMeleeTerrain not patched." );
             else {
                Patch( typeof( CombatMovementReticle ), "DrawPath", null, "ShowMeleeTerrainText" );
@@ -126,7 +126,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Pilot pilot = actor?.GetPilot();
          Team team = actor?.team;
          TMPro.TextMeshProUGUI textbox = __instance.PilotNameText;
-         if ( AnyNull( pilot, team, textbox ) || pilot.Injuries <= 0 ) return;
+         if ( AnyNull<object>( pilot, team, textbox ) || pilot.Injuries <= 0 ) return;
          string format = null;
          object[] args = new object[]{ null, pilot.Injuries, pilot.Health - pilot.Injuries, pilot.Health };
          if ( team == Combat.LocalPlayerTeam ) {

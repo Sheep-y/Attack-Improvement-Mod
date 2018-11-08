@@ -719,7 +719,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       [ HarmonyPriority( Priority.VeryLow ) ]
       public static void LogCritResult ( ICombatant __instance, Weapon weapon ) { try {
-         if ( AnyNull( __instance, weapon, thisCritLocation ) ) return;
+         if ( AnyNull<object>( __instance, weapon, thisCritLocation ) ) return;
          if ( __instance.GUID == thisAttackerId ) {
             if ( DebugLog ) Verbo( "Skip logging self crit" );
          } else {

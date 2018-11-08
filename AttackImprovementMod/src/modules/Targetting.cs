@@ -33,7 +33,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
             if ( ClearTargetedActor == null )
                Warn( "Cannot find SelectionStateFireMulti.ClearTargetedActor. MultiTarget backout may be slightly inconsistent." );
-            if ( AnyNull( RemoveTargetedCombatant, weaponTargetIndices ) )
+            if ( AnyNull<object>( RemoveTargetedCombatant, weaponTargetIndices ) )
                Error( "Cannot find RemoveTargetedCombatant or weaponTargetIndices, SelectionStateFireMulti not patched" );
             else {
                Patch( HandlerType, "BackOutOneStep", null, "PreventMultiTargetBackout" );
