@@ -447,7 +447,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   ownEffects = Combat.EffectManager.GetAllEffectsTargeting( __instance );
                   ownEffects.Reverse(); // Put temp effects before permanent effects for quicker positive match
                }
-               if ( ownEffects.Any( e => e.EffectData?.Description.Name == mask.stickyEffect.Description.Name ) ) continue; // Skip if sticky effect is already sticking  
+               if ( ownEffects.Any( e => e.EffectData?.Description.Name == mask.stickyEffect.Description.Name ) ) continue; // Skip if sticky effect is already sticking
                switch ( effect.operation ) {
                   case StatCollection.StatOperation.Int_Add:
                      extra += (int) float.Parse( effect.modValue );

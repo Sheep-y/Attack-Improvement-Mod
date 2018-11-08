@@ -31,13 +31,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          switch ( Settings.SkipBeatingDeadMech?.Trim().ToLower() ) {
             case "damage" :
-               Patch( MechType, "TakeWeaponDamage", "SkipBeatingDeadMech", null ); 
+               Patch( MechType, "TakeWeaponDamage", "SkipBeatingDeadMech", null );
                goto case "critical";
             case "critical" :
                SkipCritingDeadMech = true;
                Patch( ResolveWeaponDamage, "SkipBeatingDeadMech", null );
                break;
-            case "": case null: 
+            case "": case null:
                break;
             default :
                Warn( "Unknown SkipBeatingDeadMech: {0}", Settings.SkipBeatingDeadMech );
