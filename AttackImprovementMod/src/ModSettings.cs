@@ -108,12 +108,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public string ShowEnemyWounds = ", Wounds {1}";
       public string ShowAllyHealth = ", HP {2}/{3}";
 
-      [ JsonComment( "Set name colour of overhead nameplate of Player / Enemy / Ally.  Default \"#8FF\", \"#FBB\", \"#BFB\".  Set to empty to not change (leave at white)." ) ]
+      [ JsonComment( "Set name colour of overhead nameplate of Player / Enemy / Ally.  Default \"#CFC\", \"#FBB\", \"#8FF\".  Set to empty to not change (leave at white)." ) ]
       public string NameplateColourPlayer = "#CFC";
       public string NameplateColourEnemy = "#FBB";
       public string NameplateColourAlly = "#8FF";
 
-      [ JsonComment( "Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default \"#8FF\", \"#FBB\", \"#BFB\".  Set to empty to not change (leave at white)." ) ]
+      [ JsonComment( "Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default \"#CFC\", \"#FBB\", \"#8FF\".  Set to empty to not change (leave at white)." ) ]
       public string FloatingArmorColourPlayer = "#CFC";
       public string FloatingArmorColourEnemy = "#FBB";
       public string FloatingArmorColourAlly = "#8FF";
@@ -355,7 +355,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonSection( "Critical Hits" ) ]
       //
 
-      [ JsonComment( "When target is dead, skip \"critical\" or \"damage\" processing.  Default \"critical\"." ) ]
+      [ JsonComment( "When target is dead, skip \"critical\" or \"damage\" processing.  Default \"critical\".  Empty to not skip anything." ) ]
       public string SkipBeatingDeadMech = "critical";
 
       [ JsonComment( new string[] {

@@ -178,6 +178,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          if ( settings.SettingVersion < 2_007_000 ) { // Update from 3.0 preview 20180925
+            if ( settings.ShortPilotHint == "G{3} P{4} G{5} T{6}" ) // Spartan preset
+               settings.ShortPilotHint = "G:{3} P:{4} G:{5} T:{6}";
             if ( settings.ShowEnemyWounds == "{0}, Wounds {1}" )
                settings.ShowEnemyWounds = ", Wounds {1}";
             if ( settings.NameplateColourPlayer == "#BFB" )

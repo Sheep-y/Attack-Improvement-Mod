@@ -9,13 +9,21 @@
 
   "FixMultiTargetBackout": true,
 
-  /* Allow friendly fire while pressing Alt key.  Default true. */
+  /* When a target is selected/deselected during Multi-Target, aggressively reassign enabled weapons by hit chance.  Default true. */
 
-  "AltKeyFriendlyFire": false,
+  "AggressiveMultiTargetAssignment": false,
 
   /* Select player mechs with F1 to F4 key.  Default true. */
 
   "FunctionKeySelectPC": false,
+
+  /* Reverse target selection when shift key is pressed.  Default true. */
+
+  "ShiftKeyReverseSelection": false,
+
+  /* Ctrl click on a weapon in Multi-Target mode will enable/disable the weapon.  Default true. */
+
+  "CtrlClickDisableWeapon": false,
 
   /* Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game. */
 
@@ -24,6 +32,10 @@
   /* Fix the bug that rear paper doll is incorrectly showing front structure.  Default true. */
 
   "FixPaperDollRearStructure": true,
+
+  /* Add L and R label to paper doll.  Default true. */
+
+  "LabelPaperDollSide": false,
 
   /* Show structural damage through armour.  i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true. */
 
@@ -45,9 +57,26 @@
 
   "FixLosPreviewHeight": true,
 
-  /* Colour weapon loadout by weapon type in targeting computer.  Default true. */
+  /* Show both original terrain description and danger description, instead of danger overriding terrain.  Default true. */
 
-  "ColouredLoadout": false,
+  "ShowDangerousTerrain": true,
+
+  /* Make movement dots bigger or smaller.  Default 2 and 1.25.  1 to leave alone. */
+
+  "SpecialTerrainDotSize": 1,
+  "NormalTerrainDotSize": 1,
+
+  /* Give movement dots stronger colour.  Default true. */
+
+  "BoostTerrainDotColor": false,
+
+  /* How many grids to show around mouse cursor.  Same as CombatConstants.MoveConstants.ExperimentalHexRadius.  Default 6.  Game default 4. */
+
+  "MovementPreviewRadius": 4,
+
+  /* Colour saturation of weapon loadout by weapon type in targeting computer.  Default 0.5.  0 to disable. */
+
+  "SaturationOfLoadout": 0,
 
   /* Show weapon damage in weapon loadout list in targeting computer.  Default true. */
 
@@ -71,6 +100,18 @@
 
   "ShortPilotHint": "",
 
+  /* Apply damage reduction to damage numbers in weapon panel.  Default true. */
+
+  "ShowReducedWeaponDamage": false,
+
+  /* Show max attack damage and averaged attack damage at the bottom of weapon panel.  Default true. */
+
+  "ShowTotalWeaponDamage": false,
+
+  /* Show stability damage while pressing Callout key (default left alt).  Default true. */
+
+  "CalloutWeaponStability": false,
+
   /* Show weapon properties (bonus) instead of weapon type in weapon mouseover. */
 
   "ShowWeaponProp": false,
@@ -82,16 +123,17 @@
   /* Format pilot name to show wounds (enemies) and health (ally) after their names.
    * {0} is pilot name, {1} is injury, {2} is health - injury, and {3} is health.  Set to empty to not change game default. */
 
+  "ShowPlayerHealth": "",
   "ShowEnemyWounds": "",
-  "ShowNPCHealth": "",
+  "ShowAllyHealth": "",
 
-  /* Set name colour of overhead nameplate of Player / Enemy / Ally.  Default "#8FF", "#FBB", "#BFB".  Set to empty to not change (leave at white). */
+  /* Set name colour of overhead nameplate of Player / Enemy / Ally.  Default "#CFC", "#FBB", "#8FF".  Set to empty to not change (leave at white). */
 
   "NameplateColourPlayer": "",
   "NameplateColourEnemy": "",
   "NameplateColourAlly": "",
 
-  /* Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default "#8FF", "#FBB", "#BFB".  Set to empty to not change (leave at white). */
+  /* Set armour colour of overhead nameplate of Player / Enemy / Ally.  Default "#CFC", "#FBB", "#8FF".  Set to empty to not change (leave at white). */
 
   "FloatingArmorColourPlayer": "",
   "FloatingArmorColourEnemy": "",
@@ -111,19 +153,19 @@
 
   "LOSMarkerBlockedMultiplier": 1,
 
-  /* Controls whether indirect attack lines / can't attack lines are dotted.  Default both true. */
+  /* Controls whether indirect firing lines / can't fire lines are dotted.  Default both true. */
 
   "LOSIndirectDotted": false,
   "LOSNoAttackDotted": true,
 
-  /* Controls whether other attack lines are dotted.  Default all false. */
+  /* Controls whether other firing lines are dotted.  Default all false. */
 
   "LOSMeleeDotted": false,
   "LOSClearDotted": false,
   "LOSBlockedPreDotted": false,
   "LOSBlockedPostDotted": false,
 
-  /* Change fire line colour (html syntax). "#FF0000" is red, "#00FF00" is green etc.  Set to empty to leave alone.
+  /* Change firing line colour (html syntax). "#FF0000" is red, "#00FF00" is green etc.  Set to empty to leave alone.
    * The colour orders are Front, Left, Right, Back, Prone.  Set to empty string to use game default. */
 
   "LOSMeleeColors": "",
@@ -132,6 +174,13 @@
   "LOSBlockedPostColors": "",
   "LOSIndirectColors": "",
   "LOSNoAttackColors": "",
+
+  /* Range and speed (in half-cycle ms) of firing line animation. */
+
+  "LOSHueDeviation": 0,
+  "LOSHueHalfCycleMS": 0,
+  "LOSBrightnessDeviation": 0,
+  "LOSBrightnessHalfCycleMS": 0,
 
   /* Number of points of indirect attack lines and jump lines.  Game uses 18.  Default 48 for a smoother curve. */
 
@@ -290,6 +339,10 @@
 
   "ShowBaseHitchance": true,
 
+  /* Reverse in-combat modifier display so that + is bonus and - is penalty.  Default true. */
+
+  "ReverseInCombatModifier": false,
+
   /* Show "Short Range" in hit modifier breakdown, or whichever range is at +0.  Default false. */
 
   "ShowNeutralRangeInBreakdown": false,
@@ -312,6 +365,10 @@
   // Melee and DFA
   //
 
+  /* Show terrain description and danger description of melee destination, instead of hiding them. */
+
+  "ShowMeleeTerrain": true,
+
   /* Allow all possible melee / DFA attack positions. */
 
   "IncreaseMeleePositionChoice": false,
@@ -330,9 +387,9 @@
   // Critical Hits
   //
 
-  /* Skip critical checks if target is dead.  Default true.  Applies to vehicle and turret too. */
+  /* When target is dead, skip "critical" or "damage" processing.  Default "critical".  Empty to not skip anything. */
 
-  "SkipCritingDeadMech": false,
+  "SkipBeatingDeadMech": "",
 
   /* Overrides AICritChanceBaseMultiplier in CombatGameConstants.json.  Default 0.2, same as game.
    * Set to 1 for same crit chance as players, or set to 0 to prevent enemies and/or allies from dealing crit. */
@@ -407,7 +464,7 @@
 
   /* Deduce rolled crit from crit% and keep rolling crit until crit% is zero.  Default true. */
 
-  "MultupleCrits": false,
+  "MultipleCrits": false,
 
   //
   // Hit Resolution
@@ -455,5 +512,5 @@
 
   /* Used to determine which settings should be updated and how.  Please do not change. */
 
-  "SettingVersion": 2006000
+  "SettingVersion": 2007000
 }
