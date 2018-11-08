@@ -30,12 +30,12 @@ document.addEventListener( 'DOMContentLoaded', () => {
 </script>
 <body>
 
-<h1 id="aimattackimprovementmod30development">AIM - Attack Improvement Mod 3.0 Development</h1>
+<h1 id="aimattackimprovementmod30development">AIM - Attack Improvement Mod 3.0 Beta</h1>
 
-<p>For BATTLETECH 1.2.0</p>
+<p>For BATTLETECH 1.2.1</p>
 
 <ul>
-<li><a href="#features-overview">Features Overview</a></li>
+<li><a href="#featuresoverview">Features Overview</a></li>
 
 <li><a href="#installation">Installation</a></li>
 
@@ -45,9 +45,9 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 
 <ul>
-<li><a href="#userinterfacesettings">User Interface Settings</a></li>
+<li><a href="#hudsettings">HUD Settings</a></li>
 
-<li><a href="#targetinglineandfacingringsettings">Targeting Line and Facing Ring Settings</a></li>
+<li><a href="#combatinformationsettings">Combat Information Settings</a></li>
 
 <li><a href="#calledshotsettings">Called Shot Settings</a></li>
 
@@ -229,9 +229,9 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 
 <p>These settings can be changed in <code>settings.json</code>.</p>
 
-<h2 id="userinterfacesettings">User Interface Settings</h2>
+<h2 id="hudsettings">HUD Settings</h2>
 
-<p><strong>Hotkeys</strong></p>
+<p><strong>Unit Selection</strong></p>
 
 <blockquote>
   <p>Setting: <code>FunctionKeySelectPC</code>  (true/false, default true)</p>
@@ -242,27 +242,237 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   Also, because the keys are hard-coded and not keybinds, this will not change game settings or game profile.
   <br></p>
   
-  <p>Setting: <code>AltKeyFriendlyFire</code>  (true/false, default true)</p>
+  <p>Setting: <code>ShiftKeyReverseSelection</code>  (true/false, default true)</p>
   
-  <p>When true, friendly units may be targeted by attack when pressing Alt.</p>
+  <p>When the Shift key is holded, target selection will be reversed:</p>
+  
+  <p>Shift+Tab will select the previous target, Shift+Brace will select in the reverse direction,
+  while Shift+Click during Multi-Target will goes from C to B, B to A, and A to disable.
+  <br></p>
+  
+  <p>Setting: <code>CtrlClickDisableWeapon</code>  (true/false, default true)</p>
+  
+  <p>Ctrl+Click a weapon during Multi-Target will disable / enable the weapon.
+  The target will be remembered when the weapon is enabled this way, allowing quick evaluation of heat and damage.</p>
+</blockquote>
+
+<p><strong>Actions</strong></p>
+
+<blockquote>
+  <p>Setting: <code>SmartIndirectFire</code>  (true/false, default true)</p>
+  
+  <p>When true, indirect fire will be used for indirect-fire-capable weapons,
+  if line of fire is obstructed and indirect penalty is less than obstructed penalty.</p>
+  
+  <p>This setting applies equally to both players and enemies.
+  <br></p>
+  
+  <p>Setting: <code>FixMultiTargetBackout</code>  (true/false, default true)</p>
+  
+  <p>The game's Muti-Target back out (escape/right click) is bugged
+  Backing out from first target will cancel the action, and second back out will always cancel the whole thing (regardless of target).</p>
+  
+  <p>When true, this mod will make Multi-Target back out from selected targets one by one as expected.
+  <br></p>
+  
+  <p>Setting: <code>AggressiveMultiTargetAssignment</code>  (true/false, default true)</p>
+  
+  <p>When you select a new target with the Multi-Target skill, all enabled weapons will be reassigned.
+  Each weapon will reset to the target with highest hit chance, or the earlier target when hit chances are the same
+  (A before B, B before C).</p>
+</blockquote>
+
+<p><strong>Terrain Dots</strong></p>
+
+<blockquote>
+  <p>Setting: <code>SpecialTerrainDotSize</code>  (small positive number, default 2)<br>
+  Setting: <code>NormalTerrainDotSize</code>   (small positive number, default 1.25)<br></p>
+  
+  <p>Change the size of terrain dots.  1 is default size, 2 doubles the diameter, 0.5 halves.
+  <br></p>
+  
+  <p>Setting: <code>BoostTerrainDotColor</code>  (true/false, default true)</p>
+  
+  <p>When true, strengthen the colour of special terrain dots to make them easier to see.
+  <br></p>
+  
+  <p>Setting: <code>MovementPreviewRadius</code>  (small positive integer, default 6)</p>
+  
+  <p>When non-zero, dots within this grid radius will be displayed during movement preview.</p>
+  
+  <p>This setting simply override <code>MoveConstants.ExperimentalHexRadius</code> in <code>CombatConstants.json</code>.</p>
+  
+  <p>Because settings this too high will overflow the game's dot buffer, it is hard-caped to 16.
+  The exact crash point will depends on terrain and mech.</p>
+</blockquote>
+
+<p><strong>Terrain Descriptions And Effects</strong></p>
+
+<blockquote>
+  <p>Setting: <code>ShowDangerousTerrain</code>  (true/false, default true)</p>
+  
+  <p>When true, dangerous terrain will show both terrain description and danger description,
+  instead of danger description overriding terrain description.
+  <br></p>
+  
+  <p>Setting: <code>ShowMeleeTerrain</code>  (true/false, default true)</p>
+  
+  <p>When true, terrain description will be displayed in melee and DFA preview,
+  and the terrain reticle will be labeled with the action.
+  <br></p>
+  
+  <p>Setting: <code>FixHeatPreview</code>  (true/false, default true)</p>
+  
+  <p>When true, previewed move destination's terrain will be factored in heat preview, plus any heat effects en-route.
+  For example, moving into water will predict more cooldown and vice versa.
+  <br></p>
+  
+  <p>Setting: <code>FixLosPreviewHeight</code>  (true/false, default true)</p>
+  
+  <p>Walk and Jump will sometimes predicts different Line of Sight, because their preview height is slightly different from each other.
+  When true, they will be made the same.</p>
 </blockquote>
 
 <p><strong>Nameplates</strong></p>
 
 <blockquote>
-  <p>Setting: <code>NameplateColourPlayer</code>  (color string, default "#BFB")<br>
+  <p>Setting: <code>NameplateColourPlayer</code>  (color string, default "#CFC")<br>
   Setting: <code>NameplateColourEnemy</code>  (color string, default "#FBB")<br>
   Setting: <code>NameplateColourAlly</code>  (color string, default "#8FF")<br>
-  Setting: <code>FloatingArmorColourPlayer</code>  (color string, default "#BFB")<br>
+  Setting: <code>FloatingArmorColourPlayer</code>  (color string, default "#CFC")<br>
   Setting: <code>FloatingArmorColourEnemy</code>  (color string, default "#FBB")<br>
   Setting: <code>FloatingArmorColourAlly</code>  (color string, default "#8FF")<br></p>
   
-  <p>When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.</p>
+  <p>When non-empty, change colours of nameplate text and armour bars, making it easier to tell friends from foes.
+  <br></p>
+  
+  <p>Setting: <code>ShowPlayerHealth</code>  (format string, default ", HP {2}/{3}")<br>
+  Setting: <code>ShowEnemyWounds</code>  (format string, default ", Wounds {1}")<br>
+  Setting: <code>ShowAllyHealth</code>  (format string, default ", HP {2}/{3}")<br></p>
+  
+  <p>When non-empty, units that are wounded will have its injuries or health displayed after pilot name.
+  {0} is pilot name, {1} is injury, {2} is (health - injury), and {3} is health.</p>
+  
+  <p>The wounds or health only display when the unit is wounded.
+  Note that enemy's health is unknown to players by design.  {2} and {3} will show "?" when used.</p>
 </blockquote>
+
+<p><strong>Facing Rings Colours</strong></p>
+
+<blockquote>
+  <p>Setting: <code>FacingMarkerPlayerColors</code>  (default "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A")<br>
+  Setting: <code>FacingMarkerEnemyColors</code>  (default "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A")<br>
+  Setting: <code>FacingMarkerTargetColors</code>  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br></p>
+  
+  <p>When non-empty, change the colours of each arc for friends, foes, and targeted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.</p>
+</blockquote>
+
+<p><strong>Line of Sight/Fire Style</strong></p>
+
+<blockquote>
+  <p>Setting: <code>LOSIndirectDotted</code>  (default true, game default false)<br>
+  Setting: <code>LOSNoAttackDotted</code>  (default true)<br>
+  Setting: <code>LOSMeleeDotted</code>  (default false)<br>
+  Setting: <code>LOSClearDotted</code>  (default false)<br>
+  Setting: <code>LOSBlockedPreDotted</code>   (default false)<br>
+  Setting: <code>LOSBlockedPostDotted</code>  (default false)<br></p>
+  
+  <p>When true, the line(s) will be dotted.  When false, the line(s) will be solid.
+  <br></p>
+  
+  <p>Setting: <code>LOSMeleeColors</code>  (default "#F00,#0FF,#0FF,#0F8,#F00")<br>
+  Setting: <code>LOSClearColors</code>  (default "#F00,#0FF,#0FF,#0F8,#F00")<br>
+  Setting: <code>LOSBlockedPreColors</code>   (default "#D0F,#D0F,#D0F,#D0F,#D0F")<br>
+  Setting: <code>LOSBlockedPostColors</code>  (default "#C8E,#C8E,#C8E,#C8E,#C8E")<br>
+  Setting: <code>LOSIndirectColors</code>  (default "#F00,#0FF,#0FF,#0F8,#F00")<br>
+  Setting: <code>LOSNoAttackColors</code>  (default "")<br></p>
+  
+  <p>When non-empty, set the colour and style of various targeting lines.
+  Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.</p>
+  
+  <p>Colours are either empty or in HTML hash syntax.  For example <code>"#F00"</code> = red, <code>"#0F0"</code> = green, <code>"#00F"</code> = blue, <code>"#FFF"</code> = white, <code>"#888"</code> = grey, <code>"#000"</code> = black.
+  Four parts means RGBA, while three parts mean full opacity RGB.  Supports full and short form. e.g. #28B = #2288BB = #2288BBFF.</p>
+  
+  <p>Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in this order.
+  If less colours are specified than direction, the missing directions will use the last colour.
+  For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
+  <br></p>
+  
+  <p>Setting: <code>LOSHueDeviation</code>  (0 to 0.5, default 0.04);
+  Setting: <code>LOSHueHalfCycleMS</code>  (0 to 300k, default 2048);
+  Setting: <code>LOSBrightnessDeviation</code>  (0 to 0.5, default 0.1);
+  Setting: <code>LOSBrightnessHalfCycleMS</code>  (0 to 300k, default 1024);</p>
+  
+  <p>When non-zero, the targeting lines will have animated colour, such as dimming and brightening.</p>
+  
+  <p>"Deviation" is the range of animation. For example cyan has a hue value of "0.5",
+  and a hue deviation of "0.1" will causes it to animate between "0.4" and "0.6",
+  or a cycle of green &lt;> cyan &lt;> blue.
+  Thus, a high hue deviation can cause line colours to mix up and lost their meanings.</p>
+  
+  <p>Brightness also works on a scale of 0 (black) to 1 (brightest) with the animation range
+  determined by the colour and deviation setting.</p>
+  
+  <p>"HalfCycleMS" is the milliseconds needed for hue or brightness to complete a half cycle.
+  In the above example, that would be the time it takes to go from green to blue.</p>
+  
+  <p>The default cycles are power of two for faster modulo calculation, but you can use any integer.
+  <br></p>
+  
+  <p>When the mod "<a href="https://www.nexusmods.com/battletech/mods/135">Firing Line Improvement</a>" is used,
+  it will override the game's code with its own, effectivelly disabling these colour and animation settings.</p>
+</blockquote>
+
+<p><strong>Line of Sight/Fire Width</strong></p>
+
+<blockquote>
+  <p>Setting: <code>LOSWidth</code>  (0 to 10, default 2, game default 1)</p>
+  
+  <p>Set width of all targeting lines (direct, indirect, blocked, can't attack etc.).  Game default is 1  Mod default is 2.
+  <br></p>
+  
+  <p>Setting: <code>LOSWidthBlocked</code>  (0 to 10, default 1.5, game default 0.75)</p>
+  
+  <p>Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
+  <br></p>
+  
+  <p>When the mod "<a href="https://www.nexusmods.com/battletech/mods/135">Firing Line Improvement</a>" is used, it will override this mod's widths.</p>
+</blockquote>
+
+<p><strong>Widths of Obstruction Marker</strong></p>
+
+<blockquote>
+  <p>Setting: <code>LOSMarkerBlockedMultiplier</code>  (0 to 10, default 1.5)</p>
+  
+  <p>Scale the obstruction marker of targeting lines, the "light dot" that split the obstructed line into two. 2 means double width and height, 0.5 means half-half.
+  Set to 1 to leave at game default.  Set to 0 will not remove them from game but will effectively hide them.</p>
+  
+  <p>When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.</p>
+</blockquote>
+
+<p><strong>Refine or Roughen Fire Arc and Jump Arc</strong></p>
+
+<blockquote>
+  <p>Setting: <code>ArcLinePoints</code>  (2 to 127, default 48, game default 18)</p>
+  
+  <p>To some sharp eyes, it is easy to see the hard corners of the arc of indirect targeting lines.
+  Lines are quick to draw, so this mod will happily improves their qualities for you.
+  Set to 2 to make them flat like other lines.  Set to 18 to leave at game default.</p>
+  
+  <p>When the mod "<a href="https://www.nexusmods.com/battletech/mods/135">Firing Line Improvement</a>" is used, the indirect fire arc cannot be modified.</p>
+</blockquote>
+
+<h2 id="combatinformationsettings">Combat Information Settings</h2>
 
 <p><strong>Paper Dolls</strong></p>
 
 <blockquote>
+  <p>Setting: <code>LabelPaperDollSide</code>  (true/false, default true)</p>
+  
+  <p>When true, add L and R around the Front/Rear labels.
+  The exact position slightly differs depending on where the paper doll occurs.
+  <br></p>
+  
   <p>Setting: <code>FixPaperDollRearStructure</code>  (true/false, default true)</p>
   
   <p>The rear structures of the paper dolls are displayed incorrectly because of a typo in game code.
@@ -271,24 +481,30 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   
   <p>Setting: <code>ShowUnderArmourDamage</code>  (true/false, default true)</p>
   
-  <p>When true, armour of damaged location will have a striped pattern instead of solid.</p>
-  
-  <p>Both settings apply to all paper dolls: selection panel, target panel, called shot popup, mech bay, deploy, post-mission report etc.</p>
-</blockquote>
-
-<p><strong>Mech Info</strong></p>
-
-<blockquote>
-  <p>Setting: <code>FixHeatPreview</code>  (true/false, default true)</p>
-  
-  <p>When true, previewed move destination's terrain will be factored in heat preview, plus any heat effects en-route.
-  For example, moving into water will predict more cooldown and vice versa.
+  <p>When true, armour of damaged location will have a striped pattern instead of solid.
   <br></p>
   
+  <p>Both settings apply to all paper dolls: selection panel, target panel, called shot popup, mech bay, deploy, post-mission report etc.
+  <br></p>
+  
+  <p>Setting: <code>ShowAmmoInTooltip</code>  (true/false, default true)<br>
+  Setting: <code>ShowEnemyAmmoInTooltip</code>  (true/false, default false)<br></p>
+  
+  <p>When true, show ammo count in the component lists when you mouseover a location on the paper doll in combat.
+  Also, non-exploding (half-empty) ammo bin will be dimmed on the list.</p>
+  
+  <p>The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.</p>
+</blockquote>
+
+<p><strong>Mech and MechWarrior</strong></p>
+
+<blockquote>
   <p>Setting: <code>ShowNumericInfo</code>  (true/false, default true)</p>
   
   <p>When true, display heat, stability, movement, and distance numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.
-  Prediction numbers are supplied by the game and is subject to all its quirks and bugs and mods, such as <code>FixHeatPreview</code>.
+  Prediction numbers are supplied by the game and is subject to all its quirks and bugs and mods, such as <code>FixHeatPreview</code>.</p>
+  
+  <p>When callout mode is enabled (default Left Alt key), pilot skills will be displayed instead.
   <br></p>
   
   <p>Setting: <code>ShowUnitTonnage</code>  (true/false, default false)</p>
@@ -297,21 +513,6 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   
   <p>Duplicates with Extended Information, but AIM override it and use a shorter form for mechs to fit <code>ShowNumericInfo</code>.
   Default false because the short form may overwhelm inexperienced players.
-  <br></p>
-</blockquote>
-
-<p><strong>MechWarrior Info</strong></p>
-
-<blockquote>
-  <p>Setting: <code>ShowEnemyWounds</code>  (format string, default "{0}, Wounds {1}")<br>
-  Setting: <code>ShowNPCHealth</code>  (format string, default "{0}, HP {2}/{3}")<br></p>
-  
-  <p>When non-empty, NPCs who are wounded will have its injuries or health displayed.
-  {0} is pilot name, {1} is injury, {2} is (health - injury), and {3} is health.</p>
-  
-  <p>Note that enemy's health is unknown to players by design.  {2} and {3} will show "?" when used.
-  If the format does not starts with {0}, it will be always active.
-  Otherwise, the wounds or health only display when the NPC is wounded.
   <br></p>
   
   <p>Setting: <code>ShortPilotHint</code>  (format string, default "G:{3} P:{4} G:{5} T:{6}")</p>
@@ -326,11 +527,16 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>If the line is too long, for example when HP is included, the line will wrap.</p>
 </blockquote>
 
-<p><strong>Weapon Info</strong></p>
+<p><strong>Weapons Loadout</strong></p>
 
 <blockquote>
-  <p>Setting: <code>ColouredLoadout</code>  (true/false, default true) <br>
-  Setting: <code>ShowDamageInLoadout</code>  (true/false, default true) <br></p>
+  <p>Setting: <code>SaturationOfLoadout</code>  (0 to 1, default 0.5)</p>
+  
+  <p>When non-zero, weapon loadout list will be coloured, based on the weapon colour configurated by the game.
+  A high number will make the colour stronger, while a low number will make them more washed out.
+  <br></p>
+  
+  <p>Setting: <code>ShowDamageInLoadout</code>  (true/false, default true)</p>
   
   <p>When true, loadout list of the targeting computer will be coloured by weapon type and postfixed with weapon damage.
   <br></p>
@@ -350,17 +556,44 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Setting: <code>ShowMeleeDamageInLoadout</code>  (true/false, default true)</p>
   
   <p>When true, loadout list of the targeting computer will have melee and dfa entry.
-  Their damage will always be displayed regardless of <code>ShowDamageInLoadout</code>.
+  Their damage will always be displayed regardless of <code>ShowDamageInLoadout</code>.</p>
+</blockquote>
+
+<p><strong>Weapon Panel</strong></p>
+
+<blockquote>
+  <p>Setting: <code>ShowReducedWeaponDamage</code>  (true/false, default true)</p>
+  
+  <p>When true, the damage displayed in weapon panel will take terrain cover and Guarded status into account.
+  The number should match the floating damage when the attack hit the enemy, unless damage variant is used.</p>
+  
+  <p>This setting is compatible with Joel Meador's <a href="https://github.com/janxious/BT-WeaponRealizer">WeaponRealizer</a>.
+  Non-random variances from that mod should be factored in displayed damage.</p>
+  
+  <p>Despite the name, if weapon damage is somehow boosted by terrain (such as by a mod), the displayed numbers will go up.
   <br></p>
   
-  <p>Setting: <code>ShowAmmoInTooltip</code>  (true/false, default true)<br>
-  Setting: <code>ShowEnemyAmmoInTooltip</code>  (true/false, default false)<br></p>
+  <p>Setting: <code>ShowTotalWeaponDamage</code>  (true/false, default true)</p>
   
-  <p>When true, show ammo count in the component lists when you mouseover a location on the paper doll.</p>
+  <p>When true, a new "Total" slot will be displayed at the bottom of the weapon list, above melee and DFA.
+  It will show the total damage of all enabled weapons, or all weapon that will fire at selected target.
+  The damage column shows max damage, while the accuracy column shows average damage given current accuracy.</p>
   
-  <p>The main purpose is to allow you to see the state of each ammo bin and tell whether they are at risk of exploding.
+  <p>If <code>ShowReducedWeaponDamage</code> is true, the total damage will reflect terrain and status effects.
   <br></p>
   
+  <p>Setting: <code>CalloutWeaponStability</code>  (true/false, default true)</p>
+  
+  <p>When true, pressing the game's callout toggle button (default LeftAlt) will cause the weapon list to 
+  display stability damage instead of normal damage.</p>
+  
+  <p>If <code>ShowReducedWeaponDamage</code> is true, the numbers will be affected by status such as Entrenched.
+  If <code>ShowTotalWeaponDamage</code> is true, total stability damage will be displayed.</p>
+</blockquote>
+
+<p><strong>Weapon Mouseover Hint</strong></p>
+
+<blockquote>
   <p>Setting: <code>ShowWeaponProp</code>  (true/false, default true)<br>
   Setting: <code>WeaponRangeFormat</code>  (string, default "Min {0} : Long {2} : Max {4}")<br></p>
   
@@ -373,107 +606,6 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   The string {0} to {4} will be replaced by a weapon's MinRange, ShortRange, MediumRange, LongRange, and MaxRange.
   Most of them are unused by vanilla game, so this mod use MinRange, MediumRange, and MaxRange by default.
   But if a mod is installed that make use of them, the range display can be customised, such as "{0}:{1}:{2}:{3}:{4}".</p>
-</blockquote>
-
-<p><strong>Multi-Target</strong></p>
-
-<blockquote>
-  <p>Setting: <code>FixMultiTargetBackout</code>  (true/false, default true)</p>
-  
-  <p>The game's Muti-Target back out (escape/right click) is bugged
-  Backing out from first target will cancel the action, and second back out will always cancel the whole thing (regardless of target).</p>
-  
-  <p>When true, this mod will make Multi-Target back out from selected targets one by one as expected.</p>
-</blockquote>
-
-<h2 id="targetinglineandfacingringsettings">Targeting Line and Facing Ring Settings</h2>
-
-<p><strong>LoS Widths</strong></p>
-
-<blockquote>
-  <p>Setting: <code>LOSWidth</code>  (0 to 10, default 2, game default 1)</p>
-  
-  <p>Set width of all targeting lines (direct, indirect, blocked, can't attack etc.).  Game default is 1  Mod default is 2.
-  <br></p>
-  
-  <p>Setting: <code>LOSWidthBlocked</code>  (0 to 10, default 1.5, game default 0.75)</p>
-  
-  <p>Set width of obstructed part of an obstructed targeting lines, which is normally thinner than other lines by default.  Game default is 0.75.  Mod default is 1.5.
-  <br></p>
-  
-  <p>When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.</p>
-</blockquote>
-
-<p><strong>LoS Styles and Colours</strong></p>
-
-<blockquote>
-  <p>Setting: <code>LOSIndirectDotted</code>  (default true, game default false)<br>
-  Setting: <code>LOSNoAttackDotted</code>  (default true)<br>
-  Setting: <code>LOSMeleeDotted</code>  (default false)<br>
-  Setting: <code>LOSClearDotted</code>  (default false)<br>
-  Setting: <code>LOSBlockedPreDotted</code>   (default false)<br>
-  Setting: <code>LOSBlockedPostDotted</code>  (default false)<br>
-  Setting: <code>LOSMeleeColors</code>  (default "")<br>
-  Setting: <code>LOSClearColors</code>  (default "")<br>
-  Setting: <code>LOSBlockedPreColors</code>   (default "#D0F")<br>
-  Setting: <code>LOSBlockedPostColors</code>  (default "#C8E")<br>
-  Setting: <code>LOSIndirectColors</code>  (default "")<br>
-  Setting: <code>LOSNoAttackColors</code>  (default "")<br></p>
-  
-  <p>When non-empty, set the colour and style of various targeting lines.
-  Obstructed lines has two parts. The part before obstruction is Pre, and the part after is Post.</p>
-  
-  <p>Colours are either empty or in HTML hash syntax.  For example <code>"#F00"</code> = red, <code>"#0F0"</code> = green, <code>"#00F"</code> = blue, <code>"#FFF"</code> = white, <code>"#888"</code> = grey, <code>"#000"</code> = black.
-  Four parts means RGBA, while three parts mean full opacity RGB.  Supports full and short form. e.g. #28B = #2288BB = #2288BBFF.</p>
-  
-  <p>Colours and only colours can also vary by attack direction, separated by comma.  The directions are Front, Left, Right, Rear, and Prone, in this order.
-  If less colours are specified than direction, the missing directions will use the last colour.
-  For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.</p>
-  
-  <p>When the mod "Firing Line Improvement" is detected, these settings will be disabled to avoid conflicts.
-  Note that Firing Line Improvement does not have directional styling.</p>
-</blockquote>
-
-<p><strong>Facing Rings Colours</strong></p>
-
-<blockquote>
-  <p>Setting: <code>FacingMarkerPlayerColors</code>  (default "#FFFA,#CFCA,#CFCA,#AFAC,#FF8A")<br>
-  Setting: <code>FacingMarkerEnemyColors</code>  (default "#FFFA,#FCCA,#FCCA,#FAAC,#FF8A")<br>
-  Setting: <code>FacingMarkerTargetColors</code>  (default "#F41F,#F41F,#F41F,#F41F,#F41F")<br></p>
-  
-  <p>When non-empty, change the colours of each arc for friends, foes, and targeted arc during attack.  The colours are for Front, Left, Right, Rear, and Prone.</p>
-</blockquote>
-
-<p><strong>Widths of Obstruction Marker</strong></p>
-
-<blockquote>
-  <p>Setting: <code>LOSMarkerBlockedMultiplier</code>  (0 to 10, default 1.5)</p>
-  
-  <p>Scale the obstruction marker of targeting lines, the "light dot" that split the obstructed line into two. 2 means double width and height, 0.5 means half-half.
-  Set to 1 to leave at game default.  Set to 0 will not remove them from game but will effectively hide them.</p>
-  
-  <p>When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.</p>
-</blockquote>
-
-<p><strong>Refine or Roughen Fire Arc and Jump Arc</strong></p>
-
-<blockquote>
-  <p>Setting: <code>ArcLinePoints</code>  (2 to 1000, default 48, game default 18)</p>
-  
-  <p>To some sharp eyes, it is easy to see the hard corners of the arc of indirect targeting lines.
-  Lines are quick to draw, so this mod will happily improves their qualities for you.
-  Set to 2 to make them flat like other lines.  Set to 18 to leave at game default.</p>
-  
-  <p>When the mod "Firing Line Improvement" is detected, this setting will be disabled to avoid conflicts.</p>
-</blockquote>
-
-<p><strong>Fix LoS Inconsistency</strong></p>
-
-<blockquote>
-  <p>Setting: <code>FixLosPreviewHeight</code>  (true/false, default true)</p>
-  
-  <p>Walk and Jump will sometimes predicts different Line of Sight, because their preview height is slightly different from each other.
-  When true, they will be made the same.</p>
 </blockquote>
 
 <h2 id="calledshotsettings">Called Shot Settings</h2>
@@ -556,13 +688,14 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Setting: <code>IncreaseMeleePositionChoice</code>  (true/false, default true)<br>
   Setting: <code>IncreaseDFAPositionChoice</code>  (true/false, default true)</p>
   
-  <p>When true, melee and DFA can use all available positions, instead of nearest three.  Compatible with MeleeMover.
+  <p>When true, melee and DFA can use all available positions, instead of nearest three.
+  Compatible with the mod "<a href="https://www.nexusmods.com/battletech/mods/226">MeleeMover</a>".
   <br></p>
   
   <p>Setting: <code>UnlockMeleePositioning</code>  (true/false, default true)</p>
   
   <p>When true, player units may move to another melee position when target is already in melee range.
-  When the mod "MeleeMover" is detected, this setting will be disabled to avoid conflicts.</p>
+  When the mod "<a href="https://www.nexusmods.com/battletech/mods/226">MeleeMover</a>" is used, a warning will be logged but otherwise fully compatible.</p>
 </blockquote>
 
 <p><strong>Adjust Max Height Offset</strong></p>
@@ -614,15 +747,6 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   Game default is false.</p>
 </blockquote>
 
-<p><strong>Indirect Fire</strong></p>
-
-<blockquote>
-  <p>Setting: <code>SmartIndirectFire</code>  (true/false, default true)</p>
-  
-  <p>When true, indirect fire will be used for indirect-fire-capable weapons,
-  if line of fire is obstructed and indirect penalty is less than obstructed penalty.</p>
-</blockquote>
-
 <p><strong>Jumped Modifier</strong></p>
 
 <blockquote>
@@ -633,18 +757,6 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   
   <p>Effective only if "Jumped" is in the modifier lists.</p>
 </blockquote>
-
-<pre><code>  public bool ColouredLoadout = true;
-
-  [ JsonComment( "Show weapon damage in weapon loadout list in targetting computer.  Default true." ) ]
-  public bool ShowDamageInLoadout = true;
-
-  [ JsonComment( "Show alpha/melee&amp;dfa damage in weapon loadout list in targetting computer.  Default \"Alpha {2}+{3}\"." ) ]
-  public string ShowAlphaDamageInLoadout = "Damage {2} + Long {3}";
-
-  [ JsonComment( "Show melee &amp; dfa damage in weapon loadout list in targetting computer.  Default ." ) ]
-  public bool ShowMeleeDamageInLoadout = true;
-</code></pre>
 
 <h2 id="nethitmodifiersettings">Net Hit Modifier Settings</h2>
 
@@ -725,7 +837,7 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <strong>ArmMounted</strong> - (Ranged) Apply arm mounted modifier if weapon is mounted on an arm. (Melee) Apply arm mount bonus if the punching arm is intact and the attack is not DFA and not against prone mech or vehicle. <br>
   <strong>Direction</strong> - Apply bonus if attack is made from the target's side or rear. <br>
   <strong>DFA</strong> - (Melee) Apply DFA penalty if attack is DFA. <br>
-  <strong>Height</strong> - (Ranged) Apply height modifier.  (Melee) Apply one level of height modifier if height different is at least half of melee reach.  DFA height difference is calculated like ranged weapon - from pre-flight attacker position to target position. <br>
+  <strong>Height</strong> - (Ranged) Apply height modifier.  (DFA) Height is measured from pre-flight attacker position to target position.  (Melee) Apply one level of height modifier if height different is at least half of melee reach (medium if MaxMeleeVerticalOffsetByClass is used).<br>
   <strong>Indirect</strong> - (Ranged) Apply indirect fire penalty. <br>
   <strong>Inspired</strong> - Apply inspired bonus. <br>
   <strong>Jumped</strong> - Apply jumped penalty after jump, if any. <br>
@@ -852,11 +964,14 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 <p><strong>Skip Criting the Dead Mech</strong></p>
 
 <blockquote>
-  <p>Setting: <code>SkipCritingDeadMech</code>  (true/false, default true)</p>
+  <p>Setting: <code>SkipBeatingDeadMech</code>  ("", "critical", or "damage", default "critical")</p>
   
-  <p>When true, critical hits are not rolled for dead units.
+  <p>When set to "critical", critical hits are not rolled for dead units.
   This is mainly designed to prevent crit messages from flooding over cause of death.
   As a side effect, slightly more components will be salvageable instead of being destroyed.</p>
+  
+  <p>When set to "damage", damage is not applied to dead units.
+  This means as soon as a target is removed from play, it won't take any more damage or crits.</p>
 </blockquote>
 
 <p><strong>NPC Crit Multipliers</strong></p>
@@ -1007,13 +1122,18 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 <p><strong>Multiple Critical Hits from Single Shot</strong></p>
 
 <blockquote>
-  <p>Setting: <code>MultupleCrits</code> (true or false, default false)</p>
+  <p>Setting: <code>MultipleCrits</code> (true or false, default false)</p>
   
   <p>In Classic BattleTech, critical hits may damage multiple components.
   This setting recreate that feel in the context of BattleTech's crit system.</p>
   
   <p>When true, a successful crit roll is deduced from the crit chance.
-  This leftover crit chance is then rolled again, and repeated until a crit roll fails.</p>
+  This leftover crit chance is then rolled again, and repeated until a crit roll fails.
+  Note that successful crit rolls do not guarantee crits, since they often land on empty slots.</p>
+  
+  <p>The attack log of this mod only logs one line per attack.
+  Only the first crit roll and the first crit'ed component (and its slot roll) will be logged.
+  (They will be different when the first roll get an empty slot and a subsequence roll crits.)</p>
 </blockquote>
 
 <h2 id="hitresolutionsettings">Hit Resolution Settings</h2>
@@ -1129,18 +1249,12 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 
 <li>BattleTech 1.1 - AIM 1.0.1 to 2.1.2.</li>
 
-<li>BattleTech 1.2 - AIM 2.2 to 2.5.</li>
+<li>BattleTech 1.2 - AIM 2.2 to 3.0.</li>
 </ul>
 
 <p>AIM is aware of some other mods and will behave differently in their present to meet player expectations.</p>
 
 <p>Mod settings changed by these behaviours are not saved.  If you want to replace them with AIM, you may need to change AIM settings.</p>
-
-<p><strong><a href="https://www.nexusmods.com/battletech/mods/135">Firing Line Improvement</a></strong>
-AIM will skip line styling and arc point adjustment to not crash line drawings.</p>
-
-<p><strong><a href="https://www.nexusmods.com/battletech/mods/226">MeleeMover</a></strong>
-AIM will skip its own melee unlock to preserve sprint range melee.</p>
 
 <p><strong><a href="https://www.nexusmods.com/battletech/mods/90">Real Hit Chance</a></strong>
 AIM will enable corrected hit chance display and override this mod, since it does not support AIM features such as adjustable correction strength.</p>
@@ -1248,6 +1362,8 @@ License: <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPL v3</a></p>
 <li><p>Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.</p></li>
 
 <li><p>Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.</p></li>
+
+<li><p>Thanks CptMoore for GUI log code, which helps a lot in finding and adjusting GUI components.</p></li>
 
 <li><p>And many more players on the BattleTechGame discord that gave comments and ideas.</p></li>
 </ul>

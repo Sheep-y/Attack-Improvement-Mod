@@ -1,6 +1,6 @@
 CHANGE LOG
 
-????-??-?? AIM Version 3.0 development for BATTLETECH 1.2.0
+2018-11-09 AIM Version 3.0 beta for BATTLETECH 1.2.1
 
 * New: Press F1 to F4 to select player mech.
 * New: Shift+Tab or Shift+Click (multi-target) to select in reverse direction.
@@ -28,7 +28,7 @@ CHANGE LOG
 * Mod: ShowNumericInfo no longer shows pc movement points during enemy attacks.
 * Mod: ShowAmmoInTooltip now darkens non-exploding ammo bins.
 * Mod: Turning cost is now deduced from movement points.
-* Mod: Write an archive log if normal attack log is non-writeable.
+* Mod: Attack log now writes to archive if normal log is locked.
 * Fix: FacingMarkerEnemyColors not applied when FacingMarkerPlayerColors is empty.
 * Fix: NPE when FacingMarkerPlayerColors is non-empty but FacingMarkerEnemyColors is empty.
 * Fix: FloatingArmorColours no longer applies to target panel.

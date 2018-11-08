@@ -1,5 +1,5 @@
-# AIM - Attack Improvement Mod 3.0 Development #
-For BATTLETECH 1.2.0
+# AIM - Attack Improvement Mod 3.0 Beta #
+For BATTLETECH 1.2.1
 
 - [Features Overview](#features-overview)
 - [Installation](#installation)
@@ -1211,6 +1211,7 @@ Follow these steps to see game code and learn how BATTLETECH mod works:
 
 * Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.
 * Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.
+* Thanks CptMoore for GUI log code, which helps a lot in finding and adjusting GUI components.
 * And many more players on the BattleTechGame discord that gave comments and ideas.
 
 Despite feature overlap with some mods, this mod does not reference or use their code due to lack of license, and in most cases the approaches are different.
