@@ -53,7 +53,7 @@
 
   "FixHeatPreview": true,
 
-  /* Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results. */
+  /* Fix the issue that walk / sprint does not project line of sight / fire at same height and may leads to different results.  Default true. */
 
   "FixLosPreviewHeight": true,
 
@@ -120,8 +120,8 @@
 
   "WeaponRangeFormat": "",
 
-  /* Format pilot name to show wounds (enemies) and health (ally) after their names.
-   * {0} is pilot name, {1} is injury, {2} is health - injury, and {3} is health.  Set to empty to not change game default. */
+  /* Format pilot name to show wounds (enemies) and health (non-enemy) after their names.
+   * {1} is injury, {2} is health - injury, and {3} is health.  Set to empty to not change game default. */
 
   "ShowPlayerHealth": "",
   "ShowEnemyWounds": "",
@@ -337,7 +337,7 @@
 
   /* Display base hit chance in weapon mouseover hint.  Default true. */
 
-  "ShowBaseHitchance": true,
+  "ShowBaseHitchance": false,
 
   /* Reverse in-combat modifier display so that + is bonus and - is penalty.  Default true. */
 
