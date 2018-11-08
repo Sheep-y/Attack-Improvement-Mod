@@ -72,7 +72,7 @@
 
   /* How many grids to show around mouse cursor.  Same as CombatConstants.MoveConstants.ExperimentalHexRadius.  Default 6.  Game default 4. */
 
-  "MovementPreviewRadius": 6,
+  "MovementPreviewRadius": 12,
 
   /* Colour saturation of weapon loadout by weapon type in targeting computer.  Default 0.5.  0 to disable. */
 

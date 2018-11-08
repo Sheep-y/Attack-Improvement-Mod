@@ -188,9 +188,12 @@ These settings can be changed in `settings.json`.
 
 > Setting: `MovementPreviewRadius`  (small positive integer, default 6)
 >
-> When non-zero, this much grid dots will be displayed during movement preview.
+> When non-zero, dots within this grid radius will be displayed during movement preview.
 >
 > This setting simply override `MoveConstants.ExperimentalHexRadius` in `CombatConstants.json`.
+>
+> Because settings this too high will overflow the game's dot buffer, it is hard-caped to 16.
+> The exact crash point will depends on terrain and mech.
 
 
 **Terrain Descriptions And Effects**
@@ -303,7 +306,7 @@ These settings can be changed in `settings.json`.
 <br>
 
 > When the mod "[Firing Line Improvement](https://www.nexusmods.com/battletech/mods/135)" is used,
-> it will override the game's code with its own and render these colour and animation settings moot.
+> it will override the game's code with its own, effectivelly disabling these colour and animation settings.
 
 
 **Line of Sight/Fire Width**

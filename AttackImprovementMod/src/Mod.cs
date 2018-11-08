@@ -90,7 +90,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          RangeCheck( "LoadoutColourSaturation", ref settings.SaturationOfLoadout, 0, 1 );
          RangeCheck( "SpecialTerrainDotSize", ref settings.SpecialTerrainDotSize, 0, 10 );
          RangeCheck( "NormalTerrainDotSize", ref settings.NormalTerrainDotSize, 0, 10 );
-         RangeCheck( "MovementPreviewRadius", ref settings.MovementPreviewRadius, 0, 32 );
+         RangeCheck( "MovementPreviewRadius", ref settings.MovementPreviewRadius, 0, 16 );
 
          RangeCheck( "LOSWidth", ref settings.LOSWidth, 0, 10 );
          RangeCheck( "LOSWidthBlocked", ref settings.LOSWidthBlocked, 0, 10 );
