@@ -9,6 +9,7 @@ CHANGE LOG
 * New: Set nameplate text colours.
 * New: Show wounds or health in mechwarrior names.
 * New: See target skills with callout toggle.
+* New: Add L and R label to paper dolls.
 * New: Line of sight colour (hue and brightness) animation.
 * New: Use indirect fire when better than direct fire.
 * New: Colour weapon and show damage in weapon loadout list.
@@ -19,11 +20,10 @@ CHANGE LOG
 * New: Show stability damage with callout toggle (Left Alt).
 * New: Show rare weapon properties and weapon range in meters in weapon mouseover.
 * New: Reverse To-Hit modifier sign, positive bonus / negative penalty like mech bay.
-* New: (Optional) Show short range in hit modifier breakdown.
 * New: Show terrain description on danger terrains and during melee/DFA.
 * New: Aggressive multi-target assignment.
-* New: Excessive damage may be skipped on dead units.
-* New: Add L and R label to paper dolls.
+* New: (Optional) Show short range in hit modifier breakdown.
+* New: (Optional) Excessive damage may be skipped on dead units, in addition to crit.
 * Mod: ShortPilotHint now hides HP by default, to avoid line wrapping on elite mechwarriors.
 * Mod: ShowNumericInfo no longer shows pc movement points during enemy attacks.
 * Mod: ShowAmmoInTooltip now darkens non-exploding ammo bins.
