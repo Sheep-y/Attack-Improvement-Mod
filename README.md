@@ -980,10 +980,12 @@ These settings can be changed in `settings.json`.
 > Setting: `CritLocationTransfer` (true or false, default false)
 >
 > When true and a successful critical hit happens on a location that has nothing to crit,
-> usually because of `CritIgnoreDestroyedComponent` and `CritIgnoreEmptySlots`,
 > the crit will transfer to the next location using damage transfer rule.
+> It is strongly advised to also set `CritFollowDamageTransfer` to true.
 >
-> For best simulation of Classic BattleTech's crit, please also set `CritFollowDamageTransfer` to true.
+> In AIM 2.5, this transfer is checked after factoring `CritIgnoreDestroyedComponent` and `CritIgnoreEmptySlots`.
+> Since AIM 3.0, this transfer always ignore destroyed components and empty slots, regardless of those settings.
+
 
 
 **Multiple Critical Hits from Single Shot**

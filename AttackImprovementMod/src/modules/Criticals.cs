@@ -101,8 +101,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          CritChanceVar = (float) Settings.CritChanceZeroStructure - CritChanceBase;
          Info( "Crit chance (structural): Base {0} Var {1}, Min {2} Max {3}", CritChanceBase, CritChanceVar, CritChanceMin, CritChanceMax );
          if ( Settings.CritLocationTransfer ) {
-            if ( ! Settings.CritIgnoreDestroyedComponent || ! Settings.CritIgnoreEmptySlots )
-               Warn( "Not enabling CritIgnoreDestroyedComponent and CritIgnoreEmptySlots will make CritLocationTransfer hard to happens." );
             if ( ! Settings.CritFollowDamageTransfer )
                Warn( "Disabling CritFollowDamageTransfer will cause less crit to be checked, diminishing CritLocationTransfer." );
          }
@@ -363,38 +361,43 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return critMultiplier;
       }
 
-      public static MechComponent GetComponentFromRoll ( AbstractActor me, int location, float random, int MinSlots = 0 ) {
-         List<MechComponent> list = ListComponentsAtLocation( me, location, MinSlots );
+      public static MechComponent GetComponentFromRoll ( AbstractActor me, int location, float random ) {
+         List<MechComponent> list = ListComponentsAtLocation( me, location );
+         if ( me is Mech mech ) {
+            if ( ( list.IsNullOrEmpty() || list.All( e => e.DamageLevel >= ComponentDamageLevel.Destroyed ) ) && Settings.CritLocationTransfer ) {
+               ArmorLocation newLocation = MechStructureRules.GetPassthroughLocation( MechStructureRules.GetArmorFromChassisLocation( (ChassisLocations) location ) & FrontArmours, AttackDirection.FromFront );
+               if ( newLocation != ArmorLocation.None ) {
+                  Verbo( "Crit list empty at {0} of {1}, transferring crit to {2}", (ChassisLocations) location, me, newLocation );
+                  ChassisLocations chassis = MechStructureRules.GetChassisLocationFromArmorLocation( newLocation );
+                  return GetComponentFromRoll( me, (int) chassis, random );
+               }
+            } else if ( ! Settings.CritIgnoreEmptySlots ) {
+               int MinSlots = mech.MechDef.GetChassisLocationDef( (ChassisLocations) location ).InventorySlots;
+               if ( DebugLog && MinSlots > list.Count ) Verbo( "Padding list to {0} with empty slots", MinSlots );
+               for ( int i = list.Count ; i < MinSlots ; i++ )
+                  list.Add( null );
+            }
+         }
          int slot = (int)( list.Count * random );
          MechComponent result = slot < list.Count ? list[ slot ] : null;
-         if ( list.Count <= 0 && Settings.CritLocationTransfer && me is Mech mech ) { // TODO: Handle crit transfer at ListComponentsAtLocation so that empty slots won't block transfer
-            ArmorLocation newLocation = MechStructureRules.GetPassthroughLocation( MechStructureRules.GetArmorFromChassisLocation( (ChassisLocations) location ) & FrontArmours, AttackDirection.FromFront );
-            if ( newLocation != ArmorLocation.None ) {
-               Verbo( "Crit list empty at {0} of {1}, transferring crit to {2}", (ChassisLocations) location, me, newLocation );
-               ChassisLocations chassis = MechStructureRules.GetChassisLocationFromArmorLocation( newLocation );
-               result = GetComponentFromRoll( me, (int) chassis, random, mech.MechDef.GetChassisLocationDef( chassis ).InventorySlots );
-            }
-         } else if ( DebugLog ) Verbo( "Slot roll {0}, slot count {1}, slot {2}, component {3} status {4}", random, list.Count, slot, result, result?.DamageLevel );
+         if ( DebugLog ) Verbo( "Slot roll {0}, slot count {1}, slot {2}, component {3} status {4}", random, list.Count, slot, result, result?.DamageLevel );
          AttackLog.LogCritComp( result, slot );
          return result;
       }
 
-      public static List<MechComponent> ListComponentsAtLocation ( AbstractActor me, int location, int MinSlots = 0 ) {
-         List<MechComponent> list = new List<MechComponent>( MinSlots );
+      public static List<MechComponent> ListComponentsAtLocation ( AbstractActor me, int location ) {
+         List<MechComponent> list = new List<MechComponent>( 0 );
          foreach ( MechComponent component in me.allComponents ) {
             int componentLocation = MechEngineerGetCompLocation != null
                                   ? (int) MechEngineerGetCompLocation.Invoke( null, new object[]{ component } )
                                   : component.Location;
             int flag = componentLocation & location;
-            if ( DebugLog && flag > 0 ) Verbo( "List components at {0}, {1} size {2} ({3})", location, component, component.inventorySize, component.DamageLevel );
             if ( flag <= 0 ) continue;
+            if ( DebugLog ) Verbo( "List components at {0}, {1} size {2} ({3})", location, component, component.inventorySize, component.DamageLevel );
             if ( Settings.CritIgnoreDestroyedComponent && component.DamageLevel >= ComponentDamageLevel.Destroyed ) continue;
             for ( int i = component.inventorySize ; i > 0 ; i-- )
                list.Add( component );
          }
-         if ( ! Settings.CritIgnoreEmptySlots )
-            for ( int i = list.Count ; i < MinSlots ; i++ )
-               list.Add( null );
          return list;
       }
 
@@ -425,7 +428,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
          public abstract float GetCritChance ();
          public virtual MechComponent FindComponentFromRoll ( float random ) {
-            return component = GetComponentFromRoll( target, 65535, random, target.allComponents.Count );
+            return component = GetComponentFromRoll( target, 65535, random );
          }
          public virtual int GetCritLocation () { return HitLocation; } // Used to play VFX
       }
@@ -454,7 +457,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public override MechComponent FindComponentFromRoll ( float random ) {
-            return component = GetComponentFromRoll( target, (int) critLocation, random, Me.MechDef.GetChassisLocationDef( critLocation ).InventorySlots );
+            return component = GetComponentFromRoll( target, (int) critLocation, random );
          }
 
          public override int GetCritLocation () { return (int) critLocation; }
