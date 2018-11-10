@@ -38,6 +38,7 @@ CHANGE LOG
 * Fix: Distance info is now displayed for non-mech units.
 * Fix: FixPaperDollRearStructure now works in campaign, without going through combat first.
 * Fix: Melee height modifier now compatible with MaxMeleeVerticalOffsetByClass.
+* Fix: Rear crit chance fixed when ThroughArmorCrit is disabled.
 * Fix: Only first crit roll and first crit component is now logged when MultupleCrits is true.
 * Fix: DFA self-damage log location misalignment.
 

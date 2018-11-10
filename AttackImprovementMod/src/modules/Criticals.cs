@@ -16,6 +16,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private const bool DebugLog = false;
       private const ArmorLocation FrontArmours = ArmorLocation.Head | ArmorLocation.LeftArm | ArmorLocation.LeftTorso | ArmorLocation.CenterTorso
                                                | ArmorLocation.RightTorso | ArmorLocation.RightArm | ArmorLocation.LeftLeg | ArmorLocation.RightLeg;
+      private const ArmorLocation RearArmours = ArmorLocation.Head | ArmorLocation.LeftArm | ArmorLocation.LeftTorsoRear | ArmorLocation.CenterTorsoRear
+                                               | ArmorLocation.RightTorsoRear | ArmorLocation.RightArm | ArmorLocation.LeftLeg | ArmorLocation.RightLeg;
 
       private static Type MechType = typeof( Mech );
 
@@ -606,7 +608,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static bool Override_CheckForCrit ( Mech __instance, WeaponHitInfo hitInfo, ChassisLocations location, Weapon weapon ) { try {
          if ( location == ChassisLocations.None ) return false;
          if ( ThroughArmorCritEnabled ) Error( "Assertion error: Override_CheckForCrit is not designed to work with TAC." );
-         ArmorLocation HitLocation = MechStructureRules.GetArmorFromChassisLocation( location ) & FrontArmours;
+         ArmorLocation mask = hitInfo.attackDirection == AttackDirection.FromBack ? RearArmours : FrontArmours;
+         ArmorLocation HitLocation = MechStructureRules.GetArmorFromChassisLocation( location ) & mask;
          if ( DebugLog ) Verbo( "Override_CheckForCrit on {0} at {1} by {2}, location placeholder = {3}", __instance, location, weapon, HitLocation );
          CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), (int) HitLocation, false );
          return false;
