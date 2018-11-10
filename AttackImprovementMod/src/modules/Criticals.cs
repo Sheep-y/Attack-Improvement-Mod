@@ -21,7 +21,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static bool ThroughArmorCritEnabled, SkipCritingDeadMech;
       private static float MultiplierEnemy, MultiplierAlly,
-         TAC_Threshold, TAC_ThresholdPerc, TAC_BaseChance, TAC_VarChance, CritChanceMin, CritChanceMax, CritChanceBase, CritChanceVar;
+         TAC_Threshold, TAC_ThresholdPerc, TACritChanceBase, TACritChanceVar, CritChanceMin, CritChanceMax, CritChanceBase, CritChanceVar;
 
 #pragma warning disable CS0162 // Disable "unreachable code" warnings due to DebugLog flag
       public override void CombatStartsOnce () {
@@ -116,13 +116,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Warn( "FullStructureCrit disabled because ThroughArmorCritical is enabled, meaning full structure can be crit'ed." );
             Settings.FixFullStructureCrit = false;
          }
-         TAC_BaseChance = (float) Settings.CritChanceFullArmor;
-         TAC_VarChance = (float) Settings.CritChanceZeroArmor - TAC_BaseChance;
+         TACritChanceBase = (float) Settings.CritChanceFullArmor;
+         TACritChanceVar = (float) Settings.CritChanceZeroArmor - TACritChanceBase;
          if ( Settings.ThroughArmorCritThreshold > 1 )
             TAC_Threshold = (float) Settings.ThroughArmorCritThreshold;
          else
             TAC_ThresholdPerc = (float)Settings.ThroughArmorCritThreshold;
-         Info( "Crit chance (armour): Base {0} Var {1}, Threshold {2} or {3}%", TAC_BaseChance, TAC_VarChance, TAC_Threshold, TAC_ThresholdPerc );
+         Info( "Crit chance (armour): Base {0} Var {1}, Threshold {2} or {3}%", TACritChanceBase, TACritChanceVar, TAC_Threshold, TAC_ThresholdPerc );
          if ( Settings.ThroughArmorCritThreshold != 0 && ! Settings.CritFollowDamageTransfer )
             Warn( "Disabling CritFollowDamageTransfer may affect ThroughArmorCritThreshold calculation." );
       }
@@ -339,12 +339,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float chance = 0;
          if ( info.IsArmourBreached ) {
             chance = GetBaseChance( info.currentStructure, info.maxStructure );
-            if ( DebugLog ) Verbo( "Normal base crit chance = {0}/{1} = {2}", info.currentStructure, info.maxStructure, chance );
+            if ( DebugLog ) Verbo( "Normal base crit chance = {0} + {1} x {2}/{3} = {4}", CritChanceBase, CritChanceVar, info.currentStructure, info.maxStructure, chance );
             AttackLog.LogAIMBaseCritChance( chance, info.maxStructure );
             return Mathf.Max( CritChanceMin, Mathf.Min( chance, CritChanceMax ) );
          } else if ( ThroughArmorCritEnabled ) {
             chance = GetTACBaseChance( info.currentArmour, info.maxArmour );
-            if ( DebugLog ) Verbo( "TAC base crit chance = {0}/{1} = {2}", info.currentArmour, info.maxArmour, chance );
+            if ( DebugLog ) Verbo( "TAC base crit chance = {0} + {1} x {2}/{3} = {4}", TACritChanceBase, TACritChanceVar, info.currentArmour, info.maxArmour, chance );
             AttackLog.LogAIMBaseCritChance( chance, info.maxArmour );
          }
          return chance;
@@ -532,9 +532,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static float GetTACBaseChance ( float currentArmour, float maxArmour ) {
          if ( ! ThroughArmorCritEnabled ) return 0;
-         float result = TAC_BaseChance;
-         if ( TAC_VarChance > 0 )
-            result += ( 1f - currentArmour / maxArmour ) * TAC_VarChance;
+         float result = TACritChanceBase;
+         if ( TACritChanceVar > 0 )
+            result += ( 1f - currentArmour / maxArmour ) * TACritChanceVar;
          return result;
       }
 
