@@ -236,11 +236,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void ShowTotalDamageSlot ( CombatHUDWeaponPanel __instance, int topIndex, List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {
          TotalSlot = null;
-         if ( topIndex <= 0 || topIndex >= ___WeaponSlots.Count || __instance.DisplayedActor == null || ! ( __instance.DisplayedActor is Mech mech ) ) return;
+         if ( topIndex <= 0 || topIndex >= ___WeaponSlots.Count || __instance.DisplayedActor == null ) return;
          TotalSlot = ___WeaponSlots[ topIndex ];
          TotalSlot.transform.parent.gameObject.SetActive( true );
          TotalSlot.DisplayedWeapon = null;
-         TotalSlot.WeaponText.text = Translate( "Total" );
+         TotalSlot.WeaponText.text = GetTotalLabel();
          TotalSlot.AmmoText.text = "";
          TotalSlot.MainImage.color = Color.clear;
          TotalSlot.ToggleButton.childImage.color = Color.clear;
@@ -259,6 +259,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   AddToTotalDamage( ShowingStabilityDamage ? w.Instability() : w.DamagePerShotAdjusted(), slot );
             }
          }
+         TotalSlot.WeaponText.text = GetTotalLabel();
          TotalSlot.DamageText.text = FormatTotalDamage( TotalDamage, true );
          TotalSlot.HitChanceText.text = FormatTotalDamage( AverageDamage, true );
       }                 catch ( Exception ex ) { Error( ex ); } }
@@ -286,5 +287,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( ShowingStabilityDamage ) return FormatStabilityDamage( dmg, alwaysShowNumber );
          return ( (int) dmg ).ToString();
       }
-  }
+
+      private static string GetTotalLabel () {
+         string label = ShowingStabilityDamage ? "Total{0} Stability" : "Total{0}", target = null;
+         if ( ActiveState is SelectionStateFireMulti multi ) {
+            switch ( multi.GetTargetIndex( HUD.SelectedTarget ) ) {
+               case 0 : target = " A"; break;
+               case 1 : target = " B"; break;
+               case 2 : target = " C"; break;
+            }
+         }
+         return string.Format( label, target );
+      }
+   }
 }
