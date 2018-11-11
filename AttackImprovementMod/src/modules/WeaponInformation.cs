@@ -179,14 +179,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static float TotalDamage, AverageDamage;
       private static CombatHUDWeaponSlot TotalSlot;
 
-      /*
-      private ICombatant getDefaultTarget ( CombatHUDWeaponPanel panel ) {
-         if ( ActiveState is SelectionStateMove )
-            return panel.hoveredTarget : panel.target;
-         return panel.target : panel.hoveredTarget;
-      }
-      */
-
       private static void AddToTotalDamage ( float dmg, CombatHUDWeaponSlot slot ) {
          Weapon w = slot.DisplayedWeapon;
          if ( ! w.IsEnabled ) return;
@@ -209,16 +201,21 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
          string text = null;
          if ( ShowingStabilityDamage ) {
+            if ( ! __instance.WeaponText.text.Contains( HeatPrefix ) )
+               __instance.WeaponText.text += FormatHeat( weapon.HeatGenerated );
             float dmg = weapon.Instability();
             if ( Settings.ShowReducedWeaponDamage && target is AbstractActor actor )
                dmg *= actor.StatCollection.GetValue<float>("ReceivedInstabilityMultiplier") * actor.EntrenchedMultiplier;
             AddToTotalDamage( dmg, __instance );
             text = FormatStabilityDamage( dmg );
          } else {
+            if ( __instance.WeaponText.text.Contains( HeatPrefix ) )
+               __instance.WeaponText.text = weapon.UIName.ToString();
             if ( ActiveState is SelectionStateFireMulti multi && __instance.TargetIndex < 0 ) return;
-            Vector2 position = ActiveState?.PreviewPos ?? weapon.parent.CurrentPosition;
             float raw = weapon.DamagePerShotAdjusted(), dmg = raw; // damage displayed by vanilla
             if ( target != null ) {
+               AbstractActor owner = weapon.parent;
+               Vector2 position = ( owner.HasMovedThisRound ? null : ActiveState?.PreviewPos ) ?? owner.CurrentPosition;
                dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
                if ( WeaponRealizerDamageModifiers != null )
                   dmg = (float) WeaponRealizerDamageModifiers.Invoke( null, new object[]{ weapon.parent, target, weapon, dmg, false } );
@@ -276,11 +273,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Helpers ============
 
+      private const string HeatPrefix = " <#FF0000>", HeatPostfix = "H";
       private const string StabilityPrefix = "<#FFFF00>", StabilityPostfix = "s";
 
       private static string FormatStabilityDamage ( float dmg, bool alwaysShowNumber = false ) {
          if ( dmg < 1 && ! alwaysShowNumber ) return StabilityPrefix + "--";
          return StabilityPrefix + (int) dmg + StabilityPostfix;
+      }
+
+      private static string FormatHeat ( float heat ) {
+         if ( heat < 1 ) return HeatPrefix + "--";
+         return HeatPrefix + (int) heat + HeatPostfix;
       }
 
       private static string FormatTotalDamage ( float dmg, bool alwaysShowNumber = false ) {
