@@ -30,7 +30,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowWeaponProp || Settings.WeaponRangeFormat != null )
             Patch( SlotType, "GenerateToolTipStrings", null, "UpdateWeaponTooltip" );
 
-
          if ( Settings.ShowReducedWeaponDamage || Settings.CalloutWeaponStability )
             Patch( SlotType, "RefreshDisplayedWeapon", null, "UpdateWeaponDamage" );
          if ( Settings.ShowTotalWeaponDamage ) {
@@ -46,6 +45,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             HeauUpDisplay.HookCalloutToggle( ToggleStabilityDamage );
 
          if ( HasMod( "com.joelmeador.WeaponRealizer", "WeaponRealizer.Core" ) ) TryRun( ModLog, InitWeaponRealizerBridge );
+      }
+
+      public override void CombatStarts () {
+         if ( string.IsNullOrEmpty( RollCorrection.WeaponHitChanceFormat ) )
+            BaseChanceFormat = "{2:0}%";
+         else
+            BaseChanceFormat = RollCorrection.WeaponHitChanceFormat.Replace( "{0:", "{2:" );
       }
 
       private void InitWeaponRealizerBridge () {
@@ -139,17 +145,19 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Mouseover Hint ============
 
+      private static string BaseChanceFormat;
+
       public static void ShowBaseHitChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseToHitChance( mech ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "{0} {1} = {2:0}%", Translate( Pilot.PILOTSTAT_GUNNERY ), mech.SkillGunnery, baseChance ) );
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "{0} {1} = " + BaseChanceFormat, Translate( Pilot.PILOTSTAT_GUNNERY ), mech.SkillGunnery, baseChance ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowBaseMeleeChance ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          if ( HUD.SelectedActor is Mech mech ) {
             float baseChance = RollModifier.StepHitChance( Combat.ToHit.GetBaseMeleeToHitChance( mech ) ) * 100;
-            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "{0} {1} = {2:0}%", Translate( Pilot.PILOTSTAT_PILOTING ), mech.SkillPiloting, baseChance ) );
+            __instance.ToolTipHoverElement.BuffStrings.Add( new Text( "{0} {1} = " + BaseChanceFormat, Translate( Pilot.PILOTSTAT_PILOTING ), mech.SkillPiloting, baseChance ) );
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
@@ -217,6 +225,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                AbstractActor owner = weapon.parent;
                Vector2 position = ( owner.HasMovedThisRound ? null : ActiveState?.PreviewPos ) ?? owner.CurrentPosition;
                dmg = weapon.DamagePerShotFromPosition( MeleeAttackType.NotSet, position, target ); // damage with all masks and reductions factored
+               //Info( "{0} {1} => {2} {3} {4}, Dir {5}", owner.CurrentPosition, position, target, target.CurrentPosition, target.CurrentRotation, Combat.HitLocation.GetAttackDirection( position, target ) );
                if ( WeaponRealizerDamageModifiers != null )
                   dmg = (float) WeaponRealizerDamageModifiers.Invoke( null, new object[]{ weapon.parent, target, weapon, dmg, false } );
             }

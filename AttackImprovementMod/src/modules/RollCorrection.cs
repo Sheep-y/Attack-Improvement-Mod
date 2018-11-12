@@ -15,7 +15,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static bool NoRollCorrection = false;
       private static bool TrueRNG = false;
       private static Dictionary<float, float> correctionCache;
-      private static string WeaponHitChanceFormat = "{0:0}%";
+      internal static string WeaponHitChanceFormat = "{0:0}%";
 
       private static float RollCorrectionStrength, MissStreakBreakerThreshold, MissStreakBreakerDivider;
 
