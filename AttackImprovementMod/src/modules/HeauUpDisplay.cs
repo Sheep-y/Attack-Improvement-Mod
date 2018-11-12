@@ -58,9 +58,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( MovementDotMgr.MovementDot ).GetConstructors()[0], null, "ScaleMovementDot" );
          if ( Settings.BoostTerrainDotColor )
             Patch( typeof( CombatMovementReticle ), "Awake", null, "ColourMovementDot" );
-
-         if ( Settings.FunctionKeySelectPC )
-            Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
       }
 
       public override void CombatStarts () {
@@ -69,6 +66,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             con.ExperimentalHexRadius = Settings.MovementPreviewRadius;
             typeof( CombatGameConstants ).GetProperty( "MoveConstants" ).SetValue( CombatConstants, con, null );
          }
+         if ( Settings.FunctionKeySelectPC )
+            Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
       }
 
       public override void CombatEnds () {
