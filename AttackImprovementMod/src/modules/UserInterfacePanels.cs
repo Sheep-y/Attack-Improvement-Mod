@@ -44,12 +44,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else
                Patch( typeof( HUDMechArmorReadout ), "UpdateMechStructureAndArmor", null, "FixRearStructureDisplay" );
          }
+         // Must be placed here to have effect
+         if ( Settings.LabelPaperDollSide )
+            Patch( typeof( HUDMechArmorReadout ), "Init", null, "AddPaperDollSideLabel" );
       }
 
       public override void CombatStartsOnce () {
-         if ( Settings.LabelPaperDollSide )
-            Patch( typeof( HUDMechArmorReadout ), "Init", null, "AddPaperDollSideLabel" );
-
          if ( Settings.ShowNumericInfo ) {
             Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowNumericInfo" );
             Patch( typeof( CombatHUDActorInfo ), "RefreshAllInfo" , "RecordTarget", "ShowBuildingInfo" );
