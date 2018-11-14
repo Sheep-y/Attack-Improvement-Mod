@@ -280,7 +280,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   numbers = FormatMeter( "Heat", heat, mech.MaxHeat ) + "\n"
                           + FormatMeter( "Stab", stab, mech.MaxStability ) + "\n";
             }
-            if ( prefix == null && HUD.SelectedActor != null && HUD.SelectedActor != target )
+            if ( prefix == null && HUD.SelectedActor != target )
                prefix = GetTargetNumbers( target ) + "\n";
          }
          text.Append( GetBasicInfo( target ) ).Append( '\n' );
@@ -310,6 +310,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static string FormatMeter ( string label, float from, float max ) {
          return string.Format( "{0} {1:0}/{2:0}", label, from, max );
+      }
+
+      private static string FormatRange ( string label, float min, float max ) {
+         return string.Format( "{0} {1:0} - {2:0}", label, min, max );
       }
 
       private static void GetPreviewNumbers ( Mech mech, ref float heat, ref float stab, ref string movement ) {
@@ -357,15 +361,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static string GetTargetNumbers ( ICombatant target ) { try {
-         float oldDist = Vector3.Distance( HUD.SelectedActor.CurrentPosition, target.CurrentPosition );
-         Vector3 position = default;
-         if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
-         else if ( ActiveState is SelectionStateMove move ) position = move.PreviewPos;
-         else if ( ActiveState is SelectionStateJump jump ) position = jump.PreviewPos;
-         else return string.Format( "Dist {0:0}", oldDist );
-
-         float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
-         return FormatPrediction( "Dist", oldDist, newDist );
+         if ( HUD.SelectedActor != null ) {
+            float oldDist = Vector3.Distance( HUD.SelectedActor.CurrentPosition, target.CurrentPosition );
+            Vector3 position = default;
+            if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
+            else if ( ActiveState is SelectionStateMove move ) position = move.PreviewPos;
+            else if ( ActiveState is SelectionStateJump jump ) position = jump.PreviewPos;
+            else return string.Format( "Dist {0:0}", oldDist );
+            float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
+            return FormatPrediction( "Dist", oldDist, newDist );
+         } else {
+            float min = float.MaxValue, max = 0;
+            foreach ( AbstractActor pc in Combat.LocalPlayerTeam.units ) {
+               if ( pc.IsDead ) continue;
+               float dist = Vector3.Distance( pc.CurrentPosition, target.CurrentPosition );
+               if ( dist < min ) min = dist;
+               if ( dist > max ) max = dist;
+            }
+            return FormatRange( "Dist", min, max );
+         }
       }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
       public static void ShowUnitTonnage ( CombatHUDActorDetailsDisplay __instance ) { try {
