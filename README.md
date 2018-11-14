@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 3.0 #
+# AIM - Attack Improvement Mod 3.1 development #
 For BATTLETECH 1.2.1
 
 - [Features Overview](#features-overview)
@@ -22,7 +22,7 @@ For BATTLETECH 1.2.1
 - [Credits](#credits)
 
 
-AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show distance numbers, or a detailed attack log.  The default settings aim to preserve the balance of vanilla game.
+AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show target and weapon information, or a detailed attack log.  The default settings aim to preserve the balance of vanilla game.
 
 This mod does *not* modify game data.  Saves made with this mod on will *not* be affected by disabling or removing this mod.
 
