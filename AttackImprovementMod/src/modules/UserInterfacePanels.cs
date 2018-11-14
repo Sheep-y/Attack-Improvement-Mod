@@ -65,9 +65,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.FixHeatPreview )
             Patch( typeof( Mech ), "get_AdjustedHeatsinkCapacity", null, "CorrectProjectedHeat" );
 
-         if ( Settings.ShowUnitTonnage )
-            Patch( typeof( CombatHUDActorDetailsDisplay ), "RefreshInfo", null, "ShowUnitTonnage" );
-
          if ( Settings.ShowAmmoInTooltip || Settings.ShowEnemyAmmoInTooltip ) {
             MechTrayArmorHoverToolTipProp = typeof( CombatHUDMechTrayArmorHover ).GetProperty( "ToolTip", NonPublic | Instance );
             if ( MechTrayArmorHoverToolTipProp == null )
@@ -292,11 +289,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static object GetBasicInfo ( ICombatant target ) {
          if ( target is Mech mech ) {
+            string ton = ( (int) mech.tonnage ) + "T " + mech.weightClass;
             int jets = mech.WorkingJumpjets;
-            return jets > 0 ? (object) string.Format( "{0}, {1} JETS", mech.weightClass, jets ) : mech.weightClass;
+            return jets > 0 ? (object) string.Format( "{0}, {1} JETS", ton, jets ) : ton;
 
          } else if ( target is Vehicle vehicle )
-            return vehicle.weightClass;
+            return ( (int) vehicle.tonnage ) + "T " + vehicle.weightClass;
 
          else if ( target is Turret turret )
             return turret.TurretDef.Chassis.weightClass;
@@ -381,33 +379,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return FormatRange( "Dist", min, max );
          }
       }                 catch ( Exception ex ) { Error( ex ); return null; } }
-
-      public static void ShowUnitTonnage ( CombatHUDActorDetailsDisplay __instance ) { try {
-         CombatHUDActorDetailsDisplay me = __instance;
-         TMPro.TextMeshProUGUI label = me.ActorWeightText;
-         string from = null, to = null;
-
-         if ( me.DisplayedActor is Mech mech ) {
-            from = mech.weightClass.ToString();
-            to = mech.tonnage.ToString();
-            if ( mech.WorkingJumpjets <= 0 )
-               to += "t " + from;
-            else switch ( from ) {
-               case "LIGHT"   : to += "t LT"; break;
-               case "MEDIUM"  : to += "t MED"; break;
-               case "HEAVY"   : to += "t HVY"; break;
-               case "ASSAULT" : to += "t AST"; break;
-            }
-         } else if ( me.DisplayedActor is Vehicle vehicle ) {
-            from = vehicle.weightClass.ToString();
-            to = vehicle.tonnage.ToString();
-            if ( label.text.Contains( to ) ) return; // Already added by Extended Info, which has a generic name and may have false positive with usual detection
-            to += " TONS\n" + from; // Otherwise mimic the style for consistency
-         } else
-            return;
-
-         label.text = label.text.Replace( from, to );
-      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static bool needRefresh = false;
       public static void RecordRefresh () {

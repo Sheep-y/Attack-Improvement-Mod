@@ -40,7 +40,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show structural damage through armour.  i.e. When an armoured location is damaged, it will be displayed in a stripped pattern.  Default true." ) ]
       public bool ShowUnderArmourDamage = true;
 
-      [ JsonComment( "Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense." ) ]
+      [ JsonComment( "Legacy setting.  Kept in case needed in future." ) ]
       public bool ShowUnitTonnage = false;
 
       [ JsonComment( "Show heat, stability, and distance / movement number in selection panel (bottom left) and target panel (top).  Default true." ) ]
