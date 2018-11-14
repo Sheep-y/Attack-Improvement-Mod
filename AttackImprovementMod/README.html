@@ -30,7 +30,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 </script>
 <body>
 
-<h1 id="aimattackimprovementmod30development">AIM - Attack Improvement Mod 3.0 Beta</h1>
+<h1 id="aimattackimprovementmod30development">AIM - Attack Improvement Mod 3.0</h1>
 
 <p>For BATTLETECH 1.2.1</p>
 
@@ -88,29 +88,31 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <h2 id="bugfixesandhudenhancements">Bug Fixes and HUD Enhancements</h2>
 
 <ul>
-<li>Fix Grey head disease, Multi-Target back out, and 0 hp unit/locations.</li>
+<li>Fix Grey head disease, Multi-Target cancelling, and 0 hp unit/locations.</li>
 
-<li>Line of fire fixed and stylised: Dotted = indirect, Cyan = flank, Green = rear.</li>
+<li>Line of fire fixed and coloured: Dotted = indirect, Cyan = flank, Green = rear.</li>
+
+<li>Press F1 to F4 to select mech. Shift+Tab to reverse select mech. </li>
+
+<li>Multi-Target mode: Shift+Click / Ctrl+click weapon to reverse/toggle selection.</li>
 
 <li>Coloured nameplate, facing ring, and floating armour bar.</li>
 
 <li>Coloured weapon loadout with individual damage, melee damage, and alpha damage.</li>
 
-<li>Damaged Structure Display fixed and enhanced. Enemy injuries shown.</li>
+<li>See heat, instability, distance, movement numbers, and enemy abilities.</li>
 
-<li>Show heat, instability, distance, movement numbers.</li>
+<li>See structural damage through armour. See ammo count in paper doll hover.</li>
 
-<li>Show ammo count in paper doll hover.</li>
+<li>See mechwarrior stats in hover/right-click hint. See enemy wounds in names.</li>
 
-<li>Show weapon range (in meters) and properties such as +50% crit.</li>
+<li>See total damage and average damage.  Press Alt to see heat and stability.</li>
 
-<li>Show base hit chance in accuracy modifier popup.</li>
+<li>See terrain description always.  Bigger, more, and brighter terrain dots.</li>
 
-<li>Show mechwarrior stats in hover/right-click hint.</li>
+<li>Enhanced accuracy breakdown and weapon properties popup with fixed sign.</li>
 
 <li>Post-move to-hit penalties and heat factored in action preview.</li>
-
-<li>Press F1 to F4 to select mech. Hold Alt to enable friendly fire.</li>
 
 <li>(Optional) Show Mech Tonnage.</li>
 
@@ -120,7 +122,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <h2 id="mechanicenhancements">Mechanic Enhancements</h2>
 
 <ul>
-<li>Unlock hit chance stepping (make odd Gunnery useful).</li>
+<li>Unlock hit chance stepping (makes odd Gunnery useful).</li>
 
 <li>Smart indirect fire when direct fire is obstructed.</li>
 
@@ -398,10 +400,10 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
   <br></p>
   
-  <p>Setting: <code>LOSHueDeviation</code>  (0 to 0.5, default 0.04);
-  Setting: <code>LOSHueHalfCycleMS</code>  (0 to 300k, default 2048);
-  Setting: <code>LOSBrightnessDeviation</code>  (0 to 0.5, default 0.1);
-  Setting: <code>LOSBrightnessHalfCycleMS</code>  (0 to 300k, default 1024);</p>
+  <p>Setting: <code>LOSHueDeviation</code>  (0 to 0.5, default 0.04) <br>
+  Setting: <code>LOSHueHalfCycleMS</code>  (0 to 300k, default 2048) <br>
+  Setting: <code>LOSBrightnessDeviation</code>  (0 to 0.5, default 0.1) <br>
+  Setting: <code>LOSBrightnessHalfCycleMS</code>  (0 to 300k, default 1024)</p>
   
   <p>When non-zero, the targeting lines will have animated colour, such as dimming and brightening.</p>
   
@@ -1113,10 +1115,11 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Setting: <code>CritLocationTransfer</code> (true or false, default false)</p>
   
   <p>When true and a successful critical hit happens on a location that has nothing to crit,
-  usually because of <code>CritIgnoreDestroyedComponent</code> and <code>CritIgnoreEmptySlots</code>,
-  the crit will transfer to the next location using damage transfer rule.</p>
+  the crit will transfer to the next location using damage transfer rule.
+  It is strongly advised to also set <code>CritFollowDamageTransfer</code> to true.</p>
   
-  <p>For best simulation of Classic BattleTech's crit, please also set <code>CritFollowDamageTransfer</code> to true.</p>
+  <p>In AIM 2.5, this transfer is checked after factoring <code>CritIgnoreDestroyedComponent</code> and <code>CritIgnoreEmptySlots</code>.
+  Since AIM 3.0, this transfer always ignore destroyed components and empty slots, regardless of those settings.</p>
 </blockquote>
 
 <p><strong>Multiple Critical Hits from Single Shot</strong></p>
@@ -1252,6 +1255,9 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 <li>BattleTech 1.2 - AIM 2.2 to 3.0.</li>
 </ul>
 
+<p>Because of the <em>extensive</em> patching, this mod is sensitive to version updates.
+I did my best to defensively code it given my limited free time.</p>
+
 <p>AIM is aware of some other mods and will behave differently in their present to meet player expectations.</p>
 
 <p>Mod settings changed by these behaviours are not saved.  If you want to replace them with AIM, you may need to change AIM settings.</p>
@@ -1322,7 +1328,7 @@ Even as I tie up AIM version 2.0, the ever expanding idea list grow at an even g
 If there is an end in sight, it is an abrupt one when a game that I like better come out, such as Phoenix Point.</p>
 
 <p>This is the story of how I went from "stay away from BattleTech" to "wrote 3500 lines of BattleTech mod" in three month's time.
-Now let me see whether Paradox is hiring remote freelancer.</p>
+Hey Paradox, are you hiring remote freelancer? Baby need nappies. ;)</p>
 
 <h1 id="learntomod">Learn to Mod</h1>
 
@@ -1357,15 +1363,13 @@ License: <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">AGPL v3</a></p>
 <h1 id="credits">Credits</h1>
 
 <ul>
-<li><p>LogGuiTree code taken from CptMoore's <a href="https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99">MechEngineer</a>.</p></li>
+<li>Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.</li>
 
-<li><p>Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.</p></li>
+<li>Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.</li>
 
-<li><p>Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.</p></li>
+<li>Thanks CptMoore for GUI log code, which helps a lot in finding and adjusting GUI components.</li>
 
-<li><p>Thanks CptMoore for GUI log code, which helps a lot in finding and adjusting GUI components.</p></li>
-
-<li><p>And many more players on the BattleTechGame discord that gave comments and ideas.</p></li>
+<li>And many more players on the BattleTechGame discord that gave comments and ideas.</li>
 </ul>
 
 <p>Despite feature overlap with some mods, this mod does not reference or use their code due to lack of license, and in most cases the approaches are different.</p>

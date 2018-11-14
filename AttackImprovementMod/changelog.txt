@@ -1,6 +1,6 @@
 CHANGE LOG
 
-2018-11-09 AIM Version 3.0 beta for BATTLETECH 1.2.1
+2018-11-14 AIM Version 3.0 for BATTLETECH 1.2.1
 
 * New: Press F1 to F4 to select player mech.
 * New: Shift+Tab or Shift+Click (multi-target) to select in reverse direction.

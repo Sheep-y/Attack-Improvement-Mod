@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 3.0 Beta #
+# AIM - Attack Improvement Mod 3.0 #
 For BATTLETECH 1.2.1
 
 - [Features Overview](#features-overview)
@@ -32,24 +32,25 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 
 ## Bug Fixes and HUD Enhancements ##
 
-* Fix Grey head disease, Multi-Target back out, and 0 hp unit/locations.
-* Line of fire fixed and stylised: Dotted = indirect, Cyan = flank, Green = rear.
+* Fix Grey head disease, Multi-Target cancelling, and 0 hp unit/locations.
+* Line of fire fixed and coloured: Dotted = indirect, Cyan = flank, Green = rear.
+* Press F1 to F4 to select mech. Shift+Tab to reverse select mech. 
+* Multi-Target mode: Shift+Click / Ctrl+click weapon to reverse/toggle selection.
 * Coloured nameplate, facing ring, and floating armour bar.
 * Coloured weapon loadout with individual damage, melee damage, and alpha damage.
-* Damaged Structure Display fixed and enhanced. Enemy injuries shown.
-* Show heat, instability, distance, movement numbers.
-* Show ammo count in paper doll hover.
-* Show weapon range (in meters) and properties such as +50% crit.
-* Show base hit chance in accuracy modifier popup.
-* Show mechwarrior stats in hover/right-click hint.
+* See heat, instability, distance, movement numbers, and enemy abilities.
+* See structural damage through armour. See ammo count in paper doll hover.
+* See mechwarrior stats in hover/right-click hint. See enemy wounds in names.
+* See total damage and average damage.  Press Alt to see heat and stability.
+* See terrain description always.  Bigger, more, and brighter terrain dots.
+* Enhanced accuracy breakdown and weapon properties popup with fixed sign.
 * Post-move to-hit penalties and heat factored in action preview.
-* Press F1 to F4 to select mech. Hold Alt to enable friendly fire.
 * (Optional) Show Mech Tonnage.
 * (Optional) Show Corrected Hit chance and Called Shot Chance.
 
 ## Mechanic Enhancements ##
 
-* Unlock hit chance stepping (make odd Gunnery useful).
+* Unlock hit chance stepping (makes odd Gunnery useful).
 * Smart indirect fire when direct fire is obstructed.
 * Called shots cluster around called mech location.
 * Precise hit distribution that improves SRM and MG called shot.
@@ -284,10 +285,10 @@ These settings can be changed in `settings.json`.
 > For example "red,cyan,cyan,green" will result in front red, side cyan, and back/prone green.
 <br>
 
-> Setting: `LOSHueDeviation`  (0 to 0.5, default 0.04);
-> Setting: `LOSHueHalfCycleMS`  (0 to 300k, default 2048);
-> Setting: `LOSBrightnessDeviation`  (0 to 0.5, default 0.1);
-> Setting: `LOSBrightnessHalfCycleMS`  (0 to 300k, default 1024);
+> Setting: `LOSHueDeviation`  (0 to 0.5, default 0.04) <br>
+> Setting: `LOSHueHalfCycleMS`  (0 to 300k, default 2048) <br>
+> Setting: `LOSBrightnessDeviation`  (0 to 0.5, default 0.1) <br>
+> Setting: `LOSBrightnessHalfCycleMS`  (0 to 300k, default 1024) <br>
 >
 > When non-zero, the targeting lines will have animated colour, such as dimming and brightening.
 >
@@ -1113,6 +1114,9 @@ but because the code that determine hit distribution is not designed for fractio
 * BattleTech 1.1 - AIM 1.0.1 to 2.1.2.
 * BattleTech 1.2 - AIM 2.2 to 3.0.
 
+Because of the *extensive* patching, this mod is sensitive to version updates.
+I did my best to defensively code it given my limited free time.
+
 AIM is aware of some other mods and will behave differently in their present to meet player expectations.
 
 Mod settings changed by these behaviours are not saved.  If you want to replace them with AIM, you may need to change AIM settings.
@@ -1184,7 +1188,7 @@ Even as I tie up AIM version 2.0, the ever expanding idea list grow at an even g
 If there is an end in sight, it is an abrupt one when a game that I like better come out, such as Phoenix Point.
 
 This is the story of how I went from "stay away from BattleTech" to "wrote 3500 lines of BattleTech mod" in three month's time.
-Now let me see whether Paradox is hiring remote freelancer.
+Hey Paradox, are you hiring remote freelancer? Baby need nappies. ;)
 
 
 # Learn to Mod
@@ -1208,8 +1212,6 @@ Follow these steps to see game code and learn how BATTLETECH mod works:
 
 
 # Credits
-
-* LogGuiTree code taken from CptMoore's [MechEngineer](https://github.com/CptMoore/MechEngineer/blob/v0.8.27/source/Features/MechLabSlots/GUILogUtils.cs#L99).
 
 * Thanks Mpstark (Michael Starkweather) for making BTML and ModTek and various mods and release them to the public domain.
 * Thanks LadyAlekto for various feature requests and cool proposals such as melee modifiers and ammo jettison.
