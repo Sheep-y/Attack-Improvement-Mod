@@ -95,7 +95,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          AttackDirectionIndicator me =  __instance;
          if ( me.Owner == null || me.Owner.IsDead ) return;
          Color orig = me.ColorInactive;
-         Color?[] activeColors = __instance.Owner?.team?.IsFriendly( Combat.LocalPlayerTeam ) ?? false ? FacingMarkerPlayerColors : FacingMarkerEnemyColors;
+         Color?[] activeColors = __instance.Owner?.team?.IsFriendly( Combat?.LocalPlayerTeam ) ?? false ? FacingMarkerPlayerColors : FacingMarkerEnemyColors;
          object[] colors;
          if ( direction != AttackDirection.ToProne && direction != AttackDirection.FromTop ) {
             colors = new object[]{ activeColors?[0] ?? orig, activeColors?[1] ?? orig, activeColors?[2] ?? orig, activeColors?[3] ?? orig };
@@ -107,7 +107,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          } else {
             if ( ActiveState == null ) return;
             FiringPreviewManager.PreviewInfo info = ActiveState.FiringPreview.GetPreviewInfo( me.Owner );
-            orig = info.HasLOF ? ( FacingMarkerTargetColors[4] ?? me.ColorActive ) : ( activeColors[4] ?? me.ColorInactive );
+            orig = info.HasLOF ? ( FacingMarkerTargetColors?[4] ?? me.ColorActive ) : ( activeColors?[4] ?? me.ColorInactive );
             colors = new object[]{ orig, orig, orig, orig };
          }
          SetColors.Invoke( __instance, colors );
