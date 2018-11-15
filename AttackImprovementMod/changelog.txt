@@ -2,7 +2,8 @@ CHANGE LOG
 
 ????-??-?? AIM Version 3.1 development
 
-* Mod: Target panel shows min and max distance when no PC is selected.
+* Mod: Unit tonnage is now always displayed, ShowUnitTonnage setting is deprecated.
+* Mod: Target panel shows min distance when no PC is selected.
 
 2018-11-14 AIM Version 3.0 for BATTLETECH 1.2.1
 

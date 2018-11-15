@@ -310,10 +310,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return string.Format( "{0} {1:0}/{2:0}", label, from, max );
       }
 
-      private static string FormatRange ( string label, float min, float max ) {
-         return string.Format( "{0} {1:0} - {2:0}", label, min, max );
-      }
-
       private static void GetPreviewNumbers ( Mech mech, ref float heat, ref float stab, ref string movement ) {
          CombatSelectionHandler selection = HUD?.SelectionHandler;
 
@@ -369,14 +365,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
             return FormatPrediction( "Dist", oldDist, newDist );
          } else {
-            float min = float.MaxValue, max = 0;
+            float min = float.MaxValue;
             foreach ( AbstractActor pc in Combat.LocalPlayerTeam.units ) {
                if ( pc.IsDead ) continue;
                float dist = Vector3.Distance( pc.CurrentPosition, target.CurrentPosition );
                if ( dist < min ) min = dist;
-               if ( dist > max ) max = dist;
             }
-            return FormatRange( "Dist", min, max );
+            return string.Format( "Dist {1:0}", min );
          }
       }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
