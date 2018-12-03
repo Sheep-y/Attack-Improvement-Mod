@@ -373,7 +373,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                float dist = Vector3.Distance( pc.CurrentPosition, target.CurrentPosition );
                if ( dist < min ) min = dist;
             }
-            return string.Format( "Dist {1:0}", min );
+            return string.Format( "Dist {0:0}", min );
          }
       }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
