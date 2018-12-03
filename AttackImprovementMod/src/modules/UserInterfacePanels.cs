@@ -289,9 +289,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static object GetBasicInfo ( ICombatant target ) {
          if ( target is Mech mech ) {
-            string ton = ( (int) mech.tonnage ) + "T " + mech.weightClass;
             int jets = mech.WorkingJumpjets;
-            return jets > 0 ? (object) string.Format( "{0}, {1} JETS", ton, jets ) : ton;
+            string weight = mech.weightClass.ToString();
+            if ( jets > 0 ) weight = weight.Replace( "ASSAULT", "ASLT" );
+            string ton = ( (int) mech.tonnage ) + "T " + weight;
+            return jets > 0 ? string.Format( "{0}, {1} JETS", ton, jets ) : ton;
 
          } else if ( target is Vehicle vehicle )
             return ( (int) vehicle.tonnage ) + "T " + vehicle.weightClass;
