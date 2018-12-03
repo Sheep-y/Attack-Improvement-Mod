@@ -93,7 +93,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void SetDirectionMarker ( AttackDirectionIndicator __instance, AttackDirection direction ) { try {
          AttackDirectionIndicator me =  __instance;
-         if ( me.Owner == null || me.Owner.IsDead ) return;
+         if ( me.Owner == null || me.Owner.IsDead || Combat == null ) return;
          Color orig = me.ColorInactive;
          Color?[] activeColors = __instance.Owner?.team?.IsFriendly( Combat?.LocalPlayerTeam ) ?? false ? FacingMarkerPlayerColors : FacingMarkerEnemyColors;
          object[] colors;

@@ -259,7 +259,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Pilot pilot = target.GetPilot();
             prefix = "";
             foreach ( Ability ability in pilot.Abilities ) {
-               if ( ! ability.Def.IsPrimaryAbility ) continue;
+               if ( ability?.Def == null || ! ability.Def.IsPrimaryAbility ) continue;
                if ( prefix.Length > 0 ) prefix += "\n";
                prefix += ability.Def.Description.Name;
             }
@@ -268,7 +268,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          } else {
             if ( target is Mech mech ) {
                float heat = mech.CurrentHeat, stab = mech.CurrentStability;
-               if ( __instance != TargetDisplay && HUD.SelectionHandler?.SelectedActor == mech ) {
+               if ( __instance != TargetDisplay && HUD?.SelectionHandler?.SelectedActor == mech ) {
                   GetPreviewNumbers( mech, ref heat, ref stab, ref postfix );
                   prefix = "";
                   numbers = FormatPrediction( "Heat", mech.CurrentHeat, heat ) + "\n"
@@ -277,7 +277,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   numbers = FormatMeter( "Heat", heat, mech.MaxHeat ) + "\n"
                           + FormatMeter( "Stab", stab, mech.MaxStability ) + "\n";
             }
-            if ( prefix == null && HUD.SelectedActor != target )
+            if ( prefix == null && HUD?.SelectedActor != target )
                prefix = GetTargetNumbers( target ) + "\n";
          }
          text.Append( GetBasicInfo( target ) ).Append( '\n' );

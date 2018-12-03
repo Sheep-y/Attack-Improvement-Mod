@@ -125,7 +125,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Pilot pilot = actor?.GetPilot();
          Team team = actor?.team;
          TMPro.TextMeshProUGUI textbox = __instance.PilotNameText;
-         if ( AnyNull<object>( pilot, team, textbox ) || pilot.Injuries <= 0 ) return;
+         if ( AnyNull<object>( pilot, team, textbox, Combat ) || pilot.Injuries <= 0 ) return;
          string format = null;
          object[] args = new object[]{ null, pilot.Injuries, pilot.Health - pilot.Injuries, pilot.Health };
          if ( team == Combat.LocalPlayerTeam ) {
