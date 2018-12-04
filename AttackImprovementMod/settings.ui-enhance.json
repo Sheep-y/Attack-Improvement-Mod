@@ -41,7 +41,7 @@
 
   "ShowUnderArmourDamage": true,
 
-  /* Show tonnage in selection panel (bottom left) and target panel (top).  Mech class will be shortened.  Default false because it's too dense. */
+  /* Legacy setting.  Kept in case needed in future. */
 
   "ShowUnitTonnage": false,
 
