@@ -357,7 +357,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static string GetTargetNumbers ( ICombatant target ) { try {
-         if ( HUD.SelectedActor != null ) {
+         if ( HUD?.SelectedActor != null ) {
             float oldDist = Vector3.Distance( HUD.SelectedActor.CurrentPosition, target.CurrentPosition );
             Vector3 position = default;
             if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
