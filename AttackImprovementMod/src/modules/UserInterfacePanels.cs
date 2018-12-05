@@ -246,7 +246,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static void RecordTarget ( CombatHUDActorInfo __instance, ICombatant ___displayedCombatant ) { ActorInfoTarget = ___displayedCombatant; }
       public static void ShowBuildingInfo ( CombatHUDActorInfo __instance ) {
          if ( ActorInfoTarget is BattleTech.Building )
-            __instance.DetailsDisplay.gameObject.SetActive( true );
+            __instance.DetailsDisplay?.gameObject?.SetActive( true );
       }
 
       public static void ShowNumericInfo ( CombatHUDActorDetailsDisplay __instance ) { try {
@@ -357,7 +357,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static string GetTargetNumbers ( ICombatant target ) { try {
-         if ( HUD?.SelectedActor != null ) {
+         if ( HUD == null ) return null;
+         if ( HUD.SelectedActor != null ) {
             float oldDist = Vector3.Distance( HUD.SelectedActor.CurrentPosition, target.CurrentPosition );
             Vector3 position = default;
             if      ( ActiveState is SelectionStateSprint sprint ) position = sprint.PreviewPos;
@@ -366,15 +367,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             else return string.Format( "Dist {0:0}", oldDist );
             float newDist = (int) Vector3.Distance( position, target.CurrentPosition );
             return FormatPrediction( "Dist", oldDist, newDist );
-         } else {
-            float min = float.MaxValue;
-            foreach ( AbstractActor pc in Combat.LocalPlayerTeam.units ) {
-               if ( pc.IsDead ) continue;
-               float dist = Vector3.Distance( pc.CurrentPosition, target.CurrentPosition );
-               if ( dist < min ) min = dist;
-            }
-            return string.Format( "Dist {0:0}", min );
          }
+         float min = float.MaxValue;
+         foreach ( AbstractActor pc in Combat.LocalPlayerTeam.units ) {
+            if ( pc.IsDead ) continue;
+            float dist = Vector3.Distance( pc.CurrentPosition, target.CurrentPosition );
+            if ( dist < min ) min = dist;
+         }
+         return string.Format( "Dist {0:0}", min );
       }                 catch ( Exception ex ) { Error( ex ); return null; } }
 
       private static bool needRefresh = false;
