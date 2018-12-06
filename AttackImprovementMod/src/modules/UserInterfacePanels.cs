@@ -79,6 +79,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDMWStatus ), "ForceUnexpand", null, "RefreshPilotHint" );
             Patch( typeof( CombatHUDMWStatus ), "RefreshPilot", null, "ReplacePilotHint" );
          }
+
+         if ( Settings.MechWarriorGreyActedPilot )
+            Patch( typeof( CombatHUDPortrait ), "RefreshDisplayedActor", null, "ColourPilotNames" );
       }
 
       public override void CombatStarts () {
@@ -464,5 +467,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                pilot.Injuries, ( pilot.Health - pilot.Injuries ), pilot.Health, pilot.Gunnery, pilot.Piloting, pilot.Guts, pilot.Tactics } ),
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static void ColourPilotNames ( CombatHUDPortrait __instance ) {
+         AbstractActor actor = __instance.DisplayedActor;
+         if ( actor == null ) return;
+         Color c = Color.white;
+         if ( actor.WasEjected || actor.IsDead || ( actor.HasMovedThisRound && actor.HasFiredThisRound ) ) c = Color.grey;
+         __instance.PilotName.color = c;
+      }
    }
 }

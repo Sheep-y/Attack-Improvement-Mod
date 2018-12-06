@@ -101,8 +101,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Show weapon range in meters instead of \"Short\" or \"Very Long\" in weapon mouseover.  Default \"Min {0} : Long {2} : Max {4}\"." ) ]
       public string WeaponRangeFormat = "Min {0} : Long {2} : Max {4}";
 
-      [ JsonComment( "Show only one cheevon per weapon subtype.  Same as CombatConstants.CombatUIConstants.collapseWeaponTypesInTickMarks. " ) ]
+      [ JsonComment( "Show only one cheevon per weapon subtype.  Same as CombatConstants.CombatUIConstants.collapseWeaponTypesInTickMarks.  Default true." ) ]
       public bool ConsolidateWeaponCheevons = true;
+
+      [ JsonComment( "Set acted pilot name to grey.  Default true." ) ]
+      public bool MechWarriorGreyActedPilot = true;
 
       [ JsonComment( new string[]{
         "Format pilot name to show wounds (enemies) and health (non-enemy) after their names.",
