@@ -2,6 +2,7 @@ CHANGE LOG
 
 ????-??-?? AIM Version 3.1 development
 
+* New: Consolidate weapon cheevons.
 * New: Show margin of miss in damage floatie.
 * Mod: Unit tonnage is now always displayed, ShowUnitTonnage setting is deprecated.
 * Mod: Target panel shows min distance when no PC is selected.

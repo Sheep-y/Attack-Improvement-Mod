@@ -37,8 +37,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetArmorBarOwner", null );
          }
 
-         //Patch( typeof( BattleTech.UI.CombatHUDWeaponTickMarks ), "UpdateTicksShown", "abort", null );
-
          if ( Settings.ShowDangerousTerrain ) {
             SidePanelProp = typeof( MoveStatusPreview ).GetProperty( "sidePanel", NonPublic | Instance );
             if ( SidePanelProp == null )
@@ -70,6 +68,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
          if ( Settings.FunctionKeySelectPC )
             Combat.MessageCenter.AddSubscriber( MessageCenterMessageType.KeyPressedMessage, KeyPressed );
+         if ( Settings.ConsolidateWeaponCheevons ) {
+            // If we want to consolidate weapon damage, need to overwrite CombatHUDWeaponTickMarks.UpdateTicksShown to not depends on GetValidSlots
+            CombatUIConstantsDef uiConst = CombatConstants.CombatUIConstants;
+            uiConst.collapseWeaponTypesInTickMarks = true;
+            typeof( CombatGameConstants ).GetProperty( "CombatUIConstants" ).SetValue( CombatConstants, uiConst, null );
+         }
       }
 
       public override void CombatEnds () {
