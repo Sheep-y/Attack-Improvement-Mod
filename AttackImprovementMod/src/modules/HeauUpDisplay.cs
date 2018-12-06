@@ -37,6 +37,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDNumFlagHex ), "OnActorChanged", "SetArmorBarOwner", null );
          }
 
+         //Patch( typeof( BattleTech.UI.CombatHUDWeaponTickMarks ), "UpdateTicksShown", "abort", null );
+
          if ( Settings.ShowDangerousTerrain ) {
             SidePanelProp = typeof( MoveStatusPreview ).GetProperty( "sidePanel", NonPublic | Instance );
             if ( SidePanelProp == null )

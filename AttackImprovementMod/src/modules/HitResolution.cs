@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using System.Reflection;
    using static ArmorLocation;
    using static Mod;
 
@@ -108,8 +107,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public static void SetImpact ( MessageCenterMessage message ) {
-         if ( ! ( message is AttackSequenceImpactMessage impactMessage ) )
-            return;
+         if ( ! ( message is AttackSequenceImpactMessage impactMessage ) ) return;
          WeaponHitInfo info = impactMessage.hitInfo;
          currentImpact = info.attackSequenceId;
          currentRoll = info.toHitRolls[ impactMessage.hitIndex ];
@@ -119,11 +117,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          currentImpact = 0;
       }
 
-      public static void ShowMissChance ( FloatieMessage __instance, FloatieMessage.MessageNature nature ) {
+      public static void ShowMissChance ( FloatieMessage __instance, FloatieMessage.MessageNature nature ) { try {
          if ( currentImpact == 0 || ( nature != FloatieMessage.MessageNature.Miss && nature != FloatieMessage.MessageNature.MeleeMiss ) ) return;
          if ( ! hitChance.TryGetValue( currentImpact, out float chance ) ) return;
          __instance.SetText( new Localize.Text( "Miss {0:0}%", new object[]{ ( currentRoll - chance ) * 100 } ) );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Balanced Ammo Load ============
 
