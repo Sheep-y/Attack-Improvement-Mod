@@ -5,6 +5,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
    public class ModSettings {
 
       //
+      [ JsonSection( "Stats" ) ]
+      //
+
+      [ JsonComment( "Fix incorrect weapon stats.  Does not modify json.  Default true." ) ]
+      public bool FixWeaponStats = true;
+
+      //
       [ JsonSection( "User Interfaces" ) ]
       //
 

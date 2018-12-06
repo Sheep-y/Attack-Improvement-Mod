@@ -4,6 +4,7 @@ CHANGE LOG
 
 * New: Consolidate weapon cheevons.
 * New: Show margin of miss in damage floatie.
+* New: Fix weapon stats on game load (non-json-based).
 * New: Acted mechwarriors will have their names greyed out in mech tray.
 * Mod: Unit tonnage is now always displayed, ShowUnitTonnage setting is deprecated.
 * Mod: Target panel shows min distance when no PC is selected.
