@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
+   using System.Reflection;
    using static ArmorLocation;
    using static Mod;
 
@@ -15,6 +16,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( Vehicle ), "DamageLocation", null, "FixZombieVehicle" );
             Patch( typeof( Turret ) , "DamageLocation", null, "FixZombieTurret" );
             Patch( typeof( BattleTech.Building ), "DamageBuilding", null, "FixZombieBuilding" );
+         }
+
+         if ( Settings.ShowMissMargin ) {
+            hitChance = new Dictionary<int, float>();
+            Patch( typeof( AttackDirector.AttackSequence ), "GetIndividualHits", "RecordHitChance", null );
+            Patch( typeof( AttackDirector.AttackSequence ), "GetClusteredHits" , "RecordHitChance", null );
+            Patch( typeof( AttackDirector ), "OnAttackComplete", null, "ClearHitChance" );
+            Patch( typeof( AttackDirector.AttackSequence ), "OnAttackSequenceImpact", "SetImpact", "ClearImpact" );
+            Patch( typeof( FloatieMessage ).GetConstructors().FirstOrDefault( e => e.GetParameters().Length == 8 && e.GetParameters()[2].ParameterType == typeof( Localize.Text ) ), null, "ShowMissChance" );
          }
 
          if ( Settings.BalanceAmmoConsumption || Settings.BalanceEnemyAmmoConsumption ) {
@@ -46,6 +56,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
+      public override void CombatEnds () {
+         hitChance?.Clear();
+      }
+
       // ============ Zombie ============
 
       public static void FixZombieMech ( Mech __instance, ref float totalDamage, ArmorLocation aLoc ) {
@@ -74,6 +88,41 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( newHP >= 1 || newHP <= 0 ) return;
          Verbo( "Upgrading damage dealt to {1} by {2} to kill zombie {0}", type, name, newHP );
          totalDamage += newHP + 0.001f;
+      }
+
+      // ============ Miss margin ============
+
+      private static int currentImpact;
+      private static float currentRoll;
+      private static Dictionary<int, float> hitChance;
+
+      public static void RecordHitChance ( ref WeaponHitInfo hitInfo, float toHitChance ) {
+         if ( hitChance.ContainsKey( hitInfo.attackSequenceId ) ) return;
+         hitChance.Add( hitInfo.attackSequenceId, toHitChance );
+      }
+
+      public static void ClearHitChance () {
+         if ( Combat?.AttackDirector?.IsAnyAttackSequenceActive ?? true )
+            return; // Defer if Multi-Target is not finished. Defer when in doubt.
+         hitChance.Clear();
+      }
+
+      public static void SetImpact ( MessageCenterMessage message ) {
+         if ( ! ( message is AttackSequenceImpactMessage impactMessage ) )
+            return;
+         WeaponHitInfo info = impactMessage.hitInfo;
+         currentImpact = info.attackSequenceId;
+         currentRoll = info.toHitRolls[ impactMessage.hitIndex ];
+      }
+      
+      public static void ClearImpact () {
+         currentImpact = 0;
+      }
+
+      public static void ShowMissChance ( FloatieMessage __instance, FloatieMessage.MessageNature nature ) {
+         if ( currentImpact == 0 || ( nature != FloatieMessage.MessageNature.Miss && nature != FloatieMessage.MessageNature.MeleeMiss ) ) return;
+         if ( ! hitChance.TryGetValue( currentImpact, out float chance ) ) return;
+         __instance.SetText( new Localize.Text( "Miss {0:0}%", new object[]{ ( currentRoll - chance ) * 100 } ) );
       }
 
       // ============ Balanced Ammo Load ============

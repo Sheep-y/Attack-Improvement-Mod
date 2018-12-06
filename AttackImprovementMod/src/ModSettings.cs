@@ -297,6 +297,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "Default is 5, same as game default." } ) ]
       public decimal MissStreakBreakerDivider = 5;
 
+      [ JsonComment( "Show the % margin of a missed attack in damage floatie. Smaller % = closer miss.  Default true." ) ]
+      public bool ShowMissMargin = true;
+
       //
        [ JsonSection( "Modifiers Preview" ) ]
       //
