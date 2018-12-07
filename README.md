@@ -1,5 +1,5 @@
-# AIM - Attack Improvement Mod 3.1 development #
-For BATTLETECH 1.2.1
+# AIM - Attack Improvement Mod 3.1 beta #
+For BATTLETECH 1.3.2
 
 - [Features Overview](#features-overview)
 - [Installation](#installation)
@@ -16,6 +16,7 @@ For BATTLETECH 1.2.1
   * [Critical Hit Settings](#critical-hit-settings)
   * [Hit Resolution Settings](#hit-resolution-settings)
   * [Attack Log Settings](#attack-log-settings)
+  * [Other Settings](#other-settings)
 - [Compatibilities](#compatibilities)
 - [The Story of AIM](#the-story-of-aim)
 - [Learn to Mod](#learn-to-mod)
@@ -33,8 +34,9 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 ## Bug Fixes and HUD Enhancements ##
 
 * Fix Grey head disease, Multi-Target cancelling, and 0 hp unit/locations.
+* Fix Delta LRM stability, ER PPC debuff, and other minor weapon bugs.
 * Line of fire fixed and coloured: Dotted = indirect, Cyan = flank, Green = rear.
-* Press F1 to F4 to select mech. Shift+Tab to reverse select mech. 
+* Press F1 to F4 to select mech. Shift+Tab to reverse select mech. Grey name = acted mech.
 * Multi-Target mode: Shift+Click / Ctrl+click weapon to reverse/toggle selection.
 * Coloured nameplate, facing ring, and floating armour bar.
 * Coloured weapon loadout with individual damage, melee damage, and alpha damage.
@@ -45,6 +47,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * See terrain description always.  Bigger, more, and brighter terrain dots.
 * Enhanced accuracy breakdown and weapon properties popup with fixed sign.
 * Post-move to-hit penalties and heat factored in action preview.
+* Miss floatie shows margin of miss.
 * (Optional) Show Mech Tonnage.
 * (Optional) Show Corrected Hit chance and Called Shot Chance.
 
@@ -125,7 +128,7 @@ These settings can be changed in `settings.json`.
 ## HUD Settings
 
 
-**Unit Selection**
+**Selections**
 
 > Setting: `FunctionKeySelectPC`  (true/false, default true)
 >
@@ -145,7 +148,7 @@ These settings can be changed in `settings.json`.
 
 > Setting: `CtrlClickDisableWeapon`  (true/false, default true)
 >
-> Ctrl+Click a weapon during Multi-Target will disable / enable the weapon.
+> When true, Ctrl+Click a weapon during Multi-Target will disable / enable the weapon.
 > The target will be remembered when the weapon is enabled this way, allowing quick evaluation of heat and damage.
 
 
@@ -172,6 +175,14 @@ These settings can be changed in `settings.json`.
 > When you select a new target with the Multi-Target skill, all enabled weapons will be reassigned.
 > Each weapon will reset to the target with highest hit chance, or the earlier target when hit chances are the same
 > (A before B, B before C).
+<br>
+
+> Setting: `ShowMissMargin`  (true/false, default true)
+>
+> When true, the "MISS" floaties will be appended with a % of how much the shot missed.
+>
+> For example, "Miss 12%" means the shot was 12% from hitting.
+> If the shot had a 80% hit chance, then the attack roll was 92 (after roll correction).
 
 
 **Terrain Dots**
@@ -383,6 +394,11 @@ These settings can be changed in `settings.json`.
 
 **Mech and MechWarrior**
 
+> Setting: `MechTrayGreyActedPilot`  (true/false, default true)
+>
+> When true, Mechwarrior who have acted this round will have their names in grey in the mech tray.
+<br>
+
 > Setting: `ShowNumericInfo`  (true/false, default true)
 >
 > When true, display heat, stability, movement, and distance numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.
@@ -409,6 +425,11 @@ These settings can be changed in `settings.json`.
 > The original hint, which shows only wounds and health, will be preserved when the hint is fully expanded (i.e. when no mech is selected).
 >
 > If the line is too long, for example when HP is included, the line will wrap.
+<br>
+
+> Setting: `ConsolidateWeaponCheevons`  (true/false, default true)
+>
+> When true, weapon cheevons around enemies will be grouped by type.
 
 
 **Weapons Loadout**
@@ -1107,12 +1128,23 @@ but because the code that determine hit distribution is not designed for fractio
 > Set path of mod log and attack log.  Default is empty which will use mod folder.
 
 
+## Other Settings
+
+> Setting: `FixWeaponStats`  (true/false, default true)
+>
+> Fix several known bugs of weapon stats:
+> # Delta LRM's extra instability
+> # Holly SRM's extra accuracy
+> # ER PPC's missing debuff
+> # ER lasers's missing bonus description
+
 
 # Compatibilities
 
 * BattleTech 1.0 - AIM 1.0.1.
 * BattleTech 1.1 - AIM 1.0.1 to 2.1.2.
-* BattleTech 1.2 - AIM 2.2 to 3.0.
+* BattleTech 1.2 - AIM 2.2 to 3.1.
+* BattleTech 1.3 - AIM 3.1.
 
 Because of the *extensive* patching, this mod is sensitive to version updates.
 I did my best to defensively code it given my limited free time.

@@ -1,6 +1,14 @@
 {
 
   //
+  // Stats
+  //
+
+  /* Fix incorrect weapon stats.  Does not modify json.  Default true. */
+
+  "FixWeaponStats": true,
+
+  //
   // User Interfaces
   //
 
@@ -119,6 +127,14 @@
   /* Show weapon range in meters instead of "Short" or "Very Long" in weapon mouseover.  Default "Min {0} : Long {2} : Max {4}". */
 
   "WeaponRangeFormat": "Min {0} : Long {2} : Max {4}",
+
+  /* Show only one cheevon per weapon subtype.  Same as CombatConstants.CombatUIConstants.collapseWeaponTypesInTickMarks.  Default true. */
+
+  "ConsolidateWeaponCheevons": true,
+
+  /* Set acted pilot name to grey.  Default true. */
+
+  "MechTrayGreyActedPilot": true,
 
   /* Format pilot name to show wounds (enemies) and health (non-enemy) after their names.
    * {1} is injury, {2} is health - injury, and {3} is health.  Set to empty to not change game default. */
@@ -330,6 +346,10 @@
    * Default is 5, same as game default. */
 
   "MissStreakBreakerDivider": 5,
+
+  /* Show the % margin of a missed attack in damage floatie. Smaller % = closer miss.  Default true. */
+
+  "ShowMissMargin": true,
 
   //
   // Modifiers Preview
