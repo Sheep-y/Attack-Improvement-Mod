@@ -80,7 +80,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( typeof( CombatHUDMWStatus ), "RefreshPilot", null, "ReplacePilotHint" );
          }
 
-         if ( Settings.MechWarriorGreyActedPilot )
+         if ( Settings.MechTrayGreyActedPilot )
             Patch( typeof( CombatHUDPortrait ), "RefreshDisplayedActor", null, "ColourPilotNames" );
       }
 

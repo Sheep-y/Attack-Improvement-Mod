@@ -112,7 +112,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public bool ConsolidateWeaponCheevons = true;
 
       [ JsonComment( "Set acted pilot name to grey.  Default true." ) ]
-      public bool MechWarriorGreyActedPilot = true;
+      public bool MechTrayGreyActedPilot = true;
 
       [ JsonComment( new string[]{
         "Format pilot name to show wounds (enemies) and health (non-enemy) after their names.",
