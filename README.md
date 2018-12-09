@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 3.1 beta #
+# AIM - Attack Improvement Mod 3.1 Release Candidate #
 For BATTLETECH 1.3.2
 
 - [Features Overview](#features-overview)
@@ -550,6 +550,15 @@ These settings can be changed in `settings.json`.
 
 
 **Adjust Called Shot Weight**
+
+> Setting: `FixCalledShotMultiplierSquare`  (true/false, default true)
+>
+> When true, called shot weight will be fixed if it is detected to have been squared.
+>
+> This happens to some saves and the cause is unknown.
+> It is unlikely to be caused by this mod, and certainly can't be fixed by disabling this mod.
+> Restarting the mission will restore the weight to normal.
+<br>
 
 > Setting: `MechCalledShotMultiplier`  (0 to 1024.0, default 0.33)
 >

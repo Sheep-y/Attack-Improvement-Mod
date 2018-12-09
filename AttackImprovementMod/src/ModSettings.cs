@@ -189,6 +189,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
         "You can do that before any headshot immune unit has been attacked.  But it won't have any effect.  Default true." } ) ]
       public bool FixBossHeadCalledShotDisplay = true;
 
+      [ JsonComment( "Fix Called Shot Multiplier if it is squared.  Default true." ) ]
+      public bool FixCalledShotMultiplierSquare = true;
+
       [ JsonComment( "Enable clustering effect for called shots against mechs.  Default true." ) ]
       public bool CalledShotUseClustering = true;
 

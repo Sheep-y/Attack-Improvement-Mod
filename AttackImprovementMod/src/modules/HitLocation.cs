@@ -23,6 +23,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          MechCalledShotMultiplier = (float) Settings.MechCalledShotMultiplier;
          VehicleCalledShotMultiplier = (float) Settings.VehicleCalledShotMultiplier;
 
+         if ( Settings.FixCalledShotMultiplierSquare )
+            Patch( typeof( AbstractActor ), "get_CalledShotBonusMultiplier", null, "FixCalledShotMultiplierSquare" );
+
          bool prefixMech    = MechCalledShotMultiplier    != 1 || Settings.CalledShotUseClustering,
               prefixVehicle = VehicleCalledShotMultiplier != 1;
          MethodInfo MechGetHit    = AttackLog.GetHitLocation( typeof( ArmorLocation ) ),
@@ -45,12 +48,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       private static bool ClusterChanceNeverMultiplyHead = true;
-      private static float ClusterChanceOriginalLocationMultiplier = 1f;
+      private static float ClusterChanceOriginalLocationMultiplier = 1f, CalledShotBonusMultiplier = 2f;
       private static Dictionary<Dictionary<ArmorLocation, int>, int> HeadHitWeights;
 
       public override void CombatStarts () {
          ClusterChanceNeverMultiplyHead = CombatConstants.ToHit.ClusterChanceNeverMultiplyHead;
          ClusterChanceOriginalLocationMultiplier = CombatConstants.ToHit.ClusterChanceOriginalLocationMultiplier;
+         CalledShotBonusMultiplier = CombatConstants.HitTables.CalledShotBonusMultiplier;
 
          if ( Settings.FixHitDistribution ) {
             foreach ( AttackDirection direction in Enum.GetValues( typeof( AttackDirection ) ) ) {
@@ -97,6 +101,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       // ============ Called Shot ============
+
+      public static void FixCalledShotMultiplierSquare ( AbstractActor __instance, ref float __result ) {
+         float selfBonus = __result / CalledShotBonusMultiplier;
+         if ( selfBonus == 81 ) __result = CalledShotBonusMultiplier * 9;
+         else if ( selfBonus == 5.76f ) __result = CalledShotBonusMultiplier * 2.4f;
+      }
 
       private static Dictionary<Dictionary<ArmorLocation, int>, Dictionary<ArmorLocation, int>> ScaledMechHitTables;
       private static Dictionary<Dictionary<VehicleChassisLocations, int>, Dictionary<VehicleChassisLocations, int>> ScaledVehicleHitTables;
