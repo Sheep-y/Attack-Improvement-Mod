@@ -281,7 +281,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // Make sure Blocked LOS is displayed in single target mode.
       public static void ShowBlockedLOS () {
-         lineB?.gameObject.SetActive( true );
+         lineB?.gameObject?.SetActive( true );
       }
 
       // ============ Arcs ============
