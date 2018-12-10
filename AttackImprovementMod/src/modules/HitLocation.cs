@@ -30,8 +30,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
               prefixVehicle = VehicleCalledShotMultiplier != 1;
          MethodInfo MechGetHit    = AttackLog.GetHitLocation( typeof( ArmorLocation ) ),
                     VehicleGetHit = AttackLog.GetHitLocation( typeof( VehicleChassisLocations ) );
-         if ( prefixMech )
+         if ( prefixMech ) {
+            Patch( typeof( BattleTech.HitLocation ), "GetMechHitTable", null, "RecordHitDirection" );
             Patch( MechGetHit, "PrefixMechCalledShot", null );
+         }
          if ( prefixVehicle )
             Patch( VehicleGetHit, "PrefixVehicleCalledShot", null );
          if ( Settings.FixHitDistribution ) {
@@ -101,23 +103,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          else if ( selfBonus == 5.76f ) __result = CalledShotBonusMultiplier * 2.4f;
       }
 
+      private static AttackDirection CurrentHitDirection;
       private static Dictionary<Dictionary<ArmorLocation, int>, Dictionary<ArmorLocation, int>> ScaledMechHitTables;
       private static Dictionary<Dictionary<VehicleChassisLocations, int>, Dictionary<VehicleChassisLocations, int>> ScaledVehicleHitTables;
 
+      public static void RecordHitDirection ( AttackDirection from ) {
+         CurrentHitDirection = from;
+      }
+
       public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-         if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None ) {
-            HitTableConstantsDef hitTables = CombatConstants.HitTables;
-            AttackDirection dir = AttackDirection.None;
-            if      ( hitTable == hitTables.HitMechLocationFromFront ) dir = AttackDirection.FromFront;
-            else if ( hitTable == hitTables.HitMechLocationFromLeft  ) dir = AttackDirection.FromLeft;
-            else if ( hitTable == hitTables.HitMechLocationFromRight ) dir = AttackDirection.FromRight;
-            else if ( hitTable == hitTables.HitMechLocationFromBack  ) dir = AttackDirection.FromBack;
-            else if ( hitTable == hitTables.HitMechLocationProne     ) dir = AttackDirection.ToProne;
-            else if ( hitTable == hitTables.HitMechLocationFromTop   ) dir = AttackDirection.FromTop;
-            if ( dir != AttackDirection.None ) // Leave hitTable untouched if we don't recognise it
-               hitTable = CombatConstants.GetMechClusterTable( bonusLocation, dir );
-         }
+         if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None && CurrentHitDirection != AttackDirection.None )
+            hitTable = CombatConstants.GetMechClusterTable( bonusLocation, CurrentHitDirection );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static int head;
