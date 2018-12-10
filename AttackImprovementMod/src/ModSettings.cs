@@ -35,9 +35,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Ctrl click on a weapon in Multi-Target mode will enable/disable the weapon.  Default true." ) ]
       public bool CtrlClickDisableWeapon = true;
 
-      [ JsonComment( "Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game." ) ]
-      public bool FixGreyHeadDisease = true;
-
       [ JsonComment( "Fix the bug that rear paper doll is incorrectly showing front structure.  Default true." ) ]
       public bool FixPaperDollRearStructure = true;
 

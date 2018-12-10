@@ -40,16 +40,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Patch( MechGetHit, "ScaleMechHitTable", "RestoreHeadToScaledHitTable" );
             Patch( VehicleGetHit, "ScaleVehicleHitTable", null );
          }
-
-         if ( Settings.FixGreyHeadDisease ) {
-            HeadHitWeights = new Dictionary<Dictionary<ArmorLocation, int>, int>();
-            Patch( typeof( BattleTech.HitLocation ), "GetMechHitTable", null, "FixGreyHeadDisease" );
-         }
       }
 
       private static bool ClusterChanceNeverMultiplyHead = true;
       private static float ClusterChanceOriginalLocationMultiplier = 1f, CalledShotBonusMultiplier = 2f;
-      private static Dictionary<Dictionary<ArmorLocation, int>, int> HeadHitWeights;
 
       public override void CombatStarts () {
          ClusterChanceNeverMultiplyHead = CombatConstants.ToHit.ClusterChanceNeverMultiplyHead;
@@ -76,7 +70,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatEnds () {
-         HeadHitWeights?.Clear();
          ScaledMechHitTables?.Clear();
          ScaledVehicleHitTables?.Clear();
       }
@@ -169,19 +162,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( bonusLocationMultiplier != 1 && hitTable.ContainsKey( bonusLocation ) )
             totalWeight += (int)( hitTable[ bonusLocation ] * ( bonusLocationMultiplier - 1 ) * SCALE );
          return totalWeight;
-      }
-
-      public static void FixGreyHeadDisease ( Dictionary<ArmorLocation, int> __result ) {
-         if ( __result == null ) return;
-         if ( __result.TryGetValue( Head, out int head ) ) {
-            // Has head. Cache it.
-            if ( HeadHitWeights.ContainsKey( __result ) ) return;
-            HeadHitWeights[ __result ] = head;
-         } else {
-            // No head. Add it?
-            if ( ! HeadHitWeights.TryGetValue( __result, out head ) ) return;
-            __result[ Head ] = head;
-         }
       }
    }
 }

@@ -1,12 +1,13 @@
 CHANGE LOG
 
-2018-12-09 AIM Version 3.1 RC for BATTLETECH 1.3.2
+2018-12-?? AIM Version 3.1 RC for BATTLETECH 1.3.2
 
 * New: Consolidate weapon cheevons.
 * New: Show margin of miss in damage floatie.
 * New: Fix squared called shot multiplier.
 * New: Fix weapon stats on game load (non-json-based).
 * New: Acted mechwarriors will have their names greyed out in mech tray.
+* Del: FixGreyHeadDisease removed since it is fixed in 1.3.
 * Mod: Unit tonnage is now always displayed, ShowUnitTonnage setting is deprecated.
 * Mod: Target panel shows min distance when no PC is selected.
 * Fix: Fix a potential crash on load game.

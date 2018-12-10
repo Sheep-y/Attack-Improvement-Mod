@@ -33,7 +33,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 
 ## Bug Fixes and HUD Enhancements ##
 
-* Fix Grey head disease, Multi-Target cancelling, and 0 hp unit/locations.
+* Fix boss head called shot, Multi-Target cancelling, and 0 hp unit/locations.
 * Fix Delta LRM stability, ER PPC debuff, and other minor weapon bugs.
 * Line of fire fixed and coloured: Dotted = indirect, Cyan = flank, Green = rear.
 * Press F1 to F4 to select mech. Shift+Tab to reverse select mech. Grey name = acted mech.
@@ -516,23 +516,16 @@ These settings can be changed in `settings.json`.
 
 **Fix Grey Head Disease**
 
-> Setting: `FixGreyHeadDisease`  (true/false, default true)
->
-> When true, confine the grey head disease to the boss so that it does not spread around.
->
-> Otherwise, when anyone (friend or foe) attacks a headshot immune character, all attacks from the same direction will never hit any head ever again.
-> Every one's head will be grey.  I call it the grey head disease.  It lasts until you load a game, which resets the hit tables.
-<br>
-
 > Setting: `FixBossHeadCalledShotDisplay`  (true/false, default true)
 >
-> When true, boss head is always unselectable in called shot.
+> When true, boss head will be unselectable in called shot.
 >
-> Did you know that grey head in called shot popup is actually a bug?  (I hope it is a bug.)
-> If you try to call shot the boss before any headshot-immune unit is attacked, such as right after a load, the head is actually selectable!
-> This is most apparent with FixGreyHeadDisease on, since the head will be always available.
+> Before game version 1.3, any attack on an important NPC (which is headshot immune) will remove the head from the global hit table.
+> As a result, after a few rounds no one's head can be hit.  They will be greyed out in the called shot popup.
+> This was called the grey head disease by some and can only be cured by loading game or using an earlier version of AIM.
 >
-> If `FixGreyHeadDisease` is true but `FixBossHeadCalledShotDisplay` is false, the boss's head will be selectable for called shot, but you will never hit the head.
+> This is fixed in patch 1.3, by cloning the hit table in every hit.  Slow, but a working fix nonetheless.
+> But this also mean boss head can now be called, when in fact you will never hit the head.  This setting fix that.
 
 
 **Enable Clustering Called Shot**
