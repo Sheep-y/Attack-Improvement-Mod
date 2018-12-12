@@ -82,7 +82,7 @@ namespace Sheepy.BattleTechMod {
       protected virtual void Setup () {
          Log.Delete();
          Log.Info( "{0:yyyy-MM-dd} Loading {1} Version {2} @ {3}", DateTime.Now, Name, Version, BaseDir );
-         Log.Info( "Game Version {0}, Harmony Version {1}" + Environment.NewLine, VersionInfo.ProductVersion, typeof(HarmonyInstance).Assembly.GetName().Version );
+         Log.Info( "Game Version {0}, Harmony Version {1}, Mod Dll Version {2}" + Environment.NewLine, VersionInfo.ProductVersion, typeof(HarmonyInstance).Assembly.GetName().Version, this.GetType().Assembly.GetName().Version );
       }
 
       public static string Idify ( string text ) { return new Regex( "\\W+" ).Split( text ).Concat( "", UppercaseFirst ); }
