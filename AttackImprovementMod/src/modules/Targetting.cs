@@ -203,18 +203,18 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static bool ReAddStateData;
 
-      public static void PreventMultiTargetBackout ( CombatSelectionHandler __instance ) {
+      public static void PreventMultiTargetBackout ( CombatSelectionHandler __instance ) { try {
          if ( ReAddStateData ) {
             // Re-add self state onto selection stack to prevent next backout from cancelling command
             __instance.NotifyChange( CombatSelectionHandler.SelectionChange.StateData );
          }
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideMultiTargetCanBackout ( SelectionStateFireMulti __instance, ref bool __result ) {
+      public static bool OverrideMultiTargetCanBackout ( SelectionStateFireMulti __instance, ref bool __result ) { try {
          __result = __instance.Orders == null && __instance.AllTargetedCombatantsCount > 0;
          return false;
-      }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       private static PropertyInfo weaponTargetIndices;
       private static MethodInfo RemoveTargetedCombatant, ClearTargetedActor;

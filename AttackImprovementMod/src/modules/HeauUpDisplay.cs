@@ -183,7 +183,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       private static Dictionary<CombatHUDPipBar, ICombatant> BarOwners;
 
-      public static void SetArmorBarOwner ( CombatHUDNumFlagHex __instance ) {
+      public static void SetArmorBarOwner ( CombatHUDNumFlagHex __instance ) { try {
          ICombatant owner = __instance.DisplayedCombatant;
          CombatHUDArmorBarPips bar = __instance.ActorInfo?.ArmorBar;
          if ( bar == null ) return;
@@ -192,7 +192,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             bar.RefreshUIColors();
          } else if ( BarOwners.ContainsKey( bar ) )
             BarOwners.Remove( bar );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void SetArmorBarColour ( CombatHUDPipBar __instance, ref Color shownColor ) {
          if ( ! ( __instance is CombatHUDArmorBarPips me ) || ! BarOwners.TryGetValue( __instance, out ICombatant owner ) ) return;

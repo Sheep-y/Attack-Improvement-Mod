@@ -217,7 +217,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return TotalModifiers;
       }
 
-      private static int AddToolTipDetail( AttackModifier tooltip ) {
+      private static int AddToolTipDetail ( AttackModifier tooltip ) {
          int mod = Mathf.RoundToInt( tooltip.Value );
          if ( mod == 0 ) return 0;
          List<Text> TipList = mod > 0 ? tip.DebuffStrings : tip.BuffStrings;

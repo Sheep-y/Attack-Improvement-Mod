@@ -86,10 +86,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Info( "Target direction marker = {0}", FacingMarkerTargetColors );
       }
 
-      public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) {
+      public static void SaveDirectionMarker ( AttackDirectionIndicator __instance ) { try {
          if ( OrigDirectionMarkerColors == null )
             OrigDirectionMarkerColors = new Color[]{ __instance.ColorInactive, __instance.ColorActive };
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void SetDirectionMarker ( AttackDirectionIndicator __instance, AttackDirection direction ) { try {
          AttackDirectionIndicator me =  __instance;
@@ -270,19 +270,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return value;
       }
 
-      public static void SetBlockedLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) {
+      public static void SetBlockedLOS ( WeaponRangeIndicators __instance, bool usingMultifire ) { try {
          if ( lineB == null ) return;
          LosMaterial mat = Mats[ BlockedPost ][ dirIndex ];
          lineB.material = mat.GetMaterial();
          lineB.startColor = lineB.endColor = lineB.material.color;
          lineB.startWidth = lineB.endWidth = mat.Width;
-         lineB.gameObject.SetActive( true );
-      }
+         lineB.gameObject?.SetActive( true );
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // Make sure Blocked LOS is displayed in single target mode.
-      public static void ShowBlockedLOS () {
+      public static void ShowBlockedLOS () { try {
          lineB?.gameObject?.SetActive( true );
-      }
+      }                 catch ( NullReferenceException ) {
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Arcs ============
 

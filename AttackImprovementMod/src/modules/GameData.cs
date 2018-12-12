@@ -81,7 +81,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( weaponsToFix.Count <= 0 ) {
             weaponDefs = null;
             weaponsToFix = null;
-            Info( "All weapon stats corrected." );
+            Info( "Last weapon checked." );
          }
          return true;
       }

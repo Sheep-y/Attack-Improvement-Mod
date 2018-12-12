@@ -98,6 +98,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Called Shot ============
 
       public static void FixCalledShotMultiplierSquare ( AbstractActor __instance, ref float __result ) {
+         if ( CalledShotBonusMultiplier == 0 ) return;
          float selfBonus = __result / CalledShotBonusMultiplier;
          if ( selfBonus == 81 ) __result = CalledShotBonusMultiplier * 9;
          else if ( selfBonus == 5.76f ) __result = CalledShotBonusMultiplier * 2.4f;

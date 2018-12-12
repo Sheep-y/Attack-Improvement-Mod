@@ -136,12 +136,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
-      public static bool OverrideHitChanceStepNClamp ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) {
+      public static bool OverrideHitChanceStepNClamp ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) { try {
          // A pretty intense routine that AI use to evaluate attacks, try catch disabled.
          //Log( "OverrideHitChanceStepNClamp - Base Hit {0}, Modifier {1}", baseChance, totalModifiers );
          __result = ClampHitChance( __instance.GetSteppedValue( baseChance, totalModifiers ) );
          return false;
-      }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideHitChanceDiminishing ( ToHit __instance, ref float __result, float baseChance, float totalModifiers ) { try {
@@ -158,7 +158,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      public static float StepHitChance( float chance ) {
+      internal static float StepHitChance ( float chance ) {
          float step = HitChanceStep;
          if ( step > 0f ) {
             chance += step/2f;
@@ -167,7 +167,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return chance;
       }
 
-      public static float ClampHitChance( float chance ) {
+      internal static float ClampHitChance ( float chance ) {
          chance = StepHitChance( chance );
          if      ( chance >= MaxFinalHitChance ) return MaxFinalHitChance;
          else if ( chance <= MinFinalHitChance ) return MinFinalHitChance;
@@ -229,7 +229,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       // ============ Previews ============
 
       // Set self walked modifier when previewing movement
-      public static void Preview_SelfSpeedModifier ( ref float __result, AbstractActor attacker ) {
+      public static void Preview_SelfSpeedModifier ( ref float __result, AbstractActor attacker ) { try {
          if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasMovedThisRound || ! ( ActiveState is SelectionStateMoveBase ) ) return;
          float movement = Vector3.Distance( mech.CurrentPosition, ActiveState.PreviewPos );
          if ( movement <= 10 ) return;
@@ -239,13 +239,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             case WeightClass.HEAVY   : __result = CombatConstants.ToHit.ToHitSelfWalkHeavy  ; break;
             case WeightClass.ASSAULT : __result = CombatConstants.ToHit.ToHitSelfWalkAssault; break;
          }
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // Set self sprint modifier when previewing movement
-      public static void Preview_SelfSprintedModifier ( ref float __result, AbstractActor attacker ) {
+      public static void Preview_SelfSprintedModifier ( ref float __result, AbstractActor attacker ) { try {
          if ( __result != 0 || ! ( attacker is Mech mech ) || mech.HasSprintedThisRound || ! ( ActiveState is SelectionStateSprint ) ) return;
          __result = CombatConstants.ToHit.ToHitSelfSprinted;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static float GetJumpedModifier ( AbstractActor attacker ) {
          float movement = -1;

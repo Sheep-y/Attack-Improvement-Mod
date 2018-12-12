@@ -78,16 +78,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ HarmonyPriority( Priority.High ) ]
-      public static void SetMeleeTarget ( Pathing __instance, AbstractActor target ) {
+      public static void SetMeleeTarget ( Pathing __instance, AbstractActor target ) { try {
          thisMeleeAttacker = __instance.OwningActor;
          thisMeleeTarget = target;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.High ) ]
-      public static void SetDFATarget ( JumpPathing __instance, AbstractActor target ) {
+      public static void SetDFATarget ( JumpPathing __instance, AbstractActor target ) { try {
          thisMeleeAttacker = JumpMechProp.GetValue( __instance, null ) as AbstractActor;
          thisMeleeTarget = target;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ClearMeleeTarget () {
          thisMeleeAttacker = thisMeleeTarget = null;

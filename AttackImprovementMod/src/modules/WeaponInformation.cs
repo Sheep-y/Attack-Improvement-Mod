@@ -270,14 +270,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          TotalSlot.HitChanceText.text = FormatTotalDamage( AverageDamage, true );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void RefreshTotalDamage () {
+      public static void RefreshTotalDamage () { try {
          if ( ActiveState is SelectionStateFireMulti )
-            HUD.WeaponPanel.RefreshDisplayedWeapons(); // Refresh weapon highlight AFTER HUD.SelectedTarget is updated.
-      }
+            HUD?.WeaponPanel?.RefreshDisplayedWeapons(); // Refresh weapon highlight AFTER HUD.SelectedTarget is updated.
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ToggleStabilityDamage ( bool IsCallout ) { try {
          ShowingStabilityDamage = IsCallout;
-         HUD?.WeaponPanel.RefreshDisplayedWeapons();
+         HUD?.WeaponPanel?.RefreshDisplayedWeapons();
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Helpers ============

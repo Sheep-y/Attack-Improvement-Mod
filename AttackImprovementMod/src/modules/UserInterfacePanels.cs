@@ -247,10 +247,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static ICombatant ActorInfoTarget;
 
       public static void RecordTarget ( CombatHUDActorInfo __instance, ICombatant ___displayedCombatant ) { ActorInfoTarget = ___displayedCombatant; }
-      public static void ShowBuildingInfo ( CombatHUDActorInfo __instance ) {
+      public static void ShowBuildingInfo ( CombatHUDActorInfo __instance ) { try {
          if ( ActorInfoTarget is BattleTech.Building )
             __instance.DetailsDisplay?.gameObject?.SetActive( true );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowNumericInfo ( CombatHUDActorDetailsDisplay __instance ) { try {
          ICombatant target = __instance.DisplayedActor ?? ActorInfoTarget;
@@ -385,20 +385,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          needRefresh = true;
       }
 
-      public static void RefreshTargetInfo ( bool isCallout ) {
+      public static void RefreshTargetInfo ( bool isCallout ) { try {
          TargetDisplay?.RefreshInfo();
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void RefreshActorInfo ( CombatHUDMechTray __instance ) {
+      public static void RefreshActorInfo ( CombatHUDMechTray __instance ) { try {
          if ( ! needRefresh ) return;
-         __instance?.ActorInfo?.DetailsDisplay?.RefreshInfo();
+         __instance.ActorInfo?.DetailsDisplay?.RefreshInfo();
          needRefresh = false;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void RefreshMoveAndDist () {
+      public static void RefreshMoveAndDist () { try {
          HUD?.TargetingComputer?.ActorInfo?.DetailsDisplay?.RefreshInfo();
          HUD?.MechTray?.ActorInfo?.DetailsDisplay?.RefreshInfo();
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void CorrectProjectedHeat ( Mech __instance, ref int __result ) { try {
          if ( __instance.HasMovedThisRound || __instance != HUD?.SelectedActor ) return;
@@ -453,10 +453,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<CombatHUDMWStatus, Pilot> PilotStatus;
 
       // Force update on portrait right click and forced unexpansion.
-      public static void RefreshPilotHint ( CombatHUDMWStatus __instance ) {
+      public static void RefreshPilotHint ( CombatHUDMWStatus __instance ) { try {
          if ( PilotStatus.TryGetValue( __instance, out Pilot pilot ) )
             __instance.RefreshPilot( pilot );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ReplacePilotHint ( CombatHUDMWStatus __instance, Pilot pilot ) { try {
          if ( HUD == null || pilot == null ) return;
@@ -468,12 +468,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                CombatHUDPortrait.GetPilotInjuryColor( pilot, HUD ) );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void ColourPilotNames ( CombatHUDPortrait __instance ) {
+      public static void ColourPilotNames ( CombatHUDPortrait __instance ) { try {
          AbstractActor actor = __instance.DisplayedActor;
          if ( actor == null ) return;
          Color c = Color.white;
          if ( actor.WasEjected || actor.IsDead || ( actor.HasMovedThisRound && actor.HasFiredThisRound ) ) c = Color.grey;
          __instance.PilotName.color = c;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
    }
 }

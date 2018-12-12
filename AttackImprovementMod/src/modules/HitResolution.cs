@@ -61,26 +61,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ Zombie ============
 
-      public static void FixZombieMech ( Mech __instance, ref float totalDamage, ArmorLocation aLoc ) {
+      public static void FixZombieMech ( Mech __instance, ref float totalDamage, ArmorLocation aLoc ) { try {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid ) return;
          float armour = __instance.GetCurrentArmor( aLoc );
          if ( armour >= totalDamage ) return;
          KillZombie( "mech", __instance.DisplayName, armour + __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ), ref totalDamage );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void FixZombieVehicle ( Vehicle __instance, ref float totalDamage, VehicleChassisLocations vLoc ) {
+      public static void FixZombieVehicle ( Vehicle __instance, ref float totalDamage, VehicleChassisLocations vLoc ) { try {
          if ( vLoc == VehicleChassisLocations.None || vLoc == VehicleChassisLocations.Invalid ) return;
          KillZombie( "vehicle", __instance.DisplayName, __instance.GetCurrentArmor( vLoc ) + __instance.GetCurrentStructure( vLoc ), ref totalDamage );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void FixZombieTurret ( Turret __instance, ref float totalDamage, BuildingLocation bLoc ) {
+      public static void FixZombieTurret ( Turret __instance, ref float totalDamage, BuildingLocation bLoc ) { try {
          if ( bLoc == BuildingLocation.None || bLoc == BuildingLocation.Invalid ) return;
          KillZombie( "turret", __instance.DisplayName, __instance.GetCurrentArmor( bLoc ) + __instance.GetCurrentStructure( bLoc ), ref totalDamage );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static void FixZombieBuilding ( BattleTech.Building __instance, ref float totalDamage ) {
+      public static void FixZombieBuilding ( BattleTech.Building __instance, ref float totalDamage ) { try {
          KillZombie( "building", __instance.DisplayName, __instance.CurrentStructure, ref totalDamage );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static void KillZombie ( string type, string name, float HP, ref float totalDamage ) {
          float newHP = HP - totalDamage;
@@ -100,11 +100,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          hitChance.Add( hitInfo.attackSequenceId, toHitChance );
       }
 
-      public static void ClearHitChance () {
+      public static void ClearHitChance () { try {
          if ( Combat?.AttackDirector?.IsAnyAttackSequenceActive ?? true )
             return; // Defer if Multi-Target is not finished. Defer when in doubt.
          hitChance.Clear();
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void SetImpact ( MessageCenterMessage message ) {
          if ( ! ( message is AttackSequenceImpactMessage impactMessage ) ) return;
@@ -170,7 +170,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return false;
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
-      public static void ClearAmmoSort ( ) {
+      public static void ClearAmmoSort () {
          ByExplosion = ByRisk = null;
       }
 
@@ -256,7 +256,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
       private static int Compare ( float a, float b ) { return a > b ? 1 : ( a < b ? -1 : 0 ); }
 
-      public static IComparer<ChassisLocations> LocationSorter ( Mech mech ) {
+      private static IComparer<ChassisLocations> LocationSorter ( Mech mech ) {
          return new FunctionalComparer<ChassisLocations>( ( a, b ) => {
             LocationDamageLevel aDead = mech.GetLocationDamageLevel( a ), bDead = mech.GetLocationDamageLevel( b );
             if ( aDead != bDead ) { // Dead location has last priority
@@ -273,7 +273,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          } );
       }
 
-      public static float WeakestArmour ( Mech mech, ChassisLocations location ) {
+      private static float WeakestArmour ( Mech mech, ChassisLocations location ) {
          // For side torsos, report 0 if rear armour is breached.
          if ( location == ChassisLocations.LeftTorso ) {
             if ( mech.GetCurrentArmor( LeftTorsoRear ) <= 0 ) return 0;
@@ -289,7 +289,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return armour;
       }
 
-      public static float WeakestHP ( Mech mech, ChassisLocations location ) {
+      private static float WeakestHP ( Mech mech, ChassisLocations location ) {
          if ( location == ChassisLocations.LeftArm )
             return Math.Min( mech.GetCurrentStructure( ChassisLocations.LeftArm  ), mech.GetCurrentStructure( ChassisLocations.LeftTorso  ) );
          else if ( location == ChassisLocations.RightArm )

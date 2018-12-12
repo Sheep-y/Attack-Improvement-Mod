@@ -83,7 +83,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       // ============ UTILS ============
 
-      public static float CorrectRoll ( float roll, float strength ) {
+      private static float CorrectRoll ( float roll, float strength ) {
          strength /= 2;
          return (float)( (Math.Pow(1.6*roll-0.8,3)+0.5)*strength + roll*(1-strength) );
       }

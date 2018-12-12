@@ -147,9 +147,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       } }
 
       [ HarmonyPriority( Priority.High ) ]
-      public static bool SkipBeatingDeadMech ( Mech __instance ) {
+      public static bool SkipBeatingDeadMech ( Mech __instance ) { try {
          return ! IsBeatingDeadMech( __instance );
-      }
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       public static bool IsBeatingDeadMech ( AbstractActor __instance ) {
          return __instance.IsFlaggedForDeath || __instance.IsDead;
@@ -163,22 +163,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static AudioEventList_impact impact_weapon;
       private static AudioEventList_explosion explosion_small;
 
-      public static MessageCenterMessage GetCritMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
+      private static MessageCenterMessage GetCritMessage ( ICombatant unit, string message, object arg, FloatieMessage.MessageNature type ) {
          return new AddSequenceToStackMessage( new ShowActorInfoSequence( unit, new Text( message, new object[] { arg } ), type, true ) );
       }
 
-      public static float GetWeaponDamage ( AIMCritInfo info ) {
+      private static float GetWeaponDamage ( AIMCritInfo info ) {
          return GetWeaponDamage( info.target, info.hitInfo, info.weapon );
       }
 
-      public static float GetWeaponDamage ( AbstractActor target, WeaponHitInfo hitInfo, Weapon weapon ) {
+      private static float GetWeaponDamage ( AbstractActor target, WeaponHitInfo hitInfo, Weapon weapon ) {
          float damage = weapon.parent == null ? weapon.DamagePerShot : weapon.DamagePerShotAdjusted( weapon.parent.occupiedDesignMask );
          AbstractActor attacker = Combat.FindActorByGUID( hitInfo.attackerId );
          LineOfFireLevel lineOfFireLevel = attacker.VisibilityCache.VisibilityToTarget( target ).LineOfFireLevel;
          return target.GetAdjustedDamage( damage, weapon.Category, target.occupiedDesignMask, lineOfFireLevel, false );
       }
 
-      public static AttackDirector.AttackSequence GetAttackSequence ( WeaponHitInfo hitInfo ) {
+      private static AttackDirector.AttackSequence GetAttackSequence ( WeaponHitInfo hitInfo ) {
          return Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
       }
 
@@ -246,7 +246,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          PostCheckForCrit( info, logCrit );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static MechComponent FindAndCritComponent ( AIMCritInfo critInfo, float random ) {
+      private static MechComponent FindAndCritComponent ( AIMCritInfo critInfo, float random ) {
          MechComponent component = critInfo.FindComponentFromRoll( random );
          if ( component != null ) {
             if ( DebugLog ) Verbo( "Play crit SFX and VFX on {0} ({1}) at {2}", component, component.DamageLevel, component.Location );
