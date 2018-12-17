@@ -170,7 +170,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static Dictionary<string, int> hitMap; // Used to assign critical hit information
       private static List<string> log = new List<string>( 32 );
 
-      public static void ForceWriteLog () {
+      private static void ForceWriteLog () {
          if ( log.Count <= 0 ) return;
          if ( DebugLog ) Verbo( "Force write {0} lines of log.\n", log.Count );
          ROLL_LOG.Info( string.Join( Environment.NewLine, log.ToArray() ) );
@@ -179,7 +179,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void WriteRollLog () {
+      public static void WriteRollLog () { try {
          if ( Combat?.AttackDirector?.IsAnyAttackSequenceActive ?? true )
             return; // Defer if Multi-Target is not finished. Defer when in doubt.
          ForceWriteLog();
@@ -187,15 +187,15 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          hitMap?.Clear();
          thisSequenceId = GetNewId();
          if ( DebugLog ) Verbo( "HitMap Cleared" );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void WriteSpecialLog () {
+      public static void WriteSpecialLog () { try {
          if ( log.Count <= 0 ) return;
          if ( Combat?.AttackDirector?.IsAnyAttackSequenceActive ?? true )
             return; // Defer if Multi-Target is not finished. Defer when in doubt.
          ForceWriteLog();
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       internal static MethodInfo GetHitLocation ( Type generic ) {
          return typeof( BattleTech.HitLocation ).GetMethod( "GetHitLocation", Public | Static ).MakeGenericMethod( generic );
@@ -203,7 +203,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       internal static Random idGenerator; // Use an independent generator to make sure we don't affect the game's own RNG or be affected.
 
-      public static string GetNewId () {
+      private static string GetNewId () {
          byte[] buffer = new byte[24];
          idGenerator.NextBytes( buffer );
          return Convert.ToBase64String( buffer );
@@ -228,7 +228,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return result;
       }
 
-      public static string TeamAndCallsign ( ICombatant who ) {
+      private static string TeamAndCallsign ( ICombatant who ) {
          if ( who == null ) return "null" + Separator + "null" + Separator + "null" + Separator;
          Team team = who.team;
          string teamName;
@@ -255,7 +255,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          return time.ToString("s").Replace(':','-');
       }
 
-      public static void ArchiveOldAttackLog () {
+      private static void ArchiveOldAttackLog () {
          // First, rename existing log to clear the way for this launch
          if ( ROLL_LOG.Exists() ) try {
             string from = ROLL_LOG.LogFile;
@@ -273,7 +273,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          ThreadPool.QueueUserWorkItem( ( state ) => { TryRun( ModLog, ClearOldLogs ); } );
       }
 
-      public static void ClearOldLogs () {
+      private static void ClearOldLogs () {
          FileInfo[] oldLogs = Directory.GetFiles( ModLogDir )
             .Where( e => e.Contains( "Log_Attack.20" ) )
             .Select( e => new FileInfo( e ) )
@@ -302,32 +302,32 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static string thisSequence = "", thisSequenceId = "", thisSequenceTargetId = "", thisAttackerId = "";
 
       [ HarmonyPriority( Priority.VeryHigh ) ]
-      public static void RecordArtilleryAttack ( ArtillerySequence __instance, ICombatant target ) {
+      public static void RecordArtilleryAttack ( ArtillerySequence __instance, ICombatant target ) { try {
          ArtillerySequence me = __instance;
          Weapon weapon = me.ArtilleryWeapon;
          float range = ( me.TargetPos - target.CurrentPosition ).magnitude;
          BuildSequenceLine( weapon.parent, target, AttackDirection.FromArtillery, range );
          RecordSequenceWeapon( weapon, 1f );
          RecordAttackRoll( 0f, null );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryHigh ) ]
-      public static void RecordAttack ( AttackDirector.AttackSequence __instance ) {
+      public static void RecordAttack ( AttackDirector.AttackSequence __instance ) { try {
          AttackDirector.AttackSequence me = __instance;
          AttackDirection direction = Combat.HitLocation.GetAttackDirection( me.attackPosition, me.target );
          float range = ( me.attackPosition - me.target.CurrentPosition ).magnitude;
          BuildSequenceLine( me.attacker, me.target, direction, range );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogSelfAttack ( AttackDirector.AttackSequence __instance ) {
+      public static void LogSelfAttack ( AttackDirector.AttackSequence __instance ) { try {
          if ( thisWeapon?.WeaponSubType == WeaponSubType.DFA && LogShot ) {
             if ( DebugLog ) Verbo( "Adding {0} DFA self-damage lines", 2 );
             BuildSpecialSequenceLine( __instance.attacker, __instance.attacker, "ToSelf", "DFA" );
             LogSelfHitSequence( ArmorLocation.LeftLeg  ); // 64
             LogSelfHitSequence( ArmorLocation.RightLeg ); // 128
          }
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static void BuildSequenceLine ( ICombatant attacker, ICombatant target, AttackDirection direction, float range ) {
          string time = DateTime.Now.ToString( "s" );
@@ -377,11 +377,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static float thisStreak;
 
       [ HarmonyPriority( Priority.VeryHigh ) ]
-      public static void RecordAttackRoll ( float roll, Team team ) {
+      public static void RecordAttackRoll ( float roll, Team team ) { try {
          if ( DebugLog ) Verbo( "Roll = {0}", roll );
          thisRoll = roll;
          thisStreak = team?.StreakBreakingValue ?? 0;
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       internal static string GetShotLog () {
          string weaponName = thisWeapon?.UIName?.ToString().Replace( " +", "+" );
@@ -396,7 +396,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       internal static float thisCorrectedRoll;
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogMissedAttack ( float __result, float roll, Team team ) {
+      public static void LogMissedAttack ( float __result, float roll, Team team ) { try {
          thisCorrectedRoll = __result;
          bool miss = __result > thisHitChance;
          if ( miss || ! LogLocation ) { // If miss, log now because hit location won't be rolled
@@ -413,22 +413,22 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                line += Separator + ( miss ? "(Miss)" : "(Hit)" );
             log.Add( line );
          }
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryHigh ) ]
-      public static void RecordOverheatCheck ( Mech __instance, string attackerID ) {
+      public static void RecordOverheatCheck ( Mech __instance, string attackerID ) { try {
          if ( ! __instance.IsOverheated ) return;
          AbstractActor attacker = attackerID != __instance.GUID ? Combat.FindActorByGUID( attackerID ) : __instance;
          BuildSpecialSequenceLine( attacker, __instance, "Internal", __instance.IsShutDown ? "Shutdown" : "Overheat" );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryHigh ) ]
-      public static void RecordOverheat ( Mech __instance, ChassisLocations location ) {
+      public static void RecordOverheat ( Mech __instance, ChassisLocations location ) { try {
          beforeStruct = __instance.GetCurrentStructure( location );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogOverheat ( Mech __instance, ChassisLocations location, float damageAmount ) {
+      public static void LogOverheat ( Mech __instance, ChassisLocations location, float damageAmount ) { try {
          string line = thisSequence;
          if ( DebugLog ) Verbo( "Overheat damage {1} to {0}", location, damageAmount );
          if ( LogLocation ) {
@@ -443,7 +443,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
          }
          log.Add( line );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Location Log ============
 
@@ -569,7 +569,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc, Weapon weapon, DamageType damageType ) {
+      public static void LogMechDamage ( Mech __instance, ArmorLocation aLoc, Weapon weapon, DamageType damageType ) { try {
          if ( aLoc == ArmorLocation.None || aLoc == ArmorLocation.Invalid || ! IsLoggedDamage( damageType ) ) return;
          int line = LogActorDamage( __instance.GetCurrentArmor( aLoc ), __instance.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( aLoc ) ) );
          if ( line >= 0 && Settings.CritFollowDamageTransfer && hitMap != null ) {
@@ -577,26 +577,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( DebugLog ) Verbo( "Log damage transfer {0} = {1}", newKey, line );
             hitMap[ newKey ] = line;
          }
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogVehicleDamage ( Vehicle __instance, VehicleChassisLocations vLoc ) {
+      public static void LogVehicleDamage ( Vehicle __instance, VehicleChassisLocations vLoc ) { try {
          if ( vLoc == VehicleChassisLocations.None || vLoc == VehicleChassisLocations.Invalid ) return;
          LogActorDamage( __instance.GetCurrentArmor( vLoc ), __instance.GetCurrentStructure( vLoc ) );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogTurretDamage ( Turret __instance, BuildingLocation bLoc ) {
+      public static void LogTurretDamage ( Turret __instance, BuildingLocation bLoc ) { try {
          if ( bLoc == BuildingLocation.None || bLoc == BuildingLocation.Invalid ) return;
          LogActorDamage( __instance.GetCurrentArmor( bLoc ), __instance.GetCurrentStructure( bLoc ) );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogBuildingDamage ( BattleTech.Building __instance ) {
+      public static void LogBuildingDamage ( BattleTech.Building __instance ) { try {
          LogActorDamage( 0, __instance.CurrentStructure );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
-      private static int LogActorDamage ( float afterArmour, float afterStruct ) { try {
+      private static int LogActorDamage ( float afterArmour, float afterStruct ) {
          if ( damageResolved ) return -1;
          damageResolved = true;
          if ( hitList.Count <= 0 ) {
@@ -631,7 +631,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( DebugLog ) Verbo( "Log damage {0} @ {1}. Hit list remaining: {2}. Line index {3}", thisDamage, lastLocation, hitList.Count, index );
          thisDamage = null;
          return index;
-      }                 catch ( Exception ex ) { Error( ex ); return -1; } }
+      }
 
 
       // ============ Crit Log ============
@@ -653,25 +653,25 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
       }
 
-      public static void LogAIMCritRoll ( float crit ) {
+      internal static void LogAIMCritRoll ( float crit ) {
          if ( DebugLog ) Verbo( "Crit Roll = {0}", crit );
          thisCritRoll = crit;
       }
 
-      public static void LogAIMSlotRoll ( float slot ) {
+      internal static void LogAIMSlotRoll ( float slot ) {
          if ( DebugLog ) Verbo( "Slot Roll = {0}", slot );
          thisCritSlotRoll = slot;
          checkCritComp = true;
       }
 
       [ HarmonyPriority( Priority.VeryLow ) ]
-      public static void LogBaseCritChance ( float __result, Mech target, ChassisLocations hitLocation ) {
+      public static void LogBaseCritChance ( float __result, Mech target, ChassisLocations hitLocation ) { try {
          thisBaseCritChance = __result;
          thisLocationMaxHP = target.GetMaxStructure( hitLocation );
-      }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // Used by universal crit system of this mod (through armour crit included)
-      public static void LogAIMBaseCritChance ( float chance, float maxHP ) {
+      internal static void LogAIMBaseCritChance ( float chance, float maxHP ) {
          thisBaseCritChance = chance;
          thisLocationMaxHP = maxHP;
       }
@@ -686,7 +686,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          LogAIMCritChance( __result, hitLocation );
       }
 
-      public static float LogAIMCritChance ( float chance, object hitLocation ) {
+      internal static float LogAIMCritChance ( float chance, object hitLocation ) {
          thisCritChance = chance;
          thisCritLocation = hitLocation.ToString();
          thisCritComp = null;

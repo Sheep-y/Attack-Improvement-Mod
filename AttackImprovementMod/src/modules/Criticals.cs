@@ -281,20 +281,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static MessageCenterMessage CritCompMessage;
 
-      public static void PreDamageComponent ( MessageCenterMessage critMessage ) {
+      private static void PreDamageComponent ( MessageCenterMessage critMessage ) {
          if ( MechEngineerCheckCritPublishMessage != null ) // ME expects pre-damage call
             MechEngineerCheckCritPublishMessage.Invoke( null, new object[]{ Combat.MessageCenter, critMessage } );
          else
             CritCompMessage = critMessage;
       }
 
-      public static void PostDamageComponent () {
+      private static void PostDamageComponent () {
          if ( CritCompMessage == null ) return; // If non-ME, we can defer and suppress the message
          Combat.MessageCenter.PublishMessage( CritCompMessage );
          CritCompMessage = null;
       }
 
-      public static void PostCheckForCrit ( AIMCritInfo info, bool logCrit ) {
+      private static void PostCheckForCrit ( AIMCritInfo info, bool logCrit ) {
          if ( logCrit ) AttackLog.LogCritResult( info.target, info.weapon );
          if ( MechEngineerCheckCritPostfix != null ) {
             Mech mech = new Mech();
@@ -330,7 +330,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             target.GameRep.PlayVFX( info.GetCritLocation(), Combat.Constants.VFXNames.componentDestruction_AmmoExplosion, true, Vector3.zero, true, -1f );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
-      public static float GetAdjustedChance ( AIMCritInfo info ) {
+      internal static float GetAdjustedChance ( AIMCritInfo info ) {
          if ( info.target.StatCollection.GetValue<bool>( "CriticalHitImmunity" ) ) return 0;
          float chance = GetBaseChance( info ), critMultiplier = chance > 0 ? GetMultiplier( info ) : 0;
          if ( DebugLog ) Verbo( "Crit chance on {3} = {0} x {1} = {2}", chance, critMultiplier, chance * critMultiplier, info.HitLocation );
