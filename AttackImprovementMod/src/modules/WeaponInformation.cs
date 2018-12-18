@@ -35,6 +35,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowTotalWeaponDamage ) {
             Patch( PanelType, "ShowWeaponsUpTo", null, "ShowTotalDamageSlot" );
             Patch( PanelType, "RefreshDisplayedWeapons", "ResetTotalWeaponDamage", "ShowTotalWeaponDamage" );
+            Patch( SlotType, "RefreshHighlighted", "BypassTotalSlotHighlight", null );
          }
          if ( Settings.ShowReducedWeaponDamage || Settings.ShowTotalWeaponDamage ) {
             // Update damage numbers (and multi-target highlights) _after_ all slots are in a correct state.
@@ -279,6 +280,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          ShowingStabilityDamage = IsCallout;
          HUD?.WeaponPanel?.RefreshDisplayedWeapons();
       }                 catch ( Exception ex ) { Error( ex ); } }
+
+      public static bool BypassTotalSlotHighlight ( CombatHUDWeaponSlot __instance ) { try {
+         if ( __instance.DisplayedWeapon == null ) return false; // Skip highlight if no weapon in this slot
+         return true;
+      }                 catch ( Exception ex ) { return Error( ex ); } }
 
       // ============ Helpers ============
 
