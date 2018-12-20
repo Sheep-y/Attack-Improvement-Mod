@@ -258,15 +258,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          string prefix = null, numbers = null, postfix = null;
 
          StringBuilder text = new StringBuilder( 100 );
-         if ( __instance == TargetDisplay && IsCalloutPressed && target.GetPilot() != null ) {
-            Pilot pilot = target.GetPilot();
-            prefix = "";
+         if ( __instance == TargetDisplay && IsCalloutPressed && target.GetPilot() is Pilot pilot ) {
             foreach ( Ability ability in pilot.Abilities ) {
                if ( ability?.Def == null || ! ability.Def.IsPrimaryAbility ) continue;
-               if ( prefix.Length > 0 ) prefix += "\n";
-               prefix += ability.Def.Description.Name;
+               text.Append( ability.Def.Description?.Name ).Append( "\n" );
             }
-            if ( prefix == "" ) prefix = "(No skills)";
+            if ( text.Length <= 0 ) text.Append( "(No skills)" );
+            if ( target is Mech mech )
+               text.Append( FormatMeter( "Stab", mech.CurrentStability, mech.MaxStability ) );
 
          } else {
             if ( target is Mech mech ) {
@@ -282,9 +281,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             if ( prefix == null && HUD?.SelectedActor != target )
                prefix = GetTargetNumbers( target ) + "\n";
+            text.Append( GetBasicInfo( target ) ).Append( '\n' );
+            text.Append( prefix ).Append( numbers ).Append( postfix );
          }
-         text.Append( GetBasicInfo( target ) ).Append( '\n' );
-         text.Append( prefix ).Append( numbers ).Append( postfix );
          __instance.ActorWeightText.text = text.ToString();
 
          __instance.JumpJetsHolder.SetActive( false );

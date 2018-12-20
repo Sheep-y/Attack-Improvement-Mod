@@ -10,6 +10,7 @@ CHANGE LOG
 * Del: FixGreyHeadDisease removed since it is fixed in 1.3.
 * Mod: Unit tonnage is now always displayed, ShowUnitTonnage setting is deprecated.
 * Mod: Target panel shows min distance when no PC is selected.
+* Mod: Target panel's callout view now shows skills and stab to match weapon panel's stab display.
 * Fix: Fix a potential crash on load game.
 * Fix: Fix a bug that can cause movement dots and paths to not show up.
 * Fix: Fix a NRE logged when mouse hovering the total damage slot.
