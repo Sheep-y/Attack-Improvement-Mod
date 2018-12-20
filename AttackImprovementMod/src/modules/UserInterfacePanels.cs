@@ -294,7 +294,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( target is Mech mech ) {
             int jets = mech.WorkingJumpjets;
             string weight = mech.weightClass.ToString();
-            if ( jets > 0 ) weight = weight.Replace( "ASSAULT", "ASLT" );
+            if ( jets > 0 )
+               switch ( mech.weightClass ) {
+                  case WeightClass.LIGHT  : weight = "LT"; break;
+                  case WeightClass.MEDIUM : weight = "MED"; break;
+                  case WeightClass.HEAVY  : weight = "HVY"; break;
+                  case WeightClass.ASSAULT: weight = "ASLT"; break;
+               }
             string ton = ( (int) mech.tonnage ) + "T " + weight;
             return jets > 0 ? string.Format( "{0}, {1} JETS", ton, jets ) : ton;
 
