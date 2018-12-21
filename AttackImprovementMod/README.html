@@ -77,7 +77,7 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <li><a href="#credits">Credits</a></li>
 </ul>
 
-<p>AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show distance numbers, or a detailed attack log.  The default settings aim to preserve the balance of vanilla game.</p>
+<p>AIM is a BattleTech mod that fixes, enhances, and customise your combat experience, such as coloured facing rings and targeting lines, tune down roll correction, show target and weapon information, or a detailed attack log.  The default settings aim to preserve the balance of vanilla game.</p>
 
 <p>This mod does <em>not</em> modify game data.  Saves made with this mod on will <em>not</em> be affected by disabling or removing this mod.</p>
 
@@ -88,11 +88,13 @@ document.addEventListener( 'DOMContentLoaded', () => {
 <h2 id="bugfixesandhudenhancements">Bug Fixes and HUD Enhancements</h2>
 
 <ul>
-<li>Fix Grey head disease, Multi-Target cancelling, and 0 hp unit/locations.</li>
+<li>Fix called shot weight and precision, Multi-Target cancelling, and 0 hp unit/locations.</li>
+
+<li>Fix Delta LRM stability, ER PPC debuff, and other minor weapon bugs.</li>
 
 <li>Line of fire fixed and coloured: Dotted = indirect, Cyan = flank, Green = rear.</li>
 
-<li>Press F1 to F4 to select mech. Shift+Tab to reverse select mech. </li>
+<li>Press F1 to F4 to select mech. Shift+Tab to reverse select mech. Grey name = acted mech.</li>
 
 <li>Multi-Target mode: Shift+Click / Ctrl+click weapon to reverse/toggle selection.</li>
 
@@ -114,6 +116,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 <li>Post-move to-hit penalties and heat factored in action preview.</li>
 
+<li>Miss floatie shows margin of miss.</li>
+
 <li>(Optional) Show Mech Tonnage.</li>
 
 <li>(Optional) Show Corrected Hit chance and Called Shot Chance.</li>
@@ -128,15 +132,11 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 <li>Called shots cluster around called mech location.</li>
 
-<li>Precise hit distribution that improves SRM and MG called shot.</li>
-
 <li>More melee modifiers, and fixes the absent of stood up penalty.</li>
 
-<li>Flank and rear attack Bonus.</li>
+<li>Add flank/rear attack bonus and negative height modifier.</li>
 
 <li>Allow net bonus hit modifiers.</li>
-
-<li>Allow negative height modifier.</li>
 
 <li>Remove melee position locking.</li>
 
@@ -233,7 +233,7 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 
 <h2 id="hudsettings">HUD Settings</h2>
 
-<p><strong>Unit Selection</strong></p>
+<p><strong>Selections</strong></p>
 
 <blockquote>
   <p>Setting: <code>FunctionKeySelectPC</code>  (true/false, default true)</p>
@@ -254,7 +254,7 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   
   <p>Setting: <code>CtrlClickDisableWeapon</code>  (true/false, default true)</p>
   
-  <p>Ctrl+Click a weapon during Multi-Target will disable / enable the weapon.
+  <p>When true, Ctrl+Click a weapon during Multi-Target will disable / enable the weapon.
   The target will be remembered when the weapon is enabled this way, allowing quick evaluation of heat and damage.</p>
 </blockquote>
 
@@ -281,7 +281,15 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   
   <p>When you select a new target with the Multi-Target skill, all enabled weapons will be reassigned.
   Each weapon will reset to the target with highest hit chance, or the earlier target when hit chances are the same
-  (A before B, B before C).</p>
+  (A before B, B before C).
+  <br></p>
+  
+  <p>Setting: <code>ShowMissMargin</code>  (true/false, default true)</p>
+  
+  <p>When true, the "MISS" floaties will be appended with a % of how much the shot missed.</p>
+  
+  <p>For example, "Miss 12%" means the shot was 12% from hitting.
+  If the shot had a 80% hit chance, then the attack roll was 92 (after roll correction).</p>
 </blockquote>
 
 <p><strong>Terrain Dots</strong></p>
@@ -403,7 +411,7 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Setting: <code>LOSHueDeviation</code>  (0 to 0.5, default 0.04) <br>
   Setting: <code>LOSHueHalfCycleMS</code>  (0 to 300k, default 2048) <br>
   Setting: <code>LOSBrightnessDeviation</code>  (0 to 0.5, default 0.1) <br>
-  Setting: <code>LOSBrightnessHalfCycleMS</code>  (0 to 300k, default 1024)</p>
+  Setting: <code>LOSBrightnessHalfCycleMS</code>  (0 to 300k, default 1024) <br></p>
   
   <p>When non-zero, the targeting lines will have animated colour, such as dimming and brightening.</p>
   
@@ -501,6 +509,11 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 <p><strong>Mech and MechWarrior</strong></p>
 
 <blockquote>
+  <p>Setting: <code>MechTrayGreyActedPilot</code>  (true/false, default true)</p>
+  
+  <p>When true, Mechwarrior who have acted this round will have their names in grey in the mech tray.
+  <br></p>
+  
   <p>Setting: <code>ShowNumericInfo</code>  (true/false, default true)</p>
   
   <p>When true, display heat, stability, movement, and distance numbers in the selection panel (bottom left) and targeting panel (top center), and predicts post action numbers.
@@ -526,7 +539,12 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>This only applies to the one-line hint that pops up on mouseover and right-click.
   The original hint, which shows only wounds and health, will be preserved when the hint is fully expanded (i.e. when no mech is selected).</p>
   
-  <p>If the line is too long, for example when HP is included, the line will wrap.</p>
+  <p>If the line is too long, for example when HP is included, the line will wrap.
+  <br></p>
+  
+  <p>Setting: <code>ConsolidateWeaponCheevons</code>  (true/false, default true)</p>
+  
+  <p>When true, weapon cheevons around enemies will be grouped by type.</p>
 </blockquote>
 
 <p><strong>Weapons Loadout</strong></p>
@@ -615,23 +633,16 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 <p><strong>Fix Grey Head Disease</strong></p>
 
 <blockquote>
-  <p>Setting: <code>FixGreyHeadDisease</code>  (true/false, default true)</p>
-  
-  <p>When true, confine the grey head disease to the boss so that it does not spread around.</p>
-  
-  <p>Otherwise, when anyone (friend or foe) attacks a headshot immune character, all attacks from the same direction will never hit any head ever again.
-  Every one's head will be grey.  I call it the grey head disease.  It lasts until you load a game, which resets the hit tables.
-  <br></p>
-  
   <p>Setting: <code>FixBossHeadCalledShotDisplay</code>  (true/false, default true)</p>
   
-  <p>When true, boss head is always unselectable in called shot.</p>
+  <p>When true, boss head will be unselectable in called shot.</p>
   
-  <p>Did you know that grey head in called shot popup is actually a bug?  (I hope it is a bug.)
-  If you try to call shot the boss before any headshot-immune unit is attacked, such as right after a load, the head is actually selectable!
-  This is most apparent with FixGreyHeadDisease on, since the head will be always available.</p>
+  <p>Before game version 1.3, any attack on an important NPC (which is headshot immune) will remove the head from the global hit table.
+  As a result, after a few rounds no one's head can be hit.  They will be greyed out in the called shot popup.
+  This was called the grey head disease by some and can only be cured by loading game or using an earlier version of AIM.</p>
   
-  <p>If <code>FixGreyHeadDisease</code> is true but <code>FixBossHeadCalledShotDisplay</code> is false, the boss's head will be selectable for called shot, but you will never hit the head.</p>
+  <p>This is fixed in patch 1.3, by cloning the hit table in every hit.  Slow, but a working fix nonetheless.
+  But this also mean boss head can now be called, when in fact you will never hit the head.  This setting fix that.</p>
 </blockquote>
 
 <p><strong>Enable Clustering Called Shot</strong></p>
@@ -652,6 +663,16 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 <p><strong>Adjust Called Shot Weight</strong></p>
 
 <blockquote>
+  <p>Setting: <code>FixCalledShotMultiplierSquare</code>  (true/false, default true)</p>
+  
+  <p>When true, called shot weight will be fixed if it is detected to have been squared.</p>
+  
+  <p>This happens to some saves and the cause is unknown.  For me it happened after a game patch.
+  It is unlikely to be caused by this mod, and certainly can't be fixed by removing this mod.
+  This mod changes the weight on the fly and does not change save data;
+  without this mod, restarting the mission will restore the weight to normal.
+  <br></p>
+  
   <p>Setting: <code>MechCalledShotMultiplier</code>  (0 to 1024.0, default 0.33)</p>
   
   <p>When clustering called shot is enabled, chance to hit called locations will be amplified by clustering weight.  This setting let you tune called shot's weight multipliers.
@@ -1245,6 +1266,22 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
   <p>Set path of mod log and attack log.  Default is empty which will use mod folder.</p>
 </blockquote>
 
+<h2 id="othersettings">Other Settings</h2>
+
+<blockquote>
+  <p>Setting: <code>FixWeaponStats</code>  (true/false, default true)</p>
+  
+  <p>Fix several known bugs of weapon stats:</p>
+  
+  <h1 id="deltalrmsextrainstability">Delta LRM's extra instability</h1>
+  
+  <h1 id="hollysrmsextraaccuracy">Holly SRM's extra accuracy</h1>
+  
+  <h1 id="erppcsmissingdebuff">ER PPC's missing debuff</h1>
+  
+  <h1 id="erlaserssmissingbonusdescription">ER lasers's missing bonus description</h1>
+</blockquote>
+
 <h1 id="compatibilities">Compatibilities</h1>
 
 <ul>
@@ -1252,7 +1289,9 @@ Please report them on <a href="https://github.com/Sheep-y/Attack-Improvement-Mod
 
 <li>BattleTech 1.1 - AIM 1.0.1 to 2.1.2.</li>
 
-<li>BattleTech 1.2 - AIM 2.2 to 3.0.</li>
+<li>BattleTech 1.2 - AIM 2.2 to 3.1.</li>
+
+<li>BattleTech 1.3 - AIM 3.1.</li>
 </ul>
 
 <p>Because of the <em>extensive</em> patching, this mod is sensitive to version updates.

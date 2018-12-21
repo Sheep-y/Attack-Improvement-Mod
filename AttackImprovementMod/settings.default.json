@@ -134,7 +134,7 @@
 
   /* Set acted pilot name to grey.  Default true. */
 
-  "MechTrayGreyActedPilot": true,
+  "MechWarriorGreyActedPilot": true,
 
   /* Format pilot name to show wounds (enemies) and health (non-enemy) after their names.
    * {1} is injury, {2} is health - injury, and {3} is health.  Set to empty to not change game default. */

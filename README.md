@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 3.1 Release Candidate #
+# AIM - Attack Improvement Mod 3.1 #
 For BATTLETECH 1.3.2
 
 - [Features Overview](#features-overview)
@@ -33,7 +33,7 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 
 ## Bug Fixes and HUD Enhancements ##
 
-* Fix boss head called shot, Multi-Target cancelling, and 0 hp unit/locations.
+* Fix called shot weight and precision, Multi-Target cancelling, and 0 hp unit/locations.
 * Fix Delta LRM stability, ER PPC debuff, and other minor weapon bugs.
 * Line of fire fixed and coloured: Dotted = indirect, Cyan = flank, Green = rear.
 * Press F1 to F4 to select mech. Shift+Tab to reverse select mech. Grey name = acted mech.
@@ -56,11 +56,9 @@ This mod does *not* modify game data.  Saves made with this mod on will *not* be
 * Unlock hit chance stepping (makes odd Gunnery useful).
 * Smart indirect fire when direct fire is obstructed.
 * Called shots cluster around called mech location.
-* Precise hit distribution that improves SRM and MG called shot.
 * More melee modifiers, and fixes the absent of stood up penalty.
-* Flank and rear attack Bonus.
+* Add flank/rear attack bonus and negative height modifier.
 * Allow net bonus hit modifiers.
-* Allow negative height modifier.
 * Remove melee position locking.
 * Ammo loader AI that balance ammo usage to minimise explosion.
 * Auto jettison useless ammo.
@@ -548,9 +546,10 @@ These settings can be changed in `settings.json`.
 >
 > When true, called shot weight will be fixed if it is detected to have been squared.
 >
-> This happens to some saves and the cause is unknown.
-> It is unlikely to be caused by this mod, and certainly can't be fixed by disabling this mod.
-> Restarting the mission will restore the weight to normal.
+> This happens to some saves and the cause is unknown.  For me it happened after a game patch.
+> It is unlikely to be caused by this mod, and certainly can't be fixed by removing this mod.
+> This mod changes the weight on the fly and does not change save data;
+> without this mod, restarting the mission will restore the weight to normal.
 <br>
 
 > Setting: `MechCalledShotMultiplier`  (0 to 1024.0, default 0.33)
@@ -1145,7 +1144,7 @@ but because the code that determine hit distribution is not designed for fractio
 
 * BattleTech 1.0 - AIM 1.0.1.
 * BattleTech 1.1 - AIM 1.0.1 to 2.1.2.
-* BattleTech 1.2 - AIM 2.2 to 3.1.
+* BattleTech 1.2 - AIM 2.2 to 3.0.
 * BattleTech 1.3 - AIM 3.1.
 
 Because of the *extensive* patching, this mod is sensitive to version updates.

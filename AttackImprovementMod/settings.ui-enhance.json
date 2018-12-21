@@ -33,10 +33,6 @@
 
   "CtrlClickDisableWeapon": true,
 
-  /* Fix the bug that once you attacked an headshot immune enemy, all mechs will be immune from headshots from the same direction until you load game. */
-
-  "FixGreyHeadDisease": true,
-
   /* Fix the bug that rear paper doll is incorrectly showing front structure.  Default true. */
 
   "FixPaperDollRearStructure": true,
@@ -217,6 +213,10 @@
    * You can do that before any headshot immune unit has been attacked.  But it won't have any effect.  Default true. */
 
   "FixBossHeadCalledShotDisplay": true,
+
+  /* Fix Called Shot Multiplier if it is squared.  Default true. */
+
+  "FixCalledShotMultiplierSquare": true,
 
   /* Enable clustering effect for called shots against mechs.  Default true. */
 
