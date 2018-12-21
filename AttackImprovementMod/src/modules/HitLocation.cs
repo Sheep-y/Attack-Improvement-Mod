@@ -72,6 +72,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       public override void CombatEnds () {
+         CurrentHitDirection = AttackDirection.None;
          ScaledMechHitTables?.Clear();
          ScaledVehicleHitTables?.Clear();
       }
@@ -114,8 +115,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-         if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None && CurrentHitDirection != AttackDirection.None ) {
-            hitTable = CombatConstants.GetMechClusterTable( bonusLocation, CurrentHitDirection );
+         if ( Settings.CalledShotUseClustering && CurrentHitDirection != AttackDirection.None ) {
+            if ( bonusLocation != ArmorLocation.None )
+               hitTable = CombatConstants.GetMechClusterTable( bonusLocation, CurrentHitDirection );
             CurrentHitDirection = AttackDirection.None;
          }
       }                 catch ( Exception ex ) { Error( ex ); } }
