@@ -114,8 +114,10 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void PrefixMechCalledShot ( ref Dictionary<ArmorLocation, int> hitTable, ArmorLocation bonusLocation, ref float bonusLocationMultiplier ) { try {
          bonusLocationMultiplier = FixMultiplier( bonusLocation, bonusLocationMultiplier );
-         if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None && CurrentHitDirection != AttackDirection.None )
+         if ( Settings.CalledShotUseClustering && bonusLocation != ArmorLocation.None && CurrentHitDirection != AttackDirection.None ) {
             hitTable = CombatConstants.GetMechClusterTable( bonusLocation, CurrentHitDirection );
+            CurrentHitDirection = AttackDirection.None;
+         }
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static int head;
