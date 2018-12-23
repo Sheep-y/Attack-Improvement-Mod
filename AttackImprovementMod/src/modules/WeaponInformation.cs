@@ -238,7 +238,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             text = string.Format( HUD.WeaponPanel.HeatFormatString, text, Mathf.RoundToInt( weapon.HeatDamagePerShot ) );
          if ( weapon.ShotsWhenFired > 1 )
             text = string.Format( "{0}</color> (x{1})", text, weapon.ShotsWhenFired );
-         __instance.DamageText.SetText( text, new object[0] );
+         __instance.DamageText.text = text;
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       public static void ShowTotalDamageSlot ( CombatHUDWeaponPanel __instance, int topIndex, List<CombatHUDWeaponSlot> ___WeaponSlots ) { try {

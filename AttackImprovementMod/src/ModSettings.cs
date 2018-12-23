@@ -189,6 +189,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ JsonComment( "Fix Called Shot Multiplier if it is squared.  Default true." ) ]
       public bool FixCalledShotMultiplierSquare = true;
 
+      [ JsonComment( "Show structure and armour of hovering location in called shot popup.  Default true." ) ]
+      public bool ShowLocationInfoInCalledShot = true;
+
       [ JsonComment( "Enable clustering effect for called shots against mechs.  Default true." ) ]
       public bool CalledShotUseClustering = true;
 

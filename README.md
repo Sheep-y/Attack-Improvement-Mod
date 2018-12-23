@@ -1,4 +1,4 @@
-# AIM - Attack Improvement Mod 3.1 #
+# AIM - Attack Improvement Mod 3.2 development #
 For BATTLETECH 1.3.2
 
 - [Features Overview](#features-overview)
@@ -512,7 +512,15 @@ These settings can be changed in `settings.json`.
 ## Called Shot Settings
 
 
-**Fix Grey Head Disease**
+**Popup Enhancements**
+
+> Setting: `ShowLocationInfoInCalledShot`  (true/false, default true)
+>
+> When true, structure and armor of hovering location will be displayed in the called shot window.
+>
+> This information replaces the name of called location.
+> The location name is instead displayed as window title.
+<br>
 
 > Setting: `FixBossHeadCalledShotDisplay`  (true/false, default true)
 >

@@ -444,8 +444,10 @@ namespace Sheepy.BattleTechMod {
 
       // ============ UTILS ============
 
+      public static readonly object[] ZeroObjects = new object[0];
+
       public static string Translate ( string s, params object[] augs ) {
-         if ( augs == null ) augs = new object[0];
+         if ( augs == null ) augs = ZeroObjects;
          return new Text( s, augs ).ToString( true );
       }
 

@@ -14,10 +14,13 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static string CalledShotHitChanceFormat = "{0:0}%";
 
       public override void CombatStartsOnce () {
+         Type CalledShot = typeof( CombatHUDCalledShotPopUp );
+         if ( Settings.ShowLocationInfoInCalledShot )
+            Patch( CalledShot, "UpdateMechDisplay", null, "ShowCalledLocationHP" );
+
          if ( Settings.CalledChanceFormat != null )
             CalledShotHitChanceFormat = Settings.CalledChanceFormat;
 
-         Type CalledShot = typeof( CombatHUDCalledShotPopUp );
          if ( Settings.FixBossHeadCalledShotDisplay ) {
             currentHitTableProp = typeof( CombatHUDCalledShotPopUp ).GetProperty( "currentHitTable", NonPublic | Instance );
             if ( currentHitTableProp == null )
@@ -36,6 +39,39 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                Patch( CalledShot, "GetHitPercent", new Type[]{ typeof( VehicleChassisLocations ), typeof( VehicleChassisLocations ) }, "OverrideHUDVehicleCalledShotPercent", null );
          }
       }
+
+      public override void CombatEnds () {
+         title = null;
+      }
+
+      // ============ Hover Info ============
+
+      private static TMPro.TextMeshProUGUI title;
+
+      public static void ShowCalledLocationHP ( CombatHUDCalledShotPopUp __instance ) { try {
+         if ( title == null ) {
+            title = UnityEngine.GameObject.Find( "calledShot_Title" )?.GetComponent<TMPro.TextMeshProUGUI>();
+            title.enableAutoSizing = false;
+            if ( title == null ) return;
+         }
+
+         CombatHUDCalledShotPopUp me = __instance;
+         ArmorLocation hoveredArmor = me.MechArmorDisplay.HoveredArmor;
+         if ( me.locationNameText.text.StartsWith( "-" ) ) {
+            title.SetText( "Called Shot", ZeroObjects );
+         } else if ( me.DisplayedActor is Mech mech ) {
+            float hp = mech.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( hoveredArmor ) );
+            if ( hp <= 0 ) {
+               title.SetText( "Called Shot", ZeroObjects );
+               me.locationNameText.SetText( "-choose target-", ZeroObjects );
+            } else {
+               float mhp = mech.GetMaxStructure( MechStructureRules.GetChassisLocationFromArmorLocation( hoveredArmor ) ),
+                     armour = mech.GetCurrentArmor( hoveredArmor ), marmour = mech.GetMaxArmor( hoveredArmor );
+               title.text = me.locationNameText.text;
+               me.locationNameText.text = string.Format( "{0:0}/{1:0} <#FFFFFF>{2:0}/{3:0}", hp, mhp, armour, marmour );
+            }
+         }
+      }                 catch ( Exception ex ) { Error( ex ); } }
 
       // ============ Game States ============
 
