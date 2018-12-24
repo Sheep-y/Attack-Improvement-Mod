@@ -527,7 +527,7 @@ These settings can be changed in `settings.json`.
 > When true, boss head will be unselectable in called shot.
 >
 > Before game version 1.3, any attack on an important NPC (which is headshot immune) will remove the head from the global hit table.
-> As a result, after a few rounds no one's head can be hit.  They will be greyed out in the called shot popup.
+> As a result, no one's head can be hit.  All heads will be greyed out in the called shot popup.
 > This was called the grey head disease by some and can only be cured by loading game or using an earlier version of AIM.
 >
 > This is fixed in patch 1.3, by cloning the hit table in every hit.  Slow, but a working fix nonetheless.

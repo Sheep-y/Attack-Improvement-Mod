@@ -167,13 +167,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             parsedColours.TryGetValue( line, out Color?[] colours );
             if ( colours == null ) parsedColours[ line ] = colours = new Color?[ LOSDirectionCount ];
             if ( colours[ 0 ] == null ) colours[ 0 ] = OrigColours[ line != Line.NoAttack ? 0 : 1 ];
-            for ( int i = 1 ; i < LOSDirectionCount ; i++ ) {
+            for ( int i = 0 ; i < LOSDirectionCount ; i++ ) {
                if ( colours[ i ] == null )
                   colours[ i ] = colours[ i - 1 ];
-               if ( RGBtoHSV != null && colours[i].Value is Color c && ! RGBtoHSV.ContainsKey( c ) ) { // Cache HSV for animation
-                  Color.RGBToHSV( c, out float H, out float S, out float V );
-                  RGBtoHSV[ c ] = new Vector3( H, S, V );
-               }
+               if ( RGBtoHSV != null && colours[i].Value is Color c )
+                  ToHSV( c ); // Cache HSV for animation
             }
             Info( "LOS {0} = {1}", line, colours );
          }
@@ -181,6 +179,12 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             Info( "LOS animation, Hue = {0} @ {1}ms, Brightness = {2} @ {3}ms", HueDeviation, Settings.LOSHueHalfCycleMS, BrightnessDeviation, Settings.LOSBrightnessHalfCycleMS  );
          else
             Info( "LOS is not animated." );
+      }
+
+      private static Vector3 ToHSV ( Color c ) {
+         if ( RGBtoHSV.TryGetValue( c, out Vector3 hsv ) ) return hsv;
+         Color.RGBToHSV( c, out float H, out float S, out float V );
+         return RGBtoHSV[ c ] = hsv = new Vector3( H, S, V );
       }
 
       public static void CreateLOSTexture ( WeaponRangeIndicators __instance ) { try {
@@ -352,7 +356,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                 : base( color, dotted, width, name ) { }
 
          public override Material GetMaterial () {
-            Vector3 HSV = RGBtoHSV[ Color ]; // x = H, y = S, z = V
+            Vector3 HSV = ToHSV( Color ); // x = H, y = S, z = V
             float S = HSV.y, H = S > 0 ? ShiftHue( HSV.x, HueLerp ) : HSV.x, V = ShiftBrightness( HSV.z, BrightnessLerp, BrightnessDeviation );
             //Verbo( "Hue {0} => {1} ({5}), Sat {4}, Val {2} => {3} ({6})", HSV.x, H, HSV.z, V, S, HueLerp, ValueLerp );
             Material.color = Color.HSVToRGB( H, S, V );
