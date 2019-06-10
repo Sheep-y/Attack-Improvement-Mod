@@ -164,7 +164,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             return () => new AttackModifier( "SPRINTED", Hit.GetSelfSprintedModifier( Attacker ) );
 
          case "targeteffect" :
-            return () => new AttackModifier( "TARGET EFFECTS", Hit.GetEnemyEffectModifier( Target ) );
+            return () => new AttackModifier( "TARGET EFFECTS", Hit.GetEnemyEffectModifier( Target, AttackWeapon) );
 
          case "targetsize" :
             return () => new AttackModifier( "TARGET SIZE", Hit.GetTargetSizeModifier( Target ) );
