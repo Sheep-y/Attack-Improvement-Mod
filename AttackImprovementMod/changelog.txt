@@ -1,5 +1,9 @@
 CHANGE LOG
 
+????-??-?? AIM Version 3.3 development for BATTLETECH 1.6.1
+
+* New: Quick fix for 1.6.1
+
 ????-??-?? AIM Version 3.2 development for BATTLETECH 1.3.2
 
 * New: Show structure and armour in called shot popup.
