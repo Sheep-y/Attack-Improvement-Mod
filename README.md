@@ -1,5 +1,5 @@
 This is a quick fix for AIM based on 3.2dev version to work on BT 1.6.1.
-The only change made is I put the BTModLoader.log file into the mod's folder. The log is still reporting a crash, I haven't changed anything else.
+The only change I made was to put the BTModLoader.log file into the mod's folder. The log is still reporting a crash, I haven't changed anything else.
 
 # AIM - Attack Improvement Mod 3.2 development #
 For BATTLETECH 1.3.2
