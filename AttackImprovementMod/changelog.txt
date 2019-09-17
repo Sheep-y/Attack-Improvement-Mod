@@ -1,5 +1,9 @@
 CHANGE LOG
 
+????-??-?? AIM Version 3.3 development for BATTLETECH 1.7
+
+* New: Quick fix for 1.7
+
 ????-??-?? AIM Version 3.3 development for BATTLETECH 1.6.1
 
 * New: Quick fix for 1.6.1

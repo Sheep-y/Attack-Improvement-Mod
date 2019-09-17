@@ -214,7 +214,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          foreach ( MechComponent mechComponent in mech.GetComponentsForLocation( MechStructureRules.GetChassisLocationFromArmorLocation( location ), ComponentType.NotSet ) ) {
             string componentName = mechComponent.UIName.ToString();
             int allAmmo = 1;
-            if ( mechComponent is Weapon weaponComp && weaponComp.AmmoCategory != AmmoCategory.NotSet )
+            if ( mechComponent is Weapon weaponComp && !weaponComp.AmmoCategoryValue.Is_NotSet )
                componentName += "<size=80%> (x" + ( allAmmo = weaponComp.CurrentAmmo ) + ")";
             else if ( mechComponent is AmmunitionBox ammo ) {
                int curr = ammo.CurrentAmmo, max = ammo.AmmoCapacity;
