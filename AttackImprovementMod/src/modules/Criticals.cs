@@ -175,7 +175,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float damage = weapon.parent == null ? weapon.DamagePerShot : weapon.DamagePerShotAdjusted( weapon.parent.occupiedDesignMask );
          AbstractActor attacker = Combat.FindActorByGUID( hitInfo.attackerId );
          LineOfFireLevel lineOfFireLevel = attacker.VisibilityCache.VisibilityToTarget( target ).LineOfFireLevel;
-         return target.GetAdjustedDamage( damage, weapon.Category, target.occupiedDesignMask, lineOfFireLevel, false );
+         return target.GetAdjustedDamage( damage, weapon.WeaponCategoryValue, target.occupiedDesignMask, lineOfFireLevel, false );
       }
 
       private static AttackDirector.AttackSequence GetAttackSequence ( WeaponHitInfo hitInfo ) {
