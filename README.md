@@ -1,5 +1,9 @@
-This is a quick fix for AIM based on 3.2dev version to work on BT 1.7.
+This is a quick fix for AIM based on 3.2dev version to work on BT 1.8.
 The only change I made was to put the BTModLoader.log file into the mod's folder. The log is still reporting a crash, I haven't changed anything else.
+
+IMPORTANT NOTE: I am just maintaining this mod, I am not developping it. This means that when a new patch is released by HBS, I just  fix the errors reported in Visual Studio and recompile the mod. I will not fix any broken feature. There will come a point where I will not be able to do that anymore.
+
+This mod is not compatible with BTMLColorLOSMod.
 
 # AIM - Attack Improvement Mod 3.2 development #
 For BATTLETECH 1.3.2
