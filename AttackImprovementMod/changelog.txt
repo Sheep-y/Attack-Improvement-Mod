@@ -4,6 +4,7 @@ CHANGE LOG
 
 * New: Quick fix for 1.9
 * Deactivated LOS coloring. Please use BTMLColorLOSMod to get the feature back https://github.com/Red1812/BTMLColorLOSMod/releases
+* Fixed text displayed by ShowNumericInfo
 
 ????-??-?? AIM Version 3.3 development for BATTLETECH 1.7
 
