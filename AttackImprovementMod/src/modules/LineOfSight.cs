@@ -13,7 +13,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class LineOfSight : BattleModModule {
 
-      private static float HueDeviation, BrightnessDeviation;
+      /* private static float HueDeviation, BrightnessDeviation;
       private static bool LinesChanged, LinesAnimated;
 
       public override void CombatStartsOnce () {
@@ -192,7 +192,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          WeaponRangeIndicators me = __instance;
          Solid = OrigInRangeMat = me.MaterialInRange;
          Dotted = OrigOutOfRangeMat = me.MaterialOutOfRange;
-         OrigColours = new Color[]{ me.LOSInRange, me.LOSOutOfRange, me.LOSUnlockedTarget, me.LOSLockedTarget, me.LOSMultiTargetKBSelection, me.LOSBlocked };
+         OrigColours = new Color[]{ me.FinalLOSInRange.color, me.FinalLOSOutOfRange.color, me.FinalLOSUnlockedTarget.color, me.FinalLOSLockedTarget.color, me.FinalLOSMultiTargetKBSelection.color, me.FinalLOSBlocked.color };
 
          FillColours();
          Mats = new LosMaterial[ NoAttack + 1 ][];
@@ -298,7 +298,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             2, "SetIndirectSegments", ModLog );
       }
 
-      /*
+      
       LOSInRange = RGBA(1.000, 0.157, 0.157, 1.000) #FF2828FF
       LOSOutOfRange = RGBA(1.000, 1.000, 1.000, 0.275) #FFFFFF46
       LOSUnlockedTarget = RGBA(0.757, 0.004, 0.004, 0.666) #C00000AA
@@ -309,7 +309,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       LOSWidthEnd = 0.75
       LOSWidthBlocked = 0.4
       LOSWidthFacingTargetMultiplier = 2.5f
-      */
+      /
 
       public class LosMaterial {
          protected readonly Material Material;
@@ -333,17 +333,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             me.LineTemplate.startWidth = Width;
             me.LineTemplate.endWidth = Width;
             me.MaterialInRange = GetMaterial();
-            me.LOSLockedTarget = me.LOSInRange = me.MaterialInRange.color;
+            //me.LOSLockedTarget = me.LOSInRange = me.MaterialInRange.color;
+            me.LineTemplate.startColor = me.LineTemplate.endColor = me.MaterialInRange.color;
             if ( IsMultifire ) {
-               me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = me.MaterialInRange.color;
-               me.LOSUnlockedTarget.a *= 0.8f;
+                    //me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = me.MaterialInRange.color;
+                    //me.FinalLOSUnlockedTarget.a *= 0.8f;
+                    me.LineTemplate.startColor = me.LineTemplate.endColor = me.FinalLOSMultiTargetKBSelection.color;
+                    me.LineTemplate.startColor = me.LineTemplate.endColor *= 0.8f;
             }
             return this;
          }
 
          public void ApplyOutOfRange ( WeaponRangeIndicators me ) {
             me.MaterialOutOfRange = GetMaterial();
-            me.LOSOutOfRange = me.MaterialOutOfRange.color;
+            me.LineTemplate.startColor = me.LineTemplate.endColor = me.MaterialOutOfRange.color;
          }
 
          public virtual Material GetMaterial () {
@@ -381,6 +384,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             return Mathf.Lerp( min, max, Math.Abs( time ) );
          }
-      }
+      } */
    }
 }

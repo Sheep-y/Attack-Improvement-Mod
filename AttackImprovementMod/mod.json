@@ -1,17 +1,16 @@
 {
-   "Name" : "AIM: Attack Improvement Mod",
-   "Enabled" : true,
+  "Name": "AIM: Attack Improvement Mod",
+  "Enabled": true,
 
-   "Version" : "3.3 dev",
-   "Description" : "For BattleTech 1.6.1. Fix, enhance, and upgrade the attack experience, from Line of Sight to Hit Distribution. Each feature can be configured individually.",
-   "Author" : "Sheepy, Redferne",
-   "Website" : "https://github.com/Sheep-y/Attack-Improvement-Mod/",
-   "Contact" : "your.sheepy@gmail.com",
+  "Version": "3.3 dev",
+  "Description": "For BattleTech 1.9. Fix, enhance, and upgrade the attack experience, from Line of Sight to Hit Distribution. Each feature can be configured individually.",
+  "Author": "Sheepy, Redferne",
+  "Website": "https://github.com/Red1812/Attack-Improvement-Mod",
 
-   "DLL" : "AttackImprovementMod.dll",
-   "DLLEntryPoint" : "Sheepy.BattleTechMod.AttackImprovementMod.Mod.Init",
+  "DLL": "AttackImprovementMod.dll",
+  "DLLEntryPoint": "Sheepy.BattleTechMod.AttackImprovementMod.Mod.Init",
 
-   "Settings" : {
-      "settings.json" : "The mod use settings.json to read and write settings.  If the file does not exist, it will be created when the mod is loaded on game launch."
-   }
+  "Settings": {
+    "settings.json": "The mod use settings.json to read and write settings.  If the file does not exist, it will be created when the mod is loaded on game launch."
+  }
 }

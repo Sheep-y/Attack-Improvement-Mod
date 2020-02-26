@@ -24,7 +24,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          Add( new UserInterfacePanels(){ Name = "User Interface Panels" } );
          Add( new Targetting(){ Name = "Targetting" } );
          Add( new WeaponInfo(){ Name = "Weapons Information" } );
-         Add( new LineOfSight(){ Name = "Line of Fire" } );
+         // Add( new LineOfSight(){ Name = "Line of Fire" } );
          Add( new CalledShotPopUp(){ Name = "Called Shot HUD" } );
          Add( new Melee(){ Name = "Melee" } );
          Add( new RollModifier(){ Name = "Roll Modifier" } );
