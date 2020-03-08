@@ -88,14 +88,14 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( Settings.ShowNumericInfo ) {
             TargetDisplay = HUD?.TargetingComputer.ActorInfo.DetailsDisplay;
             // Enlarge target text background
-            TargetDisplay.transform.transform.Translate( 34, -12, 0 );
+            TargetDisplay.transform.transform.Translate( 50, -30, 0 );
             RectTransform TargetRect = TargetDisplay.transform.GetComponent<RectTransform>();
             TargetRect?.SetSizeWithCurrentAnchors( RectTransform.Axis.Horizontal, 250 );
-            TargetRect?.SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, 90 );
+            TargetRect?.SetSizeWithCurrentAnchors( RectTransform.Axis.Vertical, 70 );
             TargetDisplay.ActorWeightText.enableWordWrapping = false; // Prevent skill names from wrapping
             //LogGuiTree( HUD?.TargetingComputer.ActorInfo );
             // Shift selected actor info
-            HUD?.MechTray.ActorInfo.DetailsDisplay.transform.transform.Translate( 0, -15, 0 );
+            HUD?.MechTray.ActorInfo.DetailsDisplay.transform.transform.Translate( 55, -145, 0 );
          }
       }
 
@@ -237,8 +237,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       private static string PaperDollSideLabel ( string text, bool reversed ) {
-         if ( reversed ) return "R   " + text + "   L";
-         return "L   " + text + "   R";
+         if ( reversed ) return " R " + text + " L ";
+         return " L " + text + " R ";
       }
 
       // ============ Numeric Info ============
@@ -258,6 +258,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          string prefix = null, numbers = null, postfix = null;
 
          StringBuilder text = new StringBuilder( 100 );
+         text.Append("<size=180%><b>");
          if ( __instance == TargetDisplay && IsCalloutPressed && target.GetPilot() is Pilot pilot ) {
             foreach ( Ability ability in pilot.Abilities ) {
                if ( ability?.Def == null || ! ability.Def.IsPrimaryAbility ) continue;
@@ -266,7 +267,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( text.Length <= 0 ) text.Append( "(No skills)" );
             if ( target is Mech mech )
                text.Append( FormatMeter( "Stab", mech.CurrentStability, mech.MaxStability ) );
-
          } else {
             if ( target is Mech mech ) {
                float heat = mech.CurrentHeat, stab = mech.CurrentStability;
@@ -279,9 +279,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
                   numbers = FormatMeter( "Heat", heat, mech.MaxHeat ) + "\n"
                           + FormatMeter( "Stab", stab, mech.MaxStability ) + "\n";
             }
-            if ( prefix == null && HUD?.SelectedActor != target )
-               prefix = GetTargetNumbers( target ) + "\n";
-            text.Append( GetBasicInfo( target ) ).Append( '\n' );
+            if (prefix == null && HUD?.SelectedActor != target)
+                prefix = GetTargetNumbers(target) + "\n";
+            text.Append(GetBasicInfo(target)).Append('\n');
             text.Append( prefix ).Append( numbers ).Append( postfix );
          }
          __instance.ActorWeightText.text = text.ToString();

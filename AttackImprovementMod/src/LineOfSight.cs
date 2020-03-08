@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using HBS;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
@@ -13,7 +14,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
    public class LineOfSight : BattleModModule {
 
-      /* private static float HueDeviation, BrightnessDeviation;
+      private static float HueDeviation, BrightnessDeviation;
       private static bool LinesChanged, LinesAnimated;
 
       public override void CombatStartsOnce () {
@@ -299,17 +300,17 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }
 
       
-      LOSInRange = RGBA(1.000, 0.157, 0.157, 1.000) #FF2828FF
-      LOSOutOfRange = RGBA(1.000, 1.000, 1.000, 0.275) #FFFFFF46
-      LOSUnlockedTarget = RGBA(0.757, 0.004, 0.004, 0.666) #C00000AA
-      LOSLockedTarget = RGBA(0.853, 0.004, 0.004, 1.000) #DA0000FF
-      LOSMultiTargetKBSelection = RGBA(1.000, 0.322, 0.128, 1.000) #FF5221FF
-      LOSBlocked = RGBA(0.853, 0.000, 0.000, 0.753) #DA0000C0
-      LOSWidthBegin = 1
-      LOSWidthEnd = 0.75
-      LOSWidthBlocked = 0.4
-      LOSWidthFacingTargetMultiplier = 2.5f
-      /
+      //LOSInRange = RGBA(1.000, 0.157, 0.157, 1.000) #FF2828FF
+      //LOSOutOfRange = RGBA(1.000, 1.000, 1.000, 0.275) #FFFFFF46
+      //LOSUnlockedTarget = RGBA(0.757, 0.004, 0.004, 0.666) #C00000AA
+      //LOSLockedTarget = RGBA(0.853, 0.004, 0.004, 1.000) #DA0000FF
+      //LOSMultiTargetKBSelection = RGBA(1.000, 0.322, 0.128, 1.000) #FF5221FF
+      //LOSBlocked = RGBA(0.853, 0.000, 0.000, 0.753) #DA0000C0
+      //LOSWidthBegin = 1
+      //LOSWidthEnd = 0.75
+      //LOSWidthBlocked = 0.4
+      //LOSWidthFacingTargetMultiplier = 2.5f
+      
 
       public class LosMaterial {
          protected readonly Material Material;
@@ -328,26 +329,26 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          }
 
          public LosMaterial Apply ( WeaponRangeIndicators me, bool IsMultifire ) {
+            UILookAndColorConstants colorConstants = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
             me.LOSWidthBegin = Width;
             me.LOSWidthEnd = Width;
             me.LineTemplate.startWidth = Width;
             me.LineTemplate.endWidth = Width;
             me.MaterialInRange = GetMaterial();
-            //me.LOSLockedTarget = me.LOSInRange = me.MaterialInRange.color;
-            me.LineTemplate.startColor = me.LineTemplate.endColor = me.MaterialInRange.color;
+            colorConstants.LOSLockedTarget.color = (colorConstants.LOSInRange.color = me.MaterialInRange.color);
             if ( IsMultifire ) {
-                    //me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = me.MaterialInRange.color;
-                    //me.FinalLOSUnlockedTarget.a *= 0.8f;
-                    me.LineTemplate.startColor = me.LineTemplate.endColor = me.FinalLOSMultiTargetKBSelection.color;
-                    me.LineTemplate.startColor = me.LineTemplate.endColor *= 0.8f;
+            colorConstants.LOSUnlockedTarget.color = (colorConstants.LOSLockedTarget.color = (colorConstants.LOSMultiTargetKBSelection.color = me.MaterialInRange.color));
+            UILookAndColorConstants uilookAndColorConstants = colorConstants;
+            uilookAndColorConstants.LOSUnlockedTarget.color.a = uilookAndColorConstants.LOSUnlockedTarget.color.a * 0.8f;
             }
             return this;
          }
 
          public void ApplyOutOfRange ( WeaponRangeIndicators me ) {
-            me.MaterialOutOfRange = GetMaterial();
-            me.LineTemplate.startColor = me.LineTemplate.endColor = me.MaterialOutOfRange.color;
-         }
+            UILookAndColorConstants colorConstants = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
+            me.MaterialOutOfRange = this.GetMaterial();
+            colorConstants.LOSOutOfRange.color = me.MaterialOutOfRange.color;
+            }
 
          public virtual Material GetMaterial () {
             return Material;
@@ -384,6 +385,6 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             }
             return Mathf.Lerp( min, max, Math.Abs( time ) );
          }
-      } */
+      }
    }
 }

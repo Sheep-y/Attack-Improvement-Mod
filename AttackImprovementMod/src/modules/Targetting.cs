@@ -185,7 +185,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       }                 catch ( Exception ex ) { return Error( ex ); } }
 
       private static int FindBestTargetForWeapon ( Weapon w, List<ICombatant> targets )  {
-         if ( w == null || ! w.IsEnabled || w.Category == WeaponCategory.Melee || targets.IsNullOrEmpty() ) return -1;
+         if ( w == null || ! w.IsEnabled || w.WeaponCategoryValue.IsMelee || targets.IsNullOrEmpty() ) return -1;
          int result = -1;
          float hitChance = 0;
          for ( int i = 0 ; i < targets.Count ; i++ ) {

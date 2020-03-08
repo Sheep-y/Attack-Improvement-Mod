@@ -20,7 +20,7 @@ namespace Sheepy.BattleTechMod {
 
    public abstract class BattleMod : BattleModModule {
 
-      public static readonly Logger BTML_LOG = new Logger( "Mods/BTModLoader.log", "BTML log should not be deleted." );
+      public static readonly Logger BTML_LOG = new Logger("Mods/AttackImprovementMod/BTModLoader.log", "BTML log should not be deleted." );
       public static readonly Logger BT_LOG = new Logger( "BattleTech_Data/output_log.txt", "BattleTech game log should not be deleted." );
 
       // Basic mod info for public access, will auto load from assembly then mod.json (if exists)
@@ -260,7 +260,7 @@ namespace Sheepy.BattleTechMod {
                   modList.UnionWith( PatchProcessor.GetPatchInfo( method ).Owners );
                // Some mods may not leave a harmony trace and can only be parsed from log
                Regex regx = new Regex( " in type \"([^\"]+)\"", RegexOptions.Compiled );
-               foreach ( string line in File.ReadAllLines( "Mods/BTModLoader.log" ) ) {
+               foreach ( string line in File.ReadAllLines("Mods/AttackImprovementMod/BTModLoader.log") ) {
                   Match match = regx.Match( line );
                   if ( match.Success ) modList.Add( match.Groups[1].Value );
                }
