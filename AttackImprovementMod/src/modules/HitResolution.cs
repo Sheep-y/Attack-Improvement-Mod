@@ -130,7 +130,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ Harmony.HarmonyPriority( Harmony.Priority.Low ) ]
       public static bool OverrideDecrementAmmo ( Weapon __instance, ref int __result, int stackItemUID ) { try {
          Weapon me = __instance;
-         if ( me.AmmoCategory == AmmoCategory.NotSet || ! ( me.parent is Mech mech ) ) return true;
+         if ( me.AmmoCategoryValue.Is_NotSet || ! ( me.parent is Mech mech ) ) return true;
          if ( ! FriendOrFoe( mech, Settings.BalanceAmmoConsumption, Settings.BalanceEnemyAmmoConsumption ) ) return true;
 
          int needAmmo = __result = me.ShotsWhenFired;
@@ -343,16 +343,16 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( mech == null || mech.IsDead || mech.HasMovedThisRound || mech.IsProne || mech.IsShutDown ) return;
          if ( ! FriendOrFoe( mech, Settings.AutoJettisonAmmo, Settings.AutoJettisonEnemyAmmo ) ) return;
 
-         Dictionary<AmmoCategory, bool> checkedType = new Dictionary<AmmoCategory, bool>();
+         Dictionary<long, bool> checkedType = new Dictionary<long, bool>();
          List<AmmunitionBox> jettison = new List<AmmunitionBox>();
          foreach ( AmmunitionBox box in mech.ammoBoxes ) {
             if ( box.CurrentAmmo <= 0 ) continue;
-            AmmoCategory type = box.ammoCategory;
+            long type = box.ammoCategoryValue.AmmoCategoryID;
             if ( checkedType.ContainsKey( type ) ) {
                if ( checkedType[ type ] ) jettison.Add( box );
                continue;
             }
-            bool canUseAmmo = mech.Weapons.Any( e => e.AmmoCategory == type && e.DamageLevel < ComponentDamageLevel.NonFunctional );
+            bool canUseAmmo = mech.Weapons.Any( e => e.AmmoCategoryValue.AmmoCategoryID == type && e.DamageLevel < ComponentDamageLevel.NonFunctional );
             if ( ! canUseAmmo ) jettison.Add( box );
             checkedType[ type ] = ! canUseAmmo;
          }

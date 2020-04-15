@@ -58,11 +58,11 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          CombatHUDCalledShotPopUp me = __instance;
          ArmorLocation hoveredArmor = me.MechArmorDisplay.HoveredArmor;
          if ( me.locationNameText.text.StartsWith( "-" ) ) {
-            title.SetText( "Called Shot", ZeroObjects );
+            title.SetText( "Called Shot");
          } else if ( me.DisplayedActor is Mech mech ) {
             float hp = mech.GetCurrentStructure( MechStructureRules.GetChassisLocationFromArmorLocation( hoveredArmor ) );
             if ( hp <= 0 ) {
-               title.SetText( "Called Shot", ZeroObjects );
+               title.SetText( "Called Shot");
                me.locationNameText.SetText( "-choose target-", ZeroObjects );
             } else {
                float mhp = mech.GetMaxStructure( MechStructureRules.GetChassisLocationFromArmorLocation( hoveredArmor ) ),

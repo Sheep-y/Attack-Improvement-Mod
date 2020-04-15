@@ -9,7 +9,8 @@ using UnityEngine;
 using static System.Reflection.BindingFlags;
 
 namespace Sheepy.BattleTechMod.AttackImprovementMod {
-   using static Mod;
+    using HBS;
+    using static Mod;
 
    public class LineOfSight : BattleModModule {
 
@@ -192,7 +193,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          WeaponRangeIndicators me = __instance;
          Solid = OrigInRangeMat = me.MaterialInRange;
          Dotted = OrigOutOfRangeMat = me.MaterialOutOfRange;
-         OrigColours = new Color[]{ me.LOSInRange, me.LOSOutOfRange, me.LOSUnlockedTarget, me.LOSLockedTarget, me.LOSMultiTargetKBSelection, me.LOSBlocked };
+         OrigColours = new Color[]{ me.FinalLOSInRange.color, me.FinalLOSOutOfRange.color, me.FinalLOSUnlockedTarget.color, me.FinalLOSLockedTarget.color, me.FinalLOSMultiTargetKBSelection.color, me.FinalLOSBlocked.color };
 
          FillColours();
          Mats = new LosMaterial[ NoAttack + 1 ][];
@@ -333,17 +334,20 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             me.LineTemplate.startWidth = Width;
             me.LineTemplate.endWidth = Width;
             me.MaterialInRange = GetMaterial();
-            me.LOSLockedTarget = me.LOSInRange = me.MaterialInRange.color;
+            UILookAndColorConstants colorConstants = LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants;
+            colorConstants.LOSLockedTarget.color = me.MaterialInRange.color;
+            LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.LOSInRange.color = me.MaterialInRange.color;
+                colorConstants.LOSLockedTarget.color = colorConstants.LOSInRange.color = me.MaterialInRange.color;
             if ( IsMultifire ) {
-               me.LOSUnlockedTarget = me.LOSLockedTarget = me.LOSMultiTargetKBSelection = me.MaterialInRange.color;
-               me.LOSUnlockedTarget.a *= 0.8f;
+                    colorConstants.LOSUnlockedTarget.color = colorConstants.LOSLockedTarget.color = colorConstants.LOSMultiTargetKBSelection.color = me.MaterialInRange.color;
+                    colorConstants.LOSUnlockedTarget.color.a *= 0.8f;
             }
             return this;
          }
 
          public void ApplyOutOfRange ( WeaponRangeIndicators me ) {
             me.MaterialOutOfRange = GetMaterial();
-            me.LOSOutOfRange = me.MaterialOutOfRange.color;
+                LazySingletonBehavior<UIManager>.Instance.UILookAndColorConstants.LOSOutOfRange.color = me.MaterialOutOfRange.color;
          }
 
          public virtual Material GetMaterial () {
