@@ -175,7 +175,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          float damage = weapon.parent == null ? weapon.DamagePerShot : weapon.DamagePerShotAdjusted( weapon.parent.occupiedDesignMask );
          AbstractActor attacker = Combat.FindActorByGUID( hitInfo.attackerId );
          LineOfFireLevel lineOfFireLevel = attacker.VisibilityCache.VisibilityToTarget( target ).LineOfFireLevel;
-         return target.GetAdjustedDamage( damage, weapon.Category, target.occupiedDesignMask, lineOfFireLevel, false );
+         return target.GetAdjustedDamage( damage, weapon.WeaponCategoryValue, target.occupiedDesignMask, lineOfFireLevel, false );
       }
 
       private static AttackDirector.AttackSequence GetAttackSequence ( WeaponHitInfo hitInfo ) {
@@ -196,7 +196,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       private static void ConsolidateCrit ( AIMCritInfo info ) { try {
          damaged.Clear();
          allowConsolidateOnce = true;
-         damages = info.hitInfo.ConsolidateCriticalHitInfo( GetWeaponDamage( info ) );
+         damages = info.hitInfo.ConsolidateCriticalHitInfo(info.target.GUID, GetWeaponDamage( info ) );
          damages.Remove( 0 );
          damages.Remove( 65536 );
          if ( DebugLog ) Verbo( "SplitCriticalHitInfo found {0} hit locations by {1} on {2}.", damages.Count, info.weapon, info.target );
@@ -253,7 +253,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             PlaySFX( critInfo );
             PlayVFX( critInfo );
             AttackDirector.AttackSequence attackSequence = GetAttackSequence( critInfo.hitInfo );
-            attackSequence?.FlagAttackScoredCrit( component as Weapon, component as AmmunitionBox );
+            attackSequence?.FlagAttackScoredCrit(critInfo.hitInfo.targetId, component as Weapon, component as AmmunitionBox );
             ComponentDamageLevel newDamageLevel = GetDegradedComponentLevel( critInfo, out MessageCenterMessage critMessage );
             if ( DebugLog ) Verbo( "Component damaged to {0}", newDamageLevel );
             PreDamageComponent( critMessage );
@@ -608,7 +608,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       public static bool Override_CheckForCrit ( Mech __instance, WeaponHitInfo hitInfo, ChassisLocations location, Weapon weapon ) { try {
          if ( location == ChassisLocations.None ) return false;
          if ( ThroughArmorCritEnabled ) Error( "Assertion error: Override_CheckForCrit is not designed to work with TAC." );
-         ArmorLocation mask = hitInfo.attackDirection == AttackDirection.FromBack ? RearArmours : FrontArmours;
+         ArmorLocation mask = hitInfo.attackDirections.Contains(AttackDirection.FromBack) ? RearArmours : FrontArmours;
          ArmorLocation HitLocation = MechStructureRules.GetArmorFromChassisLocation( location ) & mask;
          if ( DebugLog ) Verbo( "Override_CheckForCrit on {0} at {1} by {2}, location placeholder = {3}", __instance, location, weapon, HitLocation );
          CheckForCrit( new AIMMechCritInfo( __instance, hitInfo, weapon ), (int) HitLocation, false );
@@ -644,7 +644,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
          if ( damageLevel != ComponentDamageLevel.Destroyed ) return;
          AttackDirector.AttackSequence attackSequence = Combat.AttackDirector.GetAttackSequence( hitInfo.attackSequenceId );
          if ( attackSequence == null ) return; // May let things like area attacks slip through. Do they crit?
-         if ( ! attackSequence.attackCausedAmmoExplosion ) return;
+         if ( ! attackSequence.GetAttackCausedAmmoExplosion(hitInfo.targetId) ) return;
          if ( __instance.parent is Vehicle ) {
             if ( ! Settings.AmmoExplosionKillVehicle ) return;
          } else if ( __instance.parent is Turret ) {

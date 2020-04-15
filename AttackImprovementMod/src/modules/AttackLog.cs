@@ -314,9 +314,9 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
       [ HarmonyPriority( Priority.VeryHigh ) ]
       public static void RecordAttack ( AttackDirector.AttackSequence __instance ) { try {
          AttackDirector.AttackSequence me = __instance;
-         AttackDirection direction = Combat.HitLocation.GetAttackDirection( me.attackPosition, me.target );
-         float range = ( me.attackPosition - me.target.CurrentPosition ).magnitude;
-         BuildSequenceLine( me.attacker, me.target, direction, range );
+         AttackDirection direction = Combat.HitLocation.GetAttackDirection( me.attackPosition, me.chosenTarget);
+         float range = ( me.attackPosition - me.chosenTarget.CurrentPosition ).magnitude;
+         BuildSequenceLine( me.attacker, me.chosenTarget, direction, range );
       }                 catch ( Exception ex ) { Error( ex ); } }
 
       [ HarmonyPriority( Priority.VeryLow ) ]

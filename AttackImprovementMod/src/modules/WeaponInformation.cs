@@ -93,8 +93,8 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
             if ( Settings.ShowDamageInLoadout )
                ___weaponNames[ i ].text = ___weaponNames[ i ].text.Replace( " +", "+" ) + MetaColour + " (" + damage + ")";
             if ( ByType.Length > 0 && ___weaponNames[ i ].color == colours.qualityA ) {
-               if ( (int) w.Category < ByType.Length )
-                  ___weaponNames[ i ].color = ByType[ (int) w.Category ];
+               if ( (int) w.WeaponCategoryValue.WeaponCategoryID < ByType.Length )
+                  ___weaponNames[ i ].color = ByType[w.WeaponCategoryValue.WeaponCategoryID];
             }
             if ( w.MaxRange <= 90 )       close += damage;
             else if ( w.MaxRange <= 360 ) medium += damage;
@@ -207,7 +207,7 @@ namespace Sheepy.BattleTechMod.AttackImprovementMod {
 
       public static void UpdateWeaponDamage ( CombatHUDWeaponSlot __instance, ICombatant target ) { try {
          Weapon weapon = __instance.DisplayedWeapon;
-         if ( weapon == null || weapon.Category == WeaponCategory.Melee || ! weapon.CanFire ) return;
+         if ( weapon == null || weapon.WeaponCategoryValue.IsMelee || ! weapon.CanFire ) return;
          string text = null;
          if ( ShowingStabilityDamage ) {
             if ( ! __instance.WeaponText.text.Contains( HeatPrefix ) )
