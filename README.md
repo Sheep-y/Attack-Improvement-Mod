@@ -1,3 +1,6 @@
+BTNomad started to rewrite AIM. It is available her https://www.nexusmods.com/battletech/mods/626?tab=description
+I suggested you have a look at his mod and use it instead of mine.
+
 This is a quick fix for AIM based on 3.2dev version to work on BT 1.8.
 The only change I made was to put the BTModLoader.log file into the mod's folder. The log is still reporting a crash, I haven't changed anything else.
 
